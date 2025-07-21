@@ -28,7 +28,7 @@ export function TradePanel() {
 
   const asset = availableAssets.find(a => a.id === selectedAsset)
   const walletBalance = 50000
-  const availableTokens = 125
+  const availableTokens = asset ? 125 : 0
 
   const handleCreateOrder = async () => {
     if (!selectedAsset || !quantity || (orderType !== 'market' && !price)) {

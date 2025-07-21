@@ -94,12 +94,12 @@ const AuditTrail = () => {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'tokenization': return 'bg-blue-100 text-blue-800';
-      case 'trading': return 'bg-green-100 text-green-800';
-      case 'authentication': return 'bg-purple-100 text-purple-800';
-      case 'compliance': return 'bg-orange-100 text-orange-800';
-      case 'configuration': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'tokenization': return 'bg-primary/10 text-primary border-primary/20';
+      case 'trading': return 'bg-success/10 text-success border-success/20';
+      case 'authentication': return 'bg-accent/10 text-accent border-accent/20';
+      case 'compliance': return 'bg-warning/10 text-warning border-warning/20';
+      case 'configuration': return 'bg-muted/10 text-muted-foreground border-muted/20';
+      default: return 'bg-muted/10 text-muted-foreground border-muted/20';
     }
   };
 
@@ -241,7 +241,7 @@ const AuditTrail = () => {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-500">
+            <div className="text-2xl font-bold text-destructive">
               {auditLogs.filter(log => log.status === 'failed').length}
             </div>
             <p className="text-xs text-muted-foreground">
