@@ -18,9 +18,11 @@ import {
   Coins,
   TrendingUp,
   Users,
-  DollarSign
+  DollarSign,
+  Loader2
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
 
 const assetTypes = [
   { value: "commodity", label: "Commodity", icon: Coins },
@@ -71,16 +73,72 @@ const recentTokenizations = [
 export default function Tokenize() {
   const [assetType, setAssetType] = useState("")
   const [tokenName, setTokenName] = useState("")
+  const [tokenSymbol, setTokenSymbol] = useState("")
   const [totalValue, setTotalValue] = useState("")
   const [totalSupply, setTotalSupply] = useState("")
   const [description, setDescription] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
-  const handleSubmitTokenization = () => {
-    toast({
-      title: "Tokenization Request Submitted",
-      description: "Your asset tokenization request has been submitted for compliance review.",
-    })
+  const handleSubmitTokenization = async () => {
+    if (!assetType || !tokenName || !tokenSymbol || !totalValue || !totalSupply) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No session found');
+      }
+
+      const { data, error } = await supabase.functions.invoke('tokenize-asset', {
+        body: {
+          asset_name: tokenName,
+          asset_symbol: tokenSymbol,
+          description,
+          total_supply: parseFloat(totalSupply),
+          metadata: {
+            asset_type: assetType,
+            estimated_value: parseFloat(totalValue),
+            created_via: 'web_portal',
+          }
+        },
+        headers: {
+          Authorization: `Bearer ${session.session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Tokenization Successful!",
+        description: `Asset ${tokenName} has been tokenized with symbol ${tokenSymbol}`,
+      });
+
+      // Reset form
+      setAssetType("");
+      setTokenName("");
+      setTokenSymbol("");
+      setTotalValue("");
+      setTotalSupply("");
+      setDescription("");
+
+    } catch (error: any) {
+      console.error('Tokenization error:', error);
+      toast({
+        title: "Tokenization Failed",
+        description: error.message || "Failed to tokenize asset. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -221,8 +279,11 @@ export default function Tokenize() {
                     <div>
                       <Label>Token Symbol</Label>
                       <Input
-                        placeholder="e.g., GOLD-001"
+                        placeholder="e.g., GOLD001"
+                        value={tokenSymbol}
+                        onChange={(e) => setTokenSymbol(e.target.value.toUpperCase())}
                         className="font-mono uppercase"
+                        maxLength={20}
                       />
                     </div>
 
@@ -275,9 +336,16 @@ export default function Tokenize() {
                     className="w-full" 
                     size="lg"
                     onClick={handleSubmitTokenization}
-                    disabled={!assetType || !tokenName || !totalValue || !totalSupply}
+                    disabled={!assetType || !tokenName || !tokenSymbol || !totalValue || !totalSupply || isLoading}
                   >
-                    Submit for Compliance Review
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating Token...
+                      </>
+                    ) : (
+                      'Create Token on XRPL'
+                    )}
                   </Button>
                 </TabsContent>
               </Tabs>
