@@ -333,7 +333,10 @@ const Settings = () => {
           </div>
 
           <div className="mt-4">
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => toast({
+              title: "Security Settings",
+              description: "Security settings update feature coming soon.",
+            })}>
               Update Security Settings
             </Button>
           </div>

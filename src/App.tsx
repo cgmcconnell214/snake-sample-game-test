@@ -10,6 +10,11 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Tokenize from "./pages/Tokenize";
 import Trading from "./pages/Trading";
+import Portfolio from "./pages/Portfolio";
+import KycCenter from "./pages/KycCenter";
+import Compliance from "./pages/Compliance";
+import AuditTrail from "./pages/AuditTrail";
+import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
@@ -48,6 +53,11 @@ const App = () => (
                               <Trading />
                             </ProtectedRoute>
                           } />
+                          <Route path="/portfolio" element={<Portfolio />} />
+                          <Route path="/kyc" element={<KycCenter />} />
+                          <Route path="/compliance" element={<Compliance />} />
+                          <Route path="/audit" element={<AuditTrail />} />
+                          <Route path="/reports" element={<Reports />} />
                           <Route path="/settings" element={<Settings />} />
                           <Route path="/admin" element={
                             <ProtectedRoute requiredRole="admin">
