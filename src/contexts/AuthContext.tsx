@@ -12,6 +12,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  checkSubscription: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -60,8 +61,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       setProfile(data);
+      
+      // Check subscription status after profile update
+      await checkSubscription();
     } catch (error) {
       console.error('Error in refreshProfile:', error);
+    }
+  };
+
+  const checkSubscription = async () => {
+    if (!user) return;
+    
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) return;
+
+      const { data, error } = await supabase.functions.invoke('check-subscription', {
+        headers: {
+          Authorization: `Bearer ${session.session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error checking subscription:', error);
+        return;
+      }
+
+      console.log('Subscription check result:', data);
+    } catch (error) {
+      console.error('Error in checkSubscription:', error);
     }
   };
 
@@ -211,6 +239,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     refreshProfile,
+    checkSubscription,
   };
 
   return (

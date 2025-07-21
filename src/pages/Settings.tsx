@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Shield, CreditCard, User, LogOut } from 'lucide-react';
+import { Shield, CreditCard, User, LogOut, RefreshCw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Settings = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, checkSubscription } = useAuth();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const getTierColor = (tier: string) => {
     switch (tier) {
@@ -22,6 +26,91 @@ const Settings = () => {
       case 'admin': return 'destructive';
       case 'premium': return 'default';
       default: return 'secondary';
+    }
+  };
+
+  const handleCreateCheckout = async (tier: string) => {
+    if (!user) return;
+
+    setIsLoading(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No session found');
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { tier },
+        headers: {
+          Authorization: `Bearer ${session.session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      // Open Stripe checkout in a new tab
+      window.open(data.url, '_blank');
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create checkout session. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleManageBilling = async () => {
+    if (!user) return;
+
+    setIsLoading(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session?.access_token) {
+        throw new Error('No session found');
+      }
+
+      const { data, error } = await supabase.functions.invoke('customer-portal', {
+        headers: {
+          Authorization: `Bearer ${session.session.access_token}`,
+        },
+      });
+
+      if (error) throw error;
+
+      // Open Stripe customer portal in a new tab
+      window.open(data.url, '_blank');
+    } catch (error) {
+      console.error('Error opening customer portal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open billing portal. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRefreshSubscription = async () => {
+    setIsLoading(true);
+    try {
+      await checkSubscription();
+      toast({
+        title: "Success",
+        description: "Subscription status refreshed!",
+      });
+    } catch (error) {
+      console.error('Error refreshing subscription:', error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh subscription status.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -99,9 +188,23 @@ const Settings = () => {
                 </Badge>
               </div>
             </div>
-            <Button variant="outline">
-              Manage Billing
-            </Button>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline"
+                onClick={handleManageBilling}
+                disabled={isLoading}
+              >
+                Manage Billing
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={handleRefreshSubscription}
+                disabled={isLoading}
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
           </div>
 
           <Separator />
@@ -122,8 +225,13 @@ const Settings = () => {
                   <li>• Basic analytics</li>
                 </ul>
                 {profile?.subscription_tier !== 'free' && (
-                  <Button variant="outline" className="w-full mt-4">
-                    Downgrade
+                  <Button 
+                    variant="outline" 
+                    className="w-full mt-4"
+                    onClick={handleManageBilling}
+                    disabled={isLoading}
+                  >
+                    Manage Plan
                   </Button>
                 )}
               </CardContent>
@@ -145,8 +253,12 @@ const Settings = () => {
                   <li>• API access</li>
                 </ul>
                 {profile?.subscription_tier !== 'standard' && (
-                  <Button className="w-full mt-4">
-                    {profile?.subscription_tier === 'free' ? 'Upgrade' : 'Change Plan'}
+                  <Button 
+                    className="w-full mt-4"
+                    onClick={() => handleCreateCheckout('standard')}
+                    disabled={isLoading}
+                  >
+                    {profile?.subscription_tier === 'free' ? 'Upgrade to Standard' : 'Switch to Standard'}
                   </Button>
                 )}
               </CardContent>
@@ -168,8 +280,12 @@ const Settings = () => {
                   <li>• Priority support</li>
                 </ul>
                 {profile?.subscription_tier !== 'enterprise' && (
-                  <Button className="w-full mt-4">
-                    {profile?.subscription_tier === 'free' ? 'Upgrade' : 'Change Plan'}
+                  <Button 
+                    className="w-full mt-4"
+                    onClick={() => handleCreateCheckout('enterprise')}
+                    disabled={isLoading}
+                  >
+                    {profile?.subscription_tier === 'free' ? 'Upgrade to Enterprise' : 'Switch to Enterprise'}
                   </Button>
                 )}
               </CardContent>
