@@ -615,7 +615,7 @@ export type Database = {
       order_status: "pending" | "partial" | "filled" | "cancelled" | "expired"
       order_type: "market" | "limit" | "stop_loss" | "take_profit"
       subscription_tier: "free" | "standard" | "enterprise"
-      user_role: "admin" | "premium" | "basic"
+      user_role: "admin" | "premium" | "basic" | "compliance"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -749,7 +749,7 @@ export const Constants = {
       order_status: ["pending", "partial", "filled", "cancelled", "expired"],
       order_type: ["market", "limit", "stop_loss", "take_profit"],
       subscription_tier: ["free", "standard", "enterprise"],
-      user_role: ["admin", "premium", "basic"],
+      user_role: ["admin", "premium", "basic", "compliance"],
     },
   },
 } as const
