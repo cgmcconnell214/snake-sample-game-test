@@ -85,6 +85,57 @@ export type Database = {
         }
         Relationships: []
       }
+      blockchain_transaction_queue: {
+        Row: {
+          compliance_check_status: Json | null
+          created_at: string
+          error_message: string | null
+          function_name: string
+          gas_used: number | null
+          id: string
+          parameters: Json
+          retry_count: number | null
+          status: string | null
+          transaction_type: string
+          updated_at: string
+          user_id: string | null
+          xrpl_ledger_index: number | null
+          xrpl_transaction_hash: string | null
+        }
+        Insert: {
+          compliance_check_status?: Json | null
+          created_at?: string
+          error_message?: string | null
+          function_name: string
+          gas_used?: number | null
+          id?: string
+          parameters: Json
+          retry_count?: number | null
+          status?: string | null
+          transaction_type: string
+          updated_at?: string
+          user_id?: string | null
+          xrpl_ledger_index?: number | null
+          xrpl_transaction_hash?: string | null
+        }
+        Update: {
+          compliance_check_status?: Json | null
+          created_at?: string
+          error_message?: string | null
+          function_name?: string
+          gas_used?: number | null
+          id?: string
+          parameters?: Json
+          retry_count?: number | null
+          status?: string | null
+          transaction_type?: string
+          updated_at?: string
+          user_id?: string | null
+          xrpl_ledger_index?: number | null
+          xrpl_transaction_hash?: string | null
+        }
+        Relationships: []
+      }
       compliance_alerts: {
         Row: {
           alert_type: string
@@ -123,6 +174,62 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      compliance_monitoring: {
+        Row: {
+          compliance_data: Json | null
+          compliance_type: string
+          created_at: string
+          flags: string[] | null
+          id: string
+          regulatory_framework: string | null
+          review_required: boolean | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_score: number | null
+          status: string
+          transaction_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          compliance_data?: Json | null
+          compliance_type: string
+          created_at?: string
+          flags?: string[] | null
+          id?: string
+          regulatory_framework?: string | null
+          review_required?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_score?: number | null
+          status: string
+          transaction_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          compliance_data?: Json | null
+          compliance_type?: string
+          created_at?: string
+          flags?: string[] | null
+          id?: string
+          regulatory_framework?: string | null
+          review_required?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_score?: number | null
+          status?: string
+          transaction_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_monitoring_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "blockchain_transaction_queue"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       kyc_verification: {
         Row: {
@@ -286,6 +393,48 @@ export type Database = {
           two_factor_enabled?: boolean | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      regulatory_reports: {
+        Row: {
+          created_at: string
+          file_path: string | null
+          id: string
+          jurisdiction: string
+          period_end: string
+          period_start: string
+          report_data: Json
+          report_type: string
+          status: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          jurisdiction: string
+          period_end: string
+          period_start: string
+          report_data: Json
+          report_type: string
+          status?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          jurisdiction?: string
+          period_end?: string
+          period_start?: string
+          report_data?: Json
+          report_type?: string
+          status?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
         }
         Relationships: []
       }

@@ -17,6 +17,7 @@ import AuditTrail from "./pages/AuditTrail";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
+import Blockchain from "./pages/Blockchain";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -62,6 +63,11 @@ const App = () => (
                           <Route path="/admin" element={
                             <ProtectedRoute requiredRole="admin">
                               <Admin />
+                            </ProtectedRoute>
+                          } />
+                          <Route path="/blockchain" element={
+                            <ProtectedRoute requiredRole="admin">
+                              <Blockchain />
                             </ProtectedRoute>
                           } />
                           <Route path="*" element={<NotFound />} />

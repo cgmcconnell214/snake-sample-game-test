@@ -6,11 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Activity, Search, Download, Filter, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import AuditDetailModal from '@/components/AuditDetailModal';
 
 const AuditTrail = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [selectedAuditLog, setSelectedAuditLog] = useState<any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Mock audit trail data
   const auditLogs = [
@@ -193,7 +196,14 @@ const AuditTrail = () => {
                     <span>Time: {new Date(log.timestamp).toLocaleString()}</span>
                   </div>
                 </div>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    setSelectedAuditLog(log);
+                    setIsDetailModalOpen(true);
+                  }}
+                >
                   <Eye className="w-4 h-4 mr-1" />
                   Details
                 </Button>
@@ -265,6 +275,12 @@ const AuditTrail = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AuditDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        auditLog={selectedAuditLog}
+      />
     </div>
   );
 };

@@ -8,7 +8,8 @@ import {
   Settings,
   UserCheck,
   Activity,
-  FileText
+  FileText,
+  Zap
 } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
@@ -38,6 +39,10 @@ const complianceItems = [
   { title: "Compliance", url: "/compliance", icon: Shield },
   { title: "Audit Trail", url: "/audit", icon: Activity },
   { title: "Reports", url: "/reports", icon: FileText },
+]
+
+const blockchainItems = [
+  { title: "Blockchain", url: "/blockchain", icon: Zap },
 ]
 
 const systemItems = [
@@ -93,6 +98,24 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {complianceItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Blockchain</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {blockchainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavCls}>
