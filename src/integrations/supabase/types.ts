@@ -49,6 +49,42 @@ export type Database = {
           },
         ]
       }
+      audit_event_details: {
+        Row: {
+          compliance_flags: string[] | null
+          created_at: string
+          error_details: Json | null
+          event_id: string
+          execution_time_ms: number | null
+          id: string
+          request_data: Json | null
+          response_data: Json | null
+          security_context: Json | null
+        }
+        Insert: {
+          compliance_flags?: string[] | null
+          created_at?: string
+          error_details?: Json | null
+          event_id: string
+          execution_time_ms?: number | null
+          id?: string
+          request_data?: Json | null
+          response_data?: Json | null
+          security_context?: Json | null
+        }
+        Update: {
+          compliance_flags?: string[] | null
+          created_at?: string
+          error_details?: Json | null
+          event_id?: string
+          execution_time_ms?: number | null
+          id?: string
+          request_data?: Json | null
+          response_data?: Json | null
+          security_context?: Json | null
+        }
+        Relationships: []
+      }
       compliance_alerts: {
         Row: {
           alert_type: string
@@ -250,6 +286,48 @@ export type Database = {
           two_factor_enabled?: boolean | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      smart_contract_functions: {
+        Row: {
+          compliance_rules: Json | null
+          contract_type: string
+          created_at: string
+          deployment_status: string | null
+          function_name: string
+          gas_estimates: Json | null
+          id: string
+          parameters: Json
+          updated_at: string
+          version: string | null
+          xrpl_transaction_type: string | null
+        }
+        Insert: {
+          compliance_rules?: Json | null
+          contract_type: string
+          created_at?: string
+          deployment_status?: string | null
+          function_name: string
+          gas_estimates?: Json | null
+          id?: string
+          parameters?: Json
+          updated_at?: string
+          version?: string | null
+          xrpl_transaction_type?: string | null
+        }
+        Update: {
+          compliance_rules?: Json | null
+          contract_type?: string
+          created_at?: string
+          deployment_status?: string | null
+          function_name?: string
+          gas_estimates?: Json | null
+          id?: string
+          parameters?: Json
+          updated_at?: string
+          version?: string | null
+          xrpl_transaction_type?: string | null
         }
         Relationships: []
       }
@@ -598,6 +676,48 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+        }
+        Relationships: []
+      }
+      xrpl_config: {
+        Row: {
+          cold_wallet_address: string | null
+          compliance_settings: Json | null
+          created_at: string
+          hot_wallet_seed: string | null
+          id: string
+          issuer_address: string | null
+          kyc_requirements: Json | null
+          minting_policies: Json | null
+          network_type: string
+          regulatory_framework: Json | null
+          updated_at: string
+        }
+        Insert: {
+          cold_wallet_address?: string | null
+          compliance_settings?: Json | null
+          created_at?: string
+          hot_wallet_seed?: string | null
+          id?: string
+          issuer_address?: string | null
+          kyc_requirements?: Json | null
+          minting_policies?: Json | null
+          network_type?: string
+          regulatory_framework?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          cold_wallet_address?: string | null
+          compliance_settings?: Json | null
+          created_at?: string
+          hot_wallet_seed?: string | null
+          id?: string
+          issuer_address?: string | null
+          kyc_requirements?: Json | null
+          minting_policies?: Json | null
+          network_type?: string
+          regulatory_framework?: Json | null
+          updated_at?: string
         }
         Relationships: []
       }
