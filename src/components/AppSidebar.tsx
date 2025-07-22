@@ -73,7 +73,7 @@ export function AppSidebar() {
           {open && (
             <div>
               <h2 className="text-lg font-bold text-sidebar-foreground">God's Realm</h2>
-              <p className="text-xs text-sidebar-foreground/60">Divine IP Tokenization Platform</p>
+              <p className="text-xs text-sidebar-foreground/60">Divine Tokenization Platform</p>
             </div>
           )}
         </div>
