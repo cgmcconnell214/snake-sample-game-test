@@ -95,12 +95,27 @@ const MessageCenter: React.FC = () => {
 
   const sendMessage = async () => {
     try {
-      // In a real app, you'd lookup recipient by email/username
+      // Lookup recipient by username/display_name
+      const { data: recipientProfile, error: lookupError } = await supabase
+        .from('user_profiles')
+        .select('user_id')
+        .or(`username.eq.${newMessage.recipient},display_name.eq.${newMessage.recipient}`)
+        .single();
+
+      if (lookupError || !recipientProfile) {
+        toast({
+          title: "Recipient Not Found",
+          description: "Could not find a user with that username or display name.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('user_messages')
         .insert({
           sender_id: user?.id,
-          recipient_id: newMessage.recipient, // This would be resolved from username/email
+          recipient_id: recipientProfile.user_id,
           subject: newMessage.subject,
           content: newMessage.content,
           message_type: 'user'
@@ -285,9 +300,9 @@ const MessageCenter: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Recipient ID</label>
+                <label className="text-sm font-medium">Recipient</label>
                 <Input
-                  placeholder="Enter recipient user ID"
+                  placeholder="Enter username or display name"
                   value={newMessage.recipient}
                   onChange={(e) => setNewMessage(prev => ({ ...prev, recipient: e.target.value }))}
                 />

@@ -122,6 +122,46 @@ const UserProfile: React.FC = () => {
     }
   };
 
+  const uploadAvatar = async (file: File) => {
+    try {
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
+      
+      // For now, we'll use a simple base64 approach since storage buckets aren't set up
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string;
+        
+        // Update the user profile with the base64 image
+        const { error } = await supabase
+          .from('user_profiles')
+          .upsert({
+            user_id: user?.id,
+            avatar_url: base64,
+          }, { onConflict: 'user_id' });
+
+        if (error) throw error;
+
+        toast({
+          title: "Avatar Updated",
+          description: "Your profile photo has been updated.",
+        });
+
+        fetchUserProfile();
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload profile photo. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const saveProfile = async () => {
     try {
       const { error } = await supabase
@@ -232,10 +272,18 @@ const UserProfile: React.FC = () => {
                   size="sm"
                   variant="outline"
                   className="absolute bottom-0 right-0 rounded-full p-1 h-8 w-8"
-                  onClick={() => toast({
-                    title: "Feature Coming Soon",
-                    description: "Avatar upload will be available soon.",
-                  })}
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = async (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        await uploadAvatar(file);
+                      }
+                    };
+                    input.click();
+                  }}
                 >
                   <Camera className="h-4 w-4" />
                 </Button>

@@ -45,9 +45,19 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    
     if (customers.data.length === 0) {
-      throw new Error("No Stripe customer found for this user");
+      logStep("No Stripe customer found - providing setup option");
+      return new Response(JSON.stringify({ 
+        error: "No active subscription found",
+        needsSetup: true,
+        message: "You don't have an active subscription. Please subscribe to a plan to access the customer portal."
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
     }
+    
     const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
