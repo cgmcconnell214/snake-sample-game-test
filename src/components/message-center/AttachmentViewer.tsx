@@ -67,12 +67,26 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
 
   const downloadAttachment = (attachment: Attachment) => {
     if (attachment.url) {
-      const link = document.createElement('a');
-      link.href = attachment.url;
-      link.download = attachment.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        // For files that need to be fetched first (like from Supabase Storage)
+        fetch(attachment.url)
+          .then(response => response.blob())
+          .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = attachment.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl); // Clean up
+          })
+          .catch(error => {
+            console.error('Download error:', error);
+          });
+      } catch (error) {
+        console.error('Error downloading attachment:', error);
+      }
     }
   };
 

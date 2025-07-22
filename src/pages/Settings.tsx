@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Shield, CreditCard, User, LogOut, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import WalletIntegration from '@/components/WalletIntegration';
 
 const Settings = () => {
   const { user, profile, signOut, checkSubscription } = useAuth();
@@ -352,8 +353,11 @@ const Settings = () => {
               Update Security Settings
             </Button>
           </div>
-        </CardContent>
+      </CardContent>
       </Card>
+
+      {/* Wallet Integration */}
+      <WalletIntegration />
     </div>
   );
 };

@@ -24,6 +24,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useAvatar } from '@/hooks/use-avatar';
 
 interface UserProfile {
   id: string;
@@ -122,44 +123,14 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const uploadAvatar = async (file: File) => {
+  const { uploadAvatar, uploading } = useAvatar();
+  
+  const handleAvatarUpload = async (file: File) => {
     try {
       if (!user?.id) return;
       
-      // Create unique filename
-      const fileName = `${user.id}/avatar.${file.name.split('.').pop()}`;
+      await uploadAvatar(file);
       
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-
-      // Update user profile with the new avatar URL
-      const { error: updateError } = await supabase
-        .from('user_profiles')
-        .upsert({
-          user_id: user.id,
-          avatar_url: publicUrl,
-        }, { onConflict: 'user_id' });
-
-      if (updateError) {
-        console.error('Profile update error:', updateError);
-        throw updateError;
-      }
-
       toast({
         title: "Avatar Updated",
         description: "Your profile photo has been updated.",

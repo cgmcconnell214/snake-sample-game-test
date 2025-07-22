@@ -49,6 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     
     try {
+      // Fetch main profile data
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -60,7 +61,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      setProfile(data);
+      // Also fetch user_profile to merge data
+      const { data: userProfileData, error: userProfileError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (!userProfileError && userProfileData) {
+        // Merge user_profile data with profile data, prioritizing user_profile
+        const mergedProfile = {
+          ...data,
+          avatar_url: userProfileData.avatar_url || data.avatar_url,
+          display_name: userProfileData.display_name,
+          username: userProfileData.username,
+          bio: userProfileData.bio
+        };
+        
+        setProfile(mergedProfile);
+      } else {
+        setProfile(data);
+      }
       
       // Check subscription status after profile update
       await checkSubscription();

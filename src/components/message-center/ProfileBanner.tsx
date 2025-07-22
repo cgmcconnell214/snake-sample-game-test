@@ -9,7 +9,8 @@ import {
   Shield, 
   Crown,
   MessageSquare,
-  TrendingUp
+  TrendingUp,
+  Wallet
 } from 'lucide-react';
 
 interface ProfileBannerProps {
@@ -20,7 +21,7 @@ interface ProfileBannerProps {
 
 const ProfileBanner: React.FC<ProfileBannerProps> = ({ user, profile, unreadCount }) => {
   const getInitials = (name: string) => {
-    return name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+    return name?.split(' ').map(n => n?.[0]).join('').toUpperCase().slice(0, 2) || 'U';
   };
 
   const getRoleIcon = (role: string) => {
@@ -43,7 +44,7 @@ const ProfileBanner: React.FC<ProfileBannerProps> = ({ user, profile, unreadCoun
     <Card className="overflow-hidden">
       <div className={`h-24 ${getSubscriptionColor(profile?.subscription_tier || 'free')} relative`}>
         <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex gap-2">
           <Button 
             variant="secondary" 
             size="sm" 
@@ -59,9 +60,9 @@ const ProfileBanner: React.FC<ProfileBannerProps> = ({ user, profile, unreadCoun
         <div className="flex items-start space-x-4 -mt-8 relative z-10">
           <div className="relative">
             <Avatar className="w-16 h-16 border-4 border-background">
-              <AvatarImage src={profile?.avatar_url} />
+              <AvatarImage src={profile?.avatar_url} alt={profile?.display_name || user?.email} />
               <AvatarFallback className="text-lg font-semibold">
-                {getInitials(profile?.display_name || user?.email)}
+                {getInitials(profile?.display_name || profile?.first_name || user?.email || 'U')}
               </AvatarFallback>
             </Avatar>
             {profile?.role && profile.role !== 'basic' && (
@@ -93,6 +94,11 @@ const ProfileBanner: React.FC<ProfileBannerProps> = ({ user, profile, unreadCoun
                 <Badge variant="outline" className="text-xs">
                   <MessageSquare className="h-3 w-3 mr-1" />
                   Messages
+                </Badge>
+
+                <Badge variant="outline" className="text-xs cursor-pointer" onClick={() => window.location.href = '/settings'}>
+                  <Wallet className="h-3 w-3 mr-1" />
+                  Wallet
                 </Badge>
                 
                 {profile?.subscription_tier && profile.subscription_tier !== 'free' && (

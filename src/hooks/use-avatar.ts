@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 
 export interface AvatarUploadResult {
   url: string;
@@ -12,7 +11,6 @@ export function useAvatar() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const { user, refreshProfile } = useAuth();
-  const { toast } = useToast();
 
   const uploadAvatar = async (file: File): Promise<AvatarUploadResult | null> => {
     if (!file || !user?.id) return null;
@@ -43,11 +41,16 @@ export function useAvatar() {
         .from('avatars')
         .getPublicUrl(fileName);
 
-      // Update user profile with the new avatar URL
+      // Update user_profiles - this will automatically sync to profiles via trigger
       const { error: updateError } = await supabase
         .from('user_profiles')
         .update({ avatar_url: publicUrl })
         .eq('user_id', user.id);
+
+      if (updateError) {
+        console.error('Profile update error:', updateError);
+        throw updateError;
+      }
 
       // Call refreshProfile to update the context
       await refreshProfile();

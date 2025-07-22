@@ -444,6 +444,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           compliance_risk: Database["public"]["Enums"]["compliance_risk"] | null
           created_at: string | null
           device_fingerprint: string | null
@@ -464,6 +465,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           compliance_risk?:
             | Database["public"]["Enums"]["compliance_risk"]
             | null
@@ -486,6 +488,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          avatar_url?: string | null
           compliance_risk?:
             | Database["public"]["Enums"]["compliance_risk"]
             | null
