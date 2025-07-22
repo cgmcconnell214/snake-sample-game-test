@@ -78,15 +78,27 @@ const Settings = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle the improved error response
+        if (error.needsSetup) {
+          toast({
+            title: "No Subscription Found",
+            description: error.message || "Please subscribe to a plan first to access the customer portal.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
-      // Open Stripe customer portal in a new tab
-      window.open(data.url, '_blank');
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
     } catch (error) {
       console.error('Error opening customer portal:', error);
       toast({
         title: "Error",
-        description: "Failed to open billing portal. Please try again.",
+        description: "Failed to open customer portal. Please try again.",
         variant: "destructive",
       });
     } finally {
