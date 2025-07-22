@@ -6,9 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FileText, Download, Calendar, BarChart3, TrendingUp, Users, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Reports = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState('monthly');
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -81,14 +84,42 @@ const Reports = () => {
 
   const handleGenerateReport = async (reportType: string) => {
     setIsGenerating(true);
-    // Simulate report generation
-    setTimeout(() => {
+    
+    try {
+      // Generate mock report data
+      const reportData = {
+        reportType,
+        period: selectedPeriod,
+        generatedAt: new Date().toISOString(),
+        data: reportMetrics,
+      };
+
+      // Call the send-report-email function
+      const { data, error } = await supabase.functions.invoke('send-report-email', {
+        body: {
+          recipientEmail: user?.email,
+          reportName: reportType,
+          reportData: reportData,
+          reportType: reportType.toLowerCase().replace(/\s+/g, '_'),
+        },
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Report Generated",
-        description: `${reportType} report has been generated successfully.`,
+        description: `${reportType} has been sent to your message center.`,
       });
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsGenerating(false);
-    }, 3000);
+    }
   };
 
   const handleDownload = (reportName: string) => {

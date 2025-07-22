@@ -94,17 +94,20 @@ const MessageCenter: React.FC = () => {
   };
 
   const sendMessage = async () => {
+    if (!newMessage.recipient.trim() || !newMessage.content.trim()) return;
+
     try {
-      // Lookup recipient by username/display_name
-      const { data: recipientProfile, error: lookupError } = await supabase
+      // Look up recipient by username first, then by display_name as fallback
+      const { data: recipientData, error: recipientError } = await supabase
         .from('user_profiles')
-        .select('user_id')
-        .or(`username.eq.${newMessage.recipient},display_name.eq.${newMessage.recipient}`)
+        .select('user_id, username, display_name')
+        .or(`username.eq.${newMessage.recipient.trim()},display_name.ilike.%${newMessage.recipient.trim()}%`)
+        .limit(1)
         .single();
 
-      if (lookupError || !recipientProfile) {
+      if (recipientError || !recipientData) {
         toast({
-          title: "Recipient Not Found",
+          title: "User Not Found",
           description: "Could not find a user with that username or display name.",
           variant: "destructive",
         });
@@ -115,8 +118,8 @@ const MessageCenter: React.FC = () => {
         .from('user_messages')
         .insert({
           sender_id: user?.id,
-          recipient_id: recipientProfile.user_id,
-          subject: newMessage.subject,
+          recipient_id: recipientData.user_id,
+          subject: newMessage.subject || 'No Subject',
           content: newMessage.content,
           message_type: 'user'
         });
@@ -125,16 +128,16 @@ const MessageCenter: React.FC = () => {
 
       toast({
         title: "Message Sent",
-        description: "Your message has been sent successfully.",
+        description: `Message sent to ${recipientData.username || recipientData.display_name}`,
       });
 
-      setNewMessage({ subject: '', content: '', recipient: '' });
+      setNewMessage({ recipient: '', subject: '', content: '' });
       fetchMessages();
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
         title: "Error",
-        description: "Failed to send message.",
+        description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
     }
@@ -302,7 +305,7 @@ const MessageCenter: React.FC = () => {
               <div>
                 <label className="text-sm font-medium">Recipient</label>
                 <Input
-                  placeholder="Enter username or display name"
+                  placeholder="Enter username (e.g., @john.doe)"
                   value={newMessage.recipient}
                   onChange={(e) => setNewMessage(prev => ({ ...prev, recipient: e.target.value }))}
                 />

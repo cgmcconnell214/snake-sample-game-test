@@ -124,34 +124,48 @@ const UserProfile: React.FC = () => {
 
   const uploadAvatar = async (file: File) => {
     try {
-      // Create a unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
+      if (!user?.id) return;
       
-      // For now, we'll use a simple base64 approach since storage buckets aren't set up
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const base64 = e.target?.result as string;
-        
-        // Update the user profile with the base64 image
-        const { error } = await supabase
-          .from('user_profiles')
-          .upsert({
-            user_id: user?.id,
-            avatar_url: base64,
-          }, { onConflict: 'user_id' });
-
-        if (error) throw error;
-
-        toast({
-          title: "Avatar Updated",
-          description: "Your profile photo has been updated.",
+      // Create unique filename
+      const fileName = `${user.id}/avatar.${file.name.split('.').pop()}`;
+      
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
         });
 
-        fetchUserProfile();
-      };
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Update user profile with the new avatar URL
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .upsert({
+          user_id: user.id,
+          avatar_url: publicUrl,
+        }, { onConflict: 'user_id' });
+
+      if (updateError) {
+        console.error('Profile update error:', updateError);
+        throw updateError;
+      }
+
+      toast({
+        title: "Avatar Updated",
+        description: "Your profile photo has been updated.",
+      });
       
-      reader.readAsDataURL(file);
+      await fetchUserProfile();
     } catch (error) {
       console.error('Error uploading avatar:', error);
       toast({
@@ -164,10 +178,17 @@ const UserProfile: React.FC = () => {
 
   const saveProfile = async () => {
     try {
+      // Generate username if not provided
+      let username = editForm.display_name.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
+      if (!username) {
+        username = `user_${user?.id?.slice(0, 8)}`;
+      }
+
       const { error } = await supabase
         .from('user_profiles')
         .upsert({
           user_id: user?.id,
+          username: username,
           ...editForm,
         }, { onConflict: 'user_id' });
 
