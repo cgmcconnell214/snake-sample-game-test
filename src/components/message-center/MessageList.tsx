@@ -1,6 +1,17 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, AlertCircle, FileText, User, Shield } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Clock, 
+  AlertCircle, 
+  FileText, 
+  User, 
+  Shield, 
+  MessageSquare, 
+  ChevronRight,
+  Paperclip
+} from 'lucide-react';
 
 interface Message {
   id: string;
@@ -32,61 +43,119 @@ const MessageList: React.FC<MessageListProps> = ({
 }) => {
   const getMessageIcon = (type: string) => {
     switch (type) {
-      case 'system': return <AlertCircle className="h-4 w-4 text-blue-500" />;
+      case 'system': return <AlertCircle className="h-4 w-4 text-primary" />;
       case 'report': return <FileText className="h-4 w-4 text-green-500" />;
       case 'compliance': return <Shield className="h-4 w-4 text-yellow-500" />;
-      default: return <User className="h-4 w-4 text-gray-500" />;
+      case 'user': return <MessageSquare className="h-4 w-4 text-blue-500" />;
+      default: return <User className="h-4 w-4 text-muted-foreground" />;
     }
+  };
+  
+  const getInitials = (name: string) => {
+    return name
+      ?.split(' ')
+      .map(n => n?.[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || 'U';
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Messages</CardTitle>
+    <Card className="h-full">
+      <CardHeader className="border-b">
+        <CardTitle className="text-lg">Messages</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-all duration-200 ${
-                !message.is_read 
-                  ? 'bg-primary/5 border-primary/20 shadow-sm' 
-                  : 'hover:shadow-sm'
-              }`}
-              onClick={() => {
-                onMessageSelect(message);
-                if (!message.is_read) {
-                  onMarkAsRead(message.id);
-                }
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {getMessageIcon(message.message_type)}
-                  <span className="font-medium text-sm">
-                    {message.sender_id ? 'User' : 'System'}
-                  </span>
+      <CardContent className="p-0 overflow-auto max-h-[600px]">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="font-medium text-lg mb-2">No messages found</h3>
+            <p className="text-muted-foreground text-sm">
+              Your inbox is empty or no messages match your search criteria
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y">
+            {messages.map((message) => {
+              // Check if it has attachments
+              const attachments = typeof message.attachments === 'string' 
+                ? JSON.parse(message.attachments || '[]') 
+                : message.attachments || [];
+              
+              const hasAttachments = attachments.length > 0;
+              
+              return (
+                <div
+                  key={message.id}
+                  className={`p-4 cursor-pointer hover:bg-muted/50 transition-all duration-200 relative ${
+                    !message.is_read 
+                      ? 'bg-primary/5 border-l-4 border-primary' 
+                      : 'hover:shadow-sm border-l-4 border-transparent'
+                  }`}
+                  onClick={() => {
+                    onMessageSelect(message);
+                    if (!message.is_read) {
+                      onMarkAsRead(message.id);
+                    }
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className={`${!message.is_read ? 'bg-primary/10 text-primary' : 'bg-muted-foreground/10'}`}>
+                        {message.sender_id ? getInitials(message.sender_profile?.first_name + ' ' + message.sender_profile?.last_name) : 'SYS'}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-medium truncate ${!message.is_read ? 'text-primary' : ''}`}>
+                            {message.subject}
+                          </span>
+                          {!message.is_read && (
+                            <Badge variant="default" className="h-2 w-2 p-0 rounded-full" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {getMessageIcon(message.message_type)}
+                            <span className="ml-1 hidden sm:inline">{message.message_type}</span>
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="text-sm text-muted-foreground truncate mt-1">
+                        {message.content}
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <span>
+                            {message.sender_id 
+                              ? `${message.sender_profile?.first_name || 'User'} ${message.sender_profile?.last_name || ''}`.trim() 
+                              : 'System'}
+                          </span>
+                          {hasAttachments && (
+                            <span className="flex items-center">
+                              <Paperclip className="h-3 w-3 mr-1" />
+                              {attachments.length}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>{new Date(message.created_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <ChevronRight className="h-5 w-5 text-muted-foreground/40" />
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {!message.is_read && (
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  )}
-                  <Clock className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(message.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-1">
-                <div className="font-medium text-sm">{message.subject}</div>
-                <div className="text-sm text-muted-foreground truncate">
-                  {message.content}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

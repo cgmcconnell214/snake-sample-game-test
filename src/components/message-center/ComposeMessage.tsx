@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Send, Paperclip, X, FileText } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Send, Paperclip, X, FileText, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useFileUpload } from '@/hooks/use-file-upload';
 
 interface ComposeMessageProps {
   onMessageSent: () => void;
@@ -19,6 +21,7 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
   const [attachments, setAttachments] = useState<File[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { uploadFiles, uploading, progress, error: uploadError } = useFileUpload();
 
   const handleFileUpload = (files: FileList | null) => {
     if (!files) return;
@@ -53,18 +56,27 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
         return;
       }
 
-      // Prepare attachments data (for now, just store file info)
-      const attachmentData = attachments.map(file => ({
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        // In a real implementation, you would upload to storage and store the URL
-        url: URL.createObjectURL(file) // Temporary URL for demo
-      }));
+      // Upload files if any
+      let attachmentData = [];
+      if (attachments.length > 0) {
+        try {
+          const messageId = crypto.randomUUID();
+          attachmentData = await uploadFiles(attachments, 'message-attachments', messageId);
+        } catch (error) {
+          console.error('Error uploading attachments:', error);
+          toast({
+            title: "Attachment Upload Failed",
+            description: "Failed to upload file attachments. Please try again.",
+            variant: "destructive",
+          });
+          return; // Stop the send process
+        }
+      }
 
       const { error } = await supabase
         .from('user_messages')
         .insert({
+          id: attachmentData.length > 0 ? attachmentData[0].url.split('/').pop()?.split('_')[0] : undefined,
           sender_id: user?.id,
           recipient_id: recipientData.user_id,
           subject: newMessage.subject || 'No Subject',
@@ -164,7 +176,20 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
               )}
             </div>
 
-            {/* Attachment List */}
+            {/* Upload Progress */}
+            {uploading && (
+              <div className="mt-3 space-y-2">
+                <div className="text-sm text-muted-foreground">Uploading files... {progress}%</div>
+                <Progress value={progress} className="h-2" />
+              </div>
+            )}
+            
+            {uploadError && (
+              <div className="mt-3 p-3 rounded bg-destructive/10 text-destructive text-sm flex items-center space-x-2">
+                <AlertCircle className="h-4 w-4" />
+                <span>{uploadError}</span>
+              </div>
+            )}
             {attachments.length > 0 && (
               <div className="space-y-2">
                 {attachments.map((file, index) => (
@@ -199,7 +224,7 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
           </div>
           <Button 
             onClick={sendMessage}
-            disabled={!newMessage.recipient || !newMessage.content || sending}
+            disabled={!newMessage.recipient || !newMessage.content || sending || uploading}
           >
             <Send className="h-4 w-4 mr-2" />
             {sending ? 'Sending...' : 'Send Message'}
