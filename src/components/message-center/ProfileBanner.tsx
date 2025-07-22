@@ -44,7 +44,12 @@ const ProfileBanner: React.FC<ProfileBannerProps> = ({ user, profile, unreadCoun
       <div className={`h-24 ${getSubscriptionColor(profile?.subscription_tier || 'free')} relative`}>
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-4 right-4">
-          <Button variant="secondary" size="sm" className="bg-white/20 hover:bg-white/30 border-white/20">
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            className="bg-white/20 hover:bg-white/30 border-white/20"
+            onClick={() => window.location.href = '/settings'}
+          >
             <Settings className="h-4 w-4" />
           </Button>
         </div>
