@@ -22,6 +22,25 @@ import MessageCenter from "./components/MessageCenter";
 import IPTokenization from "./components/IPTokenization";
 import Admin from "./pages/Admin";
 import Blockchain from "./pages/Blockchain";
+import AIAgents from "./pages/AIAgents";
+import SmartContracts from "./pages/SmartContracts";
+import WorkflowAutomation from "./pages/WorkflowAutomation";
+import LearningPortal from "./pages/LearningPortal";
+import Certification from "./pages/Certification";
+import LiveClasses from "./pages/LiveClasses";
+import DivineTrust from "./pages/DivineTrust";
+import KingdomEntry from "./pages/KingdomEntry";
+import SacredLaw from "./pages/SacredLaw";
+import Marketplace from "./pages/Marketplace";
+import LiquidityPools from "./pages/LiquidityPools";
+import EscrowVaults from "./pages/EscrowVaults";
+import NodeManagement from "./pages/NodeManagement";
+import DataSync from "./pages/DataSync";
+import SystemDiagnostics from "./pages/SystemDiagnostics";
+import LegalSafehouse from "./pages/LegalSafehouse";
+import AssetProvenance from "./pages/AssetProvenance";
+import TokenomicsPage from "./pages/TokenomicsPage";
+import DevPlayground from "./pages/DevPlayground";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -91,6 +110,28 @@ const App = () => (
                                     <Blockchain />
                                   </ProtectedRoute>
                                 } />
+                                
+                                {/* New 5-Layer Navigation */}
+                                <Route path="/ai-agents" element={<AIAgents />} />
+                                <Route path="/smart-contracts" element={<SmartContracts />} />
+                                <Route path="/workflow-automation" element={<WorkflowAutomation />} />
+                                <Route path="/learning" element={<LearningPortal />} />
+                                <Route path="/certification" element={<Certification />} />
+                                <Route path="/live-classes" element={<LiveClasses />} />
+                                <Route path="/divine-trust" element={<DivineTrust />} />
+                                <Route path="/kingdom-entry" element={<KingdomEntry />} />
+                                <Route path="/sacred-law" element={<SacredLaw />} />
+                                <Route path="/marketplace" element={<Marketplace />} />
+                                <Route path="/liquidity" element={<LiquidityPools />} />
+                                <Route path="/escrow" element={<EscrowVaults />} />
+                                <Route path="/node-management" element={<NodeManagement />} />
+                                <Route path="/data-sync" element={<DataSync />} />
+                                <Route path="/diagnostics" element={<SystemDiagnostics />} />
+                                <Route path="/legal-safehouse" element={<LegalSafehouse />} />
+                                <Route path="/asset-provenance" element={<AssetProvenance />} />
+                                <Route path="/tokenomics" element={<TokenomicsPage />} />
+                                <Route path="/dev-playground" element={<DevPlayground />} />
+                                
                                 <Route path="*" element={<NotFound />} />
                               </Routes>
                             </ErrorBoundary>
