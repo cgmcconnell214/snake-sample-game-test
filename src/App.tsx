@@ -16,6 +16,9 @@ import Compliance from "./pages/Compliance";
 import AuditTrail from "./pages/AuditTrail";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import UserProfile from "./pages/UserProfile";
+import MessageCenter from "./components/MessageCenter";
+import IPTokenization from "./components/IPTokenization";
 import Admin from "./pages/Admin";
 import Blockchain from "./pages/Blockchain";
 import Auth from "./pages/Auth";
@@ -59,6 +62,9 @@ const App = () => (
                           <Route path="/compliance" element={<Compliance />} />
                           <Route path="/audit" element={<AuditTrail />} />
                           <Route path="/reports" element={<Reports />} />
+                          <Route path="/profile" element={<UserProfile />} />
+                          <Route path="/messages" element={<MessageCenter />} />
+                          <Route path="/ip-tokenization" element={<IPTokenization />} />
                           <Route path="/settings" element={<Settings />} />
                           <Route path="/admin" element={
                             <ProtectedRoute requiredRole="admin">

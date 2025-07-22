@@ -9,7 +9,9 @@ import {
   UserCheck,
   Activity,
   FileText,
-  Zap
+  Zap,
+  User,
+  Mail
 } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
@@ -46,6 +48,9 @@ const blockchainItems = [
 ]
 
 const systemItems = [
+  { title: "Profile", url: "/profile", icon: User },
+  { title: "Messages", url: "/messages", icon: Mail },
+  { title: "IP Assets", url: "/ip-tokenization", icon: Coins },
   { title: "Settings", url: "/settings", icon: Settings },
 ]
 
@@ -67,8 +72,8 @@ export function AppSidebar() {
           </div>
           {open && (
             <div>
-              <h2 className="text-lg font-bold text-sidebar-foreground">XRPL Exchange</h2>
-              <p className="text-xs text-sidebar-foreground/60">Asset Tokenization Platform</p>
+              <h2 className="text-lg font-bold text-sidebar-foreground">God's Realm</h2>
+              <p className="text-xs text-sidebar-foreground/60">Divine IP Tokenization Platform</p>
             </div>
           )}
         </div>

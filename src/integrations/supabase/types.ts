@@ -231,6 +231,119 @@ export type Database = {
           },
         ]
       }
+      ip_assets: {
+        Row: {
+          annual_revenue: number | null
+          annual_yield_percentage: number | null
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          id: string
+          ip_type: string
+          is_active: boolean | null
+          legal_documents: Json | null
+          metadata: Json | null
+          min_stake_period_days: number | null
+          name: string
+          staking_enabled: boolean | null
+          tokens_per_dollar: number | null
+          total_tokens: number
+          updated_at: string | null
+          valuation: number | null
+          verification_status: string | null
+        }
+        Insert: {
+          annual_revenue?: number | null
+          annual_yield_percentage?: number | null
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          id?: string
+          ip_type: string
+          is_active?: boolean | null
+          legal_documents?: Json | null
+          metadata?: Json | null
+          min_stake_period_days?: number | null
+          name: string
+          staking_enabled?: boolean | null
+          tokens_per_dollar?: number | null
+          total_tokens: number
+          updated_at?: string | null
+          valuation?: number | null
+          verification_status?: string | null
+        }
+        Update: {
+          annual_revenue?: number | null
+          annual_yield_percentage?: number | null
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          id?: string
+          ip_type?: string
+          is_active?: boolean | null
+          legal_documents?: Json | null
+          metadata?: Json | null
+          min_stake_period_days?: number | null
+          name?: string
+          staking_enabled?: boolean | null
+          tokens_per_dollar?: number | null
+          total_tokens?: number
+          updated_at?: string | null
+          valuation?: number | null
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
+      ip_token_holdings: {
+        Row: {
+          accumulated_rewards: number | null
+          created_at: string | null
+          holder_id: string
+          id: string
+          ip_asset_id: string
+          last_reward_calculation: string | null
+          stake_end_date: string | null
+          stake_start_date: string | null
+          tokens_held: number
+          tokens_staked: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          accumulated_rewards?: number | null
+          created_at?: string | null
+          holder_id: string
+          id?: string
+          ip_asset_id: string
+          last_reward_calculation?: string | null
+          stake_end_date?: string | null
+          stake_start_date?: string | null
+          tokens_held?: number
+          tokens_staked?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          accumulated_rewards?: number | null
+          created_at?: string | null
+          holder_id?: string
+          id?: string
+          ip_asset_id?: string
+          last_reward_calculation?: string | null
+          stake_end_date?: string | null
+          stake_start_date?: string | null
+          tokens_held?: number
+          tokens_staked?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ip_token_holdings_ip_asset_id_fkey"
+            columns: ["ip_asset_id"]
+            isOneToOne: false
+            referencedRelation: "ip_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kyc_verification: {
         Row: {
           created_at: string | null
@@ -813,6 +926,158 @@ export type Database = {
         }
         Relationships: []
       }
+      user_messages: {
+        Row: {
+          attachments: Json | null
+          content: string
+          created_at: string | null
+          id: string
+          is_archived: boolean | null
+          is_read: boolean | null
+          message_type: string | null
+          parent_message_id: string | null
+          recipient_id: string
+          sender_id: string | null
+          subject: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          message_type?: string | null
+          parent_message_id?: string | null
+          recipient_id: string
+          sender_id?: string | null
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_archived?: boolean | null
+          is_read?: boolean | null
+          message_type?: string | null
+          parent_message_id?: string | null
+          recipient_id?: string
+          sender_id?: string | null
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "user_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_posts: {
+        Row: {
+          comment_count: number | null
+          content: string
+          created_at: string | null
+          id: string
+          is_public: boolean | null
+          like_count: number | null
+          media_urls: string[] | null
+          post_type: string | null
+          share_count: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comment_count?: number | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_public?: boolean | null
+          like_count?: number | null
+          media_urls?: string[] | null
+          post_type?: string | null
+          share_count?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comment_count?: number | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_public?: boolean | null
+          like_count?: number | null
+          media_urls?: string[] | null
+          post_type?: string | null
+          share_count?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          follower_count: number | null
+          following_count: number | null
+          id: string
+          is_public: boolean | null
+          location: string | null
+          phone: string | null
+          post_count: number | null
+          social_links: Json | null
+          updated_at: string | null
+          user_id: string
+          username: string | null
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          phone?: string | null
+          post_count?: number | null
+          social_links?: Json | null
+          updated_at?: string | null
+          user_id: string
+          username?: string | null
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          phone?: string | null
+          post_count?: number | null
+          social_links?: Json | null
+          updated_at?: string | null
+          user_id?: string
+          username?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       XRPL: {
         Row: {
           created_at: string
@@ -875,7 +1140,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       compliance_risk: "low" | "medium" | "high" | "critical"

@@ -111,10 +111,10 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center bg-gradient-primary bg-clip-text text-transparent">
-            XRPL Exchange
+            God's Realm
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access your account
+            Enter your credentials to access the divine ecosystem
           </CardDescription>
         </CardHeader>
         <CardContent>
