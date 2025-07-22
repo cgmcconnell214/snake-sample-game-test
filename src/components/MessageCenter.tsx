@@ -268,22 +268,28 @@ const MessageCenter: React.FC = () => {
                     <div className="prose prose-sm max-w-none">
                       <p className="whitespace-pre-wrap">{selectedMessage.content}</p>
                     </div>
-                    {selectedMessage.attachments && selectedMessage.attachments.length > 0 && (
-                      <div>
-                        <h4 className="font-medium mb-2">Attachments</h4>
-                        <div className="space-y-2">
-                          {selectedMessage.attachments.map((attachment, index) => (
-                            <div key={index} className="flex items-center space-x-2 p-2 bg-muted rounded">
-                              <FileText className="h-4 w-4" />
-                              <span className="text-sm">{attachment.name}</span>
-                              <Button size="sm" variant="outline">
-                                View
-                              </Button>
-                            </div>
-                          ))}
+                    {(() => {
+                      // Parse attachments from JSON if it's a string, or use as array if already parsed
+                      const attachments = typeof selectedMessage.attachments === 'string' 
+                        ? JSON.parse(selectedMessage.attachments || '[]') 
+                        : selectedMessage.attachments || [];
+                      return attachments.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Attachments</h4>
+                          <div className="space-y-2">
+                            {attachments.map((attachment: any, index: number) => (
+                              <div key={index} className="flex items-center space-x-2 p-2 bg-muted rounded">
+                                <FileText className="h-4 w-4" />
+                                <span className="text-sm">{attachment.name}</span>
+                                <Button size="sm" variant="outline">
+                                  View
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    })()}
                   </div>
                 ) : (
                   <div className="text-center text-muted-foreground py-8">
