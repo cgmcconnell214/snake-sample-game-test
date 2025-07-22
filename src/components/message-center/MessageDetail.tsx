@@ -2,7 +2,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Reply, Forward, Archive, Star, Clock } from 'lucide-react';
+import AttachmentViewer from './AttachmentViewer';
 
 interface Message {
   id: string;
@@ -26,54 +28,117 @@ interface MessageDetailProps {
 }
 
 const MessageDetail: React.FC<MessageDetailProps> = ({ message }) => {
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getSenderInfo = () => {
+    if (!message?.sender_id) return { name: 'System', initials: 'SYS' };
+    if (message.sender_profile) {
+      const name = `${message.sender_profile.first_name} ${message.sender_profile.last_name}`.trim();
+      return { name: name || 'User', initials: getInitials(name || 'User') };
+    }
+    return { name: 'User', initials: 'U' };
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Message Details</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {message ? (
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold">{message.subject}</h3>
-                <Badge variant="outline" className="text-xs">
-                  {message.message_type}
+    <Card className="h-full">
+      <CardHeader className="border-b">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Message Details</CardTitle>
+          {message && (
+            <div className="flex items-center space-x-2">
+              <Badge 
+                variant={message.message_type === 'system' ? 'default' : 'outline'} 
+                className="text-xs"
+              >
+                {message.message_type}
+              </Badge>
+              {!message.is_read && (
+                <Badge variant="secondary" className="text-xs">
+                  New
                 </Badge>
-              </div>
-              <div className="text-sm text-muted-foreground mb-4">
-                From: {message.sender_id ? 'User' : 'System'} • {new Date(message.created_at).toLocaleString()}
+              )}
+            </div>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="p-6">
+        {message ? (
+          <div className="space-y-6">
+            {/* Message Header */}
+            <div className="space-y-4">
+              <div className="flex items-start space-x-4">
+                <Avatar className="w-10 h-10">
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {getSenderInfo().initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-lg">{message.subject}</h3>
+                      <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-1">
+                        <span>From: {getSenderInfo().name}</span>
+                        <span>•</span>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-3 w-3" />
+                          <span>{new Date(message.created_at).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Message Content */}
             <div className="prose prose-sm max-w-none">
-              <p className="whitespace-pre-wrap">{message.content}</p>
+              <div className="bg-muted/30 rounded-lg p-4 border-l-4 border-primary/20">
+                <p className="whitespace-pre-wrap text-foreground leading-relaxed">
+                  {message.content}
+                </p>
+              </div>
             </div>
+
+            {/* Attachments */}
             {(() => {
-              // Parse attachments from JSON if it's a string, or use as array if already parsed
               const attachments = typeof message.attachments === 'string' 
                 ? JSON.parse(message.attachments || '[]') 
                 : message.attachments || [];
+              
               return attachments.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-2">Attachments</h4>
-                  <div className="space-y-2">
-                    {attachments.map((attachment: any, index: number) => (
-                      <div key={index} className="flex items-center space-x-2 p-2 bg-muted rounded">
-                        <FileText className="h-4 w-4" />
-                        <span className="text-sm">{attachment.name}</span>
-                        <Button size="sm" variant="outline">
-                          View
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <AttachmentViewer attachments={attachments} />
               );
             })()}
+
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-2 pt-4 border-t">
+              <Button variant="outline" size="sm">
+                <Reply className="h-4 w-4 mr-2" />
+                Reply
+              </Button>
+              <Button variant="outline" size="sm">
+                <Forward className="h-4 w-4 mr-2" />
+                Forward
+              </Button>
+              <Button variant="outline" size="sm">
+                <Archive className="h-4 w-4 mr-2" />
+                Archive
+              </Button>
+              <Button variant="outline" size="sm">
+                <Star className="h-4 w-4 mr-2" />
+                Star
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="text-center text-muted-foreground py-8">
-            Select a message to view details
+          <div className="text-center text-muted-foreground py-12">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Reply className="h-8 w-8" />
+            </div>
+            <h3 className="font-medium mb-2">No Message Selected</h3>
+            <p className="text-sm">Select a message from the list to view its details</p>
           </div>
         )}
       </CardContent>

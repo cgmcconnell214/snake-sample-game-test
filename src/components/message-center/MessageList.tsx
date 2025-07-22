@@ -49,8 +49,10 @@ const MessageList: React.FC<MessageListProps> = ({
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`p-3 border rounded-lg cursor-pointer hover:bg-muted/50 ${
-                !message.is_read ? 'bg-blue-50 border-blue-200' : ''
+              className={`p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-all duration-200 ${
+                !message.is_read 
+                  ? 'bg-primary/5 border-primary/20 shadow-sm' 
+                  : 'hover:shadow-sm'
               }`}
               onClick={() => {
                 onMessageSelect(message);

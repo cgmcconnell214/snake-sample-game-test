@@ -17,6 +17,8 @@ import { useToast } from '@/hooks/use-toast';
 import MessageList from './message-center/MessageList';
 import MessageDetail from './message-center/MessageDetail';
 import ComposeMessage from './message-center/ComposeMessage';
+import ProfileBanner from './message-center/ProfileBanner';
+import MessageSearch from './message-center/MessageSearch';
 
 interface Message {
   id: string;
@@ -40,7 +42,7 @@ const MessageCenter: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -110,12 +112,17 @@ const MessageCenter: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Profile Banner */}
+      <ProfileBanner user={user} profile={profile} unreadCount={unreadCount} />
+      
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Message Center</h1>
-        <Badge variant="outline">
-          <Mail className="w-4 h-4 mr-1" />
-          {unreadCount} Unread
-        </Badge>
+        <div className="flex items-center space-x-2">
+          <Badge variant="outline">
+            <Mail className="w-4 h-4 mr-1" />
+            {unreadCount} Unread
+          </Badge>
+        </div>
       </div>
 
       <Tabs defaultValue="inbox" className="w-full">
@@ -131,17 +138,12 @@ const MessageCenter: React.FC = () => {
         </TabsList>
 
         <TabsContent value="inbox" className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search messages..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+          <MessageSearch 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            totalMessages={messages.length}
+            filteredCount={filteredMessages.length}
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <MessageList 
