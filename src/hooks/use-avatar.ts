@@ -43,22 +43,11 @@ export function useAvatar() {
         .from('avatars')
         .getPublicUrl(fileName);
 
-      // Update both user profiles with the new avatar URL
-      const updates = [
-        // Update main profile
-        supabase
-          .from('profiles')
-          .update({ avatar_url: publicUrl })
-          .eq('user_id', user.id),
-        
-        // Update user_profiles
-        supabase
-          .from('user_profiles')
-          .update({ avatar_url: publicUrl })
-          .eq('user_id', user.id)
-      ];
-
-      await Promise.all(updates);
+      // Update user profile with the new avatar URL
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', user.id);
 
       // Call refreshProfile to update the context
       await refreshProfile();
