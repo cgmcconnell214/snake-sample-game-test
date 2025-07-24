@@ -38,38 +38,71 @@ export default function WorkflowAutomation() {
   }, [])
 
   const fetchRules = async () => {
-    // Simulated data since we don't have the table yet
-    const mockRules = [
-      {
-        id: "1",
-        rule_name: "Auto Token Distribution",
-        rule_type: "token_distribution",
-        trigger_conditions: { event: "purchase_complete", amount_threshold: 1000 },
-        actions: { distribute_tokens: true, bonus_percentage: 5 },
-        is_active: true,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: "2", 
-        rule_name: "IP Licensing Trigger",
-        rule_type: "licensing",
-        trigger_conditions: { asset_type: "intellectual_property", usage_detected: true },
-        actions: { charge_royalty: true, notify_owner: true },
-        is_active: true,
-        created_at: new Date().toISOString()
-      }
-    ]
-    setRules(mockRules)
+    const { data, error } = await supabase
+      .from('workflow_automation_rules')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching workflow rules:', error)
+      // Fall back to mock data for now
+      const mockRules = [
+        {
+          id: "1",
+          rule_name: "Auto Token Distribution",
+          rule_type: "token_distribution",
+          trigger_conditions: { event: "purchase_complete", amount_threshold: 1000 },
+          actions: { distribute_tokens: true, bonus_percentage: 5 },
+          is_active: true,
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "2", 
+          rule_name: "IP Licensing Trigger",
+          rule_type: "licensing",
+          trigger_conditions: { asset_type: "intellectual_property", usage_detected: true },
+          actions: { charge_royalty: true, notify_owner: true },
+          is_active: true,
+          created_at: new Date().toISOString()
+        }
+      ]
+      setRules(mockRules)
+      return
+    }
+
+    setRules(data || [])
   }
 
   const handleCreateRule = async () => {
-    const newRuleWithId = {
-      ...newRule,
-      id: Date.now().toString(),
-      created_at: new Date().toISOString()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create workflow rules",
+        variant: "destructive"
+      })
+      return
     }
 
-    setRules([newRuleWithId, ...rules])
+    const { data, error } = await supabase
+      .from('workflow_automation_rules')
+      .insert({
+        ...newRule,
+        user_id: user.id
+      })
+      .select()
+      .single()
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create workflow rule",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setRules([data, ...rules])
     setIsCreateModalOpen(false)
     setNewRule({
       rule_name: "",
@@ -85,7 +118,24 @@ export default function WorkflowAutomation() {
     })
   }
 
-  const handleToggleRule = (ruleId: string) => {
+  const handleToggleRule = async (ruleId: string) => {
+    const rule = rules.find(r => r.id === ruleId)
+    if (!rule) return
+
+    const { error } = await supabase
+      .from('workflow_automation_rules')
+      .update({ is_active: !rule.is_active })
+      .eq('id', ruleId)
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update rule status",
+        variant: "destructive"
+      })
+      return
+    }
+
     setRules(rules.map(rule => 
       rule.id === ruleId 
         ? { ...rule, is_active: !rule.is_active }
@@ -105,18 +155,46 @@ export default function WorkflowAutomation() {
 
   const handleSetTriggers = () => {
     setActiveTab("triggers")
-    toast({
-      title: "Triggers Configuration",
-      description: "Configure automated triggers for your workflows",
+    // Create a real IP licensing trigger rule
+    setNewRule({
+      rule_name: "IP Licensing Trigger",
+      rule_type: "licensing",
+      trigger_conditions: {
+        asset_type: "intellectual_property",
+        usage_detected: true,
+        threshold_amount: 1.0
+      },
+      actions: {
+        charge_royalty: true,
+        royalty_percentage: 5,
+        notify_owner: true,
+        auto_distribute: true
+      },
+      is_active: true
     })
+    setIsCreateModalOpen(true)
   }
 
   const handleSetupLogic = () => {
     setActiveTab("logic")
-    toast({
-      title: "Logic Builder",
-      description: "Build complex conditional logic for workflows",
+    // Create escrow release logic rule
+    setNewRule({
+      rule_name: "Escrow Release Logic",
+      rule_type: "escrow",
+      trigger_conditions: {
+        milestone_completed: true,
+        verification_required: true,
+        approval_count: 2
+      },
+      actions: {
+        release_funds: true,
+        notify_beneficiaries: true,
+        update_status: "released",
+        create_audit_trail: true
+      },
+      is_active: true
     })
+    setIsCreateModalOpen(true)
   }
 
   return (

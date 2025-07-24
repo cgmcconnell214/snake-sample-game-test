@@ -111,6 +111,42 @@ export default function SmartContracts() {
     fetchContracts()
   }
 
+  const handleContractSettings = async (contractId: string) => {
+    const contract = contracts.find(c => c.id === contractId)
+    if (!contract) return
+
+    if (contract.deployment_status === 'deployed') {
+      // Show options to disable or customize deployed contract
+      const action = confirm(`Contract "${contract.function_name}" is deployed. Would you like to disable it?`)
+      if (action) {
+        const { error } = await supabase
+          .from('smart_contract_functions')
+          .update({ deployment_status: 'disabled' })
+          .eq('id', contractId)
+
+        if (error) {
+          toast({
+            title: "Error",
+            description: "Failed to disable contract",
+            variant: "destructive"
+          })
+          return
+        }
+
+        toast({
+          title: "Contract Disabled",
+          description: "Smart contract has been disabled successfully",
+        })
+        fetchContracts()
+      }
+    } else {
+      toast({
+        title: "Contract Settings",
+        description: "Contract must be deployed before accessing settings",
+      })
+    }
+  }
+
   const contractTemplates = [
     {
       id: "trade_escrow",
@@ -251,7 +287,10 @@ export default function SmartContracts() {
                       Deploy
                     </Button>
                   )}
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={() => handleContractSettings(contract.id)}
+                  >
                     <Settings className="h-4 w-4" />
                   </Button>
                 </div>

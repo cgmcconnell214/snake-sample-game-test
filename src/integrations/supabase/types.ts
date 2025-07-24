@@ -459,6 +459,51 @@ export type Database = {
         }
         Relationships: []
       }
+      escrow_vaults: {
+        Row: {
+          asset_id: string | null
+          beneficiaries: Json
+          created_at: string
+          creator_id: string
+          description: string | null
+          id: string
+          locked_amount: number
+          status: string
+          unlock_conditions: Json
+          unlock_date: string | null
+          updated_at: string
+          vault_name: string
+        }
+        Insert: {
+          asset_id?: string | null
+          beneficiaries?: Json
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          id?: string
+          locked_amount?: number
+          status?: string
+          unlock_conditions?: Json
+          unlock_date?: string | null
+          updated_at?: string
+          vault_name: string
+        }
+        Update: {
+          asset_id?: string | null
+          beneficiaries?: Json
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          id?: string
+          locked_amount?: number
+          status?: string
+          unlock_conditions?: Json
+          unlock_date?: string | null
+          updated_at?: string
+          vault_name?: string
+        }
+        Relationships: []
+      }
       ip_assets: {
         Row: {
           annual_revenue: number | null
@@ -644,6 +689,57 @@ export type Database = {
           user_id?: string
           verification_date?: string | null
           verification_status?: Database["public"]["Enums"]["kyc_status"] | null
+        }
+        Relationships: []
+      }
+      liquidity_pool_positions: {
+        Row: {
+          created_at: string
+          current_value: number
+          entry_price: number
+          id: string
+          is_active: boolean
+          lp_tokens: number
+          pool_id: string
+          rewards_earned: number
+          stake_end_date: string | null
+          stake_start_date: string | null
+          token_a_amount: number
+          token_b_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number
+          entry_price: number
+          id?: string
+          is_active?: boolean
+          lp_tokens?: number
+          pool_id: string
+          rewards_earned?: number
+          stake_end_date?: string | null
+          stake_start_date?: string | null
+          token_a_amount?: number
+          token_b_amount?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number
+          entry_price?: number
+          id?: string
+          is_active?: boolean
+          lp_tokens?: number
+          pool_id?: string
+          rewards_earned?: number
+          stake_end_date?: string | null
+          stake_start_date?: string | null
+          token_a_amount?: number
+          token_b_amount?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1426,6 +1522,48 @@ export type Database = {
           user_id?: string
           username?: string | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      workflow_automation_rules: {
+        Row: {
+          actions: Json
+          created_at: string
+          execution_count: number
+          id: string
+          is_active: boolean
+          last_executed_at: string | null
+          rule_name: string
+          rule_type: string
+          trigger_conditions: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actions?: Json
+          created_at?: string
+          execution_count?: number
+          id?: string
+          is_active?: boolean
+          last_executed_at?: string | null
+          rule_name: string
+          rule_type: string
+          trigger_conditions?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actions?: Json
+          created_at?: string
+          execution_count?: number
+          id?: string
+          is_active?: boolean
+          last_executed_at?: string | null
+          rule_name?: string
+          rule_type?: string
+          trigger_conditions?: Json
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

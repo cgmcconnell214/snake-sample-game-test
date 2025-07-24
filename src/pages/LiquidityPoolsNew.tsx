@@ -126,6 +126,32 @@ export default function LiquidityPools() {
     const pool = pools.find(p => p.id === selectedPool)
     if (!pool) return
 
+    // Create liquidity position in database
+    const amount = parseFloat(liquidityAmount)
+    const lpTokens = amount * 0.95 // 5% fee
+    
+    const { error } = await supabase
+      .from('liquidity_pool_positions')
+      .insert({
+        user_id: user.id,
+        pool_id: selectedPool,
+        token_a_amount: amount / 2, // Split between tokens
+        token_b_amount: amount / 2,
+        lp_tokens: lpTokens,
+        entry_price: amount,
+        current_value: amount,
+        is_active: true
+      })
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add liquidity position",
+        variant: "destructive"
+      })
+      return
+    }
+
     toast({
       title: "Liquidity Added",
       description: `Added $${liquidityAmount} to ${pool.pool_name}`,
@@ -136,13 +162,57 @@ export default function LiquidityPools() {
     setLiquidityAmount("")
   }
 
-  const handleRemoveLiquidity = (poolId: string) => {
+  const handleRemoveLiquidity = async (poolId: string) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to remove liquidity",
+        variant: "destructive"
+      })
+      return
+    }
+
     const pool = pools.find(p => p.id === poolId)
     if (!pool) return
 
+    // Find user's liquidity position
+    const { data: positions, error } = await supabase
+      .from('liquidity_pool_positions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('pool_id', poolId)
+      .eq('is_active', true)
+
+    if (error || !positions || positions.length === 0) {
+      toast({
+        title: "No Position Found",
+        description: "You don't have an active liquidity position in this pool",
+        variant: "destructive"
+      })
+      return
+    }
+
+    const position = positions[0]
+    
+    // Update position to inactive
+    const { error: updateError } = await supabase
+      .from('liquidity_pool_positions')
+      .update({ is_active: false })
+      .eq('id', position.id)
+
+    if (updateError) {
+      toast({
+        title: "Error",
+        description: "Failed to remove liquidity position",
+        variant: "destructive"
+      })
+      return
+    }
+
     toast({
-      title: "Remove Liquidity",
-      description: `Initiating liquidity removal from ${pool.pool_name}`,
+      title: "Liquidity Removed",
+      description: `Successfully removed liquidity from ${pool.pool_name}`,
     })
   }
 
