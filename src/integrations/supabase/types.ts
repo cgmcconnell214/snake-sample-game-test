@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_agent_purchases: {
+        Row: {
+          agent_id: string
+          buyer_id: string
+          created_at: string
+          id: string
+          payment_status: string
+          tokens_purchased: number
+          total_amount: number
+        }
+        Insert: {
+          agent_id: string
+          buyer_id: string
+          created_at?: string
+          id?: string
+          payment_status?: string
+          tokens_purchased: number
+          total_amount: number
+        }
+        Update: {
+          agent_id?: string
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          payment_status?: string
+          tokens_purchased?: number
+          total_amount?: number
+        }
+        Relationships: []
+      }
+      ai_agents: {
+        Row: {
+          agent_type: string
+          category: string
+          configuration: Json
+          created_at: string
+          creator_id: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price_per_use: number
+          tokens_sold: number
+          total_tokens: number
+          updated_at: string
+          verification_status: string
+          workflow_data: Json
+        }
+        Insert: {
+          agent_type?: string
+          category: string
+          configuration?: Json
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price_per_use?: number
+          tokens_sold?: number
+          total_tokens?: number
+          updated_at?: string
+          verification_status?: string
+          workflow_data?: Json
+        }
+        Update: {
+          agent_type?: string
+          category?: string
+          configuration?: Json
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price_per_use?: number
+          tokens_sold?: number
+          total_tokens?: number
+          updated_at?: string
+          verification_status?: string
+          workflow_data?: Json
+        }
+        Relationships: []
+      }
       asset_holdings: {
         Row: {
           asset_id: string
@@ -136,6 +220,33 @@ export type Database = {
         }
         Relationships: []
       }
+      class_attendees: {
+        Row: {
+          attendance_status: string
+          attendee_id: string
+          class_id: string
+          id: string
+          payment_amount: number
+          registration_date: string
+        }
+        Insert: {
+          attendance_status?: string
+          attendee_id: string
+          class_id: string
+          id?: string
+          payment_amount?: number
+          registration_date?: string
+        }
+        Update: {
+          attendance_status?: string
+          attendee_id?: string
+          class_id?: string
+          id?: string
+          payment_amount?: number
+          registration_date?: string
+        }
+        Relationships: []
+      }
       compliance_alerts: {
         Row: {
           alert_type: string
@@ -230,6 +341,123 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      course_enrollments: {
+        Row: {
+          completion_status: string
+          course_id: string
+          enrollment_date: string
+          id: string
+          payment_amount: number
+          progress_data: Json
+          student_id: string
+        }
+        Insert: {
+          completion_status?: string
+          course_id: string
+          enrollment_date?: string
+          id?: string
+          payment_amount: number
+          progress_data?: Json
+          student_id: string
+        }
+        Update: {
+          completion_status?: string
+          course_id?: string
+          enrollment_date?: string
+          id?: string
+          payment_amount?: number
+          progress_data?: Json
+          student_id?: string
+        }
+        Relationships: []
+      }
+      divine_trust_documents: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by: string | null
+          content: string
+          created_at: string
+          creator_id: string
+          document_data: Json
+          document_type: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          content: string
+          created_at?: string
+          creator_id: string
+          document_data?: Json
+          document_type: string
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          content?: string
+          created_at?: string
+          creator_id?: string
+          document_data?: Json
+          document_type?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      educational_courses: {
+        Row: {
+          category: string
+          course_content: Json
+          created_at: string
+          creator_id: string
+          description: string | null
+          id: string
+          is_published: boolean
+          price_per_student: number
+          requirements: Json
+          title: string
+          total_students: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          course_content?: Json
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          price_per_student?: number
+          requirements?: Json
+          title: string
+          total_students?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          course_content?: Json
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          price_per_student?: number
+          requirements?: Json
+          title?: string
+          total_students?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       ip_assets: {
         Row: {
@@ -344,6 +572,39 @@ export type Database = {
           },
         ]
       }
+      kingdom_entry_records: {
+        Row: {
+          created_at: string
+          document_refs: Json
+          entry_data: Json
+          entry_type: string
+          id: string
+          trust_level: number
+          user_id: string
+          witness_signatures: Json
+        }
+        Insert: {
+          created_at?: string
+          document_refs?: Json
+          entry_data?: Json
+          entry_type: string
+          id?: string
+          trust_level?: number
+          user_id: string
+          witness_signatures?: Json
+        }
+        Update: {
+          created_at?: string
+          document_refs?: Json
+          entry_data?: Json
+          entry_type?: string
+          id?: string
+          trust_level?: number
+          user_id?: string
+          witness_signatures?: Json
+        }
+        Relationships: []
+      }
       kyc_verification: {
         Row: {
           created_at: string | null
@@ -383,6 +644,54 @@ export type Database = {
           user_id?: string
           verification_date?: string | null
           verification_status?: Database["public"]["Enums"]["kyc_status"] | null
+        }
+        Relationships: []
+      }
+      live_classes: {
+        Row: {
+          class_type: string
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          host_id: string
+          id: string
+          is_monetized: boolean
+          max_attendees: number | null
+          price_per_attendee: number
+          scheduled_at: string
+          title: string
+          zoom_meeting_id: string | null
+          zoom_password: string | null
+        }
+        Insert: {
+          class_type?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          host_id: string
+          id?: string
+          is_monetized?: boolean
+          max_attendees?: number | null
+          price_per_attendee?: number
+          scheduled_at: string
+          title: string
+          zoom_meeting_id?: string | null
+          zoom_password?: string | null
+        }
+        Update: {
+          class_type?: string
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          host_id?: string
+          id?: string
+          is_monetized?: boolean
+          max_attendees?: number | null
+          price_per_attendee?: number
+          scheduled_at?: string
+          title?: string
+          zoom_meeting_id?: string | null
+          zoom_password?: string | null
         }
         Relationships: []
       }
@@ -551,6 +860,45 @@ export type Database = {
           status?: string | null
           submitted_at?: string | null
           submitted_by?: string | null
+        }
+        Relationships: []
+      }
+      sacred_law_principles: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string
+          id: string
+          is_prerequisite: boolean
+          prerequisite_for: Json
+          principle_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_prerequisite?: boolean
+          prerequisite_for?: Json
+          principle_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_prerequisite?: boolean
+          prerequisite_for?: Json
+          principle_order?: number
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
