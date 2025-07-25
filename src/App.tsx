@@ -42,6 +42,7 @@ import AssetProvenance from "./pages/AssetProvenance";
 import TokenomicsPage from "./pages/TokenomicsPage";
 import DevPlayground from "./pages/DevPlayground";
 import Auth from "./pages/Auth";
+import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -66,8 +67,12 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/*" element={
+              
+              {/* Protected app routes */}
+              <Route path="/app/*" element={
                 <ErrorBoundary>
                   <ProtectedRoute>
                     <SidebarProvider>

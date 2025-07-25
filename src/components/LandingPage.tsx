@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, Shield, Coins, Scale, Crown, Users } from 'lucide-react';
 
 const LandingPage = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
+    // Redirect logged in users to the app
+    if (user) {
+      navigate('/app');
+      return;
+    }
+
     setIsVisible(true);
     
     // Smooth scroll behavior
@@ -22,7 +32,7 @@ const LandingPage = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [user, navigate]);
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -201,7 +211,7 @@ const LandingPage = () => {
             <Button 
               size="lg"
               className="bg-gradient-to-r from-primary to-divine-gold text-primary-foreground hover:scale-105 transition-all duration-300 shadow-divine"
-              onClick={() => window.location.href = '/auth'}
+              onClick={() => navigate('/auth')}
             >
               🔓 Register Now
             </Button>
