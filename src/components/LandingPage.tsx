@@ -19,19 +19,31 @@ const LandingPage = () => {
 
     setIsVisible(true);
     
-    // Smooth scroll behavior
-    const handleScroll = () => {
-      const sections = document.querySelectorAll('.scroll-section');
-      sections.forEach((section) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.8) {
-          section.classList.add('animate-fade-up');
-        }
-      });
-    };
+    // Improved scroll behavior with intersection observer
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-fade-up');
+            entry.target.classList.remove('opacity-0');
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+      }
+    );
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    // Observe all scroll sections after a short delay
+    setTimeout(() => {
+      const sections = document.querySelectorAll('.scroll-section');
+      sections.forEach((section) => observer.observe(section));
+    }, 100);
+
+    return () => {
+      observer.disconnect();
+    };
   }, [user, navigate]);
 
   const scrollToSection = (id: string) => {
@@ -109,7 +121,7 @@ const LandingPage = () => {
       </section>
 
       {/* Mission Section */}
-      <section id="mission" className="py-20 scroll-section opacity-0">
+      <section id="mission" className="py-20 scroll-section">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-8 text-divine-gold">Our Mission</h2>
@@ -124,7 +136,7 @@ const LandingPage = () => {
       </section>
 
       {/* Platform Features Section */}
-      <section id="features" className="py-20 scroll-section opacity-0">
+      <section id="features" className="py-20 scroll-section">
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-divine-gold">
@@ -181,7 +193,7 @@ const LandingPage = () => {
       </section>
 
       {/* Trust Declaration Section */}
-      <section id="trust" className="py-20 scroll-section opacity-0">
+      <section id="trust" className="py-20 scroll-section">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-8 text-divine-gold">The Sacred Trust</h2>
@@ -201,7 +213,7 @@ const LandingPage = () => {
       </section>
 
       {/* Registration Section */}
-      <section id="register" className="py-20 scroll-section opacity-0">
+      <section id="register" className="py-20 scroll-section">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl md:text-5xl font-bold mb-8 text-divine-gold">Ready to Enter?</h2>

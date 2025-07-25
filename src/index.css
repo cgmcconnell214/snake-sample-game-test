@@ -97,6 +97,18 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  /* Scroll sections visibility and animations */
+  .scroll-section {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .scroll-section.animate-fade-up {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
   /* Ensure proper overflow for scrollable areas */
   .overflow-y-auto {
     scrollbar-width: thin;
