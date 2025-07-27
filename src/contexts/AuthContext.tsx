@@ -232,20 +232,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       cleanupAuthState();
-      
+
+      toast({
+        title: "Signed out",
+        description: "Redirecting to the homepage...",
+      });
+
+      // Navigate away from protected routes immediately
+      window.location.replace('/');
+
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         // Ignore errors
       }
-      
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
-      });
-      
-      // Force page reload for clean state
-      window.location.href = '/auth';
     } catch (error) {
       console.error('Sign out error:', error);
     }

@@ -85,57 +85,57 @@ const App = () => (
                           <main className="flex-1">
                             <ErrorBoundary>
                               <Routes>
-                                <Route path="/" element={<Dashboard />} />
-                                <Route path="/tokenize" element={
+                                <Route path="/app" element={<Dashboard />} />
+                                <Route path="/app/tokenize" element={
                                   <ProtectedRoute requiredTier="standard">
                                     <Tokenize />
                                   </ProtectedRoute>
                                 } />
-                                <Route path="/trading" element={
+                                <Route path="/app/trading" element={
                                   <ProtectedRoute requiredTier="standard">
                                     <Trading />
                                   </ProtectedRoute>
                                 } />
-                                <Route path="/portfolio" element={<Portfolio />} />
-                                <Route path="/kyc" element={<KycCenter />} />
-                                <Route path="/compliance" element={<Compliance />} />
-                                <Route path="/audit" element={<AuditTrail />} />
-                                <Route path="/reports" element={<Reports />} />
-                                <Route path="/profile" element={<UserProfile />} />
-                                <Route path="/messages" element={<MessageCenter />} />
-                                <Route path="/ip-tokenization" element={<IPTokenization />} />
-                                <Route path="/settings" element={<Settings />} />
-                                <Route path="/admin" element={
+                                <Route path="/app/portfolio" element={<Portfolio />} />
+                                <Route path="/app/kyc" element={<KycCenter />} />
+                                <Route path="/app/compliance" element={<Compliance />} />
+                                <Route path="/app/audit" element={<AuditTrail />} />
+                                <Route path="/app/reports" element={<Reports />} />
+                                <Route path="/app/profile" element={<UserProfile />} />
+                                <Route path="/app/messages" element={<MessageCenter />} />
+                                <Route path="/app/ip-tokenization" element={<IPTokenization />} />
+                                <Route path="/app/settings" element={<Settings />} />
+                                <Route path="/app/admin" element={
                                   <ProtectedRoute requiredRole="admin">
                                     <Admin />
                                   </ProtectedRoute>
                                 } />
-                                <Route path="/blockchain" element={
+                                <Route path="/app/blockchain" element={
                                   <ProtectedRoute requiredRole="admin">
                                     <Blockchain />
                                   </ProtectedRoute>
                                 } />
                                 
                                 {/* New 5-Layer Navigation */}
-                                <Route path="/ai-agents" element={<AIAgents />} />
-                                <Route path="/smart-contracts" element={<SmartContracts />} />
-                                <Route path="/workflow-automation" element={<WorkflowAutomation />} />
-                                <Route path="/learning" element={<LearningPortal />} />
-                                <Route path="/certification" element={<Certification />} />
-                                <Route path="/live-classes" element={<LiveClasses />} />
-                                <Route path="/divine-trust" element={<DivineTrust />} />
-                                <Route path="/kingdom-entry" element={<KingdomEntry />} />
-                                <Route path="/sacred-law" element={<SacredLaw />} />
-                                <Route path="/marketplace" element={<Marketplace />} />
-                                <Route path="/liquidity" element={<LiquidityPools />} />
-                                <Route path="/escrow" element={<EscrowVaults />} />
-                                <Route path="/node-management" element={<NodeManagement />} />
-                                <Route path="/data-sync" element={<DataSync />} />
-                                <Route path="/diagnostics" element={<SystemDiagnostics />} />
-                                <Route path="/legal-safehouse" element={<LegalSafehouse />} />
-                                <Route path="/asset-provenance" element={<AssetProvenance />} />
-                                <Route path="/tokenomics" element={<TokenomicsPage />} />
-                                <Route path="/dev-playground" element={<DevPlayground />} />
+                                <Route path="/app/ai-agents" element={<AIAgents />} />
+                                <Route path="/app/smart-contracts" element={<SmartContracts />} />
+                                <Route path="/app/workflow-automation" element={<WorkflowAutomation />} />
+                                <Route path="/app/learning" element={<LearningPortal />} />
+                                <Route path="/app/certification" element={<Certification />} />
+                                <Route path="/app/live-classes" element={<LiveClasses />} />
+                                <Route path="/app/divine-trust" element={<DivineTrust />} />
+                                <Route path="/app/kingdom-entry" element={<KingdomEntry />} />
+                                <Route path="/app/sacred-law" element={<SacredLaw />} />
+                                <Route path="/app/marketplace" element={<Marketplace />} />
+                                <Route path="/app/liquidity" element={<LiquidityPools />} />
+                                <Route path="/app/escrow" element={<EscrowVaults />} />
+                                <Route path="/app/node-management" element={<NodeManagement />} />
+                                <Route path="/app/data-sync" element={<DataSync />} />
+                                <Route path="/app/diagnostics" element={<SystemDiagnostics />} />
+                                <Route path="/app/legal-safehouse" element={<LegalSafehouse />} />
+                                <Route path="/app/asset-provenance" element={<AssetProvenance />} />
+                                <Route path="/app/tokenomics" element={<TokenomicsPage />} />
+                                <Route path="/app/dev-playground" element={<DevPlayground />} />
                                 
                                 <Route path="*" element={<NotFound />} />
                               </Routes>

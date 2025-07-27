@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { generateSecret, generateOtpAuthURL, verifyToken } from '@/lib/totp';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const TwoFactorManager: React.FC = () => {
@@ -42,19 +43,16 @@ const TwoFactorManager: React.FC = () => {
     return codes;
   };
 
+  const [secret, setSecret] = useState<string>('');
+
   const enable2FA = async () => {
     setLoading(true);
     try {
-      // In a real implementation, you would:
-      // 1. Generate a secret key
-      // 2. Create QR code URL for authenticator apps
-      // 3. Verify the user can generate valid codes
-      
-      // For demo purposes, we'll simulate this
-      const secret = 'MOCK_SECRET_' + Math.random().toString(36).substring(2, 15);
+      const newSecret = generateSecret();
       const codes = generateBackupCodes();
-      
-      setQrCodeUrl(`otpauth://totp/God's%20Realm:${user?.email}?secret=${secret}&issuer=God's%20Realm`);
+
+      setSecret(newSecret);
+      setQrCodeUrl(generateOtpAuthURL(newSecret, user?.email || 'user', "God's Realm"));
       setBackupCodes(codes);
       setShowSetup(true);
       
@@ -82,8 +80,16 @@ const TwoFactorManager: React.FC = () => {
 
     setLoading(true);
     try {
-      // In a real implementation, verify the code against the TOTP secret
-      // For demo purposes, we'll update the profile
+      const isValid = await verifyToken(secret, verificationCode);
+      if (!isValid) {
+        toast({
+          title: "Invalid Code",
+          description: "The verification code you entered is incorrect.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('profiles')
         .update({ two_factor_enabled: true })
