@@ -20,7 +20,7 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+  attachments: Attachment[] | string;
   is_read: boolean;
   is_archived: boolean;
   created_at: string;
@@ -28,6 +28,13 @@ interface Message {
     first_name: string;
     last_name: string;
   } | null;
+}
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
 }
 
 interface MessageListProps {
