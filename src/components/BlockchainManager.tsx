@@ -65,7 +65,7 @@ const BlockchainManager: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const fetchData = async () => {
     setLoading(true);

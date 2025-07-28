@@ -40,7 +40,7 @@ export default function LearningPortal() {
 
   useEffect(() => {
     fetchCourses()
-  }, [])
+  }, [fetchCourses])
 
   const fetchCourses = async () => {
     const { data, error } = await supabase

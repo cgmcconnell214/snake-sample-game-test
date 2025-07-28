@@ -39,7 +39,7 @@ export default function SacredLaw() {
   useEffect(() => {
     fetchPrinciples()
     checkAdminStatus()
-  }, [])
+  }, [fetchPrinciples, checkAdminStatus])
 
   const checkAdminStatus = async () => {
     const { data: { user } } = await supabase.auth.getUser()

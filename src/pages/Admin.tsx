@@ -37,7 +37,7 @@ const Admin = () => {
     if (profile?.role === 'admin') {
       loadAdminData();
     }
-  }, [profile]);
+  }, [profile, loadAdminData]);
 
   const loadAdminData = async () => {
     try {

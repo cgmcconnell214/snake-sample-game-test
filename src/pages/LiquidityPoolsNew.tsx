@@ -31,7 +31,7 @@ export default function LiquidityPools() {
 
   useEffect(() => {
     fetchLiquidityPools()
-  }, [])
+  }, [fetchLiquidityPools])
 
   const fetchLiquidityPools = async () => {
     // Mock data since we don't have the table yet

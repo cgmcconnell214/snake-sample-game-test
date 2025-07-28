@@ -43,7 +43,7 @@ export default function LiveClasses() {
 
   useEffect(() => {
     fetchClasses()
-  }, [])
+  }, [fetchClasses])
 
   const fetchClasses = async () => {
     const { data, error } = await supabase

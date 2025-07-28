@@ -35,7 +35,7 @@ export default function WorkflowAutomation() {
 
   useEffect(() => {
     fetchRules()
-  }, [])
+  }, [fetchRules])
 
   const fetchRules = async () => {
     const { data, error } = await supabase

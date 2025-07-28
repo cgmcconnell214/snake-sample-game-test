@@ -32,7 +32,7 @@ export default function Marketplace() {
 
   useEffect(() => {
     fetchMarketplaceAssets()
-  }, [])
+  }, [fetchMarketplaceAssets])
 
   const fetchMarketplaceAssets = async () => {
     const { data, error } = await supabase

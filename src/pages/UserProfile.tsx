@@ -79,7 +79,7 @@ const UserProfile: React.FC = () => {
       fetchUserProfile();
       fetchUserPosts();
     }
-  }, [user]);
+  }, [user, fetchUserProfile, fetchUserPosts]);
 
   const fetchUserProfile = async () => {
     try {

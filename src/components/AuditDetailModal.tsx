@@ -57,7 +57,7 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
     if (isOpen && auditLog) {
       fetchAuditDetail();
     }
-  }, [isOpen, auditLog]);
+  }, [isOpen, auditLog, fetchAuditDetail]);
 
   const fetchAuditDetail = async () => {
     if (!auditLog) return;

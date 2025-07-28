@@ -36,7 +36,7 @@ export default function DivineTrust() {
 
   useEffect(() => {
     fetchDocuments()
-  }, [])
+  }, [fetchDocuments])
 
   const fetchDocuments = async () => {
     const { data, error } = await supabase

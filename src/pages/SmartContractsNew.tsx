@@ -36,7 +36,7 @@ export default function SmartContracts() {
 
   useEffect(() => {
     fetchContracts()
-  }, [])
+  }, [fetchContracts])
 
   const fetchContracts = async () => {
     const { data, error } = await supabase

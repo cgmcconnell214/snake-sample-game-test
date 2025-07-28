@@ -34,7 +34,7 @@ export default function EscrowVaults() {
 
   useEffect(() => {
     fetchVaults()
-  }, [])
+  }, [fetchVaults])
 
   const fetchVaults = async () => {
     const { data, error } = await supabase

@@ -40,7 +40,7 @@ export default function AIAgents() {
 
   useEffect(() => {
     fetchAgents()
-  }, [])
+  }, [fetchAgents])
 
   const fetchAgents = async () => {
     const { data, error } = await supabase

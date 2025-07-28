@@ -49,7 +49,7 @@ const MessageCenter: React.FC = () => {
     if (user) {
       fetchMessages();
     }
-  }, [user]);
+  }, [user, fetchMessages]);
 
   const fetchMessages = async () => {
     try {
