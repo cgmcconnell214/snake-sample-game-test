@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Reply, Forward, Archive, Star, Clock } from 'lucide-react';
 import AttachmentViewer from './AttachmentViewer';
+import { FileUploadResult } from '@/hooks/use-file-upload';
 
 interface Message {
   id: string;
@@ -13,7 +14,7 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+  attachments: string | FileUploadResult[] | null;
   is_read: boolean;
   is_archived: boolean;
   created_at: string;

@@ -12,10 +12,12 @@ import {
   TrendingUp,
   Wallet
 } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 
 interface ProfileBannerProps {
-  user: any;
-  profile: any;
+  user: User | null;
+  profile: Database['public']['Tables']['profiles']['Row'] | null;
   unreadCount: number;
 }
 
