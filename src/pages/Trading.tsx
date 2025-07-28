@@ -120,7 +120,7 @@ export default function Trading() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Trading Platform</h1>
           <p className="text-muted-foreground">Advanced trading interface for tokenized assets</p>

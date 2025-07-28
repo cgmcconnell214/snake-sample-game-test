@@ -136,7 +136,7 @@ export default function EscrowVaults() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Escrow Vaults</h1>
           <p className="text-muted-foreground">Secure multi-party contract management with tokenomics integration</p>

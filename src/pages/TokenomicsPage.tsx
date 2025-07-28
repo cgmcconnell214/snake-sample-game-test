@@ -5,7 +5,7 @@ import { BarChart3, TrendingUp, PieChart, Activity } from "lucide-react"
 export default function TokenomicsPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Tokenomics Dashboard</h1>
           <p className="text-muted-foreground">Real-time metrics and economic analytics</p>

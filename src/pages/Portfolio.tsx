@@ -17,7 +17,7 @@ const Portfolio = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <h1 className="text-3xl font-bold">Portfolio</h1>
         <Badge variant="outline" className="text-sm">
           <Briefcase className="w-4 h-4 mr-1" />
