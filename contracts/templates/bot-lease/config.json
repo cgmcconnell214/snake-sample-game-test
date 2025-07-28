@@ -1,0 +1,10 @@
+{
+  "function_name": "bot_lease",
+  "contract_type": "lease",
+  "action": "rent",
+  "xrpl_transaction_type": "OfferCreate",
+  "version": "1.0.0",
+  "compliance_rules": {
+    "kyc_required": true
+  }
+}

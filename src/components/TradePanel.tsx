@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { TrendingUp, TrendingDown, DollarSign, Loader2, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { injectContractTemplate } from "@/lib/contractTemplates"
 
 export function TradePanel() {
   const [orderType, setOrderType] = useState("limit")
@@ -42,6 +43,7 @@ export function TradePanel() {
 
     setIsLoading(true);
     try {
+      await injectContractTemplate(side === 'buy' ? 'buy' : 'sell');
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
         throw new Error('No session found');

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { ShoppingCart, Search, Filter, Star, TrendingUp, Package } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { injectContractTemplate } from "@/lib/contractTemplates"
 
 interface MarketplaceAsset {
   id: string
@@ -98,6 +99,7 @@ export default function Marketplace() {
       return
     }
 
+    await injectContractTemplate('buy')
     toast({
       title: "Purchase Initiated",
       description: `Preparing to buy ${asset.asset_name} at $${asset.current_price.toFixed(2)}`,
