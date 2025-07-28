@@ -13,9 +13,11 @@ import {
   Wallet
 } from 'lucide-react';
 
+import { User } from '@supabase/supabase-js';
+
 interface ProfileBannerProps {
-  user: any;
-  profile: any;
+  user: User | null;
+  profile: Record<string, unknown> | null;
   unreadCount: number;
 }
 

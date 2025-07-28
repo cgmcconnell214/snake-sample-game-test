@@ -44,7 +44,7 @@ const Auth = () => {
       if (error) {
         setError(error.message);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'An error occurred during sign in');
     } finally {
       setLoading(false);
@@ -77,7 +77,7 @@ const Auth = () => {
       if (error) {
         setError(error.message);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'An error occurred during sign up');
     } finally {
       setLoading(false);
@@ -99,7 +99,7 @@ const Auth = () => {
       if (error) {
         setError(error.message);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || 'An error occurred with Discord authentication');
     } finally {
       setLoading(false);

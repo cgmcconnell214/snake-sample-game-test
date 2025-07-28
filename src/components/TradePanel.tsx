@@ -73,7 +73,7 @@ export function TradePanel() {
       setQuantity("");
       setPrice("");
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Order creation error:', error);
       toast({
         title: "Order Failed",

@@ -40,6 +40,16 @@ export interface StrategyConfig {
   is_active: boolean;
 }
 
+export interface StrategyMetrics {
+  strategy_id: string;
+  total_trades: number;
+  success_rate: number;
+  total_pnl: number;
+  sharpe_ratio: number;
+  max_drawdown: number;
+  last_updated: string;
+}
+
 /**
  * AI Strategy Runner Class
  * Future implementation will integrate with:
@@ -169,7 +179,7 @@ export class StrategyRunner {
    * Get strategy performance metrics
    * Future implementation will track actual trading performance
    */
-  getPerformanceMetrics(): any {
+  getPerformanceMetrics(): StrategyMetrics {
     return {
       strategy_id: this.config.strategy_id,
       total_trades: 0, // Placeholder
