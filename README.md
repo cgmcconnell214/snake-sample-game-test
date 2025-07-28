@@ -64,6 +64,25 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/e4cce269-0ddb-46c0-8401-035391dbecce) and click on Share -> Publish.
 
+## Testing and coverage
+
+Run the test suite:
+
+```bash
+npm test
+```
+
+Generate a coverage report:
+
+```bash
+npm run coverage
+```
+
+## Deployment status
+
+This sample project does not include deployed smart contracts. Deployment scripts
+and logs will be added in the future.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
