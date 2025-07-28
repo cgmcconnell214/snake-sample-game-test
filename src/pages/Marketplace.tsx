@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Store, Plus, Search, Clock } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export default function Marketplace() {
+  const navigate = useNavigate()
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -10,14 +12,14 @@ export default function Marketplace() {
           <h1 className="text-3xl font-bold">P2P Marketplace</h1>
           <p className="text-muted-foreground">Peer-to-peer asset trading and contracts</p>
         </div>
-        <Button>
+        <Button onClick={() => navigate('/app/tokenize')}>
           <Plus className="h-4 w-4 mr-2" />
           List Asset
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card>
+        <Card onClick={() => navigate('/app/tokenize')} className="cursor-pointer">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
@@ -28,11 +30,13 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Create new asset listings for trading
             </p>
-            <Button variant="outline" className="w-full">Create Listing</Button>
+            <Button variant="outline" className="w-full" onClick={() => navigate('/app/tokenize')}>
+              Create Listing
+            </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card onClick={() => navigate('/app/marketplace-new')} className="cursor-pointer">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5" />
@@ -43,11 +47,13 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Explore available assets and opportunities
             </p>
-            <Button variant="outline" className="w-full">Browse Market</Button>
+            <Button variant="outline" className="w-full" onClick={() => navigate('/app/marketplace-new')}>
+              Browse Market
+            </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card onClick={() => navigate('/app/smart-contracts')} className="cursor-pointer">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
@@ -58,7 +64,9 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               View pending and active trading contracts
             </p>
-            <Button variant="outline" className="w-full">View Queue</Button>
+            <Button variant="outline" className="w-full" onClick={() => navigate('/app/smart-contracts')}>
+              View Queue
+            </Button>
           </CardContent>
         </Card>
       </div>
