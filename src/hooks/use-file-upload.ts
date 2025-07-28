@@ -83,10 +83,12 @@ export function useFileUpload() {
       results.push(...uploadResults);
 
       return results;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // TODO: Verify correct error type
       console.error('Upload error:', err);
-      setError(err.message || 'Failed to upload files');
-      throw err;
+      const error = err as Error;
+      setError(error.message || 'Failed to upload files');
+      throw error;
     } finally {
       setUploading(false);
     }

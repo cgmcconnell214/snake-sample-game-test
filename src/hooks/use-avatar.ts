@@ -56,10 +56,12 @@ export function useAvatar() {
       await refreshProfile();
 
       return { url: publicUrl };
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // TODO: Verify correct error type
       console.error('Avatar upload error:', err);
-      setError(err.message || 'Failed to upload avatar');
-      throw err;
+      const error = err as Error;
+      setError(error.message || 'Failed to upload avatar');
+      throw error;
     } finally {
       setUploading(false);
     }

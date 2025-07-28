@@ -14,8 +14,18 @@ import {
 } from 'lucide-react';
 
 interface ProfileBannerProps {
-  user: any;
-  profile: any;
+  user: {
+    email?: string;
+  } | null;
+  profile: {
+    avatar_url?: string;
+    display_name?: string;
+    first_name?: string;
+    username?: string;
+    role?: string;
+    subscription_tier?: string;
+    bio?: string;
+  } | null;
   unreadCount: number;
 }
 

@@ -19,6 +19,7 @@ import MessageDetail from './message-center/MessageDetail';
 import ComposeMessage from './message-center/ComposeMessage';
 import ProfileBanner from './message-center/ProfileBanner';
 import MessageSearch from './message-center/MessageSearch';
+import type { Attachment } from './message-center/AttachmentViewer';
 
 interface Message {
   id: string;
@@ -27,7 +28,7 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+  attachments: Attachment[] | string;
   is_read: boolean;
   is_archived: boolean;
   created_at: string;

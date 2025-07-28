@@ -48,7 +48,8 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: (failureCount, error: any) => {
+      retry: (failureCount, error: unknown) => {
+        // TODO: Verify correct error type
         // Don't retry on 4xx errors
         if (error?.status >= 400 && error?.status < 500) return false;
         return failureCount < 3;

@@ -3,13 +3,33 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+interface Profile {
+  user_id: string;
+  role?: string;
+  subscription_tier?: string;
+  compliance_risk?: string;
+  kyc_status?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  avatar_url?: string;
+  display_name?: string;
+  username?: string;
+  bio?: string;
+  [key: string]: unknown;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  profile: any | null;
+  profile: Profile | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    metadata?: Record<string, unknown>
+  ) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   checkSubscription: () => Promise<void>;
@@ -28,7 +48,7 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -194,13 +214,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       return { error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // TODO: Verify correct error type
       console.error('Sign in error:', error);
-      return { error };
+      return { error: error as Error };
     }
   };
 
-  const signUp = async (email: string, password: string, metadata?: any) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    metadata?: Record<string, unknown>
+  ) => {
     try {
       cleanupAuthState();
       
@@ -223,9 +248,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       return { error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // TODO: Verify correct error type
       console.error('Sign up error:', error);
-      return { error };
+      return { error: error as Error };
     }
   };
 

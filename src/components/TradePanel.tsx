@@ -73,11 +73,13 @@ export function TradePanel() {
       setQuantity("");
       setPrice("");
       
-    } catch (error: any) {
+    } catch (error: unknown) {
+      // TODO: Verify correct error type
       console.error('Order creation error:', error);
+      const err = error as Error;
       toast({
         title: "Order Failed",
-        description: error.message || "Failed to create order. Please try again.",
+        description: err.message || "Failed to create order. Please try again.",
         variant: "destructive",
       });
     } finally {
