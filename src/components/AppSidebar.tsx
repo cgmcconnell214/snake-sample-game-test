@@ -1,10 +1,10 @@
-import { useState } from "react"
-import { 
-  LayoutDashboard, 
-  Coins, 
-  TrendingUp, 
-  Briefcase, 
-  Shield, 
+import { useState } from "react";
+import {
+  LayoutDashboard,
+  Coins,
+  TrendingUp,
+  Briefcase,
+  Shield,
   Settings,
   UserCheck,
   Activity,
@@ -34,9 +34,9 @@ import {
   GitBranch,
   Monitor,
   Webhook,
-  AlertTriangle
-} from "lucide-react"
-import { NavLink, useLocation } from "react-router-dom"
+  AlertTriangle,
+} from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
 
 import {
   Sidebar,
@@ -50,7 +50,7 @@ import {
   SidebarTrigger,
   useSidebar,
   SidebarHeader,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 // Core Platform
 const coreItems = [
@@ -58,35 +58,39 @@ const coreItems = [
   { title: "Tokenize Assets", url: "/app/tokenize", icon: Coins },
   { title: "Trading", url: "/app/trading", icon: TrendingUp },
   { title: "Portfolio", url: "/app/portfolio", icon: Briefcase },
-]
+];
 
 // 1. AI & Automation Layer
 const aiAutomationItems = [
   { title: "AI Agents", url: "/app/ai-agents", icon: Bot },
   { title: "Smart Contracts", url: "/app/smart-contracts", icon: FileCheck },
-  { title: "Workflow Automation", url: "/app/workflow-automation", icon: Workflow },
-]
+  {
+    title: "Workflow Automation",
+    url: "/app/workflow-automation",
+    icon: Workflow,
+  },
+];
 
 // 2. Education & Onboarding Layer
 const educationItems = [
   { title: "Learning Portal", url: "/app/learning", icon: GraduationCap },
   { title: "Certification", url: "/app/certification", icon: Award },
   { title: "Live Classes", url: "/app/live-classes", icon: Calendar },
-]
+];
 
 // 3. Spiritual / Sovereign Layer
 const spiritualItems = [
   { title: "Divine Trust Vault", url: "/app/divine-trust", icon: Archive },
   { title: "Kingdom Entry", url: "/app/kingdom-entry", icon: Users },
   { title: "Sacred Law", url: "/app/sacred-law", icon: Feather },
-]
+];
 
 // 4. Marketplace & Exchange Layer
 const marketplaceItems = [
   { title: "P2P Marketplace", url: "/app/marketplace", icon: Store },
   { title: "Liquidity Pools", url: "/app/liquidity", icon: Layers },
   { title: "Escrow Vaults", url: "/app/escrow", icon: Building },
-]
+];
 
 // Compliance & Security (Existing)
 const complianceItems = [
@@ -94,14 +98,14 @@ const complianceItems = [
   { title: "Compliance", url: "/app/compliance", icon: Shield },
   { title: "Audit Trail", url: "/app/audit", icon: Activity },
   { title: "Reports", url: "/app/reports", icon: FileText },
-]
+];
 
 // 5. Admin & Infrastructure Layer
 const adminItems = [
   { title: "Node Management", url: "/app/node-management", icon: GitBranch },
   { title: "Data Sync", url: "/app/data-sync", icon: Webhook },
   { title: "System Diagnostics", url: "/app/diagnostics", icon: Monitor },
-]
+];
 
 // Bonus Features
 const bonusItems = [
@@ -109,7 +113,7 @@ const bonusItems = [
   { title: "Asset Provenance", url: "/app/asset-provenance", icon: History },
   { title: "Tokenomics", url: "/app/tokenomics", icon: BarChart3 },
   { title: "Dev Playground", url: "/app/dev-playground", icon: Code },
-]
+];
 
 // System & User
 const systemItems = [
@@ -117,16 +121,18 @@ const systemItems = [
   { title: "Messages", url: "/app/messages", icon: Mail },
   { title: "IP Assets", url: "/app/ip-tokenization", icon: Coins },
   { title: "Settings", url: "/app/settings", icon: Settings },
-]
+];
 
-export function AppSidebar() {
-  const { open } = useSidebar()
-  const location = useLocation()
-  const currentPath = location.pathname
+export function AppSidebar(): JSX.Element {
+  const { open } = useSidebar();
+  const location = useLocation();
+  const currentPath = location.pathname;
 
-  const isActive = (path: string) => currentPath === path
+  const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-sidebar-accent text-sidebar-primary font-medium" : "hover:bg-sidebar-accent/50"
+    isActive
+      ? "bg-sidebar-accent text-sidebar-primary font-medium"
+      : "hover:bg-sidebar-accent/50";
 
   return (
     <Sidebar className={open ? "w-64" : "w-16"} collapsible="icon">
@@ -137,8 +143,12 @@ export function AppSidebar() {
           </div>
           {open && (
             <div>
-              <h2 className="text-lg font-bold text-sidebar-foreground">God's Realm</h2>
-              <p className="text-xs text-sidebar-foreground/60">Divine Tokenization Platform</p>
+              <h2 className="text-lg font-bold text-sidebar-foreground">
+                God's Realm
+              </h2>
+              <p className="text-xs text-sidebar-foreground/60">
+                Divine Tokenization Platform
+              </p>
             </div>
           )}
         </div>
@@ -317,5 +327,5 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

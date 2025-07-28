@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Store, Plus, Search, Clock } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Store, Plus, Search, Clock } from "lucide-react";
 
-export default function Marketplace() {
+export default function Marketplace(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">P2P Marketplace</h1>
-          <p className="text-muted-foreground">Peer-to-peer asset trading and contracts</p>
+          <p className="text-muted-foreground">
+            Peer-to-peer asset trading and contracts
+          </p>
         </div>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Create new asset listings for trading
             </p>
-            <Button variant="outline" className="w-full">Create Listing</Button>
+            <Button variant="outline" className="w-full">
+              Create Listing
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Explore available assets and opportunities
             </p>
-            <Button variant="outline" className="w-full">Browse Market</Button>
+            <Button variant="outline" className="w-full">
+              Browse Market
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               View pending and active trading contracts
             </p>
-            <Button variant="outline" className="w-full">View Queue</Button>
+            <Button variant="outline" className="w-full">
+              View Queue
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

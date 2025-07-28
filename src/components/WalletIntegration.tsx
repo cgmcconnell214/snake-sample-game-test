@@ -1,24 +1,30 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Wallet, 
-  Plus, 
-  ArrowRightLeft, 
-  RefreshCw, 
-  Check, 
-  ChevronRight, 
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import {
+  Wallet,
+  Plus,
+  ArrowRightLeft,
+  RefreshCw,
+  Check,
+  ChevronRight,
   X,
   Link as LinkIcon,
   DollarSign,
-  CreditCard
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+  CreditCard,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface WalletAddress {
   id: string;
@@ -32,22 +38,26 @@ const WalletIntegration: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [connecting, setConnecting] = useState(false);
-  const [newWallet, setNewWallet] = useState({ name: '', address: '', type: 'xrpl' });
-  
+  const [newWallet, setNewWallet] = useState({
+    name: "",
+    address: "",
+    type: "xrpl",
+  });
+
   // Demo wallet addresses
   const [walletAddresses, setWalletAddresses] = useState<WalletAddress[]>([
-    { 
-      id: '1', 
-      name: 'My XRPL Wallet', 
-      address: 'rHEpFXJr7yfT3T2krFP74XaaDDRUTCQtRV', 
-      type: 'xrpl',
-      isDefault: true
-    }
+    {
+      id: "1",
+      name: "My XRPL Wallet",
+      address: "rHEpFXJr7yfT3T2krFP74XaaDDRUTCQtRV",
+      type: "xrpl",
+      isDefault: true,
+    },
   ]);
 
   const handleConnectWallet = () => {
     setConnecting(true);
-    
+
     // Simulate connecting to wallet
     setTimeout(() => {
       setConnecting(false);
@@ -55,62 +65,62 @@ const WalletIntegration: React.FC = () => {
         title: "Wallet Connected",
         description: "Your wallet has been connected successfully!",
       });
-      
+
       // Add new wallet to the list
       if (newWallet.name && newWallet.address) {
-        setWalletAddresses(prev => [
+        setWalletAddresses((prev) => [
           ...prev,
-          { 
-            id: Date.now().toString(), 
-            name: newWallet.name, 
-            address: newWallet.address, 
+          {
+            id: Date.now().toString(),
+            name: newWallet.name,
+            address: newWallet.address,
             type: newWallet.type,
-            isDefault: false
-          }
+            isDefault: false,
+          },
         ]);
-        setNewWallet({ name: '', address: '', type: 'xrpl' });
+        setNewWallet({ name: "", address: "", type: "xrpl" });
       }
     }, 1500);
   };
 
   const handleDisconnect = (id: string) => {
-    setWalletAddresses(prev => prev.filter(wallet => wallet.id !== id));
+    setWalletAddresses((prev) => prev.filter((wallet) => wallet.id !== id));
     toast({
       title: "Wallet Disconnected",
-      description: "Your wallet has been disconnected."
+      description: "Your wallet has been disconnected.",
     });
   };
 
   const setAsDefault = (id: string) => {
-    setWalletAddresses(prev => 
-      prev.map(wallet => ({
+    setWalletAddresses((prev) =>
+      prev.map((wallet) => ({
         ...wallet,
-        isDefault: wallet.id === id
-      }))
+        isDefault: wallet.id === id,
+      })),
     );
     toast({
       title: "Default Wallet Updated",
-      description: "Your default wallet has been updated."
+      description: "Your default wallet has been updated.",
     });
   };
 
   const handleMakePayment = () => {
-    const defaultWallet = walletAddresses.find(w => w.isDefault);
-    
+    const defaultWallet = walletAddresses.find((w) => w.isDefault);
+
     if (!defaultWallet) {
       toast({
         title: "No Default Wallet",
         description: "Please set a default wallet before making a payment.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    
+
     toast({
       title: "Payment Initiated",
       description: "Your payment is being processed.",
     });
-    
+
     // Simulate payment processing
     setTimeout(() => {
       toast({
@@ -119,7 +129,7 @@ const WalletIntegration: React.FC = () => {
       });
     }, 2000);
   };
-  
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -137,7 +147,7 @@ const WalletIntegration: React.FC = () => {
             <TabsTrigger value="connected">Connected Wallets</TabsTrigger>
             <TabsTrigger value="connect">Connect New Wallet</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="connected" className="space-y-4">
             {walletAddresses.length === 0 ? (
               <div className="text-center py-8">
@@ -150,10 +160,10 @@ const WalletIntegration: React.FC = () => {
             ) : (
               <div className="space-y-3">
                 {walletAddresses.map((wallet) => (
-                  <div 
-                    key={wallet.id} 
+                  <div
+                    key={wallet.id}
                     className={`p-4 rounded-lg border flex items-center justify-between ${
-                      wallet.isDefault ? 'bg-primary/5 border-primary' : ''
+                      wallet.isDefault ? "bg-primary/5 border-primary" : ""
                     }`}
                   >
                     <div className="flex items-center space-x-3">
@@ -164,7 +174,9 @@ const WalletIntegration: React.FC = () => {
                         <div className="font-medium flex items-center">
                           {wallet.name}
                           {wallet.isDefault && (
-                            <Badge variant="outline" className="ml-2 text-xs">Default</Badge>
+                            <Badge variant="outline" className="ml-2 text-xs">
+                              Default
+                            </Badge>
                           )}
                         </div>
                         <div className="text-xs text-muted-foreground flex items-center mt-1">
@@ -179,8 +191,8 @@ const WalletIntegration: React.FC = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       {!wallet.isDefault && (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => setAsDefault(wallet.id)}
                         >
@@ -188,8 +200,8 @@ const WalletIntegration: React.FC = () => {
                           Set Default
                         </Button>
                       )}
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleDisconnect(wallet.id)}
                       >
@@ -201,9 +213,9 @@ const WalletIntegration: React.FC = () => {
                 ))}
               </div>
             )}
-            
+
             <div className="pt-4 border-t mt-4">
-              <Button 
+              <Button
                 className="w-full"
                 onClick={handleMakePayment}
                 disabled={walletAddresses.length === 0}
@@ -213,38 +225,47 @@ const WalletIntegration: React.FC = () => {
               </Button>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="connect" className="space-y-4">
             <div className="space-y-3">
               <div>
                 <Label htmlFor="wallet-name">Wallet Name</Label>
-                <Input 
+                <Input
                   id="wallet-name"
                   placeholder="My XRPL Wallet"
                   value={newWallet.name}
-                  onChange={(e) => setNewWallet(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setNewWallet((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   disabled={connecting}
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="wallet-address">Wallet Address</Label>
-                <Input 
+                <Input
                   id="wallet-address"
                   placeholder="Enter your wallet address"
                   value={newWallet.address}
-                  onChange={(e) => setNewWallet(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={(e) =>
+                    setNewWallet((prev) => ({
+                      ...prev,
+                      address: e.target.value,
+                    }))
+                  }
                   disabled={connecting}
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="wallet-type">Wallet Type</Label>
-                <select 
+                <select
                   id="wallet-type"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={newWallet.type}
-                  onChange={(e) => setNewWallet(prev => ({ ...prev, type: e.target.value }))}
+                  onChange={(e) =>
+                    setNewWallet((prev) => ({ ...prev, type: e.target.value }))
+                  }
                   disabled={connecting}
                 >
                   <option value="xrpl">XRPL</option>
@@ -253,8 +274,8 @@ const WalletIntegration: React.FC = () => {
                 </select>
               </div>
             </div>
-            
-            <Button 
+
+            <Button
               onClick={handleConnectWallet}
               disabled={connecting || !newWallet.name || !newWallet.address}
               className="w-full"
@@ -271,23 +292,35 @@ const WalletIntegration: React.FC = () => {
                 </>
               )}
             </Button>
-            
+
             <div className="pt-2">
               <p className="text-sm text-muted-foreground">
                 You can also use a third-party wallet provider:
               </p>
               <div className="grid grid-cols-2 gap-2 mt-2">
-                <Button variant="outline" className="justify-start" onClick={() => toast({
-                  title: "Coming Soon",
-                  description: "XRP Pay integration coming soon!"
-                })}>
+                <Button
+                  variant="outline"
+                  className="justify-start"
+                  onClick={() =>
+                    toast({
+                      title: "Coming Soon",
+                      description: "XRP Pay integration coming soon!",
+                    })
+                  }
+                >
                   <CreditCard className="h-4 w-4 mr-2" />
                   XRP Pay
                 </Button>
-                <Button variant="outline" className="justify-start" onClick={() => toast({
-                  title: "Coming Soon",
-                  description: "Xumm wallet integration coming soon!"
-                })}>
+                <Button
+                  variant="outline"
+                  className="justify-start"
+                  onClick={() =>
+                    toast({
+                      title: "Coming Soon",
+                      description: "Xumm wallet integration coming soon!",
+                    })
+                  }
+                >
                   <Wallet className="h-4 w-4 mr-2" />
                   Xumm
                 </Button>

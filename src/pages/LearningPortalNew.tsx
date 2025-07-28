@@ -1,173 +1,193 @@
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { BookOpen, Plus, Play, DollarSign, Users, Star, Clock } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  BookOpen,
+  Plus,
+  Play,
+  DollarSign,
+  Users,
+  Star,
+  Clock,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Course {
-  id: string
-  title: string
-  description: string
-  category: string
-  price_per_student: number
-  total_students: number
-  creator_id: string
-  is_published: boolean
-  course_content: any
-  created_at: string
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  price_per_student: number;
+  total_students: number;
+  creator_id: string;
+  is_published: boolean;
+  course_content: any;
+  created_at: string;
 }
 
-export default function LearningPortal() {
-  const [courses, setCourses] = useState<Course[]>([])
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+export default function LearningPortal(): JSX.Element {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newCourse, setNewCourse] = useState({
     title: "",
     description: "",
     category: "blockchain",
     price_per_student: 0,
     course_content: [],
-    requirements: []
-  })
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const { toast } = useToast()
+    requirements: [],
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const { toast } = useToast();
 
   useEffect(() => {
-    fetchCourses()
-  }, [])
+    fetchCourses();
+  }, []);
 
   const fetchCourses = async () => {
     const { data, error } = await supabase
-      .from('educational_courses')
-      .select('*')
-      .eq('is_published', true)
-      .order('created_at', { ascending: false })
+      .from("educational_courses")
+      .select("*")
+      .eq("is_published", true)
+      .order("created_at", { ascending: false });
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to fetch courses",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    setCourses(data || [])
-  }
+    setCourses(data || []);
+  };
 
   const handleCreateCourse = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to create a course",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     const { data, error } = await supabase
-      .from('educational_courses')
+      .from("educational_courses")
       .insert({
         ...newCourse,
         creator_id: user.id,
-        is_published: true
+        is_published: true,
       })
       .select()
-      .single()
+      .single();
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to create course",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     toast({
       title: "Success",
       description: "Course created successfully",
-    })
+    });
 
-    setCourses([data, ...courses])
-    setIsCreateModalOpen(false)
+    setCourses([data, ...courses]);
+    setIsCreateModalOpen(false);
     setNewCourse({
       title: "",
       description: "",
       category: "blockchain",
       price_per_student: 0,
       course_content: [],
-      requirements: []
-    })
-  }
+      requirements: [],
+    });
+  };
 
   const handleEnrollCourse = async (courseId: string) => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to enroll in a course",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    const course = courses.find(c => c.id === courseId)
-    if (!course) return
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return;
 
-    const { error } = await supabase
-      .from('course_enrollments')
-      .insert({
-        student_id: user.id,
-        course_id: courseId,
-        payment_amount: course.price_per_student
-      })
+    const { error } = await supabase.from("course_enrollments").insert({
+      student_id: user.id,
+      course_id: courseId,
+      payment_amount: course.price_per_student,
+    });
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to enroll in course",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     // Update course student count
     await supabase
-      .from('educational_courses')
+      .from("educational_courses")
       .update({
-        total_students: course.total_students + 1
+        total_students: course.total_students + 1,
       })
-      .eq('id', courseId)
+      .eq("id", courseId);
 
     toast({
       title: "Enrollment Successful",
       description: `Enrolled in ${course.title}`,
-    })
+    });
 
-    fetchCourses()
-  }
+    fetchCourses();
+  };
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || course.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+  const filteredCourses = courses.filter((course) => {
+    const matchesSearch =
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" || course.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Learning Portal</h1>
-          <p className="text-muted-foreground">Create and discover tokenized educational courses</p>
+          <p className="text-muted-foreground">
+            Create and discover tokenized educational courses
+          </p>
         </div>
         <Button onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -206,19 +226,21 @@ export default function LearningPortal() {
                   <BookOpen className="h-5 w-5" />
                   <CardTitle className="text-lg">{course.title}</CardTitle>
                 </div>
-                <Badge variant="default">
-                  {course.category}
-                </Badge>
+                <Badge variant="default">{course.category}</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">{course.description}</p>
-              
+              <p className="text-sm text-muted-foreground">
+                {course.description}
+              </p>
+
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Price:</span>
                   <span className="font-medium">
-                    {course.price_per_student === 0 ? "Free" : `$${course.price_per_student}`}
+                    {course.price_per_student === 0
+                      ? "Free"
+                      : `$${course.price_per_student}`}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -227,17 +249,21 @@ export default function LearningPortal() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Lessons:</span>
-                  <span className="font-medium">{course.course_content?.length || 0}</span>
+                  <span className="font-medium">
+                    {course.course_content?.length || 0}
+                  </span>
                 </div>
               </div>
 
               <div className="flex gap-2">
-                <Button 
-                  className="flex-1" 
+                <Button
+                  className="flex-1"
                   onClick={() => handleEnrollCourse(course.id)}
                 >
                   <Play className="h-4 w-4 mr-2" />
-                  {course.price_per_student === 0 ? "Enroll Free" : "Enroll Now"}
+                  {course.price_per_student === 0
+                    ? "Enroll Free"
+                    : "Enroll Now"}
                 </Button>
               </div>
             </CardContent>
@@ -248,7 +274,9 @@ export default function LearningPortal() {
       {filteredCourses.length === 0 && (
         <div className="text-center py-12">
           <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No courses found. Create the first one!</p>
+          <p className="text-muted-foreground">
+            No courses found. Create the first one!
+          </p>
         </div>
       )}
 
@@ -264,7 +292,9 @@ export default function LearningPortal() {
                 <Input
                   id="title"
                   value={newCourse.title}
-                  onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewCourse({ ...newCourse, title: e.target.value })
+                  }
                   placeholder="e.g., Advanced Tokenization Strategies"
                 />
               </div>
@@ -274,14 +304,21 @@ export default function LearningPortal() {
                 <Textarea
                   id="description"
                   value={newCourse.description}
-                  onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewCourse({ ...newCourse, description: e.target.value })
+                  }
                   placeholder="Describe what students will learn..."
                 />
               </div>
 
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select value={newCourse.category} onValueChange={(value) => setNewCourse({ ...newCourse, category: value })}>
+                <Select
+                  value={newCourse.category}
+                  onValueChange={(value) =>
+                    setNewCourse({ ...newCourse, category: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -301,7 +338,12 @@ export default function LearningPortal() {
                   type="number"
                   step="0.01"
                   value={newCourse.price_per_student}
-                  onChange={(e) => setNewCourse({ ...newCourse, price_per_student: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setNewCourse({
+                      ...newCourse,
+                      price_per_student: parseFloat(e.target.value) || 0,
+                    })
+                  }
                 />
               </div>
 
@@ -310,7 +352,10 @@ export default function LearningPortal() {
                   <BookOpen className="h-4 w-4 mr-2" />
                   Create Course
                 </Button>
-                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateModalOpen(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -319,5 +364,5 @@ export default function LearningPortal() {
         </div>
       )}
     </div>
-  )
+  );
 }

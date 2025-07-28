@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Archive, Scroll, Shield, Eye } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Archive, Scroll, Shield, Eye } from "lucide-react";
 
-export default function DivineTrust() {
+export default function DivineTrust(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Divine Trust Vault</h1>
-          <p className="text-muted-foreground">Sacred documents and covenant management</p>
+          <p className="text-muted-foreground">
+            Sacred documents and covenant management
+          </p>
         </div>
         <Button>
           <Eye className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function DivineTrust() {
             <p className="text-sm text-muted-foreground mb-4">
               Access your sacred trust documents
             </p>
-            <Button variant="outline" className="w-full">View Documents</Button>
+            <Button variant="outline" className="w-full">
+              View Documents
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function DivineTrust() {
             <p className="text-sm text-muted-foreground mb-4">
               Sacred agreements for kingdom participation
             </p>
-            <Button variant="outline" className="w-full">Create Covenant</Button>
+            <Button variant="outline" className="w-full">
+              Create Covenant
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function DivineTrust() {
             <p className="text-sm text-muted-foreground mb-4">
               Begin sacred initiation ceremonies
             </p>
-            <Button variant="outline" className="w-full">Begin Rite</Button>
+            <Button variant="outline" className="w-full">
+              Begin Rite
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

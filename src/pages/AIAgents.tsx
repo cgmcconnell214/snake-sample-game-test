@@ -1,181 +1,204 @@
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Bot, Plus, Settings, Zap, DollarSign, Users, Star } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Bot,
+  Plus,
+  Settings,
+  Zap,
+  DollarSign,
+  Users,
+  Star,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AIAgent {
-  id: string
-  name: string
-  description: string
-  category: string
-  price_per_use: number
-  total_tokens: number
-  tokens_sold: number
-  creator_id: string
-  verification_status: string
-  created_at: string
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  price_per_use: number;
+  total_tokens: number;
+  tokens_sold: number;
+  creator_id: string;
+  verification_status: string;
+  created_at: string;
 }
 
-export default function AIAgents() {
-  const [agents, setAgents] = useState<AIAgent[]>([])
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+export default function AIAgents(): JSX.Element {
+  const [agents, setAgents] = useState<AIAgent[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newAgent, setNewAgent] = useState({
     name: "",
     description: "",
     category: "workflow",
     price_per_use: 0,
     total_tokens: 1000000,
-    workflow_data: {}
-  })
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const { toast } = useToast()
+    workflow_data: {},
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const { toast } = useToast();
 
   useEffect(() => {
-    fetchAgents()
-  }, [])
+    fetchAgents();
+  }, []);
 
   const fetchAgents = async () => {
     const { data, error } = await supabase
-      .from('ai_agents')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
+      .from("ai_agents")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to fetch AI agents",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    setAgents(data || [])
-  }
+    setAgents(data || []);
+  };
 
   const handleCreateAgent = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to create an AI agent",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     const { data, error } = await supabase
-      .from('ai_agents')
+      .from("ai_agents")
       .insert({
         ...newAgent,
         creator_id: user.id,
         configuration: {
           napier_integration: true,
           tokenomics_enabled: true,
-          revenue_sharing: true
-        }
+          revenue_sharing: true,
+        },
       })
       .select()
-      .single()
+      .single();
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to create AI agent",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     toast({
       title: "Success",
       description: "AI agent created successfully",
-    })
+    });
 
-    setAgents([data, ...agents])
-    setIsCreateModalOpen(false)
+    setAgents([data, ...agents]);
+    setIsCreateModalOpen(false);
     setNewAgent({
       name: "",
       description: "",
       category: "workflow",
       price_per_use: 0,
       total_tokens: 1000000,
-      workflow_data: {}
-    })
-  }
+      workflow_data: {},
+    });
+  };
 
-  const handlePurchaseAgent = async (agentId: string, tokensToPurchase: number) => {
-    const { data: { user } } = await supabase.auth.getUser()
+  const handlePurchaseAgent = async (
+    agentId: string,
+    tokensToPurchase: number,
+  ) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to purchase an AI agent",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    const agent = agents.find(a => a.id === agentId)
-    if (!agent) return
+    const agent = agents.find((a) => a.id === agentId);
+    if (!agent) return;
 
-    const totalAmount = tokensToPurchase * agent.price_per_use
+    const totalAmount = tokensToPurchase * agent.price_per_use;
 
-    const { error } = await supabase
-      .from('ai_agent_purchases')
-      .insert({
-        buyer_id: user.id,
-        agent_id: agentId,
-        tokens_purchased: tokensToPurchase,
-        total_amount: totalAmount,
-        payment_status: 'completed'
-      })
+    const { error } = await supabase.from("ai_agent_purchases").insert({
+      buyer_id: user.id,
+      agent_id: agentId,
+      tokens_purchased: tokensToPurchase,
+      total_amount: totalAmount,
+      payment_status: "completed",
+    });
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to purchase AI agent",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     // Update agent tokens sold
     await supabase
-      .from('ai_agents')
+      .from("ai_agents")
       .update({
-        tokens_sold: agent.tokens_sold + tokensToPurchase
+        tokens_sold: agent.tokens_sold + tokensToPurchase,
       })
-      .eq('id', agentId)
+      .eq("id", agentId);
 
     toast({
       title: "Purchase Successful",
       description: `Purchased ${tokensToPurchase} tokens for $${totalAmount}`,
-    })
+    });
 
-    fetchAgents()
-  }
+    fetchAgents();
+  };
 
-  const filteredAgents = agents.filter(agent => {
-    const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         agent.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || agent.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+  const filteredAgents = agents.filter((agent) => {
+    const matchesSearch =
+      agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      agent.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" || agent.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">AI Agents Marketplace</h1>
-          <p className="text-muted-foreground">Discover and deploy tokenized AI workflow automations</p>
+          <p className="text-muted-foreground">
+            Discover and deploy tokenized AI workflow automations
+          </p>
         </div>
         <Button onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -214,14 +237,22 @@ export default function AIAgents() {
                   <Bot className="h-5 w-5" />
                   <CardTitle className="text-lg">{agent.name}</CardTitle>
                 </div>
-                <Badge variant={agent.verification_status === 'verified' ? 'default' : 'secondary'}>
+                <Badge
+                  variant={
+                    agent.verification_status === "verified"
+                      ? "default"
+                      : "secondary"
+                  }
+                >
                   {agent.verification_status}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">{agent.description}</p>
-              
+              <p className="text-sm text-muted-foreground">
+                {agent.description}
+              </p>
+
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Price per use:</span>
@@ -229,11 +260,15 @@ export default function AIAgents() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total tokens:</span>
-                  <span className="font-medium">{agent.total_tokens.toLocaleString()}</span>
+                  <span className="font-medium">
+                    {agent.total_tokens.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tokens sold:</span>
-                  <span className="font-medium">{agent.tokens_sold.toLocaleString()}</span>
+                  <span className="font-medium">
+                    {agent.tokens_sold.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Available:</span>
@@ -244,8 +279,8 @@ export default function AIAgents() {
               </div>
 
               <div className="flex gap-2">
-                <Button 
-                  className="flex-1" 
+                <Button
+                  className="flex-1"
                   onClick={() => handlePurchaseAgent(agent.id, 1000)}
                 >
                   <DollarSign className="h-4 w-4 mr-2" />
@@ -264,7 +299,9 @@ export default function AIAgents() {
       {filteredAgents.length === 0 && (
         <div className="text-center py-12">
           <Bot className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No AI agents found. Be the first to create one!</p>
+          <p className="text-muted-foreground">
+            No AI agents found. Be the first to create one!
+          </p>
         </div>
       )}
 
@@ -280,7 +317,9 @@ export default function AIAgents() {
                 <Input
                   id="name"
                   value={newAgent.name}
-                  onChange={(e) => setNewAgent({ ...newAgent, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewAgent({ ...newAgent, name: e.target.value })
+                  }
                   placeholder="e.g., Trading Bot Extreme"
                 />
               </div>
@@ -290,19 +329,28 @@ export default function AIAgents() {
                 <Textarea
                   id="description"
                   value={newAgent.description}
-                  onChange={(e) => setNewAgent({ ...newAgent, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewAgent({ ...newAgent, description: e.target.value })
+                  }
                   placeholder="Describe what your AI agent does..."
                 />
               </div>
 
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select value={newAgent.category} onValueChange={(value) => setNewAgent({ ...newAgent, category: value })}>
+                <Select
+                  value={newAgent.category}
+                  onValueChange={(value) =>
+                    setNewAgent({ ...newAgent, category: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="workflow">Workflow Automation</SelectItem>
+                    <SelectItem value="workflow">
+                      Workflow Automation
+                    </SelectItem>
                     <SelectItem value="trading">Trading</SelectItem>
                     <SelectItem value="analytics">Analytics</SelectItem>
                     <SelectItem value="compliance">Compliance</SelectItem>
@@ -317,7 +365,12 @@ export default function AIAgents() {
                   type="number"
                   step="0.01"
                   value={newAgent.price_per_use}
-                  onChange={(e) => setNewAgent({ ...newAgent, price_per_use: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setNewAgent({
+                      ...newAgent,
+                      price_per_use: parseFloat(e.target.value) || 0,
+                    })
+                  }
                 />
               </div>
 
@@ -327,7 +380,12 @@ export default function AIAgents() {
                   id="tokens"
                   type="number"
                   value={newAgent.total_tokens}
-                  onChange={(e) => setNewAgent({ ...newAgent, total_tokens: parseInt(e.target.value) || 1000000 })}
+                  onChange={(e) =>
+                    setNewAgent({
+                      ...newAgent,
+                      total_tokens: parseInt(e.target.value) || 1000000,
+                    })
+                  }
                 />
               </div>
 
@@ -336,7 +394,10 @@ export default function AIAgents() {
                   <Zap className="h-4 w-4 mr-2" />
                   Create Agent
                 </Button>
-                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateModalOpen(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -345,5 +406,5 @@ export default function AIAgents() {
         </div>
       )}
     </div>
-  )
+  );
 }

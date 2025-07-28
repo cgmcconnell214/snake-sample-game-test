@@ -1,16 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Activity, 
-  Zap, 
-  Shield, 
-  Settings, 
-  Play, 
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Activity,
+  Zap,
+  Shield,
+  Settings,
+  Play,
   Pause,
   TrendingUp,
   AlertTriangle,
@@ -19,10 +31,10 @@ import {
   Coins,
   Lock,
   Unlock,
-  FileText
-} from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+  FileText,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface SmartContractFunction {
   id: string;
@@ -57,7 +69,9 @@ interface XRPLConfig {
 }
 
 const BlockchainManager: React.FC = () => {
-  const [smartContracts, setSmartContracts] = useState<SmartContractFunction[]>([]);
+  const [smartContracts, setSmartContracts] = useState<SmartContractFunction[]>(
+    [],
+  );
   const [transactions, setTransactions] = useState<BlockchainTransaction[]>([]);
   const [xrplConfig, setXrplConfig] = useState<XRPLConfig | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,34 +86,34 @@ const BlockchainManager: React.FC = () => {
     try {
       // Fetch smart contract functions
       const { data: contractsData, error: contractsError } = await supabase
-        .from('smart_contract_functions')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("smart_contract_functions")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (contractsError) throw contractsError;
       setSmartContracts(contractsData || []);
 
       // Fetch blockchain transactions
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from('blockchain_transaction_queue')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
+      const { data: transactionsData, error: transactionsError } =
+        await supabase
+          .from("blockchain_transaction_queue")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(50);
 
       if (transactionsError) throw transactionsError;
       setTransactions(transactionsData || []);
 
       // Fetch XRPL configuration
       const { data: configData, error: configError } = await supabase
-        .from('xrpl_config')
-        .select('*')
+        .from("xrpl_config")
+        .select("*")
         .single();
 
-      if (configError && configError.code !== 'PGRST116') throw configError;
+      if (configError && configError.code !== "PGRST116") throw configError;
       setXrplConfig(configData);
-
     } catch (error) {
-      console.error('Error fetching blockchain data:', error);
+      console.error("Error fetching blockchain data:", error);
       toast({
         title: "Error",
         description: "Failed to load blockchain data.",
@@ -110,15 +124,17 @@ const BlockchainManager: React.FC = () => {
     }
   };
 
-  const executeSmartContract = async (contractFunction: SmartContractFunction) => {
+  const executeSmartContract = async (
+    contractFunction: SmartContractFunction,
+  ) => {
     try {
       const { error } = await supabase
-        .from('blockchain_transaction_queue')
+        .from("blockchain_transaction_queue")
         .insert({
           function_name: contractFunction.function_name,
           transaction_type: contractFunction.xrpl_transaction_type,
           parameters: contractFunction.parameters,
-          status: 'pending'
+          status: "pending",
         });
 
       if (error) throw error;
@@ -130,7 +146,7 @@ const BlockchainManager: React.FC = () => {
 
       fetchData(); // Refresh data
     } catch (error) {
-      console.error('Error executing smart contract:', error);
+      console.error("Error executing smart contract:", error);
       toast({
         title: "Error",
         description: "Failed to queue smart contract execution.",
@@ -141,11 +157,11 @@ const BlockchainManager: React.FC = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <CheckCircle className="h-4 w-4 text-success" />;
-      case 'failed':
+      case "failed":
         return <AlertTriangle className="h-4 w-4 text-destructive" />;
-      case 'processing':
+      case "processing":
         return <Activity className="h-4 w-4 text-warning animate-pulse" />;
       default:
         return <Clock className="h-4 w-4 text-muted-foreground" />;
@@ -154,11 +170,11 @@ const BlockchainManager: React.FC = () => {
 
   const getContractTypeIcon = (type: string) => {
     switch (type) {
-      case 'minting':
+      case "minting":
         return <Coins className="h-4 w-4 text-primary" />;
-      case 'trading':
+      case "trading":
         return <TrendingUp className="h-4 w-4 text-success" />;
-      case 'compliance':
+      case "compliance":
         return <Shield className="h-4 w-4 text-warning" />;
       default:
         return <Settings className="h-4 w-4 text-muted-foreground" />;
@@ -168,7 +184,9 @@ const BlockchainManager: React.FC = () => {
   if (loading) {
     return (
       <div className="container mx-auto p-6">
-        <div className="text-center py-8">Loading blockchain infrastructure...</div>
+        <div className="text-center py-8">
+          Loading blockchain infrastructure...
+        </div>
       </div>
     );
   }
@@ -196,48 +214,61 @@ const BlockchainManager: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Network Status</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Network Status
+                </CardTitle>
                 <Activity className="h-4 w-4 text-success" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-success">Online</div>
                 <p className="text-xs text-muted-foreground">
-                  {xrplConfig?.network_type || 'testnet'}
+                  {xrplConfig?.network_type || "testnet"}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Smart Contracts</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Smart Contracts
+                </CardTitle>
                 <Zap className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{smartContracts.length}</div>
+                <div className="text-2xl font-bold">
+                  {smartContracts.length}
+                </div>
                 <p className="text-xs text-muted-foreground">
-                  {smartContracts.filter(c => c.deployment_status === 'deployed').length} deployed
+                  {
+                    smartContracts.filter(
+                      (c) => c.deployment_status === "deployed",
+                    ).length
+                  }{" "}
+                  deployed
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Transactions</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Pending Transactions
+                </CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {transactions.filter(t => t.status === 'pending').length}
+                  {transactions.filter((t) => t.status === "pending").length}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  In queue
-                </p>
+                <p className="text-xs text-muted-foreground">In queue</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Compliance Status</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Compliance Status
+                </CardTitle>
                 <Shield className="h-4 w-4 text-success" />
               </CardHeader>
               <CardContent>
@@ -253,22 +284,36 @@ const BlockchainManager: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Recent Blockchain Activity</CardTitle>
-              <CardDescription>Latest smart contract executions and transactions</CardDescription>
+              <CardDescription>
+                Latest smart contract executions and transactions
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {transactions.slice(0, 5).map((transaction) => (
-                  <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div className="flex items-center space-x-3">
                       {getStatusIcon(transaction.status)}
                       <div>
-                        <div className="font-medium">{transaction.function_name}</div>
+                        <div className="font-medium">
+                          {transaction.function_name}
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          {transaction.transaction_type} • {new Date(transaction.created_at).toLocaleString()}
+                          {transaction.transaction_type} •{" "}
+                          {new Date(transaction.created_at).toLocaleString()}
                         </div>
                       </div>
                     </div>
-                    <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={
+                        transaction.status === "completed"
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
                       {transaction.status}
                     </Badge>
                   </div>
@@ -282,7 +327,9 @@ const BlockchainManager: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Smart Contract Functions</CardTitle>
-              <CardDescription>XRPL-compatible smart contract functions ready for deployment</CardDescription>
+              <CardDescription>
+                XRPL-compatible smart contract functions ready for deployment
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4">
@@ -292,29 +339,36 @@ const BlockchainManager: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         {getContractTypeIcon(contract.contract_type)}
                         <div>
-                          <h4 className="font-medium">{contract.function_name}</h4>
+                          <h4 className="font-medium">
+                            {contract.function_name}
+                          </h4>
                           <p className="text-sm text-muted-foreground">
-                            {contract.contract_type} • {contract.xrpl_transaction_type}
+                            {contract.contract_type} •{" "}
+                            {contract.xrpl_transaction_type}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge 
-                          variant={contract.deployment_status === 'deployed' ? 'default' : 'secondary'}
+                        <Badge
+                          variant={
+                            contract.deployment_status === "deployed"
+                              ? "default"
+                              : "secondary"
+                          }
                         >
                           {contract.deployment_status}
                         </Badge>
-                        <Button 
+                        <Button
                           size="sm"
                           onClick={() => executeSmartContract(contract)}
-                          disabled={contract.deployment_status !== 'deployed'}
+                          disabled={contract.deployment_status !== "deployed"}
                         >
                           <Play className="h-4 w-4 mr-1" />
                           Execute
                         </Button>
                       </div>
                     </div>
-                    
+
                     {/* Parameters */}
                     <div className="text-sm space-y-1">
                       <div className="font-medium">Parameters:</div>
@@ -327,11 +381,17 @@ const BlockchainManager: React.FC = () => {
                     <div className="text-sm space-y-1 mt-2">
                       <div className="font-medium">Compliance Rules:</div>
                       <div className="flex flex-wrap gap-1">
-                        {Object.entries(contract.compliance_rules).map(([key, value]) => (
-                          <Badge key={key} variant="outline" className="text-xs">
-                            {key}: {String(value)}
-                          </Badge>
-                        ))}
+                        {Object.entries(contract.compliance_rules).map(
+                          ([key, value]) => (
+                            <Badge
+                              key={key}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {key}: {String(value)}
+                            </Badge>
+                          ),
+                        )}
                       </div>
                     </div>
                   </div>
@@ -345,7 +405,9 @@ const BlockchainManager: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Transaction Queue</CardTitle>
-              <CardDescription>Blockchain transactions and their execution status</CardDescription>
+              <CardDescription>
+                Blockchain transactions and their execution status
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -355,13 +417,22 @@ const BlockchainManager: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         {getStatusIcon(transaction.status)}
                         <div>
-                          <h4 className="font-medium">{transaction.function_name}</h4>
+                          <h4 className="font-medium">
+                            {transaction.function_name}
+                          </h4>
                           <p className="text-sm text-muted-foreground">
-                            {transaction.transaction_type} • {new Date(transaction.created_at).toLocaleString()}
+                            {transaction.transaction_type} •{" "}
+                            {new Date(transaction.created_at).toLocaleString()}
                           </p>
                         </div>
                       </div>
-                      <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
+                      <Badge
+                        variant={
+                          transaction.status === "completed"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
                         {transaction.status}
                       </Badge>
                     </div>
@@ -377,7 +448,9 @@ const BlockchainManager: React.FC = () => {
 
                     {transaction.error_message && (
                       <div className="text-sm space-y-1 mt-2">
-                        <div className="font-medium text-destructive">Error:</div>
+                        <div className="font-medium text-destructive">
+                          Error:
+                        </div>
                         <div className="text-xs bg-destructive/10 p-2 rounded text-destructive">
                           {transaction.error_message}
                         </div>
@@ -396,14 +469,20 @@ const BlockchainManager: React.FC = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>XRPL Network Configuration</CardTitle>
-                  <CardDescription>Current blockchain network settings and policies</CardDescription>
+                  <CardDescription>
+                    Current blockchain network settings and policies
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">Network Type</label>
+                      <label className="text-sm font-medium">
+                        Network Type
+                      </label>
                       <div className="mt-1">
-                        <Badge variant="outline">{xrplConfig.network_type}</Badge>
+                        <Badge variant="outline">
+                          {xrplConfig.network_type}
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -420,14 +499,21 @@ const BlockchainManager: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {Object.entries(xrplConfig.compliance_settings).map(([key, value]) => (
-                        <div key={key} className="flex justify-between">
-                          <span className="text-sm capitalize">{key.replace(/_/g, ' ')}</span>
-                          <Badge variant={value ? 'default' : 'secondary'} className="text-xs">
-                            {String(value)}
-                          </Badge>
-                        </div>
-                      ))}
+                      {Object.entries(xrplConfig.compliance_settings).map(
+                        ([key, value]) => (
+                          <div key={key} className="flex justify-between">
+                            <span className="text-sm capitalize">
+                              {key.replace(/_/g, " ")}
+                            </span>
+                            <Badge
+                              variant={value ? "default" : "secondary"}
+                              className="text-xs"
+                            >
+                              {String(value)}
+                            </Badge>
+                          </div>
+                        ),
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -441,12 +527,18 @@ const BlockchainManager: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {Object.entries(xrplConfig.minting_policies).map(([key, value]) => (
-                        <div key={key} className="flex justify-between">
-                          <span className="text-sm capitalize">{key.replace(/_/g, ' ')}</span>
-                          <span className="text-sm font-mono">{String(value)}</span>
-                        </div>
-                      ))}
+                      {Object.entries(xrplConfig.minting_policies).map(
+                        ([key, value]) => (
+                          <div key={key} className="flex justify-between">
+                            <span className="text-sm capitalize">
+                              {key.replace(/_/g, " ")}
+                            </span>
+                            <span className="text-sm font-mono">
+                              {String(value)}
+                            </span>
+                          </div>
+                        ),
+                      )}
                     </div>
                   </CardContent>
                 </Card>

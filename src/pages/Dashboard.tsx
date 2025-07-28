@@ -1,37 +1,88 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { TradingChart } from "@/components/TradingChart"
-import { OrderBook } from "@/components/OrderBook"
-import { TradePanel } from "@/components/TradePanel"
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Wallet, 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { TradingChart } from "@/components/TradingChart";
+import { OrderBook } from "@/components/OrderBook";
+import { TradePanel } from "@/components/TradePanel";
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Wallet,
   Activity,
   Shield,
   AlertCircle,
-  CheckCircle
-} from "lucide-react"
+  CheckCircle,
+} from "lucide-react";
 
 const portfolioData = [
-  { symbol: "GOLD-TOKEN", quantity: 125, value: 16400, change: 2.4, status: "verified" },
-  { symbol: "SILVER-TOKEN", quantity: 850, value: 8500, change: -1.2, status: "verified" },
-  { symbol: "OIL-FUTURE", quantity: 50, value: 4200, change: 5.7, status: "pending" },
-  { symbol: "REAL-ESTATE-A", quantity: 10, value: 25000, change: 1.8, status: "verified" },
-]
+  {
+    symbol: "GOLD-TOKEN",
+    quantity: 125,
+    value: 16400,
+    change: 2.4,
+    status: "verified",
+  },
+  {
+    symbol: "SILVER-TOKEN",
+    quantity: 850,
+    value: 8500,
+    change: -1.2,
+    status: "verified",
+  },
+  {
+    symbol: "OIL-FUTURE",
+    quantity: 50,
+    value: 4200,
+    change: 5.7,
+    status: "pending",
+  },
+  {
+    symbol: "REAL-ESTATE-A",
+    quantity: 10,
+    value: 25000,
+    change: 1.8,
+    status: "verified",
+  },
+];
 
 const recentTrades = [
-  { id: "TXN001", symbol: "GOLD-TOKEN", type: "BUY", quantity: 25, price: 131.20, time: "14:23:15", status: "completed" },
-  { id: "TXN002", symbol: "SILVER-TOKEN", type: "SELL", quantity: 100, price: 10.15, time: "13:45:30", status: "completed" },
-  { id: "TXN003", symbol: "OIL-FUTURE", type: "BUY", quantity: 10, price: 84.50, time: "12:12:08", status: "pending" },
-]
+  {
+    id: "TXN001",
+    symbol: "GOLD-TOKEN",
+    type: "BUY",
+    quantity: 25,
+    price: 131.2,
+    time: "14:23:15",
+    status: "completed",
+  },
+  {
+    id: "TXN002",
+    symbol: "SILVER-TOKEN",
+    type: "SELL",
+    quantity: 100,
+    price: 10.15,
+    time: "13:45:30",
+    status: "completed",
+  },
+  {
+    id: "TXN003",
+    symbol: "OIL-FUTURE",
+    type: "BUY",
+    quantity: 10,
+    price: 84.5,
+    time: "12:12:08",
+    status: "pending",
+  },
+];
 
-export default function Dashboard() {
-  const totalValue = portfolioData.reduce((sum, asset) => sum + asset.value, 0)
-  const totalGain = portfolioData.reduce((sum, asset) => sum + (asset.value * asset.change / 100), 0)
-  const totalGainPercent = (totalGain / totalValue) * 100
+export default function Dashboard(): JSX.Element {
+  const totalValue = portfolioData.reduce((sum, asset) => sum + asset.value, 0);
+  const totalGain = portfolioData.reduce(
+    (sum, asset) => sum + (asset.value * asset.change) / 100,
+    0,
+  );
+  const totalGainPercent = (totalGain / totalValue) * 100;
 
   return (
     <div className="space-y-6 p-6">
@@ -39,7 +90,9 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Trading Dashboard</h1>
-          <p className="text-muted-foreground">XRPL Asset Tokenization & Trading Platform</p>
+          <p className="text-muted-foreground">
+            XRPL Asset Tokenization & Trading Platform
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-success border-success">
@@ -59,12 +112,23 @@ export default function Dashboard() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Wallet className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Total Portfolio</span>
+              <span className="text-sm text-muted-foreground">
+                Total Portfolio
+              </span>
             </div>
-            <div className="text-2xl font-bold font-mono">${totalValue.toLocaleString()}</div>
-            <div className={`flex items-center gap-1 text-sm ${totalGainPercent >= 0 ? 'text-buy' : 'text-sell'}`}>
-              {totalGainPercent >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-              {totalGainPercent >= 0 ? '+' : ''}{totalGainPercent.toFixed(2)}%
+            <div className="text-2xl font-bold font-mono">
+              ${totalValue.toLocaleString()}
+            </div>
+            <div
+              className={`flex items-center gap-1 text-sm ${totalGainPercent >= 0 ? "text-buy" : "text-sell"}`}
+            >
+              {totalGainPercent >= 0 ? (
+                <TrendingUp className="h-3 w-3" />
+              ) : (
+                <TrendingDown className="h-3 w-3" />
+              )}
+              {totalGainPercent >= 0 ? "+" : ""}
+              {totalGainPercent.toFixed(2)}%
             </div>
           </CardContent>
         </Card>
@@ -75,7 +139,9 @@ export default function Dashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">24h P&L</span>
             </div>
-            <div className="text-2xl font-bold font-mono text-buy">+$1,247.85</div>
+            <div className="text-2xl font-bold font-mono text-buy">
+              +$1,247.85
+            </div>
             <div className="flex items-center gap-1 text-sm text-buy">
               <TrendingUp className="h-3 w-3" />
               +2.34%
@@ -87,7 +153,9 @@ export default function Dashboard() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Activity className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Active Orders</span>
+              <span className="text-sm text-muted-foreground">
+                Active Orders
+              </span>
             </div>
             <div className="text-2xl font-bold font-mono">7</div>
             <div className="text-sm text-muted-foreground">3 Buy, 4 Sell</div>
@@ -110,7 +178,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <TradingChart />
-          
+
           {/* Portfolio Holdings */}
           <Card className="bg-card/50 backdrop-blur border-border/50">
             <CardHeader>
@@ -119,24 +187,40 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-3">
                 {portfolioData.map((asset, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors">
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors"
+                  >
                     <div className="flex items-center gap-3">
-                      <Badge 
-                        variant={asset.status === 'verified' ? 'default' : 'secondary'}
+                      <Badge
+                        variant={
+                          asset.status === "verified" ? "default" : "secondary"
+                        }
                         className="text-xs"
                       >
-                        {asset.status === 'verified' ? <CheckCircle className="h-3 w-3 mr-1" /> : <AlertCircle className="h-3 w-3 mr-1" />}
+                        {asset.status === "verified" ? (
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                        ) : (
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                        )}
                         {asset.status}
                       </Badge>
                       <div>
                         <div className="font-medium">{asset.symbol}</div>
-                        <div className="text-sm text-muted-foreground">{asset.quantity} tokens</div>
+                        <div className="text-sm text-muted-foreground">
+                          {asset.quantity} tokens
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-mono font-medium">${asset.value.toLocaleString()}</div>
-                      <div className={`text-sm ${asset.change >= 0 ? 'text-buy' : 'text-sell'}`}>
-                        {asset.change >= 0 ? '+' : ''}{asset.change}%
+                      <div className="font-mono font-medium">
+                        ${asset.value.toLocaleString()}
+                      </div>
+                      <div
+                        className={`text-sm ${asset.change >= 0 ? "text-buy" : "text-sell"}`}
+                      >
+                        {asset.change >= 0 ? "+" : ""}
+                        {asset.change}%
                       </div>
                     </div>
                   </div>
@@ -168,14 +252,26 @@ export default function Dashboard() {
               <div>Status</div>
             </div>
             {recentTrades.map((trade) => (
-              <div key={trade.id} className="grid grid-cols-6 gap-4 text-sm font-mono py-2 hover:bg-muted/20 transition-colors rounded">
+              <div
+                key={trade.id}
+                className="grid grid-cols-6 gap-4 text-sm font-mono py-2 hover:bg-muted/20 transition-colors rounded"
+              >
                 <div className="text-primary">{trade.id}</div>
                 <div>{trade.symbol}</div>
-                <div className={trade.type === 'BUY' ? 'text-buy' : 'text-sell'}>{trade.type}</div>
+                <div
+                  className={trade.type === "BUY" ? "text-buy" : "text-sell"}
+                >
+                  {trade.type}
+                </div>
                 <div>{trade.quantity}</div>
                 <div>${trade.price}</div>
                 <div>
-                  <Badge variant={trade.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
+                  <Badge
+                    variant={
+                      trade.status === "completed" ? "default" : "secondary"
+                    }
+                    className="text-xs"
+                  >
                     {trade.status}
                   </Badge>
                 </div>
@@ -185,5 +281,5 @@ export default function Dashboard() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

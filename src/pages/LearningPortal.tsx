@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { GraduationCap, Book, Play, Award } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { GraduationCap, Book, Play, Award } from "lucide-react";
 
-export default function LearningPortal() {
+export default function LearningPortal(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Learning Portal</h1>
-          <p className="text-muted-foreground">Master tokenization and sacred commerce</p>
+          <p className="text-muted-foreground">
+            Master tokenization and sacred commerce
+          </p>
         </div>
         <Button>
           <Play className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function LearningPortal() {
             <p className="text-sm text-muted-foreground mb-4">
               Fundamental concepts of asset tokenization
             </p>
-            <Button variant="outline" className="w-full">Start Course</Button>
+            <Button variant="outline" className="w-full">
+              Start Course
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function LearningPortal() {
             <p className="text-sm text-muted-foreground mb-4">
               Regulatory compliance and legal frameworks
             </p>
-            <Button variant="outline" className="w-full">Learn More</Button>
+            <Button variant="outline" className="w-full">
+              Learn More
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function LearningPortal() {
             <p className="text-sm text-muted-foreground mb-4">
               Sacred law and divine jurisdiction principles
             </p>
-            <Button variant="outline" className="w-full">Explore</Button>
+            <Button variant="outline" className="w-full">
+              Explore
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

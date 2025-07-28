@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Search, 
-  Filter, 
-  X,
-  Calendar,
-  User,
-  Tag
-} from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import React, { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Search, Filter, X, Calendar, User, Tag } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface MessageSearchProps {
   searchTerm: string;
@@ -23,20 +20,21 @@ const MessageSearch: React.FC<MessageSearchProps> = ({
   searchTerm,
   onSearchChange,
   totalMessages,
-  filteredCount
+  filteredCount,
 }) => {
   const [filters, setFilters] = useState({
-    type: '',
-    sender: '',
-    dateRange: ''
+    type: "",
+    sender: "",
+    dateRange: "",
   });
 
   const clearFilters = () => {
-    setFilters({ type: '', sender: '', dateRange: '' });
-    onSearchChange('');
+    setFilters({ type: "", sender: "", dateRange: "" });
+    onSearchChange("");
   };
 
-  const hasActiveFilters = searchTerm || filters.type || filters.sender || filters.dateRange;
+  const hasActiveFilters =
+    searchTerm || filters.type || filters.sender || filters.dateRange;
 
   return (
     <div className="space-y-3">
@@ -54,13 +52,13 @@ const MessageSearch: React.FC<MessageSearchProps> = ({
               variant="ghost"
               size="sm"
               className="absolute right-1 top-1 h-8 w-8 p-0"
-              onClick={() => onSearchChange('')}
+              onClick={() => onSearchChange("")}
             >
               <X className="h-4 w-4" />
             </Button>
           )}
         </div>
-        
+
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="sm">
@@ -76,14 +74,16 @@ const MessageSearch: React.FC<MessageSearchProps> = ({
           <PopoverContent className="w-80">
             <div className="space-y-4">
               <h4 className="font-medium">Filter Messages</h4>
-              
+
               <div className="space-y-3">
                 <div>
                   <label className="text-sm font-medium">Message Type</label>
-                  <select 
+                  <select
                     className="w-full mt-1 p-2 border rounded-md text-sm"
                     value={filters.type}
-                    onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
+                    onChange={(e) =>
+                      setFilters((prev) => ({ ...prev, type: e.target.value }))
+                    }
                   >
                     <option value="">All Types</option>
                     <option value="user">User Messages</option>
@@ -92,26 +92,36 @@ const MessageSearch: React.FC<MessageSearchProps> = ({
                     <option value="compliance">Compliance</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium">Sender</label>
-                  <select 
+                  <select
                     className="w-full mt-1 p-2 border rounded-md text-sm"
                     value={filters.sender}
-                    onChange={(e) => setFilters(prev => ({ ...prev, sender: e.target.value }))}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        sender: e.target.value,
+                      }))
+                    }
                   >
                     <option value="">All Senders</option>
                     <option value="system">System</option>
                     <option value="user">Users</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium">Date Range</label>
-                  <select 
+                  <select
                     className="w-full mt-1 p-2 border rounded-md text-sm"
                     value={filters.dateRange}
-                    onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        dateRange: e.target.value,
+                      }))
+                    }
                   >
                     <option value="">All Time</option>
                     <option value="today">Today</option>
@@ -120,7 +130,7 @@ const MessageSearch: React.FC<MessageSearchProps> = ({
                   </select>
                 </div>
               </div>
-              
+
               <div className="flex justify-between pt-2">
                 <Button variant="outline" size="sm" onClick={clearFilters}>
                   Clear All
@@ -131,7 +141,7 @@ const MessageSearch: React.FC<MessageSearchProps> = ({
           </PopoverContent>
         </Popover>
       </div>
-      
+
       {/* Search Results Summary */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <div className="flex items-center space-x-2">
@@ -140,11 +150,9 @@ const MessageSearch: React.FC<MessageSearchProps> = ({
               Showing {filteredCount} of {totalMessages} messages
             </span>
           )}
-          {!searchTerm && (
-            <span>{totalMessages} total messages</span>
-          )}
+          {!searchTerm && <span>{totalMessages} total messages</span>}
         </div>
-        
+
         {hasActiveFilters && (
           <div className="flex items-center space-x-2">
             <span className="text-xs">Active filters:</span>
