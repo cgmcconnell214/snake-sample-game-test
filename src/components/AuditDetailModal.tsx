@@ -33,11 +33,11 @@ interface AuditLog {
 interface AuditDetail {
   id: string;
   event_id: string;
-  request_data: any;
-  response_data: any;
-  error_details: any;
+  request_data: Record<string, unknown> | null;
+  response_data: Record<string, unknown> | null;
+  error_details: Record<string, unknown> | null;
   execution_time_ms: number;
-  security_context: any;
+  security_context: Record<string, unknown> | null;
   compliance_flags: string[];
   created_at: string;
 }

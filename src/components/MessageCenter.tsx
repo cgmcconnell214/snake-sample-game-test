@@ -27,7 +27,7 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+  attachments: string | Record<string, unknown>[] | null;
   is_read: boolean;
   is_archived: boolean;
   created_at: string;

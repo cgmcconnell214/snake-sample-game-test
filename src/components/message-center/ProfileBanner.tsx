@@ -1,4 +1,5 @@
 import React from 'react';
+import { User } from '@supabase/supabase-js';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +15,8 @@ import {
 } from 'lucide-react';
 
 interface ProfileBannerProps {
-  user: any;
-  profile: any;
+  user: User | null;
+  profile: Record<string, unknown> | null;
   unreadCount: number;
 }
 

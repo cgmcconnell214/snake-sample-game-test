@@ -12,7 +12,18 @@ const AuditTrail = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
-  const [selectedAuditLog, setSelectedAuditLog] = useState<any>(null);
+  interface AuditLog {
+    id: number;
+    timestamp: string;
+    action: string;
+    user: string;
+    details: string;
+    type: string;
+    status: string;
+    ipAddress: string;
+  }
+
+  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Mock audit trail data
