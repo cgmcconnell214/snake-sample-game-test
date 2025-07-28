@@ -19,7 +19,7 @@ interface Course {
   total_students: number
   creator_id: string
   is_published: boolean
-  course_content: any
+  course_content: string[] // TODO: Verify correct type
   created_at: string
 }
 

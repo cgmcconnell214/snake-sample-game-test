@@ -22,6 +22,7 @@ import {
   FileText
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
 
 interface SmartContractFunction {
@@ -29,8 +30,8 @@ interface SmartContractFunction {
   function_name: string;
   contract_type: string;
   xrpl_transaction_type: string;
-  parameters: any;
-  compliance_rules: any;
+  parameters: Json;
+  compliance_rules: Json | null;
   deployment_status: string;
   version: string;
   created_at: string;
@@ -40,7 +41,7 @@ interface BlockchainTransaction {
   id: string;
   function_name: string;
   transaction_type: string;
-  parameters: any;
+  parameters: Json;
   status: string;
   xrpl_transaction_hash?: string;
   created_at: string;
@@ -50,10 +51,10 @@ interface BlockchainTransaction {
 interface XRPLConfig {
   id: string;
   network_type: string;
-  compliance_settings: any;
-  minting_policies: any;
-  kyc_requirements: any;
-  regulatory_framework: any;
+  compliance_settings: Json | null;
+  minting_policies: Json | null;
+  kyc_requirements: Json | null;
+  regulatory_framework: Json | null;
 }
 
 const BlockchainManager: React.FC = () => {

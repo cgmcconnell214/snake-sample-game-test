@@ -9,13 +9,14 @@ import { Badge } from "@/components/ui/badge"
 import { Workflow, Zap, Clock, Target, Settings, Plus, Play } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import type { Json } from "@/integrations/supabase/types"
 
 interface WorkflowRule {
   id: string
   rule_name: string
   rule_type: string
-  trigger_conditions: any
-  actions: any
+  trigger_conditions: Json
+  actions: Json
   is_active: boolean
   created_at: string
 }

@@ -32,7 +32,9 @@ export default function SiteEntry() {
         new Date().getTimezoneOffset(),
         canvas.toDataURL(),
         navigator.hardwareConcurrency,
-        (navigator as any).deviceMemory || 'unknown'
+        (
+          navigator as Navigator & { deviceMemory?: number }
+        ).deviceMemory || 'unknown'
       ].join('|')
       
       return btoa(fingerprint).substring(0, 32)
