@@ -29,8 +29,8 @@ interface SmartContractFunction {
   function_name: string;
   contract_type: string;
   xrpl_transaction_type: string;
-  parameters: any;
-  compliance_rules: any;
+  parameters: Record<string, unknown> | null;
+  compliance_rules: Record<string, unknown> | null;
   deployment_status: string;
   version: string;
   created_at: string;
@@ -40,7 +40,7 @@ interface BlockchainTransaction {
   id: string;
   function_name: string;
   transaction_type: string;
-  parameters: any;
+  parameters: Record<string, unknown> | null;
   status: string;
   xrpl_transaction_hash?: string;
   created_at: string;
@@ -50,10 +50,10 @@ interface BlockchainTransaction {
 interface XRPLConfig {
   id: string;
   network_type: string;
-  compliance_settings: any;
-  minting_policies: any;
-  kyc_requirements: any;
-  regulatory_framework: any;
+  compliance_settings: Record<string, unknown> | null;
+  minting_policies: Record<string, unknown> | null;
+  kyc_requirements: Record<string, unknown> | null;
+  regulatory_framework: Record<string, unknown> | null;
 }
 
 const BlockchainManager: React.FC = () => {

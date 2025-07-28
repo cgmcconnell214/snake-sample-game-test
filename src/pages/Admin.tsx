@@ -22,9 +22,9 @@ import {
 const Admin = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
-  const [users, setUsers] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [trades, setTrades] = useState([]);
+  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
+  const [alerts, setAlerts] = useState<Record<string, unknown>[]>([]);
+  const [trades, setTrades] = useState<Record<string, unknown>[]>([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeTraders: 0,
@@ -245,7 +245,7 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user: any) => (
+                  {users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>{user.first_name} {user.last_name}</TableCell>
                       <TableCell>{user.email}</TableCell>
@@ -300,7 +300,7 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {alerts.map((alert: any) => (
+                  {alerts.map((alert) => (
                     <TableRow key={alert.id}>
                       <TableCell>{alert.alert_type}</TableCell>
                       <TableCell>
@@ -350,7 +350,7 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {trades.map((trade: any) => (
+                  {trades.map((trade) => (
                     <TableRow key={trade.id}>
                       <TableCell>{trade.asset_symbol}</TableCell>
                       <TableCell>{trade.buyer?.email}</TableCell>

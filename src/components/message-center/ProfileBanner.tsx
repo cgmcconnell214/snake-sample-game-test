@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { User } from '@supabase/supabase-js';
 import { 
   Settings, 
   Bell, 
@@ -13,9 +14,19 @@ import {
   Wallet
 } from 'lucide-react';
 
+interface UserProfileInfo {
+  avatar_url?: string;
+  display_name?: string;
+  first_name?: string;
+  username?: string;
+  role?: string;
+  subscription_tier?: string;
+  bio?: string;
+}
+
 interface ProfileBannerProps {
-  user: any;
-  profile: any;
+  user: User | null;
+  profile: UserProfileInfo | null;
   unreadCount: number;
 }
 
