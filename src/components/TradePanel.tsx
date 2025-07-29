@@ -1,3 +1,4 @@
+ codex/apply-eslint-typescript-rules
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,29 @@ export function TradePanel(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { TrendingUp, TrendingDown, DollarSign, Loader2, AlertCircle } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { injectContractTemplate } from "@/lib/contractTemplates"
+
+export function TradePanel() {
+  const [orderType, setOrderType] = useState("limit")
+  const [side, setSide] = useState("buy")
+  const [quantity, setQuantity] = useState("")
+  const [price, setPrice] = useState("")
+  const [selectedAsset, setSelectedAsset] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
+ main
+
   // Mock available assets - in real app, fetch from tokenized_assets table
   const availableAssets = [
     {
@@ -59,6 +83,7 @@ export function TradePanel(): JSX.Element {
 
     setIsLoading(true);
     try {
+      await injectContractTemplate(side === 'buy' ? 'buy' : 'sell');
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
         throw new Error("No session found");
@@ -93,12 +118,41 @@ export function TradePanel(): JSX.Element {
       // Reset form
       setQuantity("");
       setPrice("");
+ codex/apply-eslint-typescript-rules
     } catch (error: any) {
       console.error("Order creation error:", error);
       toast({
         title: "Order Failed",
         description:
           error.message || "Failed to create order. Please try again.",
+
+      
+    } catch (error: unknown) {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+
+ main
+ main
+ main
+      console.error('Order creation error:', error);
+      const err = error as Error;
+      toast({
+        title: "Order Failed",
+ codex/replace-any-with-correct-typescript-types
+        description: err.message || "Failed to create order. Please try again.",
+
+ codex/replace-instances-of-any-with-correct-types
+        description: err.message || "Failed to create order. Please try again.",
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        description: (error as any).message || "Failed to create order. Please try again.",
+ main
+ main
+ main
         variant: "destructive",
       });
     } finally {

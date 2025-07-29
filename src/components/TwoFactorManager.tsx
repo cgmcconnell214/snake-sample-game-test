@@ -17,6 +17,7 @@ import {
   Key,
   AlertTriangle,
   CheckCircle,
+ codex/apply-eslint-typescript-rules
   Copy,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,6 +31,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+  Copy
+} from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { generateSecret, generateOtpAuthURL, verifyToken } from '@/lib/totp';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+ main
 
 const TwoFactorManager: React.FC = () => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -55,9 +65,12 @@ const TwoFactorManager: React.FC = () => {
     return codes;
   };
 
+  const [secret, setSecret] = useState<string>('');
+
   const enable2FA = async () => {
     setLoading(true);
     try {
+ codex/apply-eslint-typescript-rules
       // In a real implementation, you would:
       // 1. Generate a secret key
       // 2. Create QR code URL for authenticator apps
@@ -71,6 +84,13 @@ const TwoFactorManager: React.FC = () => {
       setQrCodeUrl(
         `otpauth://totp/God's%20Realm:${user?.email}?secret=${secret}&issuer=God's%20Realm`,
       );
+
+      const newSecret = generateSecret();
+      const codes = generateBackupCodes();
+
+      setSecret(newSecret);
+      setQrCodeUrl(generateOtpAuthURL(newSecret, user?.email || 'user', "God's Realm"));
+ main
       setBackupCodes(codes);
       setShowSetup(true);
     } catch (error) {
@@ -97,8 +117,16 @@ const TwoFactorManager: React.FC = () => {
 
     setLoading(true);
     try {
-      // In a real implementation, verify the code against the TOTP secret
-      // For demo purposes, we'll update the profile
+      const isValid = await verifyToken(secret, verificationCode);
+      if (!isValid) {
+        toast({
+          title: "Invalid Code",
+          description: "The verification code you entered is incorrect.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from("profiles")
         .update({ two_factor_enabled: true })

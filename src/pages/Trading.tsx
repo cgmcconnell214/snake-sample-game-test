@@ -77,7 +77,7 @@ const marketData = [
   },
 ];
 
-const openOrders = [
+const initialOrders = [
   {
     id: "ORD001",
     symbol: "GOLD-TOKEN",
@@ -110,10 +110,19 @@ const openOrders = [
   },
 ];
 
+ codex/apply-eslint-typescript-rules
 export default function Trading(): JSX.Element {
   const [selectedSymbol, setSelectedSymbol] = useState("GOLD-TOKEN");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
+
+export default function Trading() {
+  const [selectedSymbol, setSelectedSymbol] = useState("GOLD-TOKEN")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filterType, setFilterType] = useState("all")
+  const [orders, setOrders] = useState(initialOrders)
+  const [showFilters, setShowFilters] = useState(true)
+ main
 
   const filteredMarketData = marketData.filter((item) => {
     const matchesSearch =
@@ -126,6 +135,10 @@ export default function Trading(): JSX.Element {
   const selectedAsset = marketData.find(
     (item) => item.symbol === selectedSymbol,
   );
+
+  const handleCancelOrder = (orderId: string) => {
+    setOrders(prev => prev.filter(order => order.id !== orderId))
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -154,33 +167,40 @@ export default function Trading(): JSX.Element {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Markets</CardTitle>
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFilters((prev) => !prev)}
+                aria-label="Toggle Filters"
+              >
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search assets..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 text-sm"
-                />
+            {showFilters && (
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search assets..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8 text-sm"
+                  />
+                </div>
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="w-24">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="commodity">Commodities</SelectItem>
+                    <SelectItem value="real-estate">Real Estate</SelectItem>
+                    <SelectItem value="equity">Equity</SelectItem>
+                    <SelectItem value="derivative">Derivatives</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="w-24">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="commodity">Commodities</SelectItem>
-                  <SelectItem value="real-estate">Real Estate</SelectItem>
-                  <SelectItem value="equity">Equity</SelectItem>
-                  <SelectItem value="derivative">Derivatives</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            )}
           </CardHeader>
           <CardContent className="space-y-2 max-h-[600px] overflow-y-auto">
             {filteredMarketData.map((asset) => (
@@ -263,11 +283,16 @@ export default function Trading(): JSX.Element {
                   <div>Status</div>
                   <div>Action</div>
                 </div>
+ codex/apply-eslint-typescript-rules
                 {openOrders.map((order) => (
                   <div
                     key={order.id}
                     className="grid grid-cols-7 gap-2 text-sm py-2 hover:bg-muted/20 transition-colors rounded"
                   >
+
+                {orders.map((order) => (
+                  <div key={order.id} className="grid grid-cols-7 gap-2 text-sm py-2 hover:bg-muted/20 transition-colors rounded">
+ main
                     <div className="font-mono text-primary">{order.id}</div>
                     <div className="font-medium">{order.symbol}</div>
                     <div
@@ -294,13 +319,17 @@ export default function Trading(): JSX.Element {
                         variant="ghost"
                         size="sm"
                         className="text-xs text-destructive"
+ codex/apply-eslint-typescript-rules
+
+                        onClick={() => handleCancelOrder(order.id)}
+ main
                       >
                         Cancel
                       </Button>
                     </div>
                   </div>
                 ))}
-                {openOrders.length === 0 && (
+                {orders.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <AlertCircle className="h-8 w-8 mx-auto mb-2" />
                     No open orders

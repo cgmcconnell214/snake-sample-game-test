@@ -186,10 +186,15 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
           <div className="mt-4 max-h-[70vh] overflow-auto">
             {selectedAttachment && (
               <div className="flex items-center justify-center">
+ codex/apply-eslint-typescript-rules
                 {selectedAttachment.type?.startsWith("image/") ? (
+
+                {selectedAttachment.type?.startsWith('image/') ? (
+ main
                   <img
                     src={selectedAttachment.url}
                     alt={selectedAttachment.name}
+                    loading="lazy"
                     className="max-w-full max-h-full object-contain rounded"
                   />
                 ) : selectedAttachment.type === "application/pdf" ? (

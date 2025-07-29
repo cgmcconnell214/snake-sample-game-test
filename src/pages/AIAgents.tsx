@@ -1,3 +1,4 @@
+ codex/apply-eslint-typescript-rules
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,20 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Bot, Plus, Settings, Zap, DollarSign, Users, Star } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { injectContractTemplate } from "@/lib/contractTemplates"
+ main
+
 interface AIAgent {
   id: string;
   name: string;
@@ -37,9 +52,16 @@ interface AIAgent {
   created_at: string;
 }
 
+ codex/apply-eslint-typescript-rules
 export default function AIAgents(): JSX.Element {
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+export default function AIAgents() {
+  const [agents, setAgents] = useState<AIAgent[]>([])
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [editingAgent, setEditingAgent] = useState<AIAgent | null>(null)
+ main
   const [newAgent, setNewAgent] = useState({
     name: "",
     description: "",
@@ -144,8 +166,15 @@ export default function AIAgents(): JSX.Element {
       return;
     }
 
+ codex/apply-eslint-typescript-rules
     const agent = agents.find((a) => a.id === agentId);
     if (!agent) return;
+
+    await injectContractTemplate('rent')
+
+    const agent = agents.find(a => a.id === agentId)
+    if (!agent) return
+ main
 
     const totalAmount = tokensToPurchase * agent.price_per_use;
 
@@ -182,6 +211,7 @@ export default function AIAgents(): JSX.Element {
     fetchAgents();
   };
 
+ codex/apply-eslint-typescript-rules
   const filteredAgents = agents.filter((agent) => {
     const matchesSearch =
       agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -190,6 +220,32 @@ export default function AIAgents(): JSX.Element {
       selectedCategory === "all" || agent.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleUpdateAgent = async (updated: Partial<AIAgent>) => {
+    if (!editingAgent) return
+    const { data, error } = await supabase
+      .from('ai_agents')
+      .update(updated)
+      .eq('id', editingAgent.id)
+      .select()
+      .single()
+
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to update agent', variant: 'destructive' })
+      return
+    }
+    setAgents(prev => prev.map(a => (a.id === data.id ? data : a)))
+    setEditingAgent(null)
+    toast({ title: 'Agent Updated' })
+  }
+
+  const filteredAgents = agents.filter(agent => {
+    const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         agent.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || agent.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
+ main
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -286,7 +342,7 @@ export default function AIAgents(): JSX.Element {
                   <DollarSign className="h-4 w-4 mr-2" />
                   Buy 1000 tokens
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => setEditingAgent(agent)}>
                   <Settings className="h-4 w-4" />
                 </Button>
               </div>
@@ -398,6 +454,36 @@ export default function AIAgents(): JSX.Element {
                   variant="outline"
                   onClick={() => setIsCreateModalOpen(false)}
                 >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {editingAgent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Edit {editingAgent.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="edit-price">Price per Use ($)</Label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  step="0.01"
+                  defaultValue={editingAgent.price_per_use}
+                  onChange={(e) => setEditingAgent({ ...editingAgent, price_per_use: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={() => handleUpdateAgent({ price_per_use: editingAgent.price_per_use })} className="flex-1">
+                  Save
+                </Button>
+                <Button variant="outline" onClick={() => setEditingAgent(null)}>
                   Cancel
                 </Button>
               </div>

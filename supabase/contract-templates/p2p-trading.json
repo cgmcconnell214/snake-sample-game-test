@@ -1,0 +1,9 @@
+{
+  "contract_name": "P2P Trading",
+  "contract_type": "p2p",
+  "ledger": "batch",
+  "initial_settings": {
+    "fee": "0.5%",
+    "asset_pair": "XRP/USD"
+  }
+}

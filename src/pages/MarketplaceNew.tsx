@@ -1,3 +1,4 @@
+ codex/apply-eslint-typescript-rules
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,17 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { ShoppingCart, Search, Filter, Star, TrendingUp, Package } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/integrations/supabase/client"
+import { injectContractTemplate } from "@/lib/contractTemplates"
+ main
 
 interface MarketplaceAsset {
   id: string;
@@ -107,6 +119,7 @@ export default function Marketplace(): JSX.Element {
       return;
     }
 
+    await injectContractTemplate('buy')
     toast({
       title: "Purchase Initiated",
       description: `Preparing to buy ${asset.asset_name} at $${asset.current_price.toFixed(2)}`,

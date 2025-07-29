@@ -171,6 +171,7 @@ export default function LearningPortal(): JSX.Element {
     fetchCourses();
   };
 
+ codex/apply-eslint-typescript-rules
   const filteredCourses = courses.filter((course) => {
     const matchesSearch =
       course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -179,6 +180,36 @@ export default function LearningPortal(): JSX.Element {
       selectedCategory === "all" || course.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleDeleteCourse = async (courseId: string) => {
+    const { error } = await supabase
+      .from('educational_courses')
+      .delete()
+      .eq('id', courseId)
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete course',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    toast({
+      title: 'Course Deleted',
+      description: 'The course has been removed.'
+    })
+    setCourses(prev => prev.filter(c => c.id !== courseId))
+  }
+
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         course.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || course.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
+ main
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -264,6 +295,12 @@ export default function LearningPortal(): JSX.Element {
                   {course.price_per_student === 0
                     ? "Enroll Free"
                     : "Enroll Now"}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteCourse(course.id)}
+                >
+                  Delete
                 </Button>
               </div>
             </CardContent>

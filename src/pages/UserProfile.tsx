@@ -66,6 +66,7 @@ interface UserPost {
 const UserProfile: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<UserPost[]>([]);
+  const [activity, setActivity] = useState<{ id: string; action: string; created_at: string }[]>([])
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [newPost, setNewPost] = useState("");
@@ -84,6 +85,7 @@ const UserProfile: React.FC = () => {
     if (user) {
       fetchUserProfile();
       fetchUserPosts();
+      fetchUserActivity();
     }
   }, [user]);
 
@@ -126,6 +128,22 @@ const UserProfile: React.FC = () => {
       console.error("Error fetching posts:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserActivity = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_behavior_log')
+        .select('id, action, created_at')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setActivity(data || []);
+    } catch (error) {
+      console.error('Error fetching activity:', error);
     }
   };
 
@@ -504,6 +522,7 @@ const UserProfile: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="activity" className="space-y-4">
+ codex/apply-eslint-typescript-rules
               <Card>
                 <CardContent className="text-center py-8">
                   <Users className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
@@ -512,6 +531,29 @@ const UserProfile: React.FC = () => {
                   </p>
                 </CardContent>
               </Card>
+
+              {activity.length === 0 ? (
+                <Card>
+                  <CardContent className="text-center py-8">
+                    <Users className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-muted-foreground">No recent activity.</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-2">
+                  {activity.map((act) => (
+                    <Card key={act.id}>
+                      <CardContent className="flex items-center justify-between py-2">
+                        <span>{act.action}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(act.created_at).toLocaleString()}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+ main
             </TabsContent>
           </Tabs>
         </div>

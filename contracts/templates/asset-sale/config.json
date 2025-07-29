@@ -1,0 +1,10 @@
+{
+  "function_name": "asset_sale",
+  "contract_type": "marketplace",
+  "action": "buy",
+  "xrpl_transaction_type": "OfferCreate",
+  "version": "1.0.0",
+  "compliance_rules": {
+    "kyc_required": true
+  }
+}

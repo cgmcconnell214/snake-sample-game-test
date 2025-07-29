@@ -20,11 +20,56 @@ import { Activity, Search, Download, Filter, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AuditDetailModal from "@/components/AuditDetailModal";
 
+ codex/apply-eslint-typescript-rules
 const AuditTrail = (): JSX.Element => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [selectedAuditLog, setSelectedAuditLog] = useState<any>(null);
+
+interface AuditLog {
+  id: number;
+  timestamp: string;
+  action: string;
+  user: string;
+  details: string;
+  type: string;
+  status: string;
+  ipAddress: string;
+}
+
+const AuditTrail = () => {
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+
+ codex/replace-instances-of-any-with-correct-types
+ main
+  interface AuditLog {
+    id: number;
+    timestamp: string;
+    action: string;
+    user: string;
+    details: string;
+    type: string;
+    status: string;
+    ipAddress: string;
+  }
+
+ codex/replace-all-instances-of-any-in-codebase
+
+
+ main
+ main
+ main
+ main
+  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
+ main
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Mock audit trail data

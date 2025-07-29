@@ -1,3 +1,4 @@
+ codex/apply-eslint-typescript-rules
 import React, { useState, useEffect } from "react";
 import {
   Card,
@@ -20,6 +21,51 @@ import ComposeMessage from "./message-center/ComposeMessage";
 import ProfileBanner from "./message-center/ProfileBanner";
 import MessageSearch from "./message-center/MessageSearch";
 
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Mail, 
+  Send, 
+  Inbox, 
+  Archive, 
+  Search
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import MessageList from './message-center/MessageList';
+import MessageDetail from './message-center/MessageDetail';
+import ComposeMessage from './message-center/ComposeMessage';
+import ProfileBanner from './message-center/ProfileBanner';
+import MessageSearch from './message-center/MessageSearch';
+import type { Attachment } from './message-center/AttachmentViewer';
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+ main
+
 interface Message {
   id: string;
   sender_id: string | null;
@@ -27,7 +73,23 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  attachments: Attachment[] | string | null;
+
+ codex/replace-all-instances-of-any-in-codebase
+  attachments: Attachment[] | string | null;
+
+ codex/replace-any-with-correct-typescript-types
+  attachments: Attachment[] | string;
+
+ codex/replace-instances-of-any-with-correct-types
+  attachments: string | Record<string, unknown>[] | null;
+
+  attachments: Attachment[];
+ main
+ main
+ main
+ main
   is_read: boolean;
   is_archived: boolean;
   created_at: string;
