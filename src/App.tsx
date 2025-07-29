@@ -8,42 +8,44 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import Dashboard from "./pages/Dashboard";
-import Tokenize from "./pages/Tokenize";
-import Trading from "./pages/Trading";
-import Portfolio from "./pages/Portfolio";
-import KycCenter from "./pages/KycCenter";
-import Compliance from "./pages/Compliance";
-import AuditTrail from "./pages/AuditTrail";
-import Reports from "./pages/Reports";
-import Settings from "./pages/Settings";
-import UserProfile from "./pages/UserProfile";
+import { lazy, Suspense } from "react";
 import MessageCenter from "./components/MessageCenter";
 import IPTokenization from "./components/IPTokenization";
-import Admin from "./pages/Admin";
-import Blockchain from "./pages/Blockchain";
-import AIAgents from "./pages/AIAgents";
-import SmartContracts from "./pages/SmartContracts";
-import WorkflowAutomation from "./pages/WorkflowAutomation";
-import LearningPortal from "./pages/LearningPortal";
-import Certification from "./pages/Certification";
-import LiveClasses from "./pages/LiveClasses";
-import DivineTrust from "./pages/DivineTrust";
-import KingdomEntry from "./pages/KingdomEntry";
-import SacredLaw from "./pages/SacredLaw";
-import Marketplace from "./pages/Marketplace";
-import LiquidityPools from "./pages/LiquidityPools";
-import EscrowVaults from "./pages/EscrowVaults";
-import NodeManagement from "./pages/NodeManagement";
-import DataSync from "./pages/DataSync";
-import SystemDiagnostics from "./pages/SystemDiagnostics";
-import LegalSafehouse from "./pages/LegalSafehouse";
-import AssetProvenance from "./pages/AssetProvenance";
-import TokenomicsPage from "./pages/TokenomicsPage";
-import DevPlayground from "./pages/DevPlayground";
-import Auth from "./pages/Auth";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Tokenize = lazy(() => import("./pages/Tokenize"));
+const Trading = lazy(() => import("./pages/Trading"));
+const Portfolio = lazy(() => import("./pages/Portfolio"));
+const KycCenter = lazy(() => import("./pages/KycCenter"));
+const Compliance = lazy(() => import("./pages/Compliance"));
+const AuditTrail = lazy(() => import("./pages/AuditTrail"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Settings = lazy(() => import("./pages/Settings"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Blockchain = lazy(() => import("./pages/Blockchain"));
+const AIAgents = lazy(() => import("./pages/AIAgents"));
+const SmartContracts = lazy(() => import("./pages/SmartContracts"));
+const WorkflowAutomation = lazy(() => import("./pages/WorkflowAutomation"));
+const LearningPortal = lazy(() => import("./pages/LearningPortal"));
+const Certification = lazy(() => import("./pages/Certification"));
+const LiveClasses = lazy(() => import("./pages/LiveClasses"));
+const DivineTrust = lazy(() => import("./pages/DivineTrust"));
+const KingdomEntry = lazy(() => import("./pages/KingdomEntry"));
+const SacredLaw = lazy(() => import("./pages/SacredLaw"));
+const Marketplace = lazy(() => import("./pages/Marketplace"));
+const LiquidityPools = lazy(() => import("./pages/LiquidityPools"));
+const EscrowVaults = lazy(() => import("./pages/EscrowVaults"));
+const NodeManagement = lazy(() => import("./pages/NodeManagement"));
+const DataSync = lazy(() => import("./pages/DataSync"));
+const SystemDiagnostics = lazy(() => import("./pages/SystemDiagnostics"));
+const LegalSafehouse = lazy(() => import("./pages/LegalSafehouse"));
+const AssetProvenance = lazy(() => import("./pages/AssetProvenance"));
+const TokenomicsPage = lazy(() => import("./pages/TokenomicsPage"));
+const DevPlayground = lazy(() => import("./pages/DevPlayground"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Index = lazy(() => import("./pages/Index"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +79,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <Suspense fallback={<div className="p-4">Loading...</div>}>
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<Index />} />
@@ -159,6 +162,7 @@ const App = () => (
                 </ErrorBoundary>
               } />
             </Routes>
+            </Suspense>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
