@@ -1,12 +1,42 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Activity, Search, Download, Filter, Eye } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import AuditDetailModal from '@/components/AuditDetailModal';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Activity, Search, Download, Filter, Eye } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import AuditDetailModal from "@/components/AuditDetailModal";
+
+ codex/apply-eslint-typescript-rules
+const AuditTrail = (): JSX.Element => {
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [selectedAuditLog, setSelectedAuditLog] = useState<any>(null);
+
+interface AuditLog {
+  id: number;
+  timestamp: string;
+  action: string;
+  user: string;
+  details: string;
+  type: string;
+  status: string;
+  ipAddress: string;
+}
 
 interface AuditLog {
   id: number;
@@ -23,74 +53,105 @@ const AuditTrail = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+ khfq01-codex/replace-instances-of-any-with-correct-types
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
+
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+
+ codex/replace-instances-of-any-with-correct-types
+ main
+  interface AuditLog {
+    id: number;
+    timestamp: string;
+    action: string;
+    user: string;
+    details: string;
+    type: string;
+    status: string;
+    ipAddress: string;
+  }
+
+ codex/replace-all-instances-of-any-in-codebase
+
+
+ main
+ main
+ main
+ main
+  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
+ main
+ main
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Mock audit trail data
   const auditLogs = [
     {
       id: 1,
-      timestamp: '2024-01-20T10:30:00Z',
-      action: 'Token Creation',
-      user: 'john.doe@example.com',
-      details: 'Created XRPL-GOLD token with 1000 total supply',
-      type: 'tokenization',
-      status: 'success',
-      ipAddress: '192.168.1.100',
+      timestamp: "2024-01-20T10:30:00Z",
+      action: "Token Creation",
+      user: "john.doe@example.com",
+      details: "Created XRPL-GOLD token with 1000 total supply",
+      type: "tokenization",
+      status: "success",
+      ipAddress: "192.168.1.100",
     },
     {
       id: 2,
-      timestamp: '2024-01-20T09:15:00Z',
-      action: 'Trade Execution',
-      user: 'jane.smith@example.com',
-      details: 'Executed trade: 50 XRPL-USD for 2.1 XRPL-GOLD',
-      type: 'trading',
-      status: 'success',
-      ipAddress: '192.168.1.101',
+      timestamp: "2024-01-20T09:15:00Z",
+      action: "Trade Execution",
+      user: "jane.smith@example.com",
+      details: "Executed trade: 50 XRPL-USD for 2.1 XRPL-GOLD",
+      type: "trading",
+      status: "success",
+      ipAddress: "192.168.1.101",
     },
     {
       id: 3,
-      timestamp: '2024-01-20T08:45:00Z',
-      action: 'Login Attempt',
-      user: 'admin@example.com',
-      details: 'Successful login with 2FA',
-      type: 'authentication',
-      status: 'success',
-      ipAddress: '192.168.1.102',
+      timestamp: "2024-01-20T08:45:00Z",
+      action: "Login Attempt",
+      user: "admin@example.com",
+      details: "Successful login with 2FA",
+      type: "authentication",
+      status: "success",
+      ipAddress: "192.168.1.102",
     },
     {
       id: 4,
-      timestamp: '2024-01-19T16:22:00Z',
-      action: 'Failed Login',
-      user: 'unknown@example.com',
-      details: 'Failed login attempt - invalid credentials',
-      type: 'authentication',
-      status: 'failed',
-      ipAddress: '10.0.0.50',
+      timestamp: "2024-01-19T16:22:00Z",
+      action: "Failed Login",
+      user: "unknown@example.com",
+      details: "Failed login attempt - invalid credentials",
+      type: "authentication",
+      status: "failed",
+      ipAddress: "10.0.0.50",
     },
     {
       id: 5,
-      timestamp: '2024-01-19T14:10:00Z',
-      action: 'KYC Verification',
-      user: 'new.user@example.com',
-      details: 'KYC documents submitted for verification',
-      type: 'compliance',
-      status: 'pending',
-      ipAddress: '192.168.1.103',
+      timestamp: "2024-01-19T14:10:00Z",
+      action: "KYC Verification",
+      user: "new.user@example.com",
+      details: "KYC documents submitted for verification",
+      type: "compliance",
+      status: "pending",
+      ipAddress: "192.168.1.103",
     },
     {
       id: 6,
-      timestamp: '2024-01-19T11:30:00Z',
-      action: 'Settings Update',
-      user: 'admin@example.com',
-      details: 'Updated security settings - enabled IP whitelist',
-      type: 'configuration',
-      status: 'success',
-      ipAddress: '192.168.1.102',
+      timestamp: "2024-01-19T11:30:00Z",
+      action: "Settings Update",
+      user: "admin@example.com",
+      details: "Updated security settings - enabled IP whitelist",
+      type: "configuration",
+      status: "success",
+      ipAddress: "192.168.1.102",
     },
   ];
 
-  const handleExport = () => {
+  const handleExport = (): JSX.Element => {
     toast({
       title: "Export Started",
       description: "Audit trail export has been initiated.",
@@ -99,29 +160,40 @@ const AuditTrail = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'success': return 'default';
-      case 'failed': return 'destructive';
-      case 'pending': return 'secondary';
-      default: return 'outline';
+      case "success":
+        return "default";
+      case "failed":
+        return "destructive";
+      case "pending":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'tokenization': return 'bg-primary/10 text-primary border-primary/20';
-      case 'trading': return 'bg-success/10 text-success border-success/20';
-      case 'authentication': return 'bg-accent/10 text-accent border-accent/20';
-      case 'compliance': return 'bg-warning/10 text-warning border-warning/20';
-      case 'configuration': return 'bg-muted/10 text-muted-foreground border-muted/20';
-      default: return 'bg-muted/10 text-muted-foreground border-muted/20';
+      case "tokenization":
+        return "bg-primary/10 text-primary border-primary/20";
+      case "trading":
+        return "bg-success/10 text-success border-success/20";
+      case "authentication":
+        return "bg-accent/10 text-accent border-accent/20";
+      case "compliance":
+        return "bg-warning/10 text-warning border-warning/20";
+      case "configuration":
+        return "bg-muted/10 text-muted-foreground border-muted/20";
+      default:
+        return "bg-muted/10 text-muted-foreground border-muted/20";
     }
   };
 
-  const filteredLogs = auditLogs.filter(log => {
-    const matchesSearch = log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.details.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || log.type === filterType;
+  const filteredLogs = auditLogs.filter((log) => {
+    const matchesSearch =
+      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.details.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterType === "all" || log.type === filterType;
     return matchesSearch && matchesFilter;
   });
 
@@ -189,7 +261,10 @@ const AuditTrail = () => {
         <CardContent>
           <div className="space-y-4">
             {filteredLogs.map((log) => (
-              <div key={log.id} className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50">
+              <div
+                key={log.id}
+                className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50"
+              >
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center space-x-3">
                     <Badge variant="outline" className={getTypeColor(log.type)}>
@@ -204,11 +279,13 @@ const AuditTrail = () => {
                   <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                     <span>User: {log.user}</span>
                     <span>IP: {log.ipAddress}</span>
-                    <span>Time: {new Date(log.timestamp).toLocaleString()}</span>
+                    <span>
+                      Time: {new Date(log.timestamp).toLocaleString()}
+                    </span>
                   </div>
                 </div>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   onClick={() => {
                     setSelectedAuditLog(log);
@@ -233,12 +310,10 @@ const AuditTrail = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{auditLogs.length}</div>
-            <p className="text-xs text-muted-foreground">
-              All time
-            </p>
+            <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Today</CardTitle>
@@ -246,13 +321,15 @@ const AuditTrail = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {auditLogs.filter(log => 
-                new Date(log.timestamp).toDateString() === new Date().toDateString()
-              ).length}
+              {
+                auditLogs.filter(
+                  (log) =>
+                    new Date(log.timestamp).toDateString() ===
+                    new Date().toDateString(),
+                ).length
+              }
             </div>
-            <p className="text-xs text-muted-foreground">
-              Events today
-            </p>
+            <p className="text-xs text-muted-foreground">Events today</p>
           </CardContent>
         </Card>
 
@@ -263,11 +340,9 @@ const AuditTrail = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">
-              {auditLogs.filter(log => log.status === 'failed').length}
+              {auditLogs.filter((log) => log.status === "failed").length}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Require attention
-            </p>
+            <p className="text-xs text-muted-foreground">Require attention</p>
           </CardContent>
         </Card>
 
@@ -278,11 +353,9 @@ const AuditTrail = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Set(auditLogs.map(log => log.user)).size}
+              {new Set(auditLogs.map((log) => log.user)).size}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Active users
-            </p>
+            <p className="text-xs text-muted-foreground">Active users</p>
           </CardContent>
         </Card>
       </div>

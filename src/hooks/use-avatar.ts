@@ -6,7 +6,14 @@ export interface AvatarUploadResult {
   url: string;
 }
 
-export function useAvatar() {
+export interface UseAvatarResult {
+  uploadAvatar: (file: File) => Promise<AvatarUploadResult | null>
+  uploading: boolean
+  progress: number
+  error: string | null
+}
+
+export function useAvatar(): UseAvatarResult {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -57,10 +64,35 @@ export function useAvatar() {
 
       return { url: publicUrl };
     } catch (err: unknown) {
+ khfq01-codex/replace-instances-of-any-with-correct-types
       console.error('Avatar upload error:', err);
       const message = (err as Error).message || 'Failed to upload avatar';
       setError(message);
+
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+ main
+      console.error('Avatar upload error:', err);
+      const error = err as Error;
+      setError(error.message || 'Failed to upload avatar');
+      throw error;
+
+ main
+      console.error('Avatar upload error:', err);
+ codex/replace-instances-of-any-with-correct-types
+      const error = err as Error;
+      setError(error.message || 'Failed to upload avatar');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).message || 'Failed to upload avatar');
+ main
+ main
       throw err;
+ main
     } finally {
       setUploading(false);
     }

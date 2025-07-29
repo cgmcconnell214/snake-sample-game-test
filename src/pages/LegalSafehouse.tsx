@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Lock, FileText, Shield, Scale } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Lock, FileText, Shield, Scale } from "lucide-react";
 
-export default function LegalSafehouse() {
+export default function LegalSafehouse(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Legal Safehouse</h1>
-          <p className="text-muted-foreground">Secure legal documents and exemption notices</p>
+          <p className="text-muted-foreground">
+            Secure legal documents and exemption notices
+          </p>
         </div>
         <Button>
           <FileText className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function LegalSafehouse() {
             <p className="text-sm text-muted-foreground mb-4">
               Create and manage sworn statements and affidavits
             </p>
-            <Button variant="outline" className="w-full">Create Affidavit</Button>
+            <Button variant="outline" className="w-full">
+              Create Affidavit
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function LegalSafehouse() {
             <p className="text-sm text-muted-foreground mb-4">
               Formal declarations of rights and status
             </p>
-            <Button variant="outline" className="w-full">Make Declaration</Button>
+            <Button variant="outline" className="w-full">
+              Make Declaration
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function LegalSafehouse() {
             <p className="text-sm text-muted-foreground mb-4">
               Religious and ecclesiastical exemption documents
             </p>
-            <Button variant="outline" className="w-full">File Exemption</Button>
+            <Button variant="outline" className="w-full">
+              File Exemption
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

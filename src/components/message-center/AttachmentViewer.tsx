@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { 
-  FileText, 
-  Download, 
-  Eye, 
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  FileText,
+  Download,
+  Eye,
   X,
   Image as ImageIcon,
   File,
   Video,
-  Music
-} from 'lucide-react';
+  Music,
+} from "lucide-react";
 
 interface Attachment {
   name: string;
@@ -24,40 +29,52 @@ interface AttachmentViewerProps {
 }
 
 const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
-  const [selectedAttachment, setSelectedAttachment] = useState<Attachment | null>(null);
+  const [selectedAttachment, setSelectedAttachment] =
+    useState<Attachment | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const getFileIcon = (fileName: string, type?: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
+    const extension = fileName.split(".").pop()?.toLowerCase();
     const fileType = type?.toLowerCase();
-    
-    if (fileType?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension || '')) {
+
+    if (
+      fileType?.startsWith("image/") ||
+      ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension || "")
+    ) {
       return <ImageIcon className="h-4 w-4 text-blue-500" />;
     }
-    if (fileType?.startsWith('video/') || ['mp4', 'avi', 'mov', 'mkv'].includes(extension || '')) {
+    if (
+      fileType?.startsWith("video/") ||
+      ["mp4", "avi", "mov", "mkv"].includes(extension || "")
+    ) {
       return <Video className="h-4 w-4 text-purple-500" />;
     }
-    if (fileType?.startsWith('audio/') || ['mp3', 'wav', 'ogg', 'flac'].includes(extension || '')) {
+    if (
+      fileType?.startsWith("audio/") ||
+      ["mp3", "wav", "ogg", "flac"].includes(extension || "")
+    ) {
       return <Music className="h-4 w-4 text-green-500" />;
     }
     return <FileText className="h-4 w-4 text-gray-500" />;
   };
 
   const formatFileSize = (bytes?: number) => {
-    if (!bytes) return '';
-    const sizes = ['B', 'KB', 'MB', 'GB'];
+    if (!bytes) return "";
+    const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
   };
 
   const isPreviewable = (fileName: string, type?: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
+    const extension = fileName.split(".").pop()?.toLowerCase();
     const fileType = type?.toLowerCase();
-    
-    return fileType?.startsWith('image/') || 
-           ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '') ||
-           fileType === 'application/pdf' ||
-           fileType?.startsWith('text/');
+
+    return (
+      fileType?.startsWith("image/") ||
+      ["jpg", "jpeg", "png", "gif", "webp"].includes(extension || "") ||
+      fileType === "application/pdf" ||
+      fileType?.startsWith("text/")
+    );
   };
 
   const openPreview = (attachment: Attachment) => {
@@ -70,10 +87,10 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
       try {
         // For files that need to be fetched first (like from Supabase Storage)
         fetch(attachment.url)
-          .then(response => response.blob())
-          .then(blob => {
+          .then((response) => response.blob())
+          .then((blob) => {
             const blobUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = blobUrl;
             a.download = attachment.name;
             document.body.appendChild(a);
@@ -81,11 +98,11 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
             document.body.removeChild(a);
             URL.revokeObjectURL(blobUrl); // Clean up
           })
-          .catch(error => {
-            console.error('Download error:', error);
+          .catch((error) => {
+            console.error("Download error:", error);
           });
       } catch (error) {
-        console.error('Error downloading attachment:', error);
+        console.error("Error downloading attachment:", error);
       }
     }
   };
@@ -103,14 +120,17 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
         </h4>
         <div className="space-y-2">
           {attachments.map((attachment, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border hover:bg-muted/70 transition-colors"
             >
               <div className="flex items-center space-x-3 flex-1 min-w-0">
                 {getFileIcon(attachment.name, attachment.type)}
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm truncate" title={attachment.name}>
+                  <div
+                    className="font-medium text-sm truncate"
+                    title={attachment.name}
+                  >
                     {attachment.name}
                   </div>
                   {attachment.size && (
@@ -120,20 +140,21 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-1">
-                {isPreviewable(attachment.name, attachment.type) && attachment.url && (
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => openPreview(attachment)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                )}
-                
-                <Button 
-                  size="sm" 
+                {isPreviewable(attachment.name, attachment.type) &&
+                  attachment.url && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => openPreview(attachment)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
+
+                <Button
+                  size="sm"
                   variant="ghost"
                   onClick={() => downloadAttachment(attachment)}
                   disabled={!attachment.url}
@@ -152,8 +173,8 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
               <span className="truncate">{selectedAttachment?.name}</span>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => setPreviewOpen(false)}
               >
@@ -161,17 +182,22 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
               </Button>
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="mt-4 max-h-[70vh] overflow-auto">
             {selectedAttachment && (
               <div className="flex items-center justify-center">
+ codex/apply-eslint-typescript-rules
+                {selectedAttachment.type?.startsWith("image/") ? (
+
                 {selectedAttachment.type?.startsWith('image/') ? (
-                  <img 
-                    src={selectedAttachment.url} 
+ main
+                  <img
+                    src={selectedAttachment.url}
                     alt={selectedAttachment.name}
+                    loading="lazy"
                     className="max-w-full max-h-full object-contain rounded"
                   />
-                ) : selectedAttachment.type === 'application/pdf' ? (
+                ) : selectedAttachment.type === "application/pdf" ? (
                   <embed
                     src={selectedAttachment.url}
                     type="application/pdf"
@@ -179,7 +205,7 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
                     height="600px"
                     className="rounded"
                   />
-                ) : selectedAttachment.type?.startsWith('text/') ? (
+                ) : selectedAttachment.type?.startsWith("text/") ? (
                   <iframe
                     src={selectedAttachment.url}
                     width="100%"
@@ -193,7 +219,9 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
                     <p className="text-muted-foreground mb-4">
                       Preview not available for this file type
                     </p>
-                    <Button onClick={() => downloadAttachment(selectedAttachment)}>
+                    <Button
+                      onClick={() => downloadAttachment(selectedAttachment)}
+                    >
                       <Download className="h-4 w-4 mr-2" />
                       Download File
                     </Button>

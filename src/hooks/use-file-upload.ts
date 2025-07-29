@@ -8,7 +8,18 @@ export interface FileUploadResult {
   type: string;
 }
 
-export function useFileUpload() {
+export interface UseFileUploadResult {
+  uploadFiles: (
+    files: File[],
+    bucketName?: string,
+    folderPath?: string
+  ) => Promise<FileUploadResult[]>
+  uploading: boolean
+  progress: number
+  error: string | null
+}
+
+export function useFileUpload(): UseFileUploadResult {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -84,10 +95,35 @@ export function useFileUpload() {
 
       return results;
     } catch (err: unknown) {
+ khfq01-codex/replace-instances-of-any-with-correct-types
       console.error('Upload error:', err);
       const message = (err as Error).message || 'Failed to upload files';
       setError(message);
+
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+ main
+      console.error('Upload error:', err);
+      const error = err as Error;
+      setError(error.message || 'Failed to upload files');
+      throw error;
+
+ main
+      console.error('Upload error:', err);
+ codex/replace-instances-of-any-with-correct-types
+      const error = err as Error;
+      setError(error.message || 'Failed to upload files');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).message || 'Failed to upload files');
+ main
+ main
       throw err;
+ main
     } finally {
       setUploading(false);
     }

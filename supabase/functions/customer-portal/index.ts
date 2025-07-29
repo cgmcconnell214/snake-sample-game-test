@@ -19,6 +19,7 @@ serve(async (req) => {
   }
 
   try {
+    const startTime = Date.now();
     logStep("Function started");
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -48,7 +49,9 @@ serve(async (req) => {
     
     if (customers.data.length === 0) {
       logStep("No Stripe customer found - providing setup option");
-      return new Response(JSON.stringify({ 
+      const execTime = Date.now() - startTime;
+      logStep(`Execution time: ${execTime}ms`);
+      return new Response(JSON.stringify({
         error: "No active subscription found",
         needsSetup: true,
         message: "You don't have an active subscription. Please subscribe to a plan to access the customer portal."
@@ -68,13 +71,17 @@ serve(async (req) => {
     });
     logStep("Customer portal session created", { sessionId: portalSession.id, url: portalSession.url });
 
+    const execTime = Date.now() - startTime;
+    logStep(`Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({ url: portalSession.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const execTime = Date.now() - startTime;
     logStep("ERROR in customer-portal", { message: errorMessage });
+    logStep(`Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

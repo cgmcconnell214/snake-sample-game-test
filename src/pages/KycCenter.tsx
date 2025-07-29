@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { UserCheck, Upload, FileText, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import {
+  UserCheck,
+  Upload,
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const KycCenter = () => {
+const KycCenter = (): JSX.Element => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,11 +41,11 @@ const KycCenter = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'approved':
+      case "approved":
         return <CheckCircle className="h-5 w-5 text-emerald-500" />;
-      case 'rejected':
+      case "rejected":
         return <XCircle className="h-5 w-5 text-red-500" />;
-      case 'pending':
+      case "pending":
         return <Clock className="h-5 w-5 text-yellow-500" />;
       default:
         return <UserCheck className="h-5 w-5 text-muted-foreground" />;
@@ -41,10 +54,14 @@ const KycCenter = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'default';
-      case 'rejected': return 'destructive';
-      case 'pending': return 'secondary';
-      default: return 'outline';
+      case "approved":
+        return "default";
+      case "rejected":
+        return "destructive";
+      case "pending":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
@@ -52,7 +69,10 @@ const KycCenter = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">KYC Verification Center</h1>
-        <Badge variant={getStatusColor(profile?.kyc_status)} className="text-sm">
+        <Badge
+          variant={getStatusColor(profile?.kyc_status)}
+          className="text-sm"
+        >
           {getStatusIcon(profile?.kyc_status)}
           <span className="ml-2">{profile?.kyc_status?.toUpperCase()}</span>
         </Badge>
@@ -83,29 +103,36 @@ const KycCenter = () => {
               </Badge>
             </div>
 
-            {profile?.kyc_status === 'pending' && (
+            {profile?.kyc_status === "pending" && (
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <h4 className="font-medium text-yellow-800">Under Review</h4>
                 <p className="text-sm text-yellow-700 mt-1">
-                  Your documents are being reviewed. This process typically takes 1-3 business days.
+                  Your documents are being reviewed. This process typically
+                  takes 1-3 business days.
                 </p>
               </div>
             )}
 
-            {profile?.kyc_status === 'approved' && (
+            {profile?.kyc_status === "approved" && (
               <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                <h4 className="font-medium text-emerald-800">Verification Complete</h4>
+                <h4 className="font-medium text-emerald-800">
+                  Verification Complete
+                </h4>
                 <p className="text-sm text-emerald-700 mt-1">
-                  Your identity has been successfully verified. You now have full access to all platform features.
+                  Your identity has been successfully verified. You now have
+                  full access to all platform features.
                 </p>
               </div>
             )}
 
-            {profile?.kyc_status === 'rejected' && (
+            {profile?.kyc_status === "rejected" && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <h4 className="font-medium text-red-800">Verification Failed</h4>
+                <h4 className="font-medium text-red-800">
+                  Verification Failed
+                </h4>
                 <p className="text-sm text-red-700 mt-1">
-                  Your verification was unsuccessful. Please resubmit your documents with the required information.
+                  Your verification was unsuccessful. Please resubmit your
+                  documents with the required information.
                 </p>
               </div>
             )}
@@ -114,7 +141,7 @@ const KycCenter = () => {
       </Card>
 
       {/* Document Upload */}
-      {profile?.kyc_status !== 'approved' && (
+      {profile?.kyc_status !== "approved" && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
@@ -167,7 +194,8 @@ const KycCenter = () => {
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                 <FileText className="h-8 w-8 mx-auto text-muted-foreground" />
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Utility bill, bank statement, or lease agreement (less than 3 months old)
+                  Utility bill, bank statement, or lease agreement (less than 3
+                  months old)
                 </p>
                 <Input
                   id="proof-address"
@@ -178,12 +206,12 @@ const KycCenter = () => {
               </div>
             </div>
 
-            <Button 
-              onClick={handleDocumentUpload} 
+            <Button
+              onClick={handleDocumentUpload}
               disabled={isSubmitting}
               className="w-full"
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Documents'}
+              {isSubmitting ? "Submitting..." : "Submit Documents"}
             </Button>
           </CardContent>
         </Card>

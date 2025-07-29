@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Code, GitFork, Rocket, TestTube } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Code, GitFork, Rocket, TestTube } from "lucide-react";
 
-export default function DevPlayground() {
+export default function DevPlayground(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dev Playground</h1>
-          <p className="text-muted-foreground">Development environment for trusted builders</p>
+          <p className="text-muted-foreground">
+            Development environment for trusted builders
+          </p>
         </div>
         <Button>
           <Code className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function DevPlayground() {
             <p className="text-sm text-muted-foreground mb-4">
               Safe testing environment for smart contracts
             </p>
-            <Button variant="outline" className="w-full">Start Testing</Button>
+            <Button variant="outline" className="w-full">
+              Start Testing
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function DevPlayground() {
             <p className="text-sm text-muted-foreground mb-4">
               Fork existing contracts and customize for your needs
             </p>
-            <Button variant="outline" className="w-full">Browse Forks</Button>
+            <Button variant="outline" className="w-full">
+              Browse Forks
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function DevPlayground() {
             <p className="text-sm text-muted-foreground mb-4">
               Deploy tested contracts to production network
             </p>
-            <Button variant="outline" className="w-full">Deploy</Button>
+            <Button variant="outline" className="w-full">
+              Deploy
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }
