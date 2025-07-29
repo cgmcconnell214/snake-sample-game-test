@@ -1,0 +1,10 @@
+{
+  "function_name": "peer_escrow",
+  "contract_type": "escrow",
+  "action": "learn",
+  "xrpl_transaction_type": "Payment",
+  "version": "1.0.0",
+  "compliance_rules": {
+    "kyc_required": true
+  }
+}
