@@ -17,7 +17,7 @@ interface SacredPrinciple {
   category: string
   principle_order: number
   is_prerequisite: boolean
-  prerequisite_for: any
+  prerequisite_for: string[] // TODO: Verify correct type
   created_by: string
   created_at: string
 }

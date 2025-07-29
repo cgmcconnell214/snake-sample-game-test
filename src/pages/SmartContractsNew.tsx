@@ -9,13 +9,14 @@ import { Badge } from "@/components/ui/badge"
 import { FileCheck, Plus, Code, Handshake, Settings, Download } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import type { Json } from "@/integrations/supabase/types"
 
 interface SmartContractFunction {
   id: string
   function_name: string
   contract_type: string
-  parameters: any
-  compliance_rules: any
+  parameters: Json
+  compliance_rules: Json | null
   deployment_status: string
   version: string
   created_at: string

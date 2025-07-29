@@ -36,7 +36,7 @@ interface UserProfile {
   website: string;
   location: string;
   phone: string;
-  social_links: any;
+  social_links: Record<string, string>; // TODO: Verify correct shape
   is_public: boolean;
   follower_count: number;
   following_count: number;

@@ -129,11 +129,12 @@ export default function Tokenize() {
       setTotalSupply("");
       setDescription("");
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error; // TODO: Verify correct error type
       console.error('Tokenization error:', error);
       toast({
         title: "Tokenization Failed",
-        description: error.message || "Failed to tokenize asset. Please try again.",
+        description: err.message || "Failed to tokenize asset. Please try again.",
         variant: "destructive",
       });
     } finally {

@@ -6,7 +6,11 @@ import { Badge } from "@/components/ui/badge"
 import { ShoppingCart, Search, Filter, Star, TrendingUp, Package } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+ codex/fix-typescript-linting-errors
+import type { Json } from "@/integrations/supabase/types"
+
 import { useNavigate } from "react-router-dom"
+ main
 
 interface MarketplaceAsset {
   id: string
@@ -21,7 +25,7 @@ interface MarketplaceAsset {
   volume_24h: number
   is_active: boolean
   asset_type: string
-  metadata: any
+  metadata: Json
 }
 
 export default function Marketplace() {

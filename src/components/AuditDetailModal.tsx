@@ -17,6 +17,7 @@ import {
   Zap
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuditLog {
@@ -33,11 +34,11 @@ interface AuditLog {
 interface AuditDetail {
   id: string;
   event_id: string;
-  request_data: any;
-  response_data: any;
-  error_details: any;
+  request_data: Json | null;
+  response_data: Json | null;
+  error_details: Json | null;
   execution_time_ms: number;
-  security_context: any;
+  security_context: Json | null;
   compliance_flags: string[];
   created_at: string;
 }
