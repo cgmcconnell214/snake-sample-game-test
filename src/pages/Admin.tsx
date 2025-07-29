@@ -82,6 +82,9 @@ interface TradeRecord {
 const Admin = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
+ codex/replace-all-instances-of-any-in-codebase
+  interface AdminUser {
+
  codex/replace-any-with-correct-typescript-types
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
@@ -89,6 +92,7 @@ const Admin = () => {
 
  codex/replace-instances-of-any-with-correct-types
   interface UserRecord {
+ main
     id: string;
     first_name: string;
     last_name: string;
@@ -107,7 +111,11 @@ const Admin = () => {
     created_at: string;
   }
 
+ codex/replace-all-instances-of-any-in-codebase
+  interface TradeExecution {
+
   interface TradeRecord {
+ main
     id: string;
     asset_symbol: string;
     buyer?: { email: string } | null;
@@ -118,6 +126,11 @@ const Admin = () => {
     execution_time: string;
   }
 
+ codex/replace-all-instances-of-any-in-codebase
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
+  const [trades, setTrades] = useState<TradeExecution[]>([]);
+
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
   const [trades, setTrades] = useState<TradeRecord[]>([]);
@@ -125,6 +138,7 @@ const Admin = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [alerts, setAlerts] = useState<ComplianceAlertItem[]>([]);
   const [trades, setTrades] = useState<TradeExecution[]>([]);
+ main
  main
  main
   const [stats, setStats] = useState({
@@ -347,6 +361,9 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+ codex/replace-all-instances-of-any-in-codebase
+                  {users.map((user: AdminUser) => (
+
  codex/replace-any-with-correct-typescript-types
                   {users.map((user: AdminUser) => (
 
@@ -354,6 +371,7 @@ const Admin = () => {
                   {users.map((user: UserRecord) => (
 
                   {users.map((user) => (
+ main
  main
  main
                     <TableRow key={user.id}>
@@ -410,6 +428,9 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+ codex/replace-all-instances-of-any-in-codebase
+                  {alerts.map((alert: ComplianceAlert) => (
+
  codex/replace-any-with-correct-typescript-types
                   {alerts.map((alert: ComplianceAlert) => (
 
@@ -417,6 +438,7 @@ const Admin = () => {
                   {alerts.map((alert: ComplianceAlert) => (
 
                   {alerts.map((alert) => (
+ main
  main
  main
                     <TableRow key={alert.id}>
@@ -468,6 +490,9 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+ codex/replace-all-instances-of-any-in-codebase
+                  {trades.map((trade: TradeExecution) => (
+
  codex/replace-any-with-correct-typescript-types
                   {trades.map((trade: TradeRecord) => (
 
@@ -475,6 +500,7 @@ const Admin = () => {
                   {trades.map((trade: TradeRecord) => (
 
                   {trades.map((trade) => (
+ main
  main
  main
                     <TableRow key={trade.id}>

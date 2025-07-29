@@ -28,6 +28,13 @@ interface Attachment {
   size?: number;
 }
 
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+
 interface Message {
   id: string;
   sender_id: string | null;
@@ -35,6 +42,9 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ codex/replace-all-instances-of-any-in-codebase
+  attachments: Attachment[] | string | null;
+
  codex/replace-any-with-correct-typescript-types
   attachments: Attachment[] | string;
 
@@ -42,6 +52,7 @@ interface Message {
   attachments: string | Record<string, unknown>[] | null;
 
   attachments: Attachment[];
+ main
  main
  main
   is_read: boolean;

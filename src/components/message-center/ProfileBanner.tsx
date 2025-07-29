@@ -15,7 +15,13 @@ import {
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
 
+import { User } from '@supabase/supabase-js';
+
 interface ProfileBannerProps {
+ codex/replace-all-instances-of-any-in-codebase
+  user: User | null;
+  profile: Record<string, unknown> | null;
+
  codex/replace-any-with-correct-typescript-types
   user: {
     email?: string;
@@ -32,6 +38,7 @@ interface ProfileBannerProps {
 
   user: User | null;
   profile: Record<string, unknown> | null;
+ main
  main
   unreadCount: number;
 }

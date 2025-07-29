@@ -84,8 +84,11 @@ export function useFileUpload() {
 
       return results;
     } catch (err: unknown) {
+ codex/replace-all-instances-of-any-in-codebase
+
  codex/replace-any-with-correct-typescript-types
       // TODO: Verify correct error type
+ main
       console.error('Upload error:', err);
       const error = err as Error;
       setError(error.message || 'Failed to upload files');

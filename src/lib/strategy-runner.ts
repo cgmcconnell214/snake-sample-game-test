@@ -40,6 +40,9 @@ export interface StrategyConfig {
   is_active: boolean;
 }
 
+ codex/replace-all-instances-of-any-in-codebase
+export interface StrategyMetrics {
+
  codex/replace-any-with-correct-typescript-types
 export interface StrategyMetrics {
 
@@ -47,6 +50,7 @@ export interface StrategyMetrics {
 export interface PerformanceMetrics {
 
 export interface StrategyPerformanceMetrics {
+ main
  main
  main
   strategy_id: string;
@@ -187,6 +191,9 @@ export class StrategyRunner {
    * Get strategy performance metrics
    * Future implementation will track actual trading performance
    */
+ codex/replace-all-instances-of-any-in-codebase
+  getPerformanceMetrics(): StrategyMetrics {
+
  codex/replace-any-with-correct-typescript-types
   getPerformanceMetrics(): StrategyMetrics {
 
@@ -194,6 +201,7 @@ export class StrategyRunner {
   getPerformanceMetrics(): PerformanceMetrics {
 
   getPerformanceMetrics(): StrategyPerformanceMetrics {
+ main
  main
  main
     return {

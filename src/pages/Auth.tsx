@@ -45,6 +45,9 @@ const Auth = () => {
         setError(error.message);
       }
     } catch (err: unknown) {
+ codex/replace-all-instances-of-any-in-codebase
+      setError(err.message || 'An error occurred during sign in');
+
  codex/replace-any-with-correct-typescript-types
       // TODO: Verify correct error type
       const error = err as Error;
@@ -56,6 +59,7 @@ const Auth = () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred during sign in');
+ main
  main
  main
     } finally {
@@ -90,6 +94,9 @@ const Auth = () => {
         setError(error.message);
       }
     } catch (err: unknown) {
+ codex/replace-all-instances-of-any-in-codebase
+      setError(err.message || 'An error occurred during sign up');
+
  codex/replace-any-with-correct-typescript-types
       // TODO: Verify correct error type
       const error = err as Error;
@@ -101,6 +108,7 @@ const Auth = () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred during sign up');
+ main
  main
  main
     } finally {
@@ -124,6 +132,9 @@ const Auth = () => {
         setError(error.message);
       }
     } catch (err: unknown) {
+ codex/replace-all-instances-of-any-in-codebase
+      setError(err.message || 'An error occurred with Discord authentication');
+
  codex/replace-any-with-correct-typescript-types
       // TODO: Verify correct error type
       const error = err as Error;
@@ -135,6 +146,7 @@ const Auth = () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred with Discord authentication');
+ main
  main
  main
     } finally {

@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface Profile {
+ codex/replace-all-instances-of-any-in-codebase
+
   user_id: string;
   role?: string;
   subscription_tier?: string;
@@ -16,12 +18,18 @@ interface Profile {
   display_name?: string;
   username?: string;
   bio?: string;
+ main
   [key: string]: unknown;
 }
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+ codex/replace-all-instances-of-any-in-codebase
+  profile: Profile | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
+
  codex/replace-any-with-correct-typescript-types
   profile: Profile | null;
   loading: boolean;
@@ -34,14 +42,19 @@ interface AuthContextType {
   signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<{ error: unknown }>;
 
  main
+ main
   signUp: (
     email: string,
     password: string,
     metadata?: Record<string, unknown>
+ codex/replace-all-instances-of-any-in-codebase
+  ) => Promise<{ error: unknown }>;
+
  codex/replace-any-with-correct-typescript-types
   ) => Promise<{ error: Error | null }>;
 
   ) => Promise<{ error: unknown }>;
+ main
  main
  main
   signOut: () => Promise<void>;
@@ -62,10 +75,14 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+ codex/replace-all-instances-of-any-in-codebase
+  const [profile, setProfile] = useState<Profile | null>(null);
+
  codex/replace-any-with-correct-typescript-types
   const [profile, setProfile] = useState<Profile | null>(null);
 
   const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
+ main
  main
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -233,14 +250,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return { error: null };
     } catch (error: unknown) {
+ codex/replace-all-instances-of-any-in-codebase
+
  codex/replace-any-with-correct-typescript-types
       // TODO: Verify correct error type
 
+ main
  main
       console.error('Sign in error:', error);
       return { error: error as Error };
     }
   };
+
+ codex/replace-all-instances-of-any-in-codebase
 
  codex/replace-any-with-correct-typescript-types
 
@@ -248,13 +270,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
 
  main
+ main
   const signUp = async (
     email: string,
     password: string,
     metadata?: Record<string, unknown>
   ) => {
+ codex/replace-all-instances-of-any-in-codebase
+
  codex/replace-any-with-correct-typescript-types
 
+ main
  main
  main
     try {
@@ -280,9 +306,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return { error: null };
     } catch (error: unknown) {
+ codex/replace-all-instances-of-any-in-codebase
+
  codex/replace-any-with-correct-typescript-types
       // TODO: Verify correct error type
 
+ main
  main
       console.error('Sign up error:', error);
       return { error: error as Error };
