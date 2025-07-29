@@ -73,11 +73,25 @@ export function TradePanel() {
       setQuantity("");
       setPrice("");
       
-    } catch (error: any) {
+    } catch (error: unknown) {
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+
+ main
       console.error('Order creation error:', error);
+      const err = error as Error;
       toast({
         title: "Order Failed",
-        description: error.message || "Failed to create order. Please try again.",
+ codex/replace-any-with-correct-typescript-types
+        description: err.message || "Failed to create order. Please try again.",
+
+ codex/replace-instances-of-any-with-correct-types
+        description: err.message || "Failed to create order. Please try again.",
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        description: (error as any).message || "Failed to create order. Please try again.",
+ main
+ main
         variant: "destructive",
       });
     } finally {

@@ -56,10 +56,24 @@ export function useAvatar() {
       await refreshProfile();
 
       return { url: publicUrl };
-    } catch (err: any) {
+    } catch (err: unknown) {
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
       console.error('Avatar upload error:', err);
-      setError(err.message || 'Failed to upload avatar');
+      const error = err as Error;
+      setError(error.message || 'Failed to upload avatar');
+      throw error;
+
+      console.error('Avatar upload error:', err);
+ codex/replace-instances-of-any-with-correct-types
+      const error = err as Error;
+      setError(error.message || 'Failed to upload avatar');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).message || 'Failed to upload avatar');
+ main
       throw err;
+ main
     } finally {
       setUploading(false);
     }
