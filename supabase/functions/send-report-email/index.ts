@@ -19,6 +19,7 @@ serve(async (req) => {
   }
 
   try {
+    const startTime = Date.now();
     console.log("[SEND-REPORT-EMAIL] Function started");
 
     // Initialize Supabase client with service role key for admin operations
@@ -66,10 +67,12 @@ serve(async (req) => {
     // For now, we'll simulate sending the email
     console.log("[SEND-REPORT-EMAIL] Email sent successfully (simulated)");
 
+    const execTime = Date.now() - startTime;
+    console.log(`[SEND-REPORT-EMAIL] Execution time: ${execTime}ms`);
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Report sent to message center successfully" 
+      JSON.stringify({
+        success: true,
+        message: "Report sent to message center successfully"
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -77,7 +80,9 @@ serve(async (req) => {
       }
     );
   } catch (error) {
+    const execTime = Date.now() - startTime;
     console.error("[SEND-REPORT-EMAIL] Error:", error);
+    console.log(`[SEND-REPORT-EMAIL] Execution time: ${execTime}ms`);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

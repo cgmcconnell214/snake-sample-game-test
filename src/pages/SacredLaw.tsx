@@ -1,164 +1,182 @@
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Feather, Compass, Scale, Book, Plus, Edit, Crown } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Feather, Compass, Scale, Book, Plus, Edit, Crown } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SacredPrinciple {
-  id: string
-  title: string
-  content: string
-  category: string
-  principle_order: number
-  is_prerequisite: boolean
-  prerequisite_for: any
-  created_by: string
-  created_at: string
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  principle_order: number;
+  is_prerequisite: boolean;
+  prerequisite_for: any;
+  created_by: string;
+  created_at: string;
 }
 
-export default function SacredLaw() {
-  const [principles, setPrinciples] = useState<SacredPrinciple[]>([])
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
+export default function SacredLaw(): JSX.Element {
+  const [principles, setPrinciples] = useState<SacredPrinciple[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [newPrinciple, setNewPrinciple] = useState({
     title: "",
     content: "",
     category: "divine_constants",
     principle_order: 1,
     is_prerequisite: false,
-    prerequisite_for: []
-  })
-  const { toast } = useToast()
+    prerequisite_for: [],
+  });
+  const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
     fetchPrinciples()
     checkAdminStatus()
   }, [fetchPrinciples, checkAdminStatus])
 
+    fetchPrinciples();
+    checkAdminStatus();
+  }, []);
+ main
+
   const checkAdminStatus = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
 
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('user_id', user.id)
-      .single()
+      .from("profiles")
+      .select("role")
+      .eq("user_id", user.id)
+      .single();
 
-    setIsAdmin(profile?.role === 'admin')
-  }
+    setIsAdmin(profile?.role === "admin");
+  };
 
   const fetchPrinciples = async () => {
     const { data, error } = await supabase
-      .from('sacred_law_principles')
-      .select('*')
-      .order('principle_order', { ascending: true })
+      .from("sacred_law_principles")
+      .select("*")
+      .order("principle_order", { ascending: true });
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to fetch sacred principles",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    setPrinciples(data || [])
-  }
+    setPrinciples(data || []);
+  };
 
   const handleCreatePrinciple = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user || !isAdmin) {
       toast({
         title: "Access Denied",
         description: "Only admins can create sacred principles",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     const { data, error } = await supabase
-      .from('sacred_law_principles')
+      .from("sacred_law_principles")
       .insert({
         ...newPrinciple,
-        created_by: user.id
+        created_by: user.id,
       })
       .select()
-      .single()
+      .single();
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to create sacred principle",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     toast({
       title: "Success",
       description: "Sacred principle created successfully",
-    })
+    });
 
-    setPrinciples([...principles, data])
-    setIsCreateModalOpen(false)
+    setPrinciples([...principles, data]);
+    setIsCreateModalOpen(false);
     setNewPrinciple({
       title: "",
       content: "",
       category: "divine_constants",
       principle_order: 1,
       is_prerequisite: false,
-      prerequisite_for: []
-    })
-  }
+      prerequisite_for: [],
+    });
+  };
 
   const handleLearnPrinciple = (principleId: string) => {
-    const principle = principles.find(p => p.id === principleId)
+    const principle = principles.find((p) => p.id === principleId);
     if (principle) {
       toast({
         title: "Studying Principle",
         description: `Learning: ${principle.title}`,
-      })
+      });
     }
-  }
+  };
 
-  const handleViewPillars = () => {
+  const handleViewPillars = (): JSX.Element => {
     toast({
       title: "72 Pillars",
       description: "Opening the foundational pillars of sacred governance",
-    })
-  }
+    });
+  };
 
-  const handleStudyFramework = () => {
+  const handleStudyFramework = (): JSX.Element => {
     toast({
       title: "Mirror Law Framework",
       description: "Studying the law of correspondence: As above, so below",
-    })
-  }
+    });
+  };
 
-  const handleStudyProtocol = () => {
+  const handleStudyProtocol = (): JSX.Element => {
     if (isAdmin) {
-      setIsCreateModalOpen(true)
+      setIsCreateModalOpen(true);
     } else {
       toast({
         title: "Study Protocol",
         description: "Beginning comprehensive study of sacred protocols",
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Sacred Law Protocols</h1>
-          <p className="text-muted-foreground">Divine principles and universal constants</p>
+          <p className="text-muted-foreground">
+            Divine principles and universal constants
+          </p>
         </div>
         <Button onClick={handleStudyProtocol}>
           <Book className="h-4 w-4 mr-2" />
@@ -167,7 +185,10 @@ export default function SacredLaw() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleLearnPrinciple("gods-constant")}>
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => handleLearnPrinciple("gods-constant")}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Compass className="h-5 w-5" />
@@ -178,11 +199,16 @@ export default function SacredLaw() {
             <p className="text-sm text-muted-foreground mb-4">
               The unchanging divine principle guiding all commerce
             </p>
-            <Button variant="outline" className="w-full">Learn Principle</Button>
+            <Button variant="outline" className="w-full">
+              Learn Principle
+            </Button>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={handleViewPillars}>
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={handleViewPillars}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Scale className="h-5 w-5" />
@@ -193,11 +219,16 @@ export default function SacredLaw() {
             <p className="text-sm text-muted-foreground mb-4">
               The foundational pillars of sacred governance
             </p>
-            <Button variant="outline" className="w-full">View Pillars</Button>
+            <Button variant="outline" className="w-full">
+              View Pillars
+            </Button>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={handleStudyFramework}>
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={handleStudyFramework}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Feather className="h-5 w-5" />
@@ -208,7 +239,9 @@ export default function SacredLaw() {
             <p className="text-sm text-muted-foreground mb-4">
               As above, so below - the law of correspondence
             </p>
-            <Button variant="outline" className="w-full">Study Framework</Button>
+            <Button variant="outline" className="w-full">
+              Study Framework
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -218,16 +251,23 @@ export default function SacredLaw() {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Sacred Principles</h2>
           {isAdmin && (
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(true)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Principle
             </Button>
           )}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {principles.map((principle) => (
-            <Card key={principle.id} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleLearnPrinciple(principle.id)}>
+            <Card
+              key={principle.id}
+              className="cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => handleLearnPrinciple(principle.id)}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
@@ -246,10 +286,12 @@ export default function SacredLaw() {
                 <div className="text-xs bg-muted/50 p-2 rounded max-h-20 overflow-y-auto">
                   {principle.content.substring(0, 150)}...
                 </div>
-                
+
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Order:</span>
-                  <span className="font-medium">{principle.principle_order}</span>
+                  <span className="font-medium">
+                    {principle.principle_order}
+                  </span>
                 </div>
 
                 <div className="flex gap-2">
@@ -280,19 +322,28 @@ export default function SacredLaw() {
                 <Input
                   id="title"
                   value={newPrinciple.title}
-                  onChange={(e) => setNewPrinciple({ ...newPrinciple, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewPrinciple({ ...newPrinciple, title: e.target.value })
+                  }
                   placeholder="e.g., The Law of Divine Commerce"
                 />
               </div>
 
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select value={newPrinciple.category} onValueChange={(value) => setNewPrinciple({ ...newPrinciple, category: value })}>
+                <Select
+                  value={newPrinciple.category}
+                  onValueChange={(value) =>
+                    setNewPrinciple({ ...newPrinciple, category: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="divine_constants">Divine Constants</SelectItem>
+                    <SelectItem value="divine_constants">
+                      Divine Constants
+                    </SelectItem>
                     <SelectItem value="pillars">72 Pillars</SelectItem>
                     <SelectItem value="mirror_laws">Mirror Laws</SelectItem>
                     <SelectItem value="commerce">Sacred Commerce</SelectItem>
@@ -307,7 +358,12 @@ export default function SacredLaw() {
                   id="principle_order"
                   type="number"
                   value={newPrinciple.principle_order}
-                  onChange={(e) => setNewPrinciple({ ...newPrinciple, principle_order: parseInt(e.target.value) || 1 })}
+                  onChange={(e) =>
+                    setNewPrinciple({
+                      ...newPrinciple,
+                      principle_order: parseInt(e.target.value) || 1,
+                    })
+                  }
                 />
               </div>
 
@@ -316,7 +372,12 @@ export default function SacredLaw() {
                 <Textarea
                   id="content"
                   value={newPrinciple.content}
-                  onChange={(e) => setNewPrinciple({ ...newPrinciple, content: e.target.value })}
+                  onChange={(e) =>
+                    setNewPrinciple({
+                      ...newPrinciple,
+                      content: e.target.value,
+                    })
+                  }
                   placeholder="Enter the sacred principle content..."
                   className="min-h-[200px]"
                 />
@@ -327,7 +388,10 @@ export default function SacredLaw() {
                   <Crown className="h-4 w-4 mr-2" />
                   Create Principle
                 </Button>
-                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateModalOpen(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -336,5 +400,5 @@ export default function SacredLaw() {
         </div>
       )}
     </div>
-  )
+  );
 }

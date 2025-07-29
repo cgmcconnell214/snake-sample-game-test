@@ -1,6 +1,6 @@
-import LandingPage from '@/components/LandingPage';
+import LandingPage from "@/components/LandingPage";
 
-const Index = () => {
+const Index = (): JSX.Element => {
   return <LandingPage />;
 };
 

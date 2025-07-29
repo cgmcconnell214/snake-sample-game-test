@@ -28,6 +28,7 @@ serve(async (req) => {
   );
 
   try {
+    const startTime = Date.now();
     const signature = req.headers.get("stripe-signature");
     if (!signature) {
       return new Response("No signature", { status: 400 });
@@ -74,13 +75,17 @@ serve(async (req) => {
         console.log(`Unhandled event type: ${event.type}`);
     }
 
+    const execTime = Date.now() - startTime;
+    console.log(`[STRIPE-WEBHOOK] Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
 
   } catch (error: any) {
+    const execTime = Date.now() - startTime;
     console.error("Webhook error:", error);
+    console.log(`[STRIPE-WEBHOOK] Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,

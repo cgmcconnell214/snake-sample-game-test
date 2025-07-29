@@ -1,151 +1,171 @@
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { FileCheck, Plus, Code, Handshake, Settings, Download } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  FileCheck,
+  Plus,
+  Code,
+  Handshake,
+  Settings,
+  Download,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SmartContractFunction {
-  id: string
-  function_name: string
-  contract_type: string
-  parameters: any
-  compliance_rules: any
-  deployment_status: string
-  version: string
-  created_at: string
+  id: string;
+  function_name: string;
+  contract_type: string;
+  parameters: any;
+  compliance_rules: any;
+  deployment_status: string;
+  version: string;
+  created_at: string;
 }
 
-export default function SmartContracts() {
-  const [contracts, setContracts] = useState<SmartContractFunction[]>([])
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+export default function SmartContracts(): JSX.Element {
+  const [contracts, setContracts] = useState<SmartContractFunction[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newContract, setNewContract] = useState({
     function_name: "",
     contract_type: "trade",
     parameters: {},
     compliance_rules: {},
-    version: "1.0.0"
-  })
-  const [selectedTemplate, setSelectedTemplate] = useState("")
-  const { toast } = useToast()
+    version: "1.0.0",
+  });
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
     fetchContracts()
   }, [fetchContracts])
 
+    fetchContracts();
+  }, []);
+ main
+
   const fetchContracts = async () => {
     const { data, error } = await supabase
-      .from('smart_contract_functions')
-      .select('*')
-      .order('created_at', { ascending: false })
+      .from("smart_contract_functions")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to fetch smart contracts",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    setContracts(data || [])
-  }
+    setContracts(data || []);
+  };
 
   const handleCreateContract = async () => {
     const { data, error } = await supabase
-      .from('smart_contract_functions')
+      .from("smart_contract_functions")
       .insert(newContract)
       .select()
-      .single()
+      .single();
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to create smart contract",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     toast({
       title: "Success",
       description: "Smart contract created successfully",
-    })
+    });
 
-    setContracts([data, ...contracts])
-    setIsCreateModalOpen(false)
+    setContracts([data, ...contracts]);
+    setIsCreateModalOpen(false);
     setNewContract({
       function_name: "",
       contract_type: "trade",
       parameters: {},
       compliance_rules: {},
-      version: "1.0.0"
-    })
-  }
+      version: "1.0.0",
+    });
+  };
 
   const handleDeployContract = async (contractId: string) => {
     const { error } = await supabase
-      .from('smart_contract_functions')
-      .update({ deployment_status: 'deployed' })
-      .eq('id', contractId)
+      .from("smart_contract_functions")
+      .update({ deployment_status: "deployed" })
+      .eq("id", contractId);
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to deploy contract",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     toast({
       title: "Success",
       description: "Contract deployed successfully",
-    })
+    });
 
-    fetchContracts()
-  }
+    fetchContracts();
+  };
 
   const handleContractSettings = async (contractId: string) => {
-    const contract = contracts.find(c => c.id === contractId)
-    if (!contract) return
+    const contract = contracts.find((c) => c.id === contractId);
+    if (!contract) return;
 
-    if (contract.deployment_status === 'deployed') {
+    if (contract.deployment_status === "deployed") {
       // Show options to disable or customize deployed contract
-      const action = confirm(`Contract "${contract.function_name}" is deployed. Would you like to disable it?`)
+      const action = confirm(
+        `Contract "${contract.function_name}" is deployed. Would you like to disable it?`,
+      );
       if (action) {
         const { error } = await supabase
-          .from('smart_contract_functions')
-          .update({ deployment_status: 'disabled' })
-          .eq('id', contractId)
+          .from("smart_contract_functions")
+          .update({ deployment_status: "disabled" })
+          .eq("id", contractId);
 
         if (error) {
           toast({
             title: "Error",
             description: "Failed to disable contract",
-            variant: "destructive"
-          })
-          return
+            variant: "destructive",
+          });
+          return;
         }
 
         toast({
           title: "Contract Disabled",
           description: "Smart contract has been disabled successfully",
-        })
-        fetchContracts()
+        });
+        fetchContracts();
       }
     } else {
       toast({
         title: "Contract Settings",
         description: "Contract must be deployed before accessing settings",
-      })
+      });
     }
-  }
+  };
 
   const contractTemplates = [
     {
@@ -158,8 +178,8 @@ export default function SmartContracts() {
         seller_address: "string",
         asset_id: "string",
         amount: "number",
-        escrow_period: "number"
-      }
+        escrow_period: "number",
+      },
     },
     {
       id: "lending_agreement",
@@ -172,8 +192,8 @@ export default function SmartContracts() {
         collateral_asset: "string",
         loan_amount: "number",
         interest_rate: "number",
-        duration: "number"
-      }
+        duration: "number",
+      },
     },
     {
       id: "token_distribution",
@@ -184,17 +204,19 @@ export default function SmartContracts() {
         token_id: "string",
         distribution_rules: "object",
         vesting_schedule: "object",
-        total_supply: "number"
-      }
-    }
-  ]
+        total_supply: "number",
+      },
+    },
+  ];
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Smart Contract Templates</h1>
-          <p className="text-muted-foreground">Pre-built and custom contract templates</p>
+          <p className="text-muted-foreground">
+            Pre-built and custom contract templates
+          </p>
         </div>
         <Button onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -219,18 +241,18 @@ export default function SmartContracts() {
                   {template.description}
                 </p>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="flex-1"
                     onClick={() => {
-                      setSelectedTemplate(template.id)
+                      setSelectedTemplate(template.id);
                       setNewContract({
                         ...newContract,
                         function_name: template.name,
                         contract_type: template.type,
-                        parameters: template.parameters
-                      })
-                      setIsCreateModalOpen(true)
+                        parameters: template.parameters,
+                      });
+                      setIsCreateModalOpen(true);
                     }}
                   >
                     Use Template
@@ -255,9 +277,17 @@ export default function SmartContracts() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <Code className="h-5 w-5" />
-                    <CardTitle className="text-lg">{contract.function_name}</CardTitle>
+                    <CardTitle className="text-lg">
+                      {contract.function_name}
+                    </CardTitle>
                   </div>
-                  <Badge variant={contract.deployment_status === 'deployed' ? 'default' : 'secondary'}>
+                  <Badge
+                    variant={
+                      contract.deployment_status === "deployed"
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
                     {contract.deployment_status}
                   </Badge>
                 </div>
@@ -266,7 +296,9 @@ export default function SmartContracts() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Type:</span>
-                    <span className="font-medium">{contract.contract_type}</span>
+                    <span className="font-medium">
+                      {contract.contract_type}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Version:</span>
@@ -274,20 +306,22 @@ export default function SmartContracts() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Parameters:</span>
-                    <span className="font-medium">{Object.keys(contract.parameters).length}</span>
+                    <span className="font-medium">
+                      {Object.keys(contract.parameters).length}
+                    </span>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
-                  {contract.deployment_status !== 'deployed' && (
-                    <Button 
-                      className="flex-1" 
+                  {contract.deployment_status !== "deployed" && (
+                    <Button
+                      className="flex-1"
                       onClick={() => handleDeployContract(contract.id)}
                     >
                       Deploy
                     </Button>
                   )}
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={() => handleContractSettings(contract.id)}
                   >
@@ -303,7 +337,9 @@ export default function SmartContracts() {
       {contracts.length === 0 && (
         <div className="text-center py-12">
           <Code className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No contracts created yet. Start with a template!</p>
+          <p className="text-muted-foreground">
+            No contracts created yet. Start with a template!
+          </p>
         </div>
       )}
 
@@ -319,22 +355,36 @@ export default function SmartContracts() {
                 <Input
                   id="function_name"
                   value={newContract.function_name}
-                  onChange={(e) => setNewContract({ ...newContract, function_name: e.target.value })}
+                  onChange={(e) =>
+                    setNewContract({
+                      ...newContract,
+                      function_name: e.target.value,
+                    })
+                  }
                   placeholder="e.g., Multi-Sig Escrow Contract"
                 />
               </div>
 
               <div>
                 <Label htmlFor="contract_type">Contract Type</Label>
-                <Select value={newContract.contract_type} onValueChange={(value) => setNewContract({ ...newContract, contract_type: value })}>
+                <Select
+                  value={newContract.contract_type}
+                  onValueChange={(value) =>
+                    setNewContract({ ...newContract, contract_type: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="trade">Trade Contract</SelectItem>
                     <SelectItem value="lending">Lending Agreement</SelectItem>
-                    <SelectItem value="distribution">Token Distribution</SelectItem>
-                    <SelectItem value="governance">Governance Contract</SelectItem>
+                    <SelectItem value="distribution">
+                      Token Distribution
+                    </SelectItem>
+                    <SelectItem value="governance">
+                      Governance Contract
+                    </SelectItem>
                     <SelectItem value="custom">Custom Contract</SelectItem>
                   </SelectContent>
                 </Select>
@@ -345,7 +395,9 @@ export default function SmartContracts() {
                 <Input
                   id="version"
                   value={newContract.version}
-                  onChange={(e) => setNewContract({ ...newContract, version: e.target.value })}
+                  onChange={(e) =>
+                    setNewContract({ ...newContract, version: e.target.value })
+                  }
                   placeholder="1.0.0"
                 />
               </div>
@@ -355,7 +407,10 @@ export default function SmartContracts() {
                   <Code className="h-4 w-4 mr-2" />
                   Create Contract
                 </Button>
-                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateModalOpen(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -364,5 +419,5 @@ export default function SmartContracts() {
         </div>
       )}
     </div>
-  )
+  );
 }

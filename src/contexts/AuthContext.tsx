@@ -3,13 +3,83 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+interface Profile {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  id?: string;
+  user_id?: string;
+  avatar_url?: string;
+  display_name?: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  bio?: string;
+  role?: string;
+  subscription_tier?: string;
+
+ codex/replace-all-instances-of-any-in-codebase
+
+  user_id: string;
+  role?: string;
+  subscription_tier?: string;
+  compliance_risk?: string;
+  kyc_status?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  avatar_url?: string;
+  display_name?: string;
+  username?: string;
+  bio?: string;
+ main
+  [key: string]: unknown;
+ main
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  profile: any | null;
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  profile: Profile | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+
+ codex/replace-all-instances-of-any-in-codebase
+  profile: Profile | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
+
+ codex/replace-any-with-correct-typescript-types
+  profile: Profile | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+
+  profile: Record<string, unknown> | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
+ codex/replace-instances-of-any-with-correct-types
+  signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<{ error: unknown }>;
+
+ main
+ main
+ main
+  signUp: (
+    email: string,
+    password: string,
+    metadata?: Record<string, unknown>
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  ) => Promise<{ error: Error | null }>;
+
+ codex/replace-all-instances-of-any-in-codebase
+  ) => Promise<{ error: unknown }>;
+
+ codex/replace-any-with-correct-typescript-types
+  ) => Promise<{ error: Error | null }>;
+
+  ) => Promise<{ error: unknown }>;
+ main
+ main
+ main
+ main
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   checkSubscription: () => Promise<void>;
@@ -28,7 +98,19 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+ codex/replace-all-instances-of-any-in-codebase
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+ codex/replace-any-with-correct-typescript-types
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
+ main
+ main
+ main
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -194,13 +276,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       return { error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+
+ main
+ main
+ main
       console.error('Sign in error:', error);
-      return { error };
+      return { error: error as Error };
     }
   };
 
-  const signUp = async (email: string, password: string, metadata?: any) => {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+
+ codex/replace-instances-of-any-with-correct-types
+  const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
+
+ main
+ main
+ main
+  const signUp = async (
+    email: string,
+    password: string,
+    metadata?: Record<string, unknown>
+  ) => {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+
+ main
+ main
+ main
+ main
     try {
       cleanupAuthState();
       
@@ -223,29 +341,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       return { error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+
+ main
+ main
+ main
       console.error('Sign up error:', error);
-      return { error };
+      return { error: error as Error };
     }
   };
 
   const signOut = async () => {
     try {
       cleanupAuthState();
-      
+
+      toast({
+        title: "Signed out",
+        description: "Redirecting to the homepage...",
+      });
+
+      // Navigate away from protected routes immediately
+      window.location.replace('/');
+
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {
         // Ignore errors
       }
-      
-      toast({
-        title: "Signed out",
-        description: "You have been successfully signed out.",
-      });
-      
-      // Force page reload for clean state
-      window.location.href = '/auth';
     } catch (error) {
       console.error('Sign out error:', error);
     }

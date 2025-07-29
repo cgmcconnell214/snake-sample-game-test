@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, AlertTriangle, CheckCircle, Clock, FileText, Eye } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Shield,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  FileText,
+  Eye,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-const Compliance = () => {
+const Compliance = (): JSX.Element => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -16,36 +29,36 @@ const Compliance = () => {
   const complianceAlerts = [
     {
       id: 1,
-      type: 'Transaction Monitoring',
-      severity: 'medium',
-      message: 'Large transaction detected for review',
-      status: 'pending',
-      createdAt: '2024-01-20',
+      type: "Transaction Monitoring",
+      severity: "medium",
+      message: "Large transaction detected for review",
+      status: "pending",
+      createdAt: "2024-01-20",
     },
     {
       id: 2,
-      type: 'AML Screening',
-      severity: 'low',
-      message: 'Routine AML check completed',
-      status: 'resolved',
-      createdAt: '2024-01-19',
+      type: "AML Screening",
+      severity: "low",
+      message: "Routine AML check completed",
+      status: "resolved",
+      createdAt: "2024-01-19",
     },
   ];
 
   const complianceReports = [
     {
       id: 1,
-      name: 'Monthly AML Report',
-      type: 'AML',
-      date: '2024-01-01',
-      status: 'completed',
+      name: "Monthly AML Report",
+      type: "AML",
+      date: "2024-01-01",
+      status: "completed",
     },
     {
       id: 2,
-      name: 'Transaction Monitoring Report',
-      type: 'Transaction',
-      date: '2024-01-15',
-      status: 'pending',
+      name: "Transaction Monitoring Report",
+      type: "Transaction",
+      date: "2024-01-15",
+      status: "pending",
     },
   ];
 
@@ -62,18 +75,22 @@ const Compliance = () => {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'high': return 'destructive';
-      case 'medium': return 'default';
-      case 'low': return 'secondary';
-      default: return 'outline';
+      case "high":
+        return "destructive";
+      case "medium":
+        return "default";
+      case "low":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'resolved':
+      case "resolved":
         return <CheckCircle className="h-4 w-4 text-success" />;
-      case 'pending':
+      case "pending":
         return <Clock className="h-4 w-4 text-warning" />;
       default:
         return <AlertTriangle className="h-4 w-4 text-destructive" />;
@@ -104,7 +121,7 @@ const Compliance = () => {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Alerts</CardTitle>
@@ -112,11 +129,12 @@ const Compliance = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {complianceAlerts.filter(alert => alert.status === 'pending').length}
+              {
+                complianceAlerts.filter((alert) => alert.status === "pending")
+                  .length
+              }
             </div>
-            <p className="text-xs text-muted-foreground">
-              Requiring attention
-            </p>
+            <p className="text-xs text-muted-foreground">Requiring attention</p>
           </CardContent>
         </Card>
 
@@ -140,9 +158,7 @@ const Compliance = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">2d</div>
-            <p className="text-xs text-muted-foreground">
-              Days ago
-            </p>
+            <p className="text-xs text-muted-foreground">Days ago</p>
           </CardContent>
         </Card>
       </div>
@@ -165,20 +181,27 @@ const Compliance = () => {
             <CardContent>
               <div className="space-y-4">
                 {complianceAlerts.map((alert) => (
-                  <div key={alert.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={alert.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex items-center space-x-4">
                       {getStatusIcon(alert.status)}
                       <div>
                         <p className="font-medium">{alert.type}</p>
-                        <p className="text-sm text-muted-foreground">{alert.message}</p>
-                        <p className="text-xs text-muted-foreground">Created: {alert.createdAt}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {alert.message}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Created: {alert.createdAt}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge variant={getSeverityColor(alert.severity)}>
                         {alert.severity.toUpperCase()}
                       </Badge>
-                      {alert.status === 'pending' && (
+                      {alert.status === "pending" && (
                         <Button size="sm" variant="outline">
                           Review
                         </Button>
@@ -202,23 +225,36 @@ const Compliance = () => {
               </div>
               <Button onClick={handleGenerateReport} disabled={isLoading}>
                 <FileText className="w-4 h-4 mr-2" />
-                {isLoading ? 'Generating...' : 'Generate Report'}
+                {isLoading ? "Generating..." : "Generate Report"}
               </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {complianceReports.map((report) => (
-                  <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={report.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div>
                       <p className="font-medium">{report.name}</p>
-                      <p className="text-sm text-muted-foreground">Type: {report.type}</p>
-                      <p className="text-xs text-muted-foreground">Date: {report.date}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Type: {report.type}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Date: {report.date}
+                      </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Badge variant={report.status === 'completed' ? 'default' : 'secondary'}>
+                      <Badge
+                        variant={
+                          report.status === "completed"
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
                         {report.status.toUpperCase()}
                       </Badge>
-                      {report.status === 'completed' && (
+                      {report.status === "completed" && (
                         <Button size="sm" variant="outline">
                           <Eye className="w-4 h-4 mr-1" />
                           View
@@ -245,23 +281,31 @@ const Compliance = () => {
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-medium">Anti-Money Laundering (AML)</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Comprehensive AML procedures for transaction monitoring and reporting.
+                    Comprehensive AML procedures for transaction monitoring and
+                    reporting.
                   </p>
-                  <Badge variant="default" className="mt-2">Active</Badge>
+                  <Badge variant="default" className="mt-2">
+                    Active
+                  </Badge>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-medium">Know Your Customer (KYC)</h4>
                   <p className="text-sm text-muted-foreground mt-1">
                     Identity verification and customer due diligence procedures.
                   </p>
-                  <Badge variant="default" className="mt-2">Active</Badge>
+                  <Badge variant="default" className="mt-2">
+                    Active
+                  </Badge>
                 </div>
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-medium">Transaction Monitoring</h4>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Real-time monitoring of transactions for suspicious activity.
+                    Real-time monitoring of transactions for suspicious
+                    activity.
                   </p>
-                  <Badge variant="default" className="mt-2">Active</Badge>
+                  <Badge variant="default" className="mt-2">
+                    Active
+                  </Badge>
                 </div>
               </div>
             </CardContent>

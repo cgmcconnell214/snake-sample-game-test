@@ -1,0 +1,7 @@
+{
+  "asset_id": "string",
+  "price": "number",
+  "quantity": "number",
+  "buyer": "string",
+  "seller": "string"
+}

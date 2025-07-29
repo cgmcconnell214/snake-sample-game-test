@@ -25,6 +25,7 @@ serve(async (req) => {
   );
 
   try {
+    const startTime = Date.now();
     logStep("Function started");
 
     const { tier } = await req.json();
@@ -83,13 +84,17 @@ serve(async (req) => {
 
     logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
+    const execTime = Date.now() - startTime;
+    logStep(`Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const execTime = Date.now() - startTime;
     logStep("ERROR in create-checkout", { message: errorMessage });
+    logStep(`Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

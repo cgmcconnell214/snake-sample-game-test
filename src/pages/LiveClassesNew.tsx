@@ -1,34 +1,48 @@
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, Video, Plus, Clock, DollarSign, VideoIcon } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Calendar,
+  Users,
+  Video,
+  Plus,
+  Clock,
+  DollarSign,
+  VideoIcon,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LiveClass {
-  id: string
-  title: string
-  description: string
-  host_id: string
-  class_type: string
-  price_per_attendee: number
-  max_attendees?: number
-  scheduled_at: string
-  duration_minutes: number
-  zoom_meeting_id?: string
-  zoom_password?: string
-  is_monetized: boolean
-  created_at: string
+  id: string;
+  title: string;
+  description: string;
+  host_id: string;
+  class_type: string;
+  price_per_attendee: number;
+  max_attendees?: number;
+  scheduled_at: string;
+  duration_minutes: number;
+  zoom_meeting_id?: string;
+  zoom_password?: string;
+  is_monetized: boolean;
+  created_at: string;
 }
 
-export default function LiveClasses() {
-  const [classes, setClasses] = useState<LiveClass[]>([])
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+export default function LiveClasses(): JSX.Element {
+  const [classes, setClasses] = useState<LiveClass[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newClass, setNewClass] = useState({
     title: "",
     description: "",
@@ -37,74 +51,81 @@ export default function LiveClasses() {
     max_attendees: 50,
     scheduled_at: "",
     duration_minutes: 60,
-    is_monetized: false
-  })
-  const { toast } = useToast()
+    is_monetized: false,
+  });
+  const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
     fetchClasses()
   }, [fetchClasses])
 
+    fetchClasses();
+  }, []);
+ main
+
   const fetchClasses = async () => {
     const { data, error } = await supabase
-      .from('live_classes')
-      .select('*')
-      .order('scheduled_at', { ascending: true })
+      .from("live_classes")
+      .select("*")
+      .order("scheduled_at", { ascending: true });
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to fetch live classes",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    setClasses(data || [])
-  }
+    setClasses(data || []);
+  };
 
   const handleCreateClass = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to create a live class",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     // Generate mock Zoom meeting details
-    const zoomMeetingId = `${Math.floor(Math.random() * 1000000000)}`
-    const zoomPassword = Math.random().toString(36).substring(2, 8)
+    const zoomMeetingId = `${Math.floor(Math.random() * 1000000000)}`;
+    const zoomPassword = Math.random().toString(36).substring(2, 8);
 
     const { data, error } = await supabase
-      .from('live_classes')
+      .from("live_classes")
       .insert({
         ...newClass,
         host_id: user.id,
         zoom_meeting_id: zoomMeetingId,
-        zoom_password: zoomPassword
+        zoom_password: zoomPassword,
       })
       .select()
-      .single()
+      .single();
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to create live class",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     toast({
       title: "Success",
       description: "Live class created successfully with Zoom integration",
-    })
+    });
 
-    setClasses([...classes, data])
-    setIsCreateModalOpen(false)
+    setClasses([...classes, data]);
+    setIsCreateModalOpen(false);
     setNewClass({
       title: "",
       description: "",
@@ -113,79 +134,81 @@ export default function LiveClasses() {
       max_attendees: 50,
       scheduled_at: "",
       duration_minutes: 60,
-      is_monetized: false
-    })
-  }
+      is_monetized: false,
+    });
+  };
 
   const handleJoinClass = async (classId: string) => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to join a class",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    const classItem = classes.find(c => c.id === classId)
-    if (!classItem) return
+    const classItem = classes.find((c) => c.id === classId);
+    if (!classItem) return;
 
     // Register for class
-    const { error } = await supabase
-      .from('class_attendees')
-      .insert({
-        class_id: classId,
-        attendee_id: user.id,
-        payment_amount: classItem.price_per_attendee
-      })
+    const { error } = await supabase.from("class_attendees").insert({
+      class_id: classId,
+      attendee_id: user.id,
+      payment_amount: classItem.price_per_attendee,
+    });
 
     if (error) {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Failed to register for class",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     toast({
       title: "Registered Successfully",
       description: `You're registered for ${classItem.title}. Meeting details will be sent to you.`,
-    })
-  }
+    });
+  };
 
-  const handleScheduleSession = () => {
-    setIsCreateModalOpen(true)
-  }
+  const handleScheduleSession = (): JSX.Element => {
+    setIsCreateModalOpen(true);
+  };
 
-  const handleViewCalendar = () => {
+  const handleViewCalendar = (): JSX.Element => {
     toast({
       title: "Calendar Integration",
       description: "Opening calendar view with all upcoming classes",
-    })
-  }
+    });
+  };
 
-  const handleRSVPEvents = () => {
+  const handleRSVPEvents = (): JSX.Element => {
     toast({
       title: "RSVP to Events",
       description: "View and RSVP to upcoming educational events",
-    })
-  }
+    });
+  };
 
-  const handleViewArchive = () => {
+  const handleViewArchive = (): JSX.Element => {
     toast({
       title: "Replay Archive",
       description: "Access recordings of past live classes",
-    })
-  }
+    });
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Live Classes & Calls</h1>
-          <p className="text-muted-foreground">Interactive learning and community sessions</p>
+          <p className="text-muted-foreground">
+            Interactive learning and community sessions
+          </p>
         </div>
         <Button onClick={handleScheduleSession}>
           <Plus className="h-4 w-4 mr-2" />
@@ -194,7 +217,10 @@ export default function LiveClasses() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={handleViewCalendar}>
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={handleViewCalendar}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
@@ -205,11 +231,16 @@ export default function LiveClasses() {
             <p className="text-sm text-muted-foreground mb-4">
               View upcoming classes and schedule new sessions
             </p>
-            <Button variant="outline" className="w-full">View Schedule</Button>
+            <Button variant="outline" className="w-full">
+              View Schedule
+            </Button>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={handleRSVPEvents}>
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={handleRSVPEvents}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -220,11 +251,16 @@ export default function LiveClasses() {
             <p className="text-sm text-muted-foreground mb-4">
               Register for upcoming educational events and workshops
             </p>
-            <Button variant="outline" className="w-full">Browse Events</Button>
+            <Button variant="outline" className="w-full">
+              Browse Events
+            </Button>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={handleViewArchive}>
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={handleViewArchive}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Video className="h-5 w-5" />
@@ -235,7 +271,9 @@ export default function LiveClasses() {
             <p className="text-sm text-muted-foreground mb-4">
               Access recordings of past sessions and workshops
             </p>
-            <Button variant="outline" className="w-full">View Archive</Button>
+            <Button variant="outline" className="w-full">
+              View Archive
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -252,44 +290,60 @@ export default function LiveClasses() {
                     <VideoIcon className="h-5 w-5" />
                     <CardTitle className="text-lg">{classItem.title}</CardTitle>
                   </div>
-                  <Badge variant={classItem.is_monetized ? 'default' : 'secondary'}>
-                    {classItem.is_monetized ? `$${classItem.price_per_attendee}` : 'Free'}
+                  <Badge
+                    variant={classItem.is_monetized ? "default" : "secondary"}
+                  >
+                    {classItem.is_monetized
+                      ? `$${classItem.price_per_attendee}`
+                      : "Free"}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{classItem.description}</p>
-                
+                <p className="text-sm text-muted-foreground">
+                  {classItem.description}
+                </p>
+
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Scheduled:</span>
                     <span className="font-medium">
-                      {new Date(classItem.scheduled_at).toLocaleDateString()} at{' '}
+                      {new Date(classItem.scheduled_at).toLocaleDateString()} at{" "}
                       {new Date(classItem.scheduled_at).toLocaleTimeString()}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Duration:</span>
-                    <span className="font-medium">{classItem.duration_minutes} minutes</span>
+                    <span className="font-medium">
+                      {classItem.duration_minutes} minutes
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Max Attendees:</span>
-                    <span className="font-medium">{classItem.max_attendees || 'Unlimited'}</span>
+                    <span className="text-muted-foreground">
+                      Max Attendees:
+                    </span>
+                    <span className="font-medium">
+                      {classItem.max_attendees || "Unlimited"}
+                    </span>
                   </div>
                   {classItem.zoom_meeting_id && (
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Meeting ID:</span>
-                      <span className="font-medium font-mono">{classItem.zoom_meeting_id}</span>
+                      <span className="font-medium font-mono">
+                        {classItem.zoom_meeting_id}
+                      </span>
                     </div>
                   )}
                 </div>
 
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   onClick={() => handleJoinClass(classItem.id)}
                 >
                   <Users className="h-4 w-4 mr-2" />
-                  {classItem.is_monetized ? `Register ($${classItem.price_per_attendee})` : 'Join Free'}
+                  {classItem.is_monetized
+                    ? `Register ($${classItem.price_per_attendee})`
+                    : "Join Free"}
                 </Button>
               </CardContent>
             </Card>
@@ -300,7 +354,9 @@ export default function LiveClasses() {
       {classes.length === 0 && (
         <div className="text-center py-12">
           <VideoIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No upcoming classes. Schedule the first one!</p>
+          <p className="text-muted-foreground">
+            No upcoming classes. Schedule the first one!
+          </p>
         </div>
       )}
 
@@ -316,7 +372,9 @@ export default function LiveClasses() {
                 <Input
                   id="title"
                   value={newClass.title}
-                  onChange={(e) => setNewClass({ ...newClass, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, title: e.target.value })
+                  }
                   placeholder="e.g., Advanced Tokenization Workshop"
                 />
               </div>
@@ -326,7 +384,9 @@ export default function LiveClasses() {
                 <Textarea
                   id="description"
                   value={newClass.description}
-                  onChange={(e) => setNewClass({ ...newClass, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, description: e.target.value })
+                  }
                   placeholder="Describe what will be covered in this class..."
                 />
               </div>
@@ -334,7 +394,12 @@ export default function LiveClasses() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="class_type">Class Type</Label>
-                  <Select value={newClass.class_type} onValueChange={(value) => setNewClass({ ...newClass, class_type: value })}>
+                  <Select
+                    value={newClass.class_type}
+                    onValueChange={(value) =>
+                      setNewClass({ ...newClass, class_type: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -353,7 +418,12 @@ export default function LiveClasses() {
                     id="duration"
                     type="number"
                     value={newClass.duration_minutes}
-                    onChange={(e) => setNewClass({ ...newClass, duration_minutes: parseInt(e.target.value) || 60 })}
+                    onChange={(e) =>
+                      setNewClass({
+                        ...newClass,
+                        duration_minutes: parseInt(e.target.value) || 60,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -365,7 +435,9 @@ export default function LiveClasses() {
                     id="scheduled_at"
                     type="datetime-local"
                     value={newClass.scheduled_at}
-                    onChange={(e) => setNewClass({ ...newClass, scheduled_at: e.target.value })}
+                    onChange={(e) =>
+                      setNewClass({ ...newClass, scheduled_at: e.target.value })
+                    }
                   />
                 </div>
 
@@ -375,7 +447,12 @@ export default function LiveClasses() {
                     id="max_attendees"
                     type="number"
                     value={newClass.max_attendees}
-                    onChange={(e) => setNewClass({ ...newClass, max_attendees: parseInt(e.target.value) || 50 })}
+                    onChange={(e) =>
+                      setNewClass({
+                        ...newClass,
+                        max_attendees: parseInt(e.target.value) || 50,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -387,11 +464,13 @@ export default function LiveClasses() {
                   type="number"
                   step="0.01"
                   value={newClass.price_per_attendee}
-                  onChange={(e) => setNewClass({ 
-                    ...newClass, 
-                    price_per_attendee: parseFloat(e.target.value) || 0,
-                    is_monetized: parseFloat(e.target.value) > 0
-                  })}
+                  onChange={(e) =>
+                    setNewClass({
+                      ...newClass,
+                      price_per_attendee: parseFloat(e.target.value) || 0,
+                      is_monetized: parseFloat(e.target.value) > 0,
+                    })
+                  }
                 />
               </div>
 
@@ -400,7 +479,10 @@ export default function LiveClasses() {
                   <Clock className="h-4 w-4 mr-2" />
                   Schedule Class
                 </Button>
-                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateModalOpen(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -409,5 +491,5 @@ export default function LiveClasses() {
         </div>
       )}
     </div>
-  )
+  );
 }

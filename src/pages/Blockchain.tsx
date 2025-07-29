@@ -1,7 +1,7 @@
-import React from 'react';
-import BlockchainManager from '@/components/BlockchainManager';
+import React from "react";
+import BlockchainManager from "@/components/BlockchainManager";
 
-const Blockchain = () => {
+const Blockchain = (): JSX.Element => {
   return <BlockchainManager />;
 };
 
