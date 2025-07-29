@@ -1,23 +1,45 @@
 import React from 'react';
+import { User } from '@supabase/supabase-js';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Settings, 
-  Bell, 
-  Shield, 
+import {
+  Settings,
+  Bell,
+  Shield,
   Crown,
   MessageSquare,
   TrendingUp,
   Wallet
 } from 'lucide-react';
+import { User } from '@supabase/supabase-js';
 
 import { User } from '@supabase/supabase-js';
 
 interface ProfileBannerProps {
+ codex/replace-all-instances-of-any-in-codebase
   user: User | null;
   profile: Record<string, unknown> | null;
+
+ codex/replace-any-with-correct-typescript-types
+  user: {
+    email?: string;
+  } | null;
+  profile: {
+    avatar_url?: string;
+    display_name?: string;
+    first_name?: string;
+    username?: string;
+    role?: string;
+    subscription_tier?: string;
+    bio?: string;
+  } | null;
+
+  user: User | null;
+  profile: Record<string, unknown> | null;
+ main
+ main
   unreadCount: number;
 }
 

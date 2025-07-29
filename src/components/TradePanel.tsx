@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { TrendingUp, TrendingDown, DollarSign, Loader2, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { injectContractTemplate } from "@/lib/contractTemplates"
 
 export function TradePanel() {
   const [orderType, setOrderType] = useState("limit")
@@ -42,6 +43,7 @@ export function TradePanel() {
 
     setIsLoading(true);
     try {
+      await injectContractTemplate(side === 'buy' ? 'buy' : 'sell');
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
         throw new Error('No session found');
@@ -74,10 +76,27 @@ export function TradePanel() {
       setPrice("");
       
     } catch (error: unknown) {
+ codex/replace-all-instances-of-any-in-codebase
+
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+
+ main
+ main
       console.error('Order creation error:', error);
+      const err = error as Error;
       toast({
         title: "Order Failed",
-        description: error.message || "Failed to create order. Please try again.",
+ codex/replace-any-with-correct-typescript-types
+        description: err.message || "Failed to create order. Please try again.",
+
+ codex/replace-instances-of-any-with-correct-types
+        description: err.message || "Failed to create order. Please try again.",
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        description: (error as any).message || "Failed to create order. Please try again.",
+ main
+ main
         variant: "destructive",
       });
     } finally {
