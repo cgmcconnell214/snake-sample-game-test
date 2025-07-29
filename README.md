@@ -71,3 +71,21 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Required environment variables
+
+Several Supabase Edge functions depend on environment variables for Supabase and Stripe access. Create a `.env` file in the `supabase` directory with at least the following keys:
+
+```
+SUPABASE_URL=<your-supabase-url>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+SUPABASE_ANON_KEY=<your-anon-key>
+STRIPE_SECRET_KEY=<your-stripe-secret-key>
+STRIPE_WEBHOOK_SECRET=<your-stripe-webhook-secret>
+```
+
+Make sure these are set when deploying functions so the API calls succeed.
+
+## Two‑factor authentication
+
+The `TwoFactorManager` component now generates a secure TOTP secret using browser crypto and verifies tokens locally. When enabling 2FA, scan the displayed OTP URL with an authenticator app and enter the generated code to complete setup.

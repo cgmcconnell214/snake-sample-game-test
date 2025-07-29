@@ -8,6 +8,7 @@ import { Shield, CreditCard, User, LogOut, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import WalletIntegration from '@/components/WalletIntegration';
+import TwoFactorManager from '@/components/TwoFactorManager';
 
 const Settings = () => {
   const { user, profile, signOut, checkSubscription } = useAuth();
@@ -129,7 +130,7 @@ const Settings = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <h1 className="text-3xl font-bold">Settings</h1>
         <Button onClick={signOut} variant="outline">
           <LogOut className="w-4 h-4 mr-2" />
@@ -345,14 +346,7 @@ const Settings = () => {
             </Badge>
           </div>
 
-          <div className="mt-4">
-            <Button variant="outline" onClick={() => toast({
-              title: "Security Settings",
-              description: "Security settings update feature coming soon.",
-            })}>
-              Update Security Settings
-            </Button>
-          </div>
+          <TwoFactorManager />
       </CardContent>
       </Card>
 

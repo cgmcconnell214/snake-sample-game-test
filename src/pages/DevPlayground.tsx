@@ -1,16 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { useNavigate } from "react-router-dom"
 import { Code, GitFork, Rocket, TestTube } from "lucide-react"
 
 export default function DevPlayground() {
+  const navigate = useNavigate()
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Dev Playground</h1>
           <p className="text-muted-foreground">Development environment for trusted builders</p>
         </div>
-        <Button>
+        <Button onClick={() => navigate('/app/dev-playground/new')}>
           <Code className="h-4 w-4 mr-2" />
           New Project
         </Button>
@@ -28,7 +30,13 @@ export default function DevPlayground() {
             <p className="text-sm text-muted-foreground mb-4">
               Safe testing environment for smart contracts
             </p>
-            <Button variant="outline" className="w-full">Start Testing</Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate('/app/dev-playground/test')}
+            >
+              Start Testing
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +51,13 @@ export default function DevPlayground() {
             <p className="text-sm text-muted-foreground mb-4">
               Fork existing contracts and customize for your needs
             </p>
-            <Button variant="outline" className="w-full">Browse Forks</Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate('/app/dev-playground/forks')}
+            >
+              Browse Forks
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,7 +72,13 @@ export default function DevPlayground() {
             <p className="text-sm text-muted-foreground mb-4">
               Deploy tested contracts to production network
             </p>
-            <Button variant="outline" className="w-full">Deploy</Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate('/app/dev-playground/deploy')}
+            >
+              Deploy
+            </Button>
           </CardContent>
         </Card>
       </div>

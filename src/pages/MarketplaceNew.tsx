@@ -6,7 +6,11 @@ import { Badge } from "@/components/ui/badge"
 import { ShoppingCart, Search, Filter, Star, TrendingUp, Package } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+ codex/fix-typescript-linting-errors
 import type { Json } from "@/integrations/supabase/types"
+
+import { useNavigate } from "react-router-dom"
+ main
 
 interface MarketplaceAsset {
   id: string
@@ -30,6 +34,7 @@ export default function Marketplace() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortBy, setSortBy] = useState("volume")
   const { toast } = useToast()
+  const navigate = useNavigate()
 
   useEffect(() => {
     fetchMarketplaceAssets()
@@ -68,7 +73,7 @@ export default function Marketplace() {
       title: "List New Asset",
       description: "Redirecting to asset tokenization page...",
     })
-    window.location.href = "/tokenize"
+    navigate('/app/tokenize')
   }
 
   const handleBrowseOffers = () => {
@@ -76,6 +81,7 @@ export default function Marketplace() {
       title: "Browse Offers",
       description: "Showing all available trading offers",
     })
+    navigate('/app/marketplace')
   }
 
   const handleViewContracts = () => {
@@ -83,6 +89,7 @@ export default function Marketplace() {
       title: "Contract Queue",
       description: "Viewing active and pending smart contracts",
     })
+    navigate('/app/marketplace')
   }
 
   const handleBuyAsset = async (assetId: string) => {
@@ -105,7 +112,7 @@ export default function Marketplace() {
     })
 
     // Redirect to trading page with pre-filled buy order
-    window.location.href = `/trading?asset=${assetId}&action=buy`
+    navigate(`/app/trading?asset=${assetId}&action=buy`)
   }
 
   const filteredAssets = assets.filter(asset => {
@@ -131,7 +138,7 @@ export default function Marketplace() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">P2P Marketplace</h1>
           <p className="text-muted-foreground">Trade tokenized assets peer-to-peer</p>
@@ -155,7 +162,9 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Tokenize and list your assets for peer-to-peer trading
             </p>
-            <Button variant="outline" className="w-full">List Asset</Button>
+            <Button variant="outline" className="w-full" onClick={handleListAsset}>
+              List Asset
+            </Button>
           </CardContent>
         </Card>
 
@@ -170,7 +179,9 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Explore available assets and trading opportunities
             </p>
-            <Button variant="outline" className="w-full">Browse Offers</Button>
+            <Button variant="outline" className="w-full" onClick={handleBrowseOffers}>
+              Browse Offers
+            </Button>
           </CardContent>
         </Card>
 
@@ -185,7 +196,9 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               View active trades and pending smart contracts
             </p>
-            <Button variant="outline" className="w-full">View Queue</Button>
+            <Button variant="outline" className="w-full" onClick={handleViewContracts}>
+              View Queue
+            </Button>
           </CardContent>
         </Card>
       </div>

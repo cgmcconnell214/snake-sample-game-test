@@ -5,7 +5,7 @@ import { Lock, FileText, Shield, Scale } from "lucide-react"
 export default function LegalSafehouse() {
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Legal Safehouse</h1>
           <p className="text-muted-foreground">Secure legal documents and exemption notices</p>
