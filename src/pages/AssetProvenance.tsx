@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { History, Eye, Search, Clock } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { History, Eye, Search, Clock } from "lucide-react";
 
-export default function AssetProvenance() {
+export default function AssetProvenance(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Asset Provenance</h1>
-          <p className="text-muted-foreground">Visual history and tracking of tokenized assets</p>
+          <p className="text-muted-foreground">
+            Visual history and tracking of tokenized assets
+          </p>
         </div>
         <Button>
           <Search className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function AssetProvenance() {
             <p className="text-sm text-muted-foreground mb-4">
               Complete visual timeline of asset lifecycle
             </p>
-            <Button variant="outline" className="w-full">View Timeline</Button>
+            <Button variant="outline" className="w-full">
+              View Timeline
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function AssetProvenance() {
             <p className="text-sm text-muted-foreground mb-4">
               Track physical commodities from origin to token
             </p>
-            <Button variant="outline" className="w-full">Track Commodity</Button>
+            <Button variant="outline" className="w-full">
+              Track Commodity
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function AssetProvenance() {
             <p className="text-sm text-muted-foreground mb-4">
               Follow intellectual property from creation to tokenization
             </p>
-            <Button variant="outline" className="w-full">View Journey</Button>
+            <Button variant="outline" className="w-full">
+              View Journey
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

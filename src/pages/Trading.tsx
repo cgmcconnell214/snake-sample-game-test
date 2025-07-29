@@ -1,63 +1,69 @@
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { TradingChart } from "@/components/TradingChart"
-import { OrderBook } from "@/components/OrderBook"
-import { TradePanel } from "@/components/TradePanel"
-import { 
-  Search, 
-  Filter, 
-  TrendingUp, 
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { TradingChart } from "@/components/TradingChart";
+import { OrderBook } from "@/components/OrderBook";
+import { TradePanel } from "@/components/TradePanel";
+import {
+  Search,
+  Filter,
+  TrendingUp,
   TrendingDown,
   Volume2,
   Clock,
   AlertCircle,
-  CheckCircle
-} from "lucide-react"
+  CheckCircle,
+} from "lucide-react";
 
 const marketData = [
   {
     symbol: "GOLD-TOKEN",
     name: "Premium Gold Bars",
-    price: 131.20,
+    price: 131.2,
     change: 2.4,
     volume: 1250000,
     marketCap: 164000000,
     type: "commodity",
-    status: "active"
+    status: "active",
   },
   {
-    symbol: "SILVER-TOKEN", 
+    symbol: "SILVER-TOKEN",
     name: "Silver Bullion",
     price: 10.15,
     change: -1.2,
     volume: 890000,
     marketCap: 8630000,
     type: "commodity",
-    status: "active"
+    status: "active",
   },
   {
     symbol: "OIL-FUTURE",
     name: "Crude Oil Futures Q1",
-    price: 84.50,
+    price: 84.5,
     change: 5.7,
     volume: 2100000,
     marketCap: 42250000,
     type: "derivative",
-    status: "active"
+    status: "active",
   },
   {
     symbol: "REAL-ESTATE-A",
     name: "Manhattan Office Complex",
-    price: 2500.00,
+    price: 2500.0,
     change: 1.8,
     volume: 150000,
     marketCap: 25000000,
     type: "real-estate",
-    status: "pending"
+    status: "pending",
   },
   {
     symbol: "TECH-EQUITY-B",
@@ -67,9 +73,9 @@ const marketData = [
     volume: 567000,
     marketCap: 4575000,
     type: "equity",
-    status: "active"
-  }
-]
+    status: "active",
+  },
+];
 
 const initialOrders = [
   {
@@ -77,32 +83,38 @@ const initialOrders = [
     symbol: "GOLD-TOKEN",
     type: "LIMIT_BUY",
     quantity: 25,
-    price: 130.50,
+    price: 130.5,
     filled: 0,
     status: "open",
-    time: "2024-01-15 14:23:15"
+    time: "2024-01-15 14:23:15",
   },
   {
-    id: "ORD002", 
+    id: "ORD002",
     symbol: "SILVER-TOKEN",
     type: "LIMIT_SELL",
     quantity: 100,
     price: 10.25,
     filled: 0,
     status: "open",
-    time: "2024-01-15 13:45:30"
+    time: "2024-01-15 13:45:30",
   },
   {
     id: "ORD003",
     symbol: "OIL-FUTURE",
     type: "STOP_LOSS",
     quantity: 10,
-    price: 82.00,
+    price: 82.0,
     filled: 0,
     status: "pending",
-    time: "2024-01-15 12:12:08"
-  }
-]
+    time: "2024-01-15 12:12:08",
+  },
+];
+
+ codex/apply-eslint-typescript-rules
+export default function Trading(): JSX.Element {
+  const [selectedSymbol, setSelectedSymbol] = useState("GOLD-TOKEN");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("all");
 
 export default function Trading() {
   const [selectedSymbol, setSelectedSymbol] = useState("GOLD-TOKEN")
@@ -110,15 +122,19 @@ export default function Trading() {
   const [filterType, setFilterType] = useState("all")
   const [orders, setOrders] = useState(initialOrders)
   const [showFilters, setShowFilters] = useState(true)
+ main
 
-  const filteredMarketData = marketData.filter(item => {
-    const matchesSearch = item.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = filterType === "all" || item.type === filterType
-    return matchesSearch && matchesFilter
-  })
+  const filteredMarketData = marketData.filter((item) => {
+    const matchesSearch =
+      item.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterType === "all" || item.type === filterType;
+    return matchesSearch && matchesFilter;
+  });
 
-  const selectedAsset = marketData.find(item => item.symbol === selectedSymbol)
+  const selectedAsset = marketData.find(
+    (item) => item.symbol === selectedSymbol,
+  );
 
   const handleCancelOrder = (orderId: string) => {
     setOrders(prev => prev.filter(order => order.id !== orderId))
@@ -129,7 +145,9 @@ export default function Trading() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Trading Platform</h1>
-          <p className="text-muted-foreground">Advanced trading interface for tokenized assets</p>
+          <p className="text-muted-foreground">
+            Advanced trading interface for tokenized assets
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-success border-success">
@@ -189,35 +207,48 @@ export default function Trading() {
               <div
                 key={asset.symbol}
                 className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                  selectedSymbol === asset.symbol 
-                    ? 'bg-primary/20 border border-primary/30' 
-                    : 'bg-muted/20 hover:bg-muted/30'
+                  selectedSymbol === asset.symbol
+                    ? "bg-primary/20 border border-primary/30"
+                    : "bg-muted/20 hover:bg-muted/30"
                 }`}
                 onClick={() => setSelectedSymbol(asset.symbol)}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <div className="font-medium text-sm">{asset.symbol}</div>
-                    <div className="text-xs text-muted-foreground truncate">{asset.name}</div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {asset.name}
+                    </div>
                   </div>
-                  <Badge 
-                    variant={asset.status === 'active' ? 'default' : 'secondary'}
+                  <Badge
+                    variant={
+                      asset.status === "active" ? "default" : "secondary"
+                    }
                     className="text-xs"
                   >
                     {asset.status}
                   </Badge>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold">${asset.price.toFixed(2)}</span>
-                  <div className={`flex items-center gap-1 text-xs ${
-                    asset.change >= 0 ? 'text-buy' : 'text-sell'
-                  }`}>
-                    {asset.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    {asset.change >= 0 ? '+' : ''}{asset.change}%
+                  <span className="font-mono font-bold">
+                    ${asset.price.toFixed(2)}
+                  </span>
+                  <div
+                    className={`flex items-center gap-1 text-xs ${
+                      asset.change >= 0 ? "text-buy" : "text-sell"
+                    }`}
+                  >
+                    {asset.change >= 0 ? (
+                      <TrendingUp className="h-3 w-3" />
+                    ) : (
+                      <TrendingDown className="h-3 w-3" />
+                    )}
+                    {asset.change >= 0 ? "+" : ""}
+                    {asset.change}%
                   </div>
                 </div>
-                
+
                 <div className="mt-2 text-xs text-muted-foreground">
                   Vol: ${(asset.volume / 1000000).toFixed(1)}M
                 </div>
@@ -229,7 +260,7 @@ export default function Trading() {
         {/* Main Trading Area */}
         <div className="xl:col-span-2 space-y-6">
           {selectedAsset && (
-            <TradingChart 
+            <TradingChart
               symbol={selectedAsset.symbol}
               currentPrice={selectedAsset.price}
               change={selectedAsset.change}
@@ -252,20 +283,32 @@ export default function Trading() {
                   <div>Status</div>
                   <div>Action</div>
                 </div>
+ codex/apply-eslint-typescript-rules
+                {openOrders.map((order) => (
+                  <div
+                    key={order.id}
+                    className="grid grid-cols-7 gap-2 text-sm py-2 hover:bg-muted/20 transition-colors rounded"
+                  >
+
                 {orders.map((order) => (
                   <div key={order.id} className="grid grid-cols-7 gap-2 text-sm py-2 hover:bg-muted/20 transition-colors rounded">
+ main
                     <div className="font-mono text-primary">{order.id}</div>
                     <div className="font-medium">{order.symbol}</div>
-                    <div className={`text-xs ${
-                      order.type.includes('BUY') ? 'text-buy' : 'text-sell'
-                    }`}>
-                      {order.type.replace('_', ' ')}
+                    <div
+                      className={`text-xs ${
+                        order.type.includes("BUY") ? "text-buy" : "text-sell"
+                      }`}
+                    >
+                      {order.type.replace("_", " ")}
                     </div>
                     <div className="font-mono">{order.quantity}</div>
                     <div className="font-mono">${order.price}</div>
                     <div>
-                      <Badge 
-                        variant={order.status === 'open' ? 'default' : 'secondary'}
+                      <Badge
+                        variant={
+                          order.status === "open" ? "default" : "secondary"
+                        }
                         className="text-xs"
                       >
                         {order.status}
@@ -276,7 +319,10 @@ export default function Trading() {
                         variant="ghost"
                         size="sm"
                         className="text-xs text-destructive"
+ codex/apply-eslint-typescript-rules
+
                         onClick={() => handleCancelOrder(order.id)}
+ main
                       >
                         Cancel
                       </Button>
@@ -298,7 +344,7 @@ export default function Trading() {
         <div className="space-y-6">
           <TradePanel />
           <OrderBook />
-          
+
           {/* Market Statistics */}
           {selectedAsset && (
             <Card className="bg-card/50 backdrop-blur border-border/50">
@@ -308,11 +354,15 @@ export default function Trading() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Market Cap:</span>
-                  <span className="font-mono">${(selectedAsset.marketCap / 1000000).toFixed(1)}M</span>
+                  <span className="font-mono">
+                    ${(selectedAsset.marketCap / 1000000).toFixed(1)}M
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">24h Volume:</span>
-                  <span className="font-mono">${(selectedAsset.volume / 1000000).toFixed(1)}M</span>
+                  <span className="font-mono">
+                    ${(selectedAsset.volume / 1000000).toFixed(1)}M
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Asset Type:</span>
@@ -322,8 +372,12 @@ export default function Trading() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Status:</span>
-                  <Badge 
-                    variant={selectedAsset.status === 'active' ? 'default' : 'secondary'}
+                  <Badge
+                    variant={
+                      selectedAsset.status === "active"
+                        ? "default"
+                        : "secondary"
+                    }
                     className="text-xs"
                   >
                     {selectedAsset.status}
@@ -335,5 +389,5 @@ export default function Trading() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,31 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Icons } from '@/components/ui/icons';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Icons } from "@/components/ui/icons";
+import { supabase } from "@/integrations/supabase/client";
 
-const Auth = () => {
+const Auth = (): JSX.Element => {
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
   });
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate("/");
     }
   }, [user, navigate]);
 
@@ -44,6 +50,10 @@ const Auth = () => {
       if (error) {
         setError(error.message);
       }
+ codex/apply-eslint-typescript-rules
+    } catch (err: any) {
+      setError(err.message || "An error occurred during sign in");
+
     } catch (err: unknown) {
  codex/replace-all-instances-of-any-in-codebase
       setError(err.message || 'An error occurred during sign in');
@@ -62,6 +72,7 @@ const Auth = () => {
  main
  main
  main
+ main
     } finally {
       setLoading(false);
     }
@@ -73,13 +84,13 @@ const Auth = () => {
     setError(null);
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError("Password must be at least 6 characters long");
       setLoading(false);
       return;
     }
@@ -89,10 +100,14 @@ const Auth = () => {
         first_name: formData.firstName,
         last_name: formData.lastName,
       });
-      
+
       if (error) {
         setError(error.message);
       }
+ codex/apply-eslint-typescript-rules
+    } catch (err: any) {
+      setError(err.message || "An error occurred during sign up");
+
     } catch (err: unknown) {
  codex/replace-all-instances-of-any-in-codebase
       setError(err.message || 'An error occurred during sign up');
@@ -111,6 +126,7 @@ const Auth = () => {
  main
  main
  main
+ main
     } finally {
       setLoading(false);
     }
@@ -122,7 +138,7 @@ const Auth = () => {
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'discord',
+        provider: "discord",
         options: {
           redirectTo: `${window.location.origin}/`,
         },
@@ -131,6 +147,10 @@ const Auth = () => {
       if (error) {
         setError(error.message);
       }
+ codex/apply-eslint-typescript-rules
+    } catch (err: any) {
+      setError(err.message || "An error occurred with Discord authentication");
+
     } catch (err: unknown) {
  codex/replace-all-instances-of-any-in-codebase
       setError(err.message || 'An error occurred with Discord authentication');
@@ -146,6 +166,7 @@ const Auth = () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred with Discord authentication');
+ main
  main
  main
  main
@@ -171,7 +192,7 @@ const Auth = () => {
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="signin" className="space-y-4">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -206,11 +227,11 @@ const Auth = () => {
                   </Alert>
                 )}
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Signing in...' : 'Sign In'}
+                  {loading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
             </TabsContent>
-            
+
             <TabsContent value="signup" className="space-y-4">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -286,7 +307,7 @@ const Auth = () => {
                   </Alert>
                 )}
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Creating account...' : 'Create Account'}
+                  {loading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>
@@ -298,7 +319,9 @@ const Auth = () => {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                <span className="bg-card px-2 text-muted-foreground">
+                  Or continue with
+                </span>
               </div>
             </div>
             <Button

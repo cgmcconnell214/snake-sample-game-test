@@ -1,16 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Shield, 
-  ShieldCheck, 
-  ShieldX, 
-  Smartphone, 
-  Key, 
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Shield,
+  ShieldCheck,
+  ShieldX,
+  Smartphone,
+  Key,
   AlertTriangle,
   CheckCircle,
+ codex/apply-eslint-typescript-rules
+  Copy,
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
   Copy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,12 +39,13 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { generateSecret, generateOtpAuthURL, verifyToken } from '@/lib/totp';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+ main
 
 const TwoFactorManager: React.FC = () => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  const [verificationCode, setVerificationCode] = useState('');
+  const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [showSetup, setShowSetup] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user, profile } = useAuth();
@@ -48,16 +70,31 @@ const TwoFactorManager: React.FC = () => {
   const enable2FA = async () => {
     setLoading(true);
     try {
+ codex/apply-eslint-typescript-rules
+      // In a real implementation, you would:
+      // 1. Generate a secret key
+      // 2. Create QR code URL for authenticator apps
+      // 3. Verify the user can generate valid codes
+
+      // For demo purposes, we'll simulate this
+      const secret =
+        "MOCK_SECRET_" + Math.random().toString(36).substring(2, 15);
+      const codes = generateBackupCodes();
+
+      setQrCodeUrl(
+        `otpauth://totp/God's%20Realm:${user?.email}?secret=${secret}&issuer=God's%20Realm`,
+      );
+
       const newSecret = generateSecret();
       const codes = generateBackupCodes();
 
       setSecret(newSecret);
       setQrCodeUrl(generateOtpAuthURL(newSecret, user?.email || 'user', "God's Realm"));
+ main
       setBackupCodes(codes);
       setShowSetup(true);
-      
     } catch (error) {
-      console.error('Error enabling 2FA:', error);
+      console.error("Error enabling 2FA:", error);
       toast({
         title: "Error",
         description: "Failed to enable two-factor authentication.",
@@ -91,22 +128,21 @@ const TwoFactorManager: React.FC = () => {
       }
 
       const { error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ two_factor_enabled: true })
-        .eq('user_id', user?.id);
+        .eq("user_id", user?.id);
 
       if (error) throw error;
 
       setIsEnabled(true);
       setShowSetup(false);
-      
+
       toast({
         title: "2FA Enabled",
         description: "Two-factor authentication has been successfully enabled.",
       });
-      
     } catch (error) {
-      console.error('Error verifying 2FA:', error);
+      console.error("Error verifying 2FA:", error);
       toast({
         title: "Error",
         description: "Failed to verify two-factor authentication.",
@@ -121,23 +157,22 @@ const TwoFactorManager: React.FC = () => {
     setLoading(true);
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ two_factor_enabled: false })
-        .eq('user_id', user?.id);
+        .eq("user_id", user?.id);
 
       if (error) throw error;
 
       setIsEnabled(false);
       setBackupCodes([]);
-      setQrCodeUrl('');
-      
+      setQrCodeUrl("");
+
       toast({
         title: "2FA Disabled",
         description: "Two-factor authentication has been disabled.",
       });
-      
     } catch (error) {
-      console.error('Error disabling 2FA:', error);
+      console.error("Error disabling 2FA:", error);
       toast({
         title: "Error",
         description: "Failed to disable two-factor authentication.",
@@ -177,16 +212,16 @@ const TwoFactorManager: React.FC = () => {
                 <ShieldX className="h-6 w-6 text-muted-foreground" />
               )}
               <div>
-                <div className="font-medium">
-                  Two-Factor Authentication
-                </div>
+                <div className="font-medium">Two-Factor Authentication</div>
                 <div className="text-sm text-muted-foreground">
-                  {isEnabled ? 'Enabled and protecting your account' : 'Not currently enabled'}
+                  {isEnabled
+                    ? "Enabled and protecting your account"
+                    : "Not currently enabled"}
                 </div>
               </div>
             </div>
-            <Badge variant={isEnabled ? 'default' : 'secondary'}>
-              {isEnabled ? 'Enabled' : 'Disabled'}
+            <Badge variant={isEnabled ? "default" : "secondary"}>
+              {isEnabled ? "Enabled" : "Disabled"}
             </Badge>
           </div>
 
@@ -209,14 +244,22 @@ const TwoFactorManager: React.FC = () => {
                     <DialogHeader>
                       <DialogTitle>Backup Codes</DialogTitle>
                       <DialogDescription>
-                        Use these codes if you lose access to your authenticator app
+                        Use these codes if you lose access to your authenticator
+                        app
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-2">
                       {backupCodes.map((code, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 bg-muted rounded"
+                        >
                           <code className="font-mono">{code}</code>
-                          <Button size="sm" variant="ghost" onClick={() => copyBackupCode(code)}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => copyBackupCode(code)}
+                          >
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -224,7 +267,11 @@ const TwoFactorManager: React.FC = () => {
                     </div>
                   </DialogContent>
                 </Dialog>
-                <Button variant="destructive" onClick={disable2FA} disabled={loading}>
+                <Button
+                  variant="destructive"
+                  onClick={disable2FA}
+                  disabled={loading}
+                >
                   <ShieldX className="h-4 w-4 mr-2" />
                   Disable 2FA
                 </Button>
@@ -243,7 +290,7 @@ const TwoFactorManager: React.FC = () => {
               Scan the QR code with your authenticator app
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="text-center">
               <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center mx-auto">
@@ -251,7 +298,9 @@ const TwoFactorManager: React.FC = () => {
                   <Smartphone className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
                   <div className="text-sm text-muted-foreground">QR Code</div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    Use Google Authenticator<br />or similar app
+                    Use Google Authenticator
+                    <br />
+                    or similar app
                   </div>
                 </div>
               </div>
@@ -269,10 +318,18 @@ const TwoFactorManager: React.FC = () => {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowSetup(false)} className="flex-1">
+              <Button
+                variant="outline"
+                onClick={() => setShowSetup(false)}
+                className="flex-1"
+              >
                 Cancel
               </Button>
-              <Button onClick={verify2FA} disabled={loading || !verificationCode} className="flex-1">
+              <Button
+                onClick={verify2FA}
+                disabled={loading || !verificationCode}
+                className="flex-1"
+              >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Verify & Enable
               </Button>
@@ -285,7 +342,9 @@ const TwoFactorManager: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-1 text-xs">
                 {backupCodes.slice(0, 4).map((code, index) => (
-                  <code key={index} className="bg-muted p-1 rounded">{code}</code>
+                  <code key={index} className="bg-muted p-1 rounded">
+                    {code}
+                  </code>
                 ))}
               </div>
             </div>
