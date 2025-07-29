@@ -58,8 +58,13 @@ export function useAvatar() {
       return { url: publicUrl };
     } catch (err: unknown) {
       console.error('Avatar upload error:', err);
+ codex/replace-instances-of-any-with-correct-types
+      const error = err as Error;
+      setError(error.message || 'Failed to upload avatar');
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'Failed to upload avatar');
+ main
       throw err;
     } finally {
       setUploading(false);

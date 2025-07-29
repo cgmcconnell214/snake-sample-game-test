@@ -9,11 +9,15 @@ interface AuthContextType {
   profile: Record<string, unknown> | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: unknown }>;
+ codex/replace-instances-of-any-with-correct-types
+  signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<{ error: unknown }>;
+
   signUp: (
     email: string,
     password: string,
     metadata?: Record<string, unknown>
   ) => Promise<{ error: unknown }>;
+ main
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   checkSubscription: () => Promise<void>;
@@ -204,11 +208,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+ codex/replace-instances-of-any-with-correct-types
+  const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
+
   const signUp = async (
     email: string,
     password: string,
     metadata?: Record<string, unknown>
   ) => {
+ main
     try {
       cleanupAuthState();
       

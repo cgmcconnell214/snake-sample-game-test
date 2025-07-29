@@ -27,7 +27,11 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ codex/replace-instances-of-any-with-correct-types
+  attachments: string | Record<string, unknown>[] | null;
+
   attachments: Attachment[];
+ main
   is_read: boolean;
   is_archived: boolean;
   created_at: string;
