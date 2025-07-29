@@ -75,8 +75,13 @@ export default function AIAgents() {
   const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
+    fetchAgents()
+  }, [fetchAgents])
+
     fetchAgents();
   }, []);
+ main
 
   const fetchAgents = async () => {
     const { data, error } = await supabase

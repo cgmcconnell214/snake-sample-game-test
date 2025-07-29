@@ -48,8 +48,13 @@ export default function SmartContracts(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
+    fetchContracts()
+  }, [fetchContracts])
+
     fetchContracts();
   }, []);
+ main
 
   const fetchContracts = async () => {
     const { data, error } = await supabase

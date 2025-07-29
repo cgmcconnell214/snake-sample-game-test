@@ -80,7 +80,7 @@ const IPTokenization: React.FC = () => {
     if (user) {
       fetchData();
     }
-  }, [user]);
+  }, [user, fetchData]);
 
   const fetchData = async () => {
     try {

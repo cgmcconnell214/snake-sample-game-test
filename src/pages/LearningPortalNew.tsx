@@ -53,8 +53,13 @@ export default function LearningPortal(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
+    fetchCourses()
+  }, [fetchCourses])
+
     fetchCourses();
   }, []);
+ main
 
   const fetchCourses = async () => {
     const { data, error } = await supabase

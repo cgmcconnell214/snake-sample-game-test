@@ -48,8 +48,13 @@ export default function WorkflowAutomation(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
+    fetchRules()
+  }, [fetchRules])
+
     fetchRules();
   }, []);
+ main
 
   const fetchRules = async () => {
     const { data, error } = await supabase

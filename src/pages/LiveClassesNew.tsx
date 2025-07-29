@@ -56,8 +56,13 @@ export default function LiveClasses(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
+    fetchClasses()
+  }, [fetchClasses])
+
     fetchClasses();
   }, []);
+ main
 
   const fetchClasses = async () => {
     const { data, error } = await supabase

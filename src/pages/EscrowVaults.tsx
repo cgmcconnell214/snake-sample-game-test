@@ -40,8 +40,13 @@ export default function EscrowVaults(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
+    fetchVaults()
+  }, [fetchVaults])
+
     fetchVaults();
   }, []);
+ main
 
   const fetchVaults = async () => {
     const { data, error } = await supabase
