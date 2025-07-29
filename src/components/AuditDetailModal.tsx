@@ -25,18 +25,10 @@ import {
   Activity,
   Lock,
   Globe,
- khfq01-codex/replace-instances-of-any-with-correct-types
-  Zap
-} from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Json } from '@/integrations/supabase/types';
-
   Zap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
- main
 
 interface AuditLog {
   id: number;
@@ -52,51 +44,11 @@ interface AuditLog {
 interface AuditDetail {
   id: string;
   event_id: string;
- khfq01-codex/replace-instances-of-any-with-correct-types
-  request_data: Json | null;
-  response_data: Json | null;
-  error_details: Json | null;
+  request_data: any;
+  response_data: any;
+  error_details: any;
   execution_time_ms: number;
-  security_context: Json | null;
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
-  request_data: Record<string, unknown> | null;
-  response_data: Record<string, unknown> | null;
-  error_details: Record<string, unknown> | null;
-  execution_time_ms: number;
-  security_context: Record<string, unknown> | null;
-
- codex/replace-all-instances-of-any-in-codebase
-  request_data: Record<string, unknown>;
-  response_data: Record<string, unknown>;
-  error_details: unknown;
-  execution_time_ms: number;
-  security_context: Record<string, unknown>;
-
- codex/replace-any-with-correct-typescript-types
-  request_data: Record<string, unknown>;
-  response_data: Record<string, unknown>;
-  error_details: Record<string, unknown>;
-  execution_time_ms: number;
-  security_context: Record<string, unknown>;
-
- codex/replace-instances-of-any-with-correct-types
-  request_data: Record<string, unknown> | null;
-  response_data: Record<string, unknown> | null;
-  error_details: Record<string, unknown> | null;
-  execution_time_ms: number;
-  security_context: Record<string, unknown> | null;
-
-  request_data: Record<string, unknown>;
-  response_data: Record<string, unknown>;
-  error_details: Record<string, unknown>;
-  execution_time_ms: number;
-  security_context: Record<string, unknown>;
- main
- main
- main
- main
- main
+  security_context: any;
   compliance_flags: string[];
   created_at: string;
 }
@@ -120,7 +72,7 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({
     if (isOpen && auditLog) {
       fetchAuditDetail();
     }
-  }, [isOpen, auditLog, fetchAuditDetail]);
+  }, [isOpen, auditLog]);
 
   const fetchAuditDetail = async () => {
     if (!auditLog) return;

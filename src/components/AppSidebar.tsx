@@ -34,14 +34,10 @@ import {
   GitBranch,
   Monitor,
   Webhook,
-  ChevronDown,
+  AlertTriangle,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
 import {
   Sidebar,
   SidebarContent,
@@ -68,7 +64,11 @@ const coreItems = [
 const aiAutomationItems = [
   { title: "AI Agents", url: "/app/ai-agents", icon: Bot },
   { title: "Smart Contracts", url: "/app/smart-contracts", icon: FileCheck },
-  { title: "Workflow Automation", url: "/app/workflow-automation", icon: Workflow },
+  {
+    title: "Workflow Automation",
+    url: "/app/workflow-automation",
+    icon: Workflow,
+  },
 ];
 
 // 2. Education & Onboarding Layer
@@ -92,7 +92,7 @@ const marketplaceItems = [
   { title: "Escrow Vaults", url: "/app/escrow", icon: Building },
 ];
 
-// Compliance & Security
+// Compliance & Security (Existing)
 const complianceItems = [
   { title: "KYC Center", url: "/app/kyc", icon: UserCheck },
   { title: "Compliance", url: "/app/compliance", icon: Shield },
@@ -129,22 +129,6 @@ export function AppSidebar(): JSX.Element {
   const currentPath = location.pathname;
 
   const isActive = (path: string) => currentPath === path;
-
-  const [openSections, setOpenSections] = useState({
-    core: true,
-    ai: true,
-    education: true,
-    spiritual: true,
-    market: true,
-    compliance: true,
-    admin: true,
-    bonus: true,
-    system: true,
-  });
-
-  const toggleSection = (key: keyof typeof openSections) =>
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
-
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive
       ? "bg-sidebar-accent text-sidebar-primary font-medium"
@@ -169,9 +153,178 @@ export function AppSidebar(): JSX.Element {
           )}
         </div>
       </SidebarHeader>
+
       <SidebarContent className="p-2 space-y-1">
-        {/* Collapsibles go here, unchanged */}
-        {/* You already pasted them correctly above; retain as-is */}
+        {/* Core Platform */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Core Platform</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {coreItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} end className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* 1. AI & Automation */}
+        <SidebarGroup>
+          <SidebarGroupLabel>🧬 AI & Automation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {aiAutomationItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* 2. Education & Onboarding */}
+        <SidebarGroup>
+          <SidebarGroupLabel>📚 Education & Onboarding</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {educationItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* 3. Spiritual / Sovereign */}
+        <SidebarGroup>
+          <SidebarGroupLabel>👁️ Spiritual / Sovereign</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {spiritualItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* 4. Marketplace & Exchange */}
+        <SidebarGroup>
+          <SidebarGroupLabel>🏦 Marketplace & Exchange</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {marketplaceItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Compliance & Security */}
+        <SidebarGroup>
+          <SidebarGroupLabel>🛡️ Compliance & Security</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {complianceItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* 5. Admin & Infrastructure */}
+        <SidebarGroup>
+          <SidebarGroupLabel>🧩 Admin & Infrastructure</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Bonus Features */}
+        <SidebarGroup>
+          <SidebarGroupLabel>✨ Advanced Features</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {bonusItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* System & User */}
+        <SidebarGroup>
+          <SidebarGroupLabel>⚙️ System</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {systemItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );
