@@ -12,7 +12,17 @@ const AuditTrail = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
-  const [selectedAuditLog, setSelectedAuditLog] = useState<any>(null);
+  interface AuditLog {
+    id: number;
+    timestamp: string;
+    action: string;
+    user: string;
+    details: string;
+    type: string;
+    status: string;
+    ipAddress: string;
+  }
+  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Mock audit trail data
@@ -116,7 +126,7 @@ const AuditTrail = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <h1 className="text-3xl font-bold">Audit Trail</h1>
         <Badge variant="outline" className="text-sm">
           <Activity className="w-4 h-4 mr-1" />

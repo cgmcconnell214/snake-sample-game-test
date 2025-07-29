@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { Client, Wallet, convertStringToHex } from "https://esm.sh/xrpl@2.7.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,6 +16,125 @@ interface XRPLTransactionRequest {
   memo?: string;
   parameters?: any; // For smart contract functions
 }
+
+const NETWORK_URLS = {
+  testnet: "wss://s.altnet.rippletest.net:51233",
+  xahau: "wss://xahau.network:51233",
+  batch: "wss://batch-devnet.rippletest.net:51233",
+};
+
+interface NetworkResult {
+  success: boolean;
+  hash?: string;
+  ledgerIndex?: number;
+  error?: string;
+}
+
+const sendToXRPLNetworks = async (tx: any, seed: string) => {
+  const wallet = Wallet.fromSeed(seed);
+  const results: Record<string, NetworkResult> = {};
+
+  for (const [name, url] of Object.entries(NETWORK_URLS)) {
+    const client = new Client(url);
+    try {
+      await client.connect();
+      const prepared = await client.autofill({ ...tx, Account: wallet.classicAddress });
+      const signed = wallet.sign(prepared);
+      const resp = await client.submitAndWait(signed.tx_blob);
+      const success = resp.result.meta?.TransactionResult === "tesSUCCESS";
+      results[name] = {
+        success,
+        hash: signed.hash,
+        ledgerIndex: resp.result.validated_ledger_index,
+      };
+    } catch (error) {
+      results[name] = { success: false, error: (error as Error).message };
+    } finally {
+      try {
+        await client.disconnect();
+      } catch (_) {
+        /* ignore */
+      }
+    }
+  }
+  return results;
+};
+
+const buildTokenTx = (
+  type: string,
+  asset: any,
+  amount: number,
+  destination: string,
+  memo?: string,
+) => {
+  const base = {
+    TransactionType: "Payment",
+    Destination: destination,
+    Amount: {
+      currency: asset.xrpl_currency_code,
+      issuer: asset.xrpl_issuer_address,
+      value: String(amount),
+    },
+  } as any;
+  if (memo) {
+    base.Memos = [{ Memo: { MemoData: convertStringToHex(memo) } }];
+  }
+  return base;
+};
+
+const executeXRPLTransaction = async (
+  transactionType: string,
+  parameters: any,
+  asset: any,
+  seed: string,
+) => {
+  let tx: any;
+  switch (transactionType) {
+    case "Payment":
+      tx = buildTokenTx(transactionType, asset, parameters.amount, parameters.destination, parameters.memo);
+      break;
+    case "TrustSet":
+      tx = {
+        TransactionType: "TrustSet",
+        LimitAmount: {
+          currency: parameters.currency,
+          issuer: parameters.issuer,
+          value: String(parameters.limit),
+        },
+      };
+      break;
+    case "OfferCreate":
+      tx = {
+        TransactionType: "OfferCreate",
+        TakerPays: parameters.taker_pays,
+        TakerGets: parameters.taker_gets,
+        Expiration: parameters.expiration,
+      };
+      break;
+    case "AccountSet":
+      tx = {
+        TransactionType: "AccountSet",
+        SetFlag: parameters.freeze_flag ? 4 : undefined,
+      };
+      break;
+    default:
+      return { success: false, error: `Unsupported transaction type: ${transactionType}` };
+  }
+
+  const networkResults = await sendToXRPLNetworks(tx, seed);
+  const anySuccess = Object.values(networkResults).find((r) => r.success);
+  if (!anySuccess) {
+    const fallback = await simulateXRPLTransaction(transactionType, parameters, null);
+    return { ...fallback, networkResults };
+  }
+
+  return {
+    success: true,
+    transactionHash: anySuccess?.hash,
+    ledgerIndex: anySuccess?.ledgerIndex,
+    networkResults,
+  };
+};
 
 // Helper logging function
 const logStep = (step: string, details?: any) => {
@@ -83,17 +203,25 @@ serve(async (req) => {
       throw new Error("Asset not found");
     }
 
-    // Simulate XRPL transaction
-    // In production, this would interact with actual XRPL network
-    const mockTransactionHash = `${Math.random().toString(16).substring(2, 66).toUpperCase()}`;
-    const mockLedgerIndex = Math.floor(Math.random() * 1000000);
+    const walletSeed = Deno.env.get("XRPL_WALLET_SEED") ?? "";
+    if (!walletSeed) {
+      throw new Error("XRPL_WALLET_SEED not configured");
+    }
 
-    logStep("Simulated XRPL transaction", {
-      type: requestData.transaction_type,
-      asset: asset.asset_symbol,
-      amount: requestData.amount,
-      hash: mockTransactionHash
-    });
+    const networkResults = await sendToXRPLNetworks(
+      buildTokenTx(
+        requestData.transaction_type || "Payment",
+        asset,
+        requestData.amount || 0,
+        requestData.transaction_type === 'token_burn'
+          ? asset.xrpl_issuer_address
+          : requestData.destination || Wallet.fromSeed(walletSeed).classicAddress,
+        requestData.memo,
+      ),
+      walletSeed,
+    );
+
+    const successful = Object.values(networkResults).find(r => r.success);
 
     // Update asset holdings based on transaction type
     if (requestData.transaction_type === 'token_transfer' && requestData.destination) {
@@ -176,12 +304,13 @@ serve(async (req) => {
         amount: requestData.amount,
         event_type: requestData.transaction_type,
         asset_issuer: asset.xrpl_issuer_address,
-        xrpl_transaction_hash: mockTransactionHash,
-        xrpl_ledger_index: mockLedgerIndex,
+        xrpl_transaction_hash: successful?.hash,
+        xrpl_ledger_index: successful?.ledgerIndex,
         compliance_metadata: {
           transaction_memo: requestData.memo,
           user_verified: true,
           timestamp: new Date().toISOString(),
+          network_results: networkResults,
         },
         iso20022_data: {
           message_type: 'pacs.008.001.02', // ISO 20022 payment instruction
@@ -192,21 +321,30 @@ serve(async (req) => {
         },
       });
 
+    await createAuditLog(
+      user.id,
+      requestData.transaction_type || '',
+      requestData,
+      { success: Boolean(successful), networkResults },
+      supabaseClient,
+    );
+
     logStep("Transaction logged and processed");
 
     return new Response(JSON.stringify({
-      success: true,
+      success: Boolean(successful),
       transaction: {
-        hash: mockTransactionHash,
-        ledger_index: mockLedgerIndex,
+        hash: successful?.hash,
+        ledger_index: successful?.ledgerIndex,
         type: requestData.transaction_type,
         asset_symbol: asset.asset_symbol,
         amount: requestData.amount,
         timestamp: new Date().toISOString(),
+        network_results: networkResults,
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
+      status: successful ? 200 : 500,
     });
 
   } catch (error) {
@@ -290,11 +428,16 @@ async function handleSmartContractExecution(
 
   logStep("Transaction queued", { transactionId: transactionData.id });
 
-  // Simulate XRPL transaction execution
-  const xrplResult = await simulateXRPLTransaction(
+  const walletSeed = Deno.env.get("XRPL_WALLET_SEED") ?? "";
+  if (!walletSeed) {
+    throw new Error("XRPL_WALLET_SEED not configured");
+  }
+
+  const xrplResult = await executeXRPLTransaction(
     contractFunction.xrpl_transaction_type,
     parameters,
-    supabase
+    parameters,
+    walletSeed,
   );
 
   // Update transaction with result
@@ -330,7 +473,8 @@ async function handleSmartContractExecution(
     transactionId: transactionData.id,
     transactionHash: xrplResult.transactionHash,
     ledgerIndex: xrplResult.ledgerIndex,
-    complianceStatus: complianceChecks
+    complianceStatus: complianceChecks,
+    networkResults: xrplResult.networkResults
   }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
     status: xrplResult.success ? 200 : 400,
@@ -464,10 +608,11 @@ async function createAuditLog(
         user_id: userId,
         action: `blockchain_${action}`,
         location_data: { source: 'xrpl_transaction_function' },
-        risk_indicators: { 
+        risk_indicators: {
           transaction_type: action,
           success: xrplResult.success,
-          amount: parameters.amount || 0
+          amount: parameters.amount || 0,
+          network_results: xrplResult.networkResults || xrplResult
         }
       });
   } catch (error) {

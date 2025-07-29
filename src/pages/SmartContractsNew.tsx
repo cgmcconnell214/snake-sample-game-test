@@ -9,13 +9,14 @@ import { Badge } from "@/components/ui/badge"
 import { FileCheck, Plus, Code, Handshake, Settings, Download } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import type { Json } from "@/integrations/supabase/types"
 
 interface SmartContractFunction {
   id: string
   function_name: string
   contract_type: string
-  parameters: any
-  compliance_rules: any
+  parameters: Json
+  compliance_rules: Json | null
   deployment_status: string
   version: string
   created_at: string
@@ -191,7 +192,7 @@ export default function SmartContracts() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Smart Contract Templates</h1>
           <p className="text-muted-foreground">Pre-built and custom contract templates</p>

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import type { Json } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
 import MessageList from './message-center/MessageList';
 import MessageDetail from './message-center/MessageDetail';
@@ -27,7 +28,7 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+  attachments: Json | null;
   is_read: boolean;
   is_archived: boolean;
   created_at: string;

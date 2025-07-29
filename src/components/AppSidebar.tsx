@@ -60,7 +60,11 @@ import {
 
 // Core Platform
 const coreItems = [
+ 8uxpdn-codex/conduct-full-system-audit-and-prioritize-findings
   { title: "Dashboard", url: "/app", icon: LayoutDashboard },
+
+  { title: "Dashboard", url: "/app/", icon: LayoutDashboard },
+ main
   { title: "Tokenize Assets", url: "/app/tokenize", icon: Coins },
   { title: "Trading", url: "/app/trading", icon: TrendingUp },
   { title: "Portfolio", url: "/app/portfolio", icon: Briefcase },

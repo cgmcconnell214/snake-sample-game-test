@@ -150,7 +150,7 @@ const Reports = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <h1 className="text-3xl font-bold">Reports</h1>
         <div className="flex items-center space-x-2">
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>

@@ -86,6 +86,7 @@ STRIPE_WEBHOOK_SECRET=<your-stripe-webhook-secret>
 
 Make sure these are set when deploying functions so the API calls succeed.
 
+ 8uxpdn-codex/conduct-full-system-audit-and-prioritize-findings
 ### Supabase and Stripe setup
 
 1. **Create accounts** – Sign up for [Supabase](https://supabase.com) and [Stripe](https://stripe.com) if you haven't already.
@@ -98,6 +99,8 @@ Make sure these are set when deploying functions so the API calls succeed.
 
 After these steps the serverless functions will have the credentials they need for Supabase and Stripe access.
 
+
+ main
 ## Two‑factor authentication
 
 The `TwoFactorManager` component now generates a secure TOTP secret using browser crypto and verifies tokens locally. When enabling 2FA, scan the displayed OTP URL with an authenticator app and enter the generated code to complete setup.

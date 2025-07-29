@@ -129,11 +129,12 @@ export default function Tokenize() {
       setTotalSupply("");
       setDescription("");
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error; // TODO: Verify correct error type
       console.error('Tokenization error:', error);
       toast({
         title: "Tokenization Failed",
-        description: error.message || "Failed to tokenize asset. Please try again.",
+        description: err.message || "Failed to tokenize asset. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -143,7 +144,7 @@ export default function Tokenize() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Asset Tokenization</h1>
           <p className="text-muted-foreground">Convert real-world assets into tradeable XRPL tokens</p>
