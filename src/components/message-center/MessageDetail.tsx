@@ -6,6 +6,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Reply, Forward, Archive, Star, Clock } from 'lucide-react';
 import AttachmentViewer, { type Attachment } from './AttachmentViewer';
 
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+
 interface Message {
   id: string;
   sender_id: string | null;
@@ -13,7 +20,15 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ codex/replace-any-with-correct-typescript-types
   attachments: Attachment[] | string;
+
+ codex/replace-instances-of-any-with-correct-types
+  attachments: string | Record<string, unknown>[] | null;
+
+  attachments: Attachment[];
+ main
+ main
   is_read: boolean;
   is_archived: boolean;
   created_at: string;

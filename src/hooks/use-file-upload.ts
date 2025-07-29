@@ -84,11 +84,23 @@ export function useFileUpload() {
 
       return results;
     } catch (err: unknown) {
+ codex/replace-any-with-correct-typescript-types
       // TODO: Verify correct error type
       console.error('Upload error:', err);
       const error = err as Error;
       setError(error.message || 'Failed to upload files');
       throw error;
+
+      console.error('Upload error:', err);
+ codex/replace-instances-of-any-with-correct-types
+      const error = err as Error;
+      setError(error.message || 'Failed to upload files');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).message || 'Failed to upload files');
+ main
+      throw err;
+ main
     } finally {
       setUploading(false);
     }
