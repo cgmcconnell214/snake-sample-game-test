@@ -191,7 +191,7 @@ export default function SmartContracts() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Smart Contract Templates</h1>
           <p className="text-muted-foreground">Pre-built and custom contract templates</p>

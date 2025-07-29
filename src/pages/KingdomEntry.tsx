@@ -5,7 +5,7 @@ import { Users, UserCheck, Feather, Crown } from "lucide-react"
 export default function KingdomEntry() {
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Kingdom Entry Logs</h1>
           <p className="text-muted-foreground">Sacred registry and witness management</p>

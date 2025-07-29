@@ -36,7 +36,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="page-header">
         <div>
           <h1 className="text-3xl font-bold">Trading Dashboard</h1>
           <p className="text-muted-foreground">XRPL Asset Tokenization & Trading Platform</p>
