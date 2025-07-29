@@ -166,9 +166,10 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({ attachments }) => {
             {selectedAttachment && (
               <div className="flex items-center justify-center">
                 {selectedAttachment.type?.startsWith('image/') ? (
-                  <img 
-                    src={selectedAttachment.url} 
+                  <img
+                    src={selectedAttachment.url}
                     alt={selectedAttachment.name}
+                    loading="lazy"
                     className="max-w-full max-h-full object-contain rounded"
                   />
                 ) : selectedAttachment.type === 'application/pdf' ? (

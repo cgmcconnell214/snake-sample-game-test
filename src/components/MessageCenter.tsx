@@ -19,6 +19,21 @@ import MessageDetail from './message-center/MessageDetail';
 import ComposeMessage from './message-center/ComposeMessage';
 import ProfileBanner from './message-center/ProfileBanner';
 import MessageSearch from './message-center/MessageSearch';
+import type { Attachment } from './message-center/AttachmentViewer';
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
 
 interface Attachment {
   name: string;
@@ -34,7 +49,23 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ xgqza0-codex/replace-instances-of-any-with-correct-types
   attachments: Attachment[] | string | null;
+
+ codex/replace-all-instances-of-any-in-codebase
+  attachments: Attachment[] | string | null;
+
+ codex/replace-any-with-correct-typescript-types
+  attachments: Attachment[] | string;
+
+ codex/replace-instances-of-any-with-correct-types
+  attachments: string | Record<string, unknown>[] | null;
+
+  attachments: Attachment[];
+ main
+ main
+ main
+ main
   is_read: boolean;
   is_archived: boolean;
   created_at: string;

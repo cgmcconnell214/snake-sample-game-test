@@ -40,7 +40,23 @@ export interface StrategyConfig {
   is_active: boolean;
 }
 
+ xgqza0-codex/replace-instances-of-any-with-correct-types
 export interface PerformanceMetrics {
+
+ codex/replace-all-instances-of-any-in-codebase
+export interface StrategyMetrics {
+
+ codex/replace-any-with-correct-typescript-types
+export interface StrategyMetrics {
+
+ codex/replace-instances-of-any-with-correct-types
+export interface PerformanceMetrics {
+
+export interface StrategyPerformanceMetrics {
+ main
+ main
+ main
+ main
   strategy_id: string;
   total_trades: number;
   success_rate: number;
@@ -179,7 +195,23 @@ export class StrategyRunner {
    * Get strategy performance metrics
    * Future implementation will track actual trading performance
    */
+ xgqza0-codex/replace-instances-of-any-with-correct-types
   getPerformanceMetrics(): PerformanceMetrics {
+
+ codex/replace-all-instances-of-any-in-codebase
+  getPerformanceMetrics(): StrategyMetrics {
+
+ codex/replace-any-with-correct-typescript-types
+  getPerformanceMetrics(): StrategyMetrics {
+
+ codex/replace-instances-of-any-with-correct-types
+  getPerformanceMetrics(): PerformanceMetrics {
+
+  getPerformanceMetrics(): StrategyPerformanceMetrics {
+ main
+ main
+ main
+ main
     return {
       strategy_id: this.config.strategy_id,
       total_trades: 0, // Placeholder
