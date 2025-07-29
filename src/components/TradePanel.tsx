@@ -78,7 +78,12 @@ export function TradePanel() {
       const err = error as Error;
       toast({
         title: "Order Failed",
+ codex/replace-instances-of-any-with-correct-types
         description: err.message || "Failed to create order. Please try again.",
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        description: (error as any).message || "Failed to create order. Please try again.",
+ main
         variant: "destructive",
       });
     } finally {

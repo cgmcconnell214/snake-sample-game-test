@@ -49,7 +49,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error: unknown) => {
+ codex/replace-instances-of-any-with-correct-types
         // TODO: Verify correct type for error
+
+ main
         // Don't retry on 4xx errors
         if (error?.status >= 400 && error?.status < 500) return false;
         return failureCount < 3;

@@ -45,8 +45,13 @@ const Auth = () => {
         setError(error.message);
       }
     } catch (err: unknown) {
+ codex/replace-instances-of-any-with-correct-types
       const error = err as Error;
       setError(error.message || 'An error occurred during sign in');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).message || 'An error occurred during sign in');
+ main
     } finally {
       setLoading(false);
     }
@@ -79,8 +84,13 @@ const Auth = () => {
         setError(error.message);
       }
     } catch (err: unknown) {
+ codex/replace-instances-of-any-with-correct-types
       const error = err as Error;
       setError(error.message || 'An error occurred during sign up');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).message || 'An error occurred during sign up');
+ main
     } finally {
       setLoading(false);
     }
@@ -102,8 +112,13 @@ const Auth = () => {
         setError(error.message);
       }
     } catch (err: unknown) {
+ codex/replace-instances-of-any-with-correct-types
       const error = err as Error;
       setError(error.message || 'An error occurred with Discord authentication');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).message || 'An error occurred with Discord authentication');
+ main
     } finally {
       setLoading(false);
     }

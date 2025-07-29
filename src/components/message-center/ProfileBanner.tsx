@@ -4,15 +4,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Settings, 
-  Bell, 
-  Shield, 
+import {
+  Settings,
+  Bell,
+  Shield,
   Crown,
   MessageSquare,
   TrendingUp,
   Wallet
 } from 'lucide-react';
+import { User } from '@supabase/supabase-js';
 
 interface ProfileBannerProps {
   user: User | null;

@@ -8,10 +8,22 @@ import { Activity, Search, Download, Filter, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AuditDetailModal from '@/components/AuditDetailModal';
 
+interface AuditLog {
+  id: number;
+  timestamp: string;
+  action: string;
+  user: string;
+  details: string;
+  type: string;
+  status: string;
+  ipAddress: string;
+}
+
 const AuditTrail = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+ codex/replace-instances-of-any-with-correct-types
   interface AuditLog {
     id: number;
     timestamp: string;
@@ -23,6 +35,8 @@ const AuditTrail = () => {
     ipAddress: string;
   }
 
+
+ main
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
