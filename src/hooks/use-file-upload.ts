@@ -84,6 +84,8 @@ export function useFileUpload() {
 
       return results;
     } catch (err: unknown) {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
  codex/replace-all-instances-of-any-in-codebase
 
  codex/replace-any-with-correct-typescript-types
@@ -94,6 +96,7 @@ export function useFileUpload() {
       setError(error.message || 'Failed to upload files');
       throw error;
 
+ main
       console.error('Upload error:', err);
  codex/replace-instances-of-any-with-correct-types
       const error = err as Error;

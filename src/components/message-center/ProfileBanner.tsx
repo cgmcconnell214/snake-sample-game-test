@@ -4,10 +4,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+import { User } from '@supabase/supabase-js';
+import { 
+  Settings, 
+  Bell, 
+  Shield, 
+
 import {
   Settings,
   Bell,
   Shield,
+ main
   Crown,
   MessageSquare,
   TrendingUp,
@@ -17,7 +25,21 @@ import { User } from '@supabase/supabase-js';
 
 import { User } from '@supabase/supabase-js';
 
+interface UserProfileInfo {
+  avatar_url?: string;
+  display_name?: string;
+  first_name?: string;
+  username?: string;
+  role?: string;
+  subscription_tier?: string;
+  bio?: string;
+}
+
 interface ProfileBannerProps {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  user: User | null;
+  profile: UserProfileInfo | null;
+
  codex/replace-all-instances-of-any-in-codebase
   user: User | null;
   profile: Record<string, unknown> | null;
@@ -38,6 +60,7 @@ interface ProfileBannerProps {
 
   user: User | null;
   profile: Record<string, unknown> | null;
+ main
  main
  main
   unreadCount: number;

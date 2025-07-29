@@ -33,6 +33,13 @@ interface AuditLog {
 interface AuditDetail {
   id: string;
   event_id: string;
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  request_data: Record<string, unknown> | null;
+  response_data: Record<string, unknown> | null;
+  error_details: Record<string, unknown> | null;
+  execution_time_ms: number;
+  security_context: Record<string, unknown> | null;
+
  codex/replace-all-instances-of-any-in-codebase
   request_data: Record<string, unknown>;
   response_data: Record<string, unknown>;
@@ -59,6 +66,7 @@ interface AuditDetail {
   error_details: Record<string, unknown>;
   execution_time_ms: number;
   security_context: Record<string, unknown>;
+ main
  main
  main
  main

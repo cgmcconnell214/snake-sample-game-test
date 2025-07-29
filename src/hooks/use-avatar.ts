@@ -57,6 +57,8 @@ export function useAvatar() {
 
       return { url: publicUrl };
     } catch (err: unknown) {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
  codex/replace-all-instances-of-any-in-codebase
 
  codex/replace-any-with-correct-typescript-types
@@ -67,6 +69,7 @@ export function useAvatar() {
       setError(error.message || 'Failed to upload avatar');
       throw error;
 
+ main
       console.error('Avatar upload error:', err);
  codex/replace-instances-of-any-with-correct-types
       const error = err as Error;

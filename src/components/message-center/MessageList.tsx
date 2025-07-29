@@ -38,6 +38,9 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  attachments: Attachment[] | string | null;
+
  codex/replace-all-instances-of-any-in-codebase
   attachments: Attachment[] | string | null;
 
@@ -48,6 +51,7 @@ interface Message {
   attachments: string | Record<string, unknown>[] | null;
 
   attachments: Attachment[];
+ main
  main
  main
  main

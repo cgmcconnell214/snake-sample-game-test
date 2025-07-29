@@ -76,11 +76,14 @@ export function TradePanel() {
       setPrice("");
       
     } catch (error: unknown) {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+
  codex/replace-all-instances-of-any-in-codebase
 
  codex/replace-any-with-correct-typescript-types
       // TODO: Verify correct error type
 
+ main
  main
  main
       console.error('Order creation error:', error);

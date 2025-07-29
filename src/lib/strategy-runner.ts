@@ -40,6 +40,9 @@ export interface StrategyConfig {
   is_active: boolean;
 }
 
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+export interface PerformanceMetrics {
+
  codex/replace-all-instances-of-any-in-codebase
 export interface StrategyMetrics {
 
@@ -50,6 +53,7 @@ export interface StrategyMetrics {
 export interface PerformanceMetrics {
 
 export interface StrategyPerformanceMetrics {
+ main
  main
  main
  main
@@ -191,6 +195,9 @@ export class StrategyRunner {
    * Get strategy performance metrics
    * Future implementation will track actual trading performance
    */
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  getPerformanceMetrics(): PerformanceMetrics {
+
  codex/replace-all-instances-of-any-in-codebase
   getPerformanceMetrics(): StrategyMetrics {
 
@@ -201,6 +208,7 @@ export class StrategyRunner {
   getPerformanceMetrics(): PerformanceMetrics {
 
   getPerformanceMetrics(): StrategyPerformanceMetrics {
+ main
  main
  main
  main

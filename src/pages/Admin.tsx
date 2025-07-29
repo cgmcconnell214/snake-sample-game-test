@@ -82,6 +82,11 @@ interface TradeRecord {
 const Admin = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
+  const [alerts, setAlerts] = useState<Record<string, unknown>[]>([]);
+  const [trades, setTrades] = useState<Record<string, unknown>[]>([]);
+
  codex/replace-all-instances-of-any-in-codebase
   interface AdminUser {
 
@@ -138,6 +143,7 @@ const Admin = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [alerts, setAlerts] = useState<ComplianceAlertItem[]>([]);
   const [trades, setTrades] = useState<TradeExecution[]>([]);
+ main
  main
  main
  main
@@ -361,6 +367,9 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+                  {users.map((user) => (
+
  codex/replace-all-instances-of-any-in-codebase
                   {users.map((user: AdminUser) => (
 
@@ -371,6 +380,7 @@ const Admin = () => {
                   {users.map((user: UserRecord) => (
 
                   {users.map((user) => (
+ main
  main
  main
  main
@@ -428,6 +438,9 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+                  {alerts.map((alert) => (
+
  codex/replace-all-instances-of-any-in-codebase
                   {alerts.map((alert: ComplianceAlert) => (
 
@@ -438,6 +451,7 @@ const Admin = () => {
                   {alerts.map((alert: ComplianceAlert) => (
 
                   {alerts.map((alert) => (
+ main
  main
  main
  main
@@ -490,6 +504,9 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+                  {trades.map((trade) => (
+
  codex/replace-all-instances-of-any-in-codebase
                   {trades.map((trade: TradeExecution) => (
 
@@ -500,6 +517,7 @@ const Admin = () => {
                   {trades.map((trade: TradeRecord) => (
 
                   {trades.map((trade) => (
+ main
  main
  main
  main

@@ -50,6 +50,9 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+      retry: (failureCount, error: { status?: number }) => {
+
       retry: (failureCount, error: unknown) => {
  codex/replace-all-instances-of-any-in-codebase
 
@@ -59,6 +62,7 @@ const queryClient = new QueryClient({
  codex/replace-instances-of-any-with-correct-types
         // TODO: Verify correct type for error
 
+ main
  main
  main
  main
