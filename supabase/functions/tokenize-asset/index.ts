@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { generateXrplCurrencyCode } from "../utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -65,9 +66,7 @@ serve(async (req) => {
     }
 
     // Generate XRPL currency code (3-character for standard, hex for custom)
-    const xrpl_currency_code = requestData.asset_symbol.length <= 3 
-      ? requestData.asset_symbol.toUpperCase().padEnd(3, '\0')
-      : Buffer.from(requestData.asset_symbol.substring(0, 20)).toString('hex').toUpperCase().padEnd(40, '0');
+    const xrpl_currency_code = generateXrplCurrencyCode(requestData.asset_symbol);
 
     // For demo purposes, we'll simulate XRPL interaction
     // In production, this would interact with actual XRPL network
