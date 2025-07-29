@@ -26,6 +26,7 @@ serve(async (req) => {
   );
 
   try {
+    const startTime = Date.now();
     logStep("Function started");
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -68,10 +69,12 @@ serve(async (req) => {
         updated_at: new Date().toISOString(),
       }).eq('user_id', user.id);
       
-      return new Response(JSON.stringify({ 
-        subscribed: false, 
+      const execTime = Date.now() - startTime;
+      logStep(`Execution time: ${execTime}ms`);
+      return new Response(JSON.stringify({
+        subscribed: false,
         subscription_tier: "free",
-        subscription_end: null 
+        subscription_end: null
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -131,6 +134,8 @@ serve(async (req) => {
     }).eq('user_id', user.id);
 
     logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier });
+    const execTime = Date.now() - startTime;
+    logStep(`Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({
       subscribed: hasActiveSub,
       subscription_tier: subscriptionTier,
@@ -141,7 +146,9 @@ serve(async (req) => {
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const execTime = Date.now() - startTime;
     logStep("ERROR in check-subscription", { message: errorMessage });
+    logStep(`Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

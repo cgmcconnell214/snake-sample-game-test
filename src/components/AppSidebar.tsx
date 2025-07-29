@@ -1,10 +1,10 @@
-import { useState } from "react"
-import { 
-  LayoutDashboard, 
-  Coins, 
-  TrendingUp, 
-  Briefcase, 
-  Shield, 
+import { useState } from "react";
+import {
+  LayoutDashboard,
+  Coins,
+  TrendingUp,
+  Briefcase,
+  Shield,
   Settings,
   UserCheck,
   Activity,
@@ -34,9 +34,21 @@ import {
   GitBranch,
   Monitor,
   Webhook,
+ codex/apply-eslint-typescript-rules
+  AlertTriangle,
+} from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
+
   AlertTriangle
 } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { ChevronDown } from "lucide-react"
+ main
 
 import {
   Sidebar,
@@ -50,43 +62,51 @@ import {
   SidebarTrigger,
   useSidebar,
   SidebarHeader,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 // Core Platform
 const coreItems = [
+ ulpt8z-codex/conduct-full-system-audit-and-prioritize-findings
+  { title: "Dashboard", url: "/app", icon: LayoutDashboard },
+
   { title: "Dashboard", url: "/app/", icon: LayoutDashboard },
+ main
   { title: "Tokenize Assets", url: "/app/tokenize", icon: Coins },
   { title: "Trading", url: "/app/trading", icon: TrendingUp },
   { title: "Portfolio", url: "/app/portfolio", icon: Briefcase },
-]
+];
 
 // 1. AI & Automation Layer
 const aiAutomationItems = [
   { title: "AI Agents", url: "/app/ai-agents", icon: Bot },
   { title: "Smart Contracts", url: "/app/smart-contracts", icon: FileCheck },
-  { title: "Workflow Automation", url: "/app/workflow-automation", icon: Workflow },
-]
+  {
+    title: "Workflow Automation",
+    url: "/app/workflow-automation",
+    icon: Workflow,
+  },
+];
 
 // 2. Education & Onboarding Layer
 const educationItems = [
   { title: "Learning Portal", url: "/app/learning", icon: GraduationCap },
   { title: "Certification", url: "/app/certification", icon: Award },
   { title: "Live Classes", url: "/app/live-classes", icon: Calendar },
-]
+];
 
 // 3. Spiritual / Sovereign Layer
 const spiritualItems = [
   { title: "Divine Trust Vault", url: "/app/divine-trust", icon: Archive },
   { title: "Kingdom Entry", url: "/app/kingdom-entry", icon: Users },
   { title: "Sacred Law", url: "/app/sacred-law", icon: Feather },
-]
+];
 
 // 4. Marketplace & Exchange Layer
 const marketplaceItems = [
   { title: "P2P Marketplace", url: "/app/marketplace", icon: Store },
   { title: "Liquidity Pools", url: "/app/liquidity", icon: Layers },
   { title: "Escrow Vaults", url: "/app/escrow", icon: Building },
-]
+];
 
 // Compliance & Security (Existing)
 const complianceItems = [
@@ -94,14 +114,14 @@ const complianceItems = [
   { title: "Compliance", url: "/app/compliance", icon: Shield },
   { title: "Audit Trail", url: "/app/audit", icon: Activity },
   { title: "Reports", url: "/app/reports", icon: FileText },
-]
+];
 
 // 5. Admin & Infrastructure Layer
 const adminItems = [
   { title: "Node Management", url: "/app/node-management", icon: GitBranch },
   { title: "Data Sync", url: "/app/data-sync", icon: Webhook },
   { title: "System Diagnostics", url: "/app/diagnostics", icon: Monitor },
-]
+];
 
 // Bonus Features
 const bonusItems = [
@@ -109,7 +129,7 @@ const bonusItems = [
   { title: "Asset Provenance", url: "/app/asset-provenance", icon: History },
   { title: "Tokenomics", url: "/app/tokenomics", icon: BarChart3 },
   { title: "Dev Playground", url: "/app/dev-playground", icon: Code },
-]
+];
 
 // System & User
 const systemItems = [
@@ -117,16 +137,37 @@ const systemItems = [
   { title: "Messages", url: "/app/messages", icon: Mail },
   { title: "IP Assets", url: "/app/ip-tokenization", icon: Coins },
   { title: "Settings", url: "/app/settings", icon: Settings },
-]
+];
 
-export function AppSidebar() {
-  const { open } = useSidebar()
-  const location = useLocation()
-  const currentPath = location.pathname
+export function AppSidebar(): JSX.Element {
+  const { open } = useSidebar();
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+ codex/apply-eslint-typescript-rules
+  const isActive = (path: string) => currentPath === path;
+
+  const [openSections, setOpenSections] = useState({
+    core: true,
+    ai: true,
+    education: true,
+    spiritual: true,
+    market: true,
+    compliance: true,
+    admin: true,
+    bonus: true,
+    system: true,
+  })
+
+  const toggleSection = (key: keyof typeof openSections) =>
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }))
 
   const isActive = (path: string) => currentPath === path
+ main
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-sidebar-accent text-sidebar-primary font-medium" : "hover:bg-sidebar-accent/50"
+    isActive
+      ? "bg-sidebar-accent text-sidebar-primary font-medium"
+      : "hover:bg-sidebar-accent/50";
 
   return (
     <Sidebar className={open ? "w-64" : "w-16"} collapsible="icon">
@@ -137,8 +178,12 @@ export function AppSidebar() {
           </div>
           {open && (
             <div>
-              <h2 className="text-lg font-bold text-sidebar-foreground">God's Realm</h2>
-              <p className="text-xs text-sidebar-foreground/60">Divine Tokenization Platform</p>
+              <h2 className="text-lg font-bold text-sidebar-foreground">
+                God's Realm
+              </h2>
+              <p className="text-xs text-sidebar-foreground/60">
+                Divine Tokenization Platform
+              </p>
             </div>
           )}
         </div>
@@ -146,176 +191,302 @@ export function AppSidebar() {
 
       <SidebarContent className="p-2 space-y-1">
         {/* Core Platform */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Core Platform</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {coreItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Collapsible
+          open={openSections.core}
+          onOpenChange={() => toggleSection('core')}
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full cursor-pointer px-2">
+                <span>Core Platform</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${openSections.core ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {coreItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} end className={getNavCls}>
+                          <item.icon className="h-4 w-4" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* 1. AI & Automation */}
-        <SidebarGroup>
-          <SidebarGroupLabel>🧬 AI & Automation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {aiAutomationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Collapsible
+          open={openSections.ai}
+          onOpenChange={() => toggleSection('ai')}
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full cursor-pointer px-2">
+                <span>🧬 AI & Automation</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${openSections.ai ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {aiAutomationItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="h-4 w-4" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* 2. Education & Onboarding */}
-        <SidebarGroup>
-          <SidebarGroupLabel>📚 Education & Onboarding</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {educationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Collapsible
+          open={openSections.education}
+          onOpenChange={() => toggleSection('education')}
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full cursor-pointer px-2">
+                <span>📚 Education & Onboarding</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${openSections.education ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {educationItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="h-4 w-4" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* 3. Spiritual / Sovereign */}
-        <SidebarGroup>
-          <SidebarGroupLabel>👁️ Spiritual / Sovereign</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {spiritualItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Collapsible
+          open={openSections.spiritual}
+          onOpenChange={() => toggleSection('spiritual')}
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full cursor-pointer px-2">
+                <span>👁️ Spiritual / Sovereign</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${openSections.spiritual ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {spiritualItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="h-4 w-4" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* 4. Marketplace & Exchange */}
-        <SidebarGroup>
-          <SidebarGroupLabel>🏦 Marketplace & Exchange</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {marketplaceItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Collapsible
+          open={openSections.market}
+          onOpenChange={() => toggleSection('market')}
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full cursor-pointer px-2">
+                <span>🏦 Marketplace & Exchange</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${openSections.market ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {marketplaceItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="h-4 w-4" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* Compliance & Security */}
-        <SidebarGroup>
-          <SidebarGroupLabel>🛡️ Compliance & Security</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {complianceItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Collapsible
+          open={openSections.compliance}
+          onOpenChange={() => toggleSection('compliance')}
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full cursor-pointer px-2">
+                <span>🛡️ Compliance & Security</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${openSections.compliance ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {complianceItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="h-4 w-4" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* 5. Admin & Infrastructure */}
-        <SidebarGroup>
-          <SidebarGroupLabel>🧩 Admin & Infrastructure</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {adminItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Collapsible
+          open={openSections.admin}
+          onOpenChange={() => toggleSection('admin')}
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full cursor-pointer px-2">
+                <span>🧩 Admin & Infrastructure</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${openSections.admin ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {adminItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="h-4 w-4" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* Bonus Features */}
-        <SidebarGroup>
-          <SidebarGroupLabel>✨ Advanced Features</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {bonusItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Collapsible
+          open={openSections.bonus}
+          onOpenChange={() => toggleSection('bonus')}
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full cursor-pointer px-2">
+                <span>✨ Advanced Features</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${openSections.bonus ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {bonusItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="h-4 w-4" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
 
         {/* System & User */}
-        <SidebarGroup>
-          <SidebarGroupLabel>⚙️ System</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {systemItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {open && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <Collapsible
+          open={openSections.system}
+          onOpenChange={() => toggleSection('system')}
+        >
+          <SidebarGroup>
+            <SidebarGroupLabel asChild>
+              <CollapsibleTrigger className="flex items-center justify-between w-full cursor-pointer px-2">
+                <span>⚙️ System</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${openSections.system ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </CollapsibleTrigger>
+            </SidebarGroupLabel>
+            <CollapsibleContent>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {systemItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="h-4 w-4" />
+                          {open && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </CollapsibleContent>
+          </SidebarGroup>
+        </Collapsible>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

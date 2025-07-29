@@ -9,8 +9,12 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+ codex/generate-final-production-readiness-checklist
     "test": "vitest",
     "coverage": "vitest run --coverage"
+
+    "deploy:contract": "node scripts/deploy-contract.js"
+ main
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -62,6 +66,7 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.3",
+    "xrpl": "^2.14.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {

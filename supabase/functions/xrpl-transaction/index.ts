@@ -34,6 +34,7 @@ serve(async (req) => {
   );
 
   try {
+    const startTime = Date.now();
     logStep("Function started");
 
     const authHeader = req.headers.get("Authorization");
@@ -64,12 +65,15 @@ serve(async (req) => {
 
     // Handle smart contract function execution
     if (requestData.action && requestData.parameters) {
-      return await handleSmartContractExecution(
+      const resp = await handleSmartContractExecution(
         requestData.action,
         requestData.parameters,
         user.id,
         supabaseClient
       );
+      const execTime = Date.now() - startTime;
+      logStep(`Execution time: ${execTime}ms`);
+      return resp;
     }
 
     // Get asset details
@@ -193,7 +197,8 @@ serve(async (req) => {
       });
 
     logStep("Transaction logged and processed");
-
+    const execTime = Date.now() - startTime;
+    logStep(`Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({
       success: true,
       transaction: {
@@ -211,10 +216,12 @@ serve(async (req) => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const execTime = Date.now() - startTime;
     logStep("ERROR in xrpl-transaction", { message: errorMessage });
-    return new Response(JSON.stringify({ 
+    logStep(`Execution time: ${execTime}ms`);
+    return new Response(JSON.stringify({
       error: errorMessage,
-      success: false 
+      success: false
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

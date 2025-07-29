@@ -1,10 +1,41 @@
+ codex/apply-eslint-typescript-rules
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Reply, Forward, Archive, Star, Clock } from "lucide-react";
+import AttachmentViewer from "./AttachmentViewer";
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Reply, Forward, Archive, Star, Clock } from 'lucide-react';
-import AttachmentViewer from './AttachmentViewer';
+import AttachmentViewer, { type Attachment } from './AttachmentViewer';
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+ main
 
 interface Message {
   id: string;
@@ -13,7 +44,23 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  attachments: Attachment[] | string | null;
+
+ codex/replace-all-instances-of-any-in-codebase
+  attachments: Attachment[] | string | null;
+
+ codex/replace-any-with-correct-typescript-types
+  attachments: Attachment[] | string;
+
+ codex/replace-instances-of-any-with-correct-types
+  attachments: string | Record<string, unknown>[] | null;
+
+  attachments: Attachment[];
+ main
+ main
+ main
+ main
   is_read: boolean;
   is_archived: boolean;
   created_at: string;
@@ -29,16 +76,22 @@ interface MessageDetailProps {
 
 const MessageDetail: React.FC<MessageDetailProps> = ({ message }) => {
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const getSenderInfo = () => {
-    if (!message?.sender_id) return { name: 'System', initials: 'SYS' };
+    if (!message?.sender_id) return { name: "System", initials: "SYS" };
     if (message.sender_profile) {
-      const name = `${message.sender_profile.first_name} ${message.sender_profile.last_name}`.trim();
-      return { name: name || 'User', initials: getInitials(name || 'User') };
+      const name =
+        `${message.sender_profile.first_name} ${message.sender_profile.last_name}`.trim();
+      return { name: name || "User", initials: getInitials(name || "User") };
     }
-    return { name: 'User', initials: 'U' };
+    return { name: "User", initials: "U" };
   };
 
   return (
@@ -48,8 +101,10 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ message }) => {
           <CardTitle className="text-lg">Message Details</CardTitle>
           {message && (
             <div className="flex items-center space-x-2">
-              <Badge 
-                variant={message.message_type === 'system' ? 'default' : 'outline'} 
+              <Badge
+                variant={
+                  message.message_type === "system" ? "default" : "outline"
+                }
                 className="text-xs"
               >
                 {message.message_type}
@@ -77,13 +132,17 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ message }) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-lg">{message.subject}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {message.subject}
+                      </h3>
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground mt-1">
                         <span>From: {getSenderInfo().name}</span>
                         <span>•</span>
                         <div className="flex items-center space-x-1">
                           <Clock className="h-3 w-3" />
-                          <span>{new Date(message.created_at).toLocaleString()}</span>
+                          <span>
+                            {new Date(message.created_at).toLocaleString()}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -103,12 +162,15 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ message }) => {
 
             {/* Attachments */}
             {(() => {
-              const attachments = typeof message.attachments === 'string' 
-                ? JSON.parse(message.attachments || '[]') 
-                : message.attachments || [];
-              
-              return attachments.length > 0 && (
-                <AttachmentViewer attachments={attachments} />
+              const attachments =
+                typeof message.attachments === "string"
+                  ? JSON.parse(message.attachments || "[]")
+                  : message.attachments || [];
+
+              return (
+                attachments.length > 0 && (
+                  <AttachmentViewer attachments={attachments} />
+                )
               );
             })()}
 
@@ -138,7 +200,9 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ message }) => {
               <Reply className="h-8 w-8" />
             </div>
             <h3 className="font-medium mb-2">No Message Selected</h3>
-            <p className="text-sm">Select a message from the list to view its details</p>
+            <p className="text-sm">
+              Select a message from the list to view its details
+            </p>
           </div>
         )}
       </CardContent>
