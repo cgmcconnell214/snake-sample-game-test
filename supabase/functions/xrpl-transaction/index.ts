@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { Client, Wallet } from "https://esm.sh/xrpl@2.7.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,6 +21,59 @@ interface XRPLTransactionRequest {
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[XRPL-TRANSACTION] ${step}${detailsStr}`);
+};
+
+// XRPL network configuration
+const XRPL_NETWORKS = {
+  XRPL_TESTNET: "wss://s.altnet.rippletest.net:51233",
+  XAHAU_TESTNET: "wss://xahau-test.net:51233",
+  BATCH_DEVNET: "wss://hooks-testnet-v3.xrpl-labs.com",
+} as const;
+
+const XRPL_BURN_ADDRESS = "rrrrrrrrrrrrrrrrrrrrrhoLvTp";
+
+const getNetworkUrl = () => {
+  const name = (Deno.env.get("XRPL_NETWORK") || "XRPL_TESTNET") as keyof typeof XRPL_NETWORKS;
+  return XRPL_NETWORKS[name] ?? XRPL_NETWORKS.XRPL_TESTNET;
+};
+
+const getWallet = () => {
+  const seed = Deno.env.get("XRPL_WALLET_SEED");
+  if (!seed) throw new Error("XRPL_WALLET_SEED not set");
+  return Wallet.fromSeed(seed);
+};
+
+const submitPayment = async (
+  destination: string,
+  amount: string,
+  currency: string,
+  issuer: string,
+  memo?: string,
+) => {
+  const client = new Client(getNetworkUrl());
+  await client.connect();
+  const wallet = getWallet();
+  const tx: any = {
+    TransactionType: "Payment",
+    Account: wallet.classicAddress,
+    Destination: destination,
+    Amount: { currency, issuer, value: amount },
+  };
+  if (memo) {
+    tx.Memos = [{ Memo: { MemoData: Buffer.from(memo).toString("hex") } }];
+  }
+  try {
+    const resp = await client.submitAndWait(tx, { wallet });
+    const result = resp.result;
+    return {
+      success: result.meta?.TransactionResult === "tesSUCCESS",
+      transactionHash: result.hash,
+      ledgerIndex: result.ledger_index,
+      status: result.meta?.TransactionResult,
+    };
+  } finally {
+    await client.disconnect();
+  }
 };
 
 serve(async (req) => {
@@ -83,16 +137,23 @@ serve(async (req) => {
       throw new Error("Asset not found");
     }
 
-    // Simulate XRPL transaction
-    // In production, this would interact with actual XRPL network
-    const mockTransactionHash = `${Math.random().toString(16).substring(2, 66).toUpperCase()}`;
-    const mockLedgerIndex = Math.floor(Math.random() * 1000000);
+    // Execute XRPL transaction against selected network
+    const xrplResult = await submitPayment(
+      requestData.transaction_type === 'token_burn'
+        ? XRPL_BURN_ADDRESS
+        : requestData.destination || getWallet().classicAddress,
+      String(requestData.amount || 0),
+      asset.xrpl_currency_code,
+      asset.xrpl_issuer_address,
+      requestData.memo,
+    );
 
-    logStep("Simulated XRPL transaction", {
+    logStep("XRPL transaction submitted", {
       type: requestData.transaction_type,
       asset: asset.asset_symbol,
       amount: requestData.amount,
-      hash: mockTransactionHash
+      hash: xrplResult.transactionHash,
+      status: xrplResult.status,
     });
 
     // Update asset holdings based on transaction type
@@ -176,8 +237,9 @@ serve(async (req) => {
         amount: requestData.amount,
         event_type: requestData.transaction_type,
         asset_issuer: asset.xrpl_issuer_address,
-        xrpl_transaction_hash: mockTransactionHash,
-        xrpl_ledger_index: mockLedgerIndex,
+        xrpl_transaction_hash: xrplResult.transactionHash,
+        xrpl_ledger_index: xrplResult.ledgerIndex,
+        transaction_status: xrplResult.status,
         compliance_metadata: {
           transaction_memo: requestData.memo,
           user_verified: true,
@@ -197,8 +259,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       transaction: {
-        hash: mockTransactionHash,
-        ledger_index: mockLedgerIndex,
+        hash: xrplResult.transactionHash,
+        ledger_index: xrplResult.ledgerIndex,
         type: requestData.transaction_type,
         asset_symbol: asset.asset_symbol,
         amount: requestData.amount,
