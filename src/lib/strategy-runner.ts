@@ -40,6 +40,36 @@ export interface StrategyConfig {
   is_active: boolean;
 }
 
+ khfq01-codex/replace-instances-of-any-with-correct-types
+export interface PerformanceMetrics {
+
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+export interface PerformanceMetrics {
+
+ codex/replace-all-instances-of-any-in-codebase
+export interface StrategyMetrics {
+
+ codex/replace-any-with-correct-typescript-types
+export interface StrategyMetrics {
+
+ codex/replace-instances-of-any-with-correct-types
+export interface PerformanceMetrics {
+
+export interface StrategyPerformanceMetrics {
+ main
+ main
+ main
+ main
+ main
+  strategy_id: string;
+  total_trades: number;
+  success_rate: number;
+  total_pnl: number;
+  sharpe_ratio: number;
+  max_drawdown: number;
+  last_updated: string;
+}
+
 /**
  * AI Strategy Runner Class
  * Future implementation will integrate with:
@@ -169,7 +199,27 @@ export class StrategyRunner {
    * Get strategy performance metrics
    * Future implementation will track actual trading performance
    */
-  getPerformanceMetrics(): any {
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  getPerformanceMetrics(): PerformanceMetrics {
+
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  getPerformanceMetrics(): PerformanceMetrics {
+
+ codex/replace-all-instances-of-any-in-codebase
+  getPerformanceMetrics(): StrategyMetrics {
+
+ codex/replace-any-with-correct-typescript-types
+  getPerformanceMetrics(): StrategyMetrics {
+
+ codex/replace-instances-of-any-with-correct-types
+  getPerformanceMetrics(): PerformanceMetrics {
+
+  getPerformanceMetrics(): StrategyPerformanceMetrics {
+ main
+ main
+ main
+ main
+ main
     return {
       strategy_id: this.config.strategy_id,
       total_trades: 0, // Placeholder

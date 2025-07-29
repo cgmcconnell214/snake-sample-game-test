@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { BarChart3, TrendingUp, PieChart, Activity } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BarChart3, TrendingUp, PieChart, Activity } from "lucide-react";
 
-export default function TokenomicsPage() {
+export default function TokenomicsPage(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Tokenomics Dashboard</h1>
-          <p className="text-muted-foreground">Real-time metrics and economic analytics</p>
+          <p className="text-muted-foreground">
+            Real-time metrics and economic analytics
+          </p>
         </div>
         <Button>
           <TrendingUp className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function TokenomicsPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Track token velocity and circulation patterns
             </p>
-            <Button variant="outline" className="w-full">View Velocity</Button>
+            <Button variant="outline" className="w-full">
+              View Velocity
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function TokenomicsPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor token supply distribution and inflation
             </p>
-            <Button variant="outline" className="w-full">Analyze Supply</Button>
+            <Button variant="outline" className="w-full">
+              Analyze Supply
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function TokenomicsPage() {
             <p className="text-sm text-muted-foreground mb-4">
               Visualize smart contract interactions and flows
             </p>
-            <Button variant="outline" className="w-full">View Flows</Button>
+            <Button variant="outline" className="w-full">
+              View Flows
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

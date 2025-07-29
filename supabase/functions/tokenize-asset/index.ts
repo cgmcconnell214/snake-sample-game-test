@@ -32,6 +32,7 @@ serve(async (req) => {
   );
 
   try {
+    const startTime = Date.now();
     logStep("Function started");
 
     const authHeader = req.headers.get("Authorization");
@@ -156,6 +157,8 @@ serve(async (req) => {
         },
       });
 
+    const execTime = Date.now() - startTime;
+    logStep(`Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({
       success: true,
       asset: {
@@ -174,7 +177,9 @@ serve(async (req) => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const execTime = Date.now() - startTime;
     logStep("ERROR in tokenize-asset", { message: errorMessage });
+    logStep(`Execution time: ${execTime}ms`);
     return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

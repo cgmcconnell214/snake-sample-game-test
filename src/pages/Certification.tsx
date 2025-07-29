@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Award, CheckCircle, Clock, Star } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Award, CheckCircle, Clock, Star } from "lucide-react";
 
-export default function Certification() {
+export default function Certification(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Certification Paths</h1>
-          <p className="text-muted-foreground">Validate your knowledge and unlock new access levels</p>
+          <p className="text-muted-foreground">
+            Validate your knowledge and unlock new access levels
+          </p>
         </div>
         <Button>
           <Award className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function Certification() {
             <p className="text-sm text-muted-foreground mb-4">
               Complete essential steps to get started
             </p>
-            <Button variant="outline" className="w-full">View Checklist</Button>
+            <Button variant="outline" className="w-full">
+              View Checklist
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function Certification() {
             <p className="text-sm text-muted-foreground mb-4">
               Track your progress through skill levels
             </p>
-            <Button variant="outline" className="w-full">View Progress</Button>
+            <Button variant="outline" className="w-full">
+              View Progress
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function Certification() {
             <p className="text-sm text-muted-foreground mb-4">
               Unlock features based on certification level
             </p>
-            <Button variant="outline" className="w-full">Check Access</Button>
+            <Button variant="outline" className="w-full">
+              Check Access
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

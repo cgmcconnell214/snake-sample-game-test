@@ -1,0 +1,9 @@
+{
+  "contract_name": "Marketplace",
+  "contract_type": "marketplace",
+  "ledger": "xahau",
+  "initial_settings": {
+    "listing_fee": "10",
+    "currency": "XRP"
+  }
+}

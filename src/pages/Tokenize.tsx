@@ -1,28 +1,34 @@
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  Upload, 
-  FileText, 
-  Shield, 
-  CheckCircle, 
-  Clock, 
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Upload,
+  FileText,
+  Shield,
+  CheckCircle,
+  Clock,
   AlertCircle,
   Coins,
   TrendingUp,
   Users,
   DollarSign,
-  Loader2
-} from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+  Loader2,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const assetTypes = [
   { value: "commodity", label: "Commodity", icon: Coins },
@@ -30,15 +36,40 @@ const assetTypes = [
   { value: "equity", label: "Equity", icon: Users },
   { value: "debt", label: "Debt Instrument", icon: DollarSign },
   { value: "derivative", label: "Derivative", icon: TrendingUp },
-]
+];
 
 const complianceSteps = [
-  { id: 1, title: "Asset Documentation", status: "completed", description: "Upload legal documents" },
-  { id: 2, title: "Valuation Report", status: "completed", description: "Third-party asset valuation" },
-  { id: 3, title: "Regulatory Review", status: "in-progress", description: "ISO 20022 compliance check" },
-  { id: 4, title: "XRPL Minting", status: "pending", description: "Token creation on XRPL" },
-  { id: 5, title: "Market Listing", status: "pending", description: "Available for trading" },
-]
+  {
+    id: 1,
+    title: "Asset Documentation",
+    status: "completed",
+    description: "Upload legal documents",
+  },
+  {
+    id: 2,
+    title: "Valuation Report",
+    status: "completed",
+    description: "Third-party asset valuation",
+  },
+  {
+    id: 3,
+    title: "Regulatory Review",
+    status: "in-progress",
+    description: "ISO 20022 compliance check",
+  },
+  {
+    id: 4,
+    title: "XRPL Minting",
+    status: "pending",
+    description: "Token creation on XRPL",
+  },
+  {
+    id: 5,
+    title: "Market Listing",
+    status: "pending",
+    description: "Available for trading",
+  },
+];
 
 const recentTokenizations = [
   {
@@ -48,40 +79,46 @@ const recentTokenizations = [
     value: 65000,
     tokens: 1000,
     status: "active",
-    progress: 100
+    progress: 100,
   },
   {
-    id: "TKN002", 
+    id: "TKN002",
     name: "Manhattan Office Complex",
     type: "real-estate",
     value: 2500000,
     tokens: 10000,
     status: "pending",
-    progress: 75
+    progress: 75,
   },
   {
     id: "TKN003",
     name: "Silver Futures Contract",
-    type: "derivative", 
+    type: "derivative",
     value: 85000,
     tokens: 850,
     status: "review",
-    progress: 45
-  }
-]
+    progress: 45,
+  },
+];
 
-export default function Tokenize() {
-  const [assetType, setAssetType] = useState("")
-  const [tokenName, setTokenName] = useState("")
-  const [tokenSymbol, setTokenSymbol] = useState("")
-  const [totalValue, setTotalValue] = useState("")
-  const [totalSupply, setTotalSupply] = useState("")
-  const [description, setDescription] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+export default function Tokenize(): JSX.Element {
+  const [assetType, setAssetType] = useState("");
+  const [tokenName, setTokenName] = useState("");
+  const [tokenSymbol, setTokenSymbol] = useState("");
+  const [totalValue, setTotalValue] = useState("");
+  const [totalSupply, setTotalSupply] = useState("");
+  const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmitTokenization = async () => {
-    if (!assetType || !tokenName || !tokenSymbol || !totalValue || !totalSupply) {
+    if (
+      !assetType ||
+      !tokenName ||
+      !tokenSymbol ||
+      !totalValue ||
+      !totalSupply
+    ) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -94,25 +131,28 @@ export default function Tokenize() {
     try {
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
-        throw new Error('No session found');
+        throw new Error("No session found");
       }
 
-      const { data, error } = await supabase.functions.invoke('tokenize-asset', {
-        body: {
-          asset_name: tokenName,
-          asset_symbol: tokenSymbol,
-          description,
-          total_supply: parseFloat(totalSupply),
-          metadata: {
-            asset_type: assetType,
-            estimated_value: parseFloat(totalValue),
-            created_via: 'web_portal',
-          }
+      const { data, error } = await supabase.functions.invoke(
+        "tokenize-asset",
+        {
+          body: {
+            asset_name: tokenName,
+            asset_symbol: tokenSymbol,
+            description,
+            total_supply: parseFloat(totalSupply),
+            metadata: {
+              asset_type: assetType,
+              estimated_value: parseFloat(totalValue),
+              created_via: "web_portal",
+            },
+          },
+          headers: {
+            Authorization: `Bearer ${session.session.access_token}`,
+          },
         },
-        headers: {
-          Authorization: `Bearer ${session.session.access_token}`,
-        },
-      });
+      );
 
       if (error) throw error;
 
@@ -128,25 +168,27 @@ export default function Tokenize() {
       setTotalValue("");
       setTotalSupply("");
       setDescription("");
-
     } catch (error: any) {
-      console.error('Tokenization error:', error);
+      console.error("Tokenization error:", error);
       toast({
         title: "Tokenization Failed",
-        description: error.message || "Failed to tokenize asset. Please try again.",
+        description:
+          error.message || "Failed to tokenize asset. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Asset Tokenization</h1>
-          <p className="text-muted-foreground">Convert real-world assets into tradeable XRPL tokens</p>
+          <p className="text-muted-foreground">
+            Convert real-world assets into tradeable XRPL tokens
+          </p>
         </div>
         <Badge variant="outline" className="text-primary border-primary">
           <Shield className="h-3 w-3 mr-1" />
@@ -240,9 +282,12 @@ export default function Tokenize() {
                   <div className="space-y-4">
                     <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
                       <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="font-medium mb-2">Upload Asset Documentation</h3>
+                      <h3 className="font-medium mb-2">
+                        Upload Asset Documentation
+                      </h3>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Upload ownership documents, certificates, valuations, and legal papers
+                        Upload ownership documents, certificates, valuations,
+                        and legal papers
                       </p>
                       <Button variant="outline">
                         <Upload className="h-4 w-4 mr-2" />
@@ -281,7 +326,9 @@ export default function Tokenize() {
                       <Input
                         placeholder="e.g., GOLD001"
                         value={tokenSymbol}
-                        onChange={(e) => setTokenSymbol(e.target.value.toUpperCase())}
+                        onChange={(e) =>
+                          setTokenSymbol(e.target.value.toUpperCase())
+                        }
                         className="font-mono uppercase"
                         maxLength={20}
                       />
@@ -317,26 +364,46 @@ export default function Tokenize() {
                   </div>
 
                   <div className="bg-muted/20 rounded p-4">
-                    <h4 className="font-medium mb-2">Token Economics Preview</h4>
+                    <h4 className="font-medium mb-2">
+                      Token Economics Preview
+                    </h4>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Token Price:</span>
+                        <span className="text-muted-foreground">
+                          Token Price:
+                        </span>
                         <div className="font-mono font-medium">
-                          ${totalValue && totalSupply ? (parseFloat(totalValue) / parseFloat(totalSupply)).toFixed(2) : '0.00'}
+                          $
+                          {totalValue && totalSupply
+                            ? (
+                                parseFloat(totalValue) / parseFloat(totalSupply)
+                              ).toFixed(2)
+                            : "0.00"}
                         </div>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Market Cap:</span>
-                        <div className="font-mono font-medium">${totalValue || '0'}</div>
+                        <span className="text-muted-foreground">
+                          Market Cap:
+                        </span>
+                        <div className="font-mono font-medium">
+                          ${totalValue || "0"}
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     size="lg"
                     onClick={handleSubmitTokenization}
-                    disabled={!assetType || !tokenName || !tokenSymbol || !totalValue || !totalSupply || isLoading}
+                    disabled={
+                      !assetType ||
+                      !tokenName ||
+                      !tokenSymbol ||
+                      !totalValue ||
+                      !totalSupply ||
+                      isLoading
+                    }
                   >
                     {isLoading ? (
                       <>
@@ -344,7 +411,7 @@ export default function Tokenize() {
                         Creating Token...
                       </>
                     ) : (
-                      'Create Token on XRPL'
+                      "Create Token on XRPL"
                     )}
                   </Button>
                 </TabsContent>
@@ -364,13 +431,21 @@ export default function Tokenize() {
               {complianceSteps.map((step) => (
                 <div key={step.id} className="flex items-start gap-3">
                   <div className="flex-shrink-0 mt-0.5">
-                    {step.status === 'completed' && <CheckCircle className="h-5 w-5 text-success" />}
-                    {step.status === 'in-progress' && <Clock className="h-5 w-5 text-warning animate-pulse" />}
-                    {step.status === 'pending' && <AlertCircle className="h-5 w-5 text-muted-foreground" />}
+                    {step.status === "completed" && (
+                      <CheckCircle className="h-5 w-5 text-success" />
+                    )}
+                    {step.status === "in-progress" && (
+                      <Clock className="h-5 w-5 text-warning animate-pulse" />
+                    )}
+                    {step.status === "pending" && (
+                      <AlertCircle className="h-5 w-5 text-muted-foreground" />
+                    )}
                   </div>
                   <div className="space-y-1">
                     <div className="font-medium text-sm">{step.title}</div>
-                    <div className="text-xs text-muted-foreground">{step.description}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {step.description}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -384,7 +459,10 @@ export default function Tokenize() {
             </CardHeader>
             <CardContent className="space-y-4">
               {recentTokenizations.map((token) => (
-                <div key={token.id} className="space-y-3 p-3 rounded-lg bg-muted/20">
+                <div
+                  key={token.id}
+                  className="space-y-3 p-3 rounded-lg bg-muted/20"
+                >
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <div className="font-medium text-sm">{token.name}</div>
@@ -392,8 +470,10 @@ export default function Tokenize() {
                         <Badge variant="outline" className="text-xs">
                           {token.type}
                         </Badge>
-                        <Badge 
-                          variant={token.status === 'active' ? 'default' : 'secondary'}
+                        <Badge
+                          variant={
+                            token.status === "active" ? "default" : "secondary"
+                          }
                           className="text-xs"
                         >
                           {token.status}
@@ -401,8 +481,12 @@ export default function Tokenize() {
                       </div>
                     </div>
                     <div className="text-right text-xs">
-                      <div className="font-mono">${token.value.toLocaleString()}</div>
-                      <div className="text-muted-foreground">{token.tokens} tokens</div>
+                      <div className="font-mono">
+                        ${token.value.toLocaleString()}
+                      </div>
+                      <div className="text-muted-foreground">
+                        {token.tokens} tokens
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-1">
@@ -419,5 +503,5 @@ export default function Tokenize() {
         </div>
       </div>
     </div>
-  )
+  );
 }

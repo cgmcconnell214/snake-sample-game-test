@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Layers, Droplets, Lock, Timer } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Layers, Droplets, Lock, Timer } from "lucide-react";
 
-export default function LiquidityPools() {
+export default function LiquidityPools(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Liquidity Pools</h1>
-          <p className="text-muted-foreground">Provide liquidity and earn rewards</p>
+          <p className="text-muted-foreground">
+            Provide liquidity and earn rewards
+          </p>
         </div>
         <Button>
           <Droplets className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function LiquidityPools() {
             <p className="text-sm text-muted-foreground mb-4">
               Pools backed by physical commodities
             </p>
-            <Button variant="outline" className="w-full">View Pools</Button>
+            <Button variant="outline" className="w-full">
+              View Pools
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function LiquidityPools() {
             <p className="text-sm text-muted-foreground mb-4">
               Long-term locked liquidity with higher rewards
             </p>
-            <Button variant="outline" className="w-full">Bond Liquidity</Button>
+            <Button variant="outline" className="w-full">
+              Bond Liquidity
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function LiquidityPools() {
             <p className="text-sm text-muted-foreground mb-4">
               Track time-based interest accumulation
             </p>
-            <Button variant="outline" className="w-full">View Timers</Button>
+            <Button variant="outline" className="w-full">
+              View Timers
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

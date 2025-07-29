@@ -1,23 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Shield, 
-  Clock, 
-  AlertTriangle, 
-  CheckCircle, 
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Shield,
+  Clock,
+  AlertTriangle,
+  CheckCircle,
   Copy,
   ExternalLink,
   Activity,
   Lock,
   Globe,
+ khfq01-codex/replace-instances-of-any-with-correct-types
   Zap
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Json } from '@/integrations/supabase/types';
+
+  Zap,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+ main
 
 interface AuditLog {
   id: number;
@@ -33,11 +52,51 @@ interface AuditLog {
 interface AuditDetail {
   id: string;
   event_id: string;
-  request_data: any;
-  response_data: any;
-  error_details: any;
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  request_data: Json | null;
+  response_data: Json | null;
+  error_details: Json | null;
   execution_time_ms: number;
-  security_context: any;
+  security_context: Json | null;
+
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  request_data: Record<string, unknown> | null;
+  response_data: Record<string, unknown> | null;
+  error_details: Record<string, unknown> | null;
+  execution_time_ms: number;
+  security_context: Record<string, unknown> | null;
+
+ codex/replace-all-instances-of-any-in-codebase
+  request_data: Record<string, unknown>;
+  response_data: Record<string, unknown>;
+  error_details: unknown;
+  execution_time_ms: number;
+  security_context: Record<string, unknown>;
+
+ codex/replace-any-with-correct-typescript-types
+  request_data: Record<string, unknown>;
+  response_data: Record<string, unknown>;
+  error_details: Record<string, unknown>;
+  execution_time_ms: number;
+  security_context: Record<string, unknown>;
+
+ codex/replace-instances-of-any-with-correct-types
+  request_data: Record<string, unknown> | null;
+  response_data: Record<string, unknown> | null;
+  error_details: Record<string, unknown> | null;
+  execution_time_ms: number;
+  security_context: Record<string, unknown> | null;
+
+  request_data: Record<string, unknown>;
+  response_data: Record<string, unknown>;
+  error_details: Record<string, unknown>;
+  execution_time_ms: number;
+  security_context: Record<string, unknown>;
+ main
+ main
+ main
+ main
+ main
   compliance_flags: string[];
   created_at: string;
 }
@@ -48,7 +107,11 @@ interface AuditDetailModalProps {
   auditLog: AuditLog | null;
 }
 
-const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, auditLog }) => {
+const AuditDetailModal: React.FC<AuditDetailModalProps> = ({
+  isOpen,
+  onClose,
+  auditLog,
+}) => {
   const [auditDetail, setAuditDetail] = useState<AuditDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -57,27 +120,27 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
     if (isOpen && auditLog) {
       fetchAuditDetail();
     }
-  }, [isOpen, auditLog]);
+  }, [isOpen, auditLog, fetchAuditDetail]);
 
   const fetchAuditDetail = async () => {
     if (!auditLog) return;
-    
+
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('audit_event_details')
-        .select('*')
-        .eq('event_id', auditLog.id.toString())
+        .from("audit_event_details")
+        .select("*")
+        .eq("event_id", auditLog.id.toString())
         .single();
 
       if (error) {
-        console.error('Error fetching audit details:', error);
+        console.error("Error fetching audit details:", error);
         return;
       }
 
       setAuditDetail(data);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -93,11 +156,11 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success':
+      case "success":
         return <CheckCircle className="h-4 w-4 text-success" />;
-      case 'failed':
+      case "failed":
         return <AlertTriangle className="h-4 w-4 text-destructive" />;
-      case 'pending':
+      case "pending":
         return <Clock className="h-4 w-4 text-warning" />;
       default:
         return <Activity className="h-4 w-4 text-muted-foreground" />;
@@ -105,16 +168,20 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
   };
 
   const getComplianceFlagColor = (flag: string) => {
-    if (flag.includes('VERIFIED') || flag.includes('CLEARED') || flag.includes('OK')) {
-      return 'bg-success/10 text-success border-success/20';
+    if (
+      flag.includes("VERIFIED") ||
+      flag.includes("CLEARED") ||
+      flag.includes("OK")
+    ) {
+      return "bg-success/10 text-success border-success/20";
     }
-    if (flag.includes('PENDING') || flag.includes('REVIEW')) {
-      return 'bg-warning/10 text-warning border-warning/20';
+    if (flag.includes("PENDING") || flag.includes("REVIEW")) {
+      return "bg-warning/10 text-warning border-warning/20";
     }
-    if (flag.includes('FAILED') || flag.includes('VIOLATION')) {
-      return 'bg-destructive/10 text-destructive border-destructive/20';
+    if (flag.includes("FAILED") || flag.includes("VIOLATION")) {
+      return "bg-destructive/10 text-destructive border-destructive/20";
     }
-    return 'bg-primary/10 text-primary border-primary/20';
+    return "bg-primary/10 text-primary border-primary/20";
   };
 
   if (!auditLog) return null;
@@ -141,16 +208,20 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
             <div className="grid grid-cols-2 gap-4">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">Event Information</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Event Information
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Event ID:</span>
+                    <span className="text-sm text-muted-foreground">
+                      Event ID:
+                    </span>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-mono">{auditLog.id}</span>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
+                      <Button
+                        size="sm"
+                        variant="ghost"
                         onClick={() => copyToClipboard(auditLog.id.toString())}
                       >
                         <Copy className="h-3 w-3" />
@@ -158,25 +229,43 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
                     </div>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Action:</span>
-                    <span className="text-sm font-medium">{auditLog.action}</span>
+                    <span className="text-sm text-muted-foreground">
+                      Action:
+                    </span>
+                    <span className="text-sm font-medium">
+                      {auditLog.action}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Status:</span>
-                    <Badge variant={auditLog.status === 'success' ? 'default' : 'destructive'}>
+                    <span className="text-sm text-muted-foreground">
+                      Status:
+                    </span>
+                    <Badge
+                      variant={
+                        auditLog.status === "success"
+                          ? "default"
+                          : "destructive"
+                      }
+                    >
                       {auditLog.status.toUpperCase()}
                     </Badge>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Timestamp:</span>
-                    <span className="text-sm">{new Date(auditLog.timestamp).toLocaleString()}</span>
+                    <span className="text-sm text-muted-foreground">
+                      Timestamp:
+                    </span>
+                    <span className="text-sm">
+                      {new Date(auditLog.timestamp).toLocaleString()}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium">User Context</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    User Context
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex justify-between">
@@ -184,11 +273,17 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
                     <span className="text-sm">{auditLog.user}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">IP Address:</span>
-                    <span className="text-sm font-mono">{auditLog.ipAddress}</span>
+                    <span className="text-sm text-muted-foreground">
+                      IP Address:
+                    </span>
+                    <span className="text-sm font-mono">
+                      {auditLog.ipAddress}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Category:</span>
+                    <span className="text-sm text-muted-foreground">
+                      Category:
+                    </span>
                     <Badge variant="outline" className="text-xs">
                       {auditLog.type.toUpperCase()}
                     </Badge>
@@ -199,10 +294,14 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Event Details</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Event Details
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{auditLog.details}</p>
+                <p className="text-sm text-muted-foreground">
+                  {auditLog.details}
+                </p>
               </CardContent>
             </Card>
 
@@ -216,8 +315,12 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
                 </CardHeader>
                 <CardContent>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Execution Time:</span>
-                    <span className="text-sm font-medium">{auditDetail.execution_time_ms}ms</span>
+                    <span className="text-sm text-muted-foreground">
+                      Execution Time:
+                    </span>
+                    <span className="text-sm font-medium">
+                      {auditDetail.execution_time_ms}ms
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -226,13 +329,17 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
 
           <TabsContent value="technical" className="space-y-4">
             {loading ? (
-              <div className="text-center py-8">Loading technical details...</div>
+              <div className="text-center py-8">
+                Loading technical details...
+              </div>
             ) : auditDetail ? (
               <div className="space-y-4">
                 {auditDetail.request_data && (
                   <Card>
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium">Request Data</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Request Data
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto">
@@ -245,7 +352,9 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
                 {auditDetail.response_data && (
                   <Card>
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium">Response Data</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Response Data
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto">
@@ -258,7 +367,9 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
                 {auditDetail.error_details && (
                   <Card>
                     <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-destructive">Error Details</CardTitle>
+                      <CardTitle className="text-sm font-medium text-destructive">
+                        Error Details
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <pre className="text-xs bg-destructive/10 p-3 rounded-md overflow-x-auto">
@@ -285,14 +396,18 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {Object.entries(auditDetail.security_context).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="text-sm text-muted-foreground capitalize">
-                        {key.replace(/_/g, ' ')}:
-                      </span>
-                      <span className="text-sm font-mono">{String(value)}</span>
-                    </div>
-                  ))}
+                  {Object.entries(auditDetail.security_context).map(
+                    ([key, value]) => (
+                      <div key={key} className="flex justify-between">
+                        <span className="text-sm text-muted-foreground capitalize">
+                          {key.replace(/_/g, " ")}:
+                        </span>
+                        <span className="text-sm font-mono">
+                          {String(value)}
+                        </span>
+                      </div>
+                    ),
+                  )}
                 </CardContent>
               </Card>
             ) : (
@@ -303,7 +418,8 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
           </TabsContent>
 
           <TabsContent value="compliance" className="space-y-4">
-            {auditDetail?.compliance_flags && auditDetail.compliance_flags.length > 0 ? (
+            {auditDetail?.compliance_flags &&
+            auditDetail.compliance_flags.length > 0 ? (
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -317,9 +433,9 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {auditDetail.compliance_flags.map((flag, index) => (
-                      <Badge 
-                        key={index} 
-                        variant="outline" 
+                      <Badge
+                        key={index}
+                        variant="outline"
                         className={getComplianceFlagColor(flag)}
                       >
                         {flag}
@@ -344,15 +460,21 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Jurisdiction:</span>
+                    <span className="text-sm text-muted-foreground">
+                      Jurisdiction:
+                    </span>
                     <span className="text-sm">United States</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Regulatory Body:</span>
+                    <span className="text-sm text-muted-foreground">
+                      Regulatory Body:
+                    </span>
                     <span className="text-sm">SEC, CFTC, FINRA</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Compliance Standard:</span>
+                    <span className="text-sm text-muted-foreground">
+                      Compliance Standard:
+                    </span>
                     <span className="text-sm">SOX, GDPR, CCPA</span>
                   </div>
                 </div>
@@ -365,7 +487,12 @@ const AuditDetailModal: React.FC<AuditDetailModalProps> = ({ isOpen, onClose, au
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-          <Button variant="outline" onClick={() => copyToClipboard(JSON.stringify(auditDetail, null, 2))}>
+          <Button
+            variant="outline"
+            onClick={() =>
+              copyToClipboard(JSON.stringify(auditDetail, null, 2))
+            }
+          >
             <Copy className="h-4 w-4 mr-2" />
             Copy All Data
           </Button>

@@ -1,90 +1,110 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Download, Calendar, BarChart3, TrendingUp, Users, Shield } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  FileText,
+  Download,
+  Calendar,
+  BarChart3,
+  TrendingUp,
+  Users,
+  Shield,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
-const Reports = () => {
+const Reports = (): JSX.Element => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [selectedPeriod, setSelectedPeriod] = useState('monthly');
+  const [selectedPeriod, setSelectedPeriod] = useState("monthly");
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Mock reports data
   const availableReports = [
     {
       id: 1,
-      name: 'Trading Volume Report',
-      type: 'trading',
-      description: 'Comprehensive trading activity and volume analysis',
-      lastGenerated: '2024-01-20',
-      status: 'ready',
-      size: '2.4 MB',
+      name: "Trading Volume Report",
+      type: "trading",
+      description: "Comprehensive trading activity and volume analysis",
+      lastGenerated: "2024-01-20",
+      status: "ready",
+      size: "2.4 MB",
     },
     {
       id: 2,
-      name: 'Compliance Summary',
-      type: 'compliance',
-      description: 'KYC status, AML checks, and regulatory compliance',
-      lastGenerated: '2024-01-19',
-      status: 'ready',
-      size: '1.8 MB',
+      name: "Compliance Summary",
+      type: "compliance",
+      description: "KYC status, AML checks, and regulatory compliance",
+      lastGenerated: "2024-01-19",
+      status: "ready",
+      size: "1.8 MB",
     },
     {
       id: 3,
-      name: 'User Activity Report',
-      type: 'user',
-      description: 'User engagement, registration, and activity metrics',
-      lastGenerated: '2024-01-18',
-      status: 'generating',
-      size: '3.1 MB',
+      name: "User Activity Report",
+      type: "user",
+      description: "User engagement, registration, and activity metrics",
+      lastGenerated: "2024-01-18",
+      status: "generating",
+      size: "3.1 MB",
     },
     {
       id: 4,
-      name: 'Tokenization Report',
-      type: 'tokenization',
-      description: 'Asset tokenization statistics and performance',
-      lastGenerated: '2024-01-17',
-      status: 'ready',
-      size: '1.5 MB',
+      name: "Tokenization Report",
+      type: "tokenization",
+      description: "Asset tokenization statistics and performance",
+      lastGenerated: "2024-01-17",
+      status: "ready",
+      size: "1.5 MB",
     },
   ];
 
   const reportMetrics = {
     trading: {
-      totalVolume: '$2,450,000',
-      transactions: '1,234',
-      uniqueTraders: '156',
-      avgTransaction: '$1,987',
+      totalVolume: "$2,450,000",
+      transactions: "1,234",
+      uniqueTraders: "156",
+      avgTransaction: "$1,987",
     },
     compliance: {
-      kycApproved: '94%',
-      amlFlags: '12',
-      riskAlerts: '3',
-      complianceScore: '98%',
+      kycApproved: "94%",
+      amlFlags: "12",
+      riskAlerts: "3",
+      complianceScore: "98%",
     },
     users: {
-      totalUsers: '2,845',
-      activeUsers: '1,203',
-      newSignups: '89',
-      retentionRate: '76%',
+      totalUsers: "2,845",
+      activeUsers: "1,203",
+      newSignups: "89",
+      retentionRate: "76%",
     },
     tokenization: {
-      totalAssets: '45',
-      totalValue: '$12,450,000',
-      newTokens: '8',
-      avgTokenValue: '$276,667',
+      totalAssets: "45",
+      totalValue: "$12,450,000",
+      newTokens: "8",
+      avgTokenValue: "$276,667",
     },
   };
 
   const handleGenerateReport = async (reportType: string) => {
     setIsGenerating(true);
-    
+
     try {
       // Generate mock report data
       const reportData = {
@@ -95,14 +115,17 @@ const Reports = () => {
       };
 
       // Call the send-report-email function
-      const { data, error } = await supabase.functions.invoke('send-report-email', {
-        body: {
-          recipientEmail: user?.email,
-          reportName: reportType,
-          reportData: reportData,
-          reportType: reportType.toLowerCase().replace(/\s+/g, '_'),
+      const { data, error } = await supabase.functions.invoke(
+        "send-report-email",
+        {
+          body: {
+            recipientEmail: user?.email,
+            reportName: reportType,
+            reportData: reportData,
+            reportType: reportType.toLowerCase().replace(/\s+/g, "_"),
+          },
         },
-      });
+      );
 
       if (error) throw error;
 
@@ -111,7 +134,7 @@ const Reports = () => {
         description: `${reportType} has been sent to your message center.`,
       });
     } catch (error) {
-      console.error('Error generating report:', error);
+      console.error("Error generating report:", error);
       toast({
         title: "Error",
         description: "Failed to generate report. Please try again.",
@@ -131,20 +154,29 @@ const Reports = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ready': return 'default';
-      case 'generating': return 'secondary';
-      case 'error': return 'destructive';
-      default: return 'outline';
+      case "ready":
+        return "default";
+      case "generating":
+        return "secondary";
+      case "error":
+        return "destructive";
+      default:
+        return "outline";
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'trading': return <TrendingUp className="h-4 w-4" />;
-      case 'compliance': return <Shield className="h-4 w-4" />;
-      case 'user': return <Users className="h-4 w-4" />;
-      case 'tokenization': return <BarChart3 className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
+      case "trading":
+        return <TrendingUp className="h-4 w-4" />;
+      case "compliance":
+        return <Shield className="h-4 w-4" />;
+      case "user":
+        return <Users className="h-4 w-4" />;
+      case "tokenization":
+        return <BarChart3 className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
     }
   };
 
@@ -182,37 +214,47 @@ const Reports = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Volume</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Volume
+                </CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{reportMetrics.trading.totalVolume}</div>
+                <div className="text-2xl font-bold">
+                  {reportMetrics.trading.totalVolume}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Trading volume this month
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">KYC Approval</CardTitle>
-                <Shield className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{reportMetrics.compliance.kycApproved}</div>
-                <p className="text-xs text-muted-foreground">
-                  Approval rate
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  KYC Approval
+                </CardTitle>
+                <Shield className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {reportMetrics.compliance.kycApproved}
+                </div>
+                <p className="text-xs text-muted-foreground">Approval rate</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Active Users
+                </CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{reportMetrics.users.activeUsers}</div>
+                <div className="text-2xl font-bold">
+                  {reportMetrics.users.activeUsers}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Monthly active users
                 </p>
@@ -221,11 +263,15 @@ const Reports = () => {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Assets
+                </CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{reportMetrics.tokenization.totalAssets}</div>
+                <div className="text-2xl font-bold">
+                  {reportMetrics.tokenization.totalAssets}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Tokenized assets
                 </p>
@@ -244,20 +290,29 @@ const Reports = () => {
             <CardContent>
               <div className="space-y-4">
                 {availableReports.map((report) => (
-                  <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={report.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex items-center space-x-4">
                       <div className="p-2 bg-muted rounded-lg">
                         {getTypeIcon(report.type)}
                       </div>
                       <div>
                         <h4 className="font-medium">{report.name}</h4>
-                        <p className="text-sm text-muted-foreground">{report.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {report.description}
+                        </p>
                         <div className="flex items-center space-x-2 mt-1">
                           <span className="text-xs text-muted-foreground">
                             Last generated: {report.lastGenerated}
                           </span>
-                          <span className="text-xs text-muted-foreground">•</span>
-                          <span className="text-xs text-muted-foreground">Size: {report.size}</span>
+                          <span className="text-xs text-muted-foreground">
+                            •
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            Size: {report.size}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -265,9 +320,9 @@ const Reports = () => {
                       <Badge variant={getStatusColor(report.status)}>
                         {report.status.toUpperCase()}
                       </Badge>
-                      {report.status === 'ready' && (
-                        <Button 
-                          size="sm" 
+                      {report.status === "ready" && (
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => handleDownload(report.name)}
                         >
@@ -275,12 +330,14 @@ const Reports = () => {
                           Download
                         </Button>
                       )}
-                      <Button 
+                      <Button
                         size="sm"
                         onClick={() => handleGenerateReport(report.name)}
-                        disabled={isGenerating || report.status === 'generating'}
+                        disabled={
+                          isGenerating || report.status === "generating"
+                        }
                       >
-                        {isGenerating ? 'Generating...' : 'Generate'}
+                        {isGenerating ? "Generating..." : "Generate"}
                       </Button>
                     </div>
                   </div>
@@ -305,26 +362,44 @@ const Reports = () => {
                   <h4 className="font-medium">Trading Metrics</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Total Volume</span>
-                      <span className="font-medium">{reportMetrics.trading.totalVolume}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Total Volume
+                      </span>
+                      <span className="font-medium">
+                        {reportMetrics.trading.totalVolume}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Transactions</span>
-                      <span className="font-medium">{reportMetrics.trading.transactions}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Transactions
+                      </span>
+                      <span className="font-medium">
+                        {reportMetrics.trading.transactions}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Unique Traders</span>
-                      <span className="font-medium">{reportMetrics.trading.uniqueTraders}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Unique Traders
+                      </span>
+                      <span className="font-medium">
+                        {reportMetrics.trading.uniqueTraders}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Avg Transaction</span>
-                      <span className="font-medium">{reportMetrics.trading.avgTransaction}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Avg Transaction
+                      </span>
+                      <span className="font-medium">
+                        {reportMetrics.trading.avgTransaction}
+                      </span>
                     </div>
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <Button 
-                    onClick={() => handleGenerateReport('Trading Volume Report')}
+                  <Button
+                    onClick={() =>
+                      handleGenerateReport("Trading Volume Report")
+                    }
                     disabled={isGenerating}
                     className="w-full"
                   >
