@@ -27,6 +27,7 @@ interface AIAgent {
 export default function AIAgents() {
   const [agents, setAgents] = useState<AIAgent[]>([])
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [editingAgent, setEditingAgent] = useState<AIAgent | null>(null)
   const [newAgent, setNewAgent] = useState({
     name: "",
     description: "",
@@ -166,6 +167,24 @@ export default function AIAgents() {
     fetchAgents()
   }
 
+  const handleUpdateAgent = async (updated: Partial<AIAgent>) => {
+    if (!editingAgent) return
+    const { data, error } = await supabase
+      .from('ai_agents')
+      .update(updated)
+      .eq('id', editingAgent.id)
+      .select()
+      .single()
+
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to update agent', variant: 'destructive' })
+      return
+    }
+    setAgents(prev => prev.map(a => (a.id === data.id ? data : a)))
+    setEditingAgent(null)
+    toast({ title: 'Agent Updated' })
+  }
+
   const filteredAgents = agents.filter(agent => {
     const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          agent.description?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -254,7 +273,7 @@ export default function AIAgents() {
                   <DollarSign className="h-4 w-4 mr-2" />
                   Buy 1000 tokens
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => setEditingAgent(agent)}>
                   <Settings className="h-4 w-4" />
                 </Button>
               </div>
@@ -340,6 +359,36 @@ export default function AIAgents() {
                   Create Agent
                 </Button>
                 <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {editingAgent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Edit {editingAgent.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="edit-price">Price per Use ($)</Label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  step="0.01"
+                  defaultValue={editingAgent.price_per_use}
+                  onChange={(e) => setEditingAgent({ ...editingAgent, price_per_use: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={() => handleUpdateAgent({ price_per_use: editingAgent.price_per_use })} className="flex-1">
+                  Save
+                </Button>
+                <Button variant="outline" onClick={() => setEditingAgent(null)}>
                   Cancel
                 </Button>
               </div>

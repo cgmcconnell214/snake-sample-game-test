@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,15 +10,16 @@ interface ChartDataPoint {
   volume: number
 }
 
-const mockChartData: ChartDataPoint[] = [
-  { time: "09:00", price: 125.50, volume: 1250 },
-  { time: "09:30", price: 127.20, volume: 1890 },
-  { time: "10:00", price: 124.80, volume: 2100 },
-  { time: "10:30", price: 128.90, volume: 1750 },
-  { time: "11:00", price: 132.40, volume: 2300 },
-  { time: "11:30", price: 129.70, volume: 1680 },
-  { time: "12:00", price: 131.20, volume: 1950 },
-]
+function generateMockChartData(basePrice: number): ChartDataPoint[] {
+  const points: ChartDataPoint[] = []
+  for (let i = 0; i < 7; i++) {
+    const time = `${9 + i * 0.5}:00`
+    const price = basePrice + (Math.random() - 0.5) * 5
+    const volume = 1500 + Math.random() * 1000
+    points.push({ time, price, volume })
+  }
+  return points
+}
 
 export function TradingChart({ symbol = "GOLD-TOKEN", currentPrice = 131.20, change = 2.4 }: {
   symbol?: string
@@ -26,7 +27,12 @@ export function TradingChart({ symbol = "GOLD-TOKEN", currentPrice = 131.20, cha
   change?: number
 }) {
   const [timeframe, setTimeframe] = useState("1H")
+  const [chartData, setChartData] = useState<ChartDataPoint[]>(() => generateMockChartData(currentPrice))
   const isPositive = change >= 0
+
+  useEffect(() => {
+    setChartData(generateMockChartData(currentPrice))
+  }, [symbol, timeframe, currentPrice])
 
   return (
     <Card className="bg-card/50 backdrop-blur border-border/50">
@@ -94,23 +100,23 @@ export function TradingChart({ symbol = "GOLD-TOKEN", currentPrice = 131.20, cha
               fill="none"
               stroke="hsl(var(--primary))"
               strokeWidth="2"
-              points={mockChartData.map((point, i) => 
-                `${(i * 400) / (mockChartData.length - 1)},${200 - ((point.price - 120) / 15) * 200}`
+              points={chartData.map((point, i) =>
+                `${(i * 400) / (chartData.length - 1)},${200 - ((point.price - currentPrice) / 15 + 0.5) * 200}`
               ).join(' ')}
             />
             
             {/* Fill area */}
             <polygon
               fill="url(#priceGradient)"
-              points={`0,200 ${mockChartData.map((point, i) => 
-                `${(i * 400) / (mockChartData.length - 1)},${200 - ((point.price - 120) / 15) * 200}`
+              points={`0,200 ${chartData.map((point, i) =>
+                `${(i * 400) / (chartData.length - 1)},${200 - ((point.price - currentPrice) / 15 + 0.5) * 200}`
               ).join(' ')} 400,200`}
             />
           </svg>
           
           {/* Volume bars at bottom */}
           <div className="absolute bottom-0 left-0 right-0 h-8 flex items-end gap-1">
-            {mockChartData.map((point, i) => (
+            {chartData.map((point, i) => (
               <div
                 key={i}
                 className="flex-1 bg-muted/30 rounded-t"

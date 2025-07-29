@@ -155,6 +155,28 @@ export default function LearningPortal() {
     fetchCourses()
   }
 
+  const handleDeleteCourse = async (courseId: string) => {
+    const { error } = await supabase
+      .from('educational_courses')
+      .delete()
+      .eq('id', courseId)
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete course',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    toast({
+      title: 'Course Deleted',
+      description: 'The course has been removed.'
+    })
+    setCourses(prev => prev.filter(c => c.id !== courseId))
+  }
+
   const filteredCourses = courses.filter(course => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          course.description?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -232,12 +254,18 @@ export default function LearningPortal() {
               </div>
 
               <div className="flex gap-2">
-                <Button 
-                  className="flex-1" 
+                <Button
+                  className="flex-1"
                   onClick={() => handleEnrollCourse(course.id)}
                 >
                   <Play className="h-4 w-4 mr-2" />
                   {course.price_per_student === 0 ? "Enroll Free" : "Enroll Now"}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteCourse(course.id)}
+                >
+                  Delete
                 </Button>
               </div>
             </CardContent>
