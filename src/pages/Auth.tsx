@@ -50,6 +50,11 @@ const Auth = (): JSX.Element => {
       if (error) {
         setError(error.message);
       }
+ khfq01-codex/replace-instances-of-any-with-correct-types
+    } catch (err: unknown) {
+      const message = (err as Error).message || 'An error occurred during sign in';
+      setError(message);
+
  codex/apply-eslint-typescript-rules
     } catch (err: any) {
       setError(err.message || "An error occurred during sign in");
@@ -69,6 +74,7 @@ const Auth = (): JSX.Element => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred during sign in');
+ main
  main
  main
  main
@@ -104,6 +110,11 @@ const Auth = (): JSX.Element => {
       if (error) {
         setError(error.message);
       }
+ khfq01-codex/replace-instances-of-any-with-correct-types
+    } catch (err: unknown) {
+      const message = (err as Error).message || 'An error occurred during sign up';
+      setError(message);
+
  codex/apply-eslint-typescript-rules
     } catch (err: any) {
       setError(err.message || "An error occurred during sign up");
@@ -123,6 +134,7 @@ const Auth = (): JSX.Element => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred during sign up');
+ main
  main
  main
  main
@@ -147,6 +159,11 @@ const Auth = (): JSX.Element => {
       if (error) {
         setError(error.message);
       }
+ khfq01-codex/replace-instances-of-any-with-correct-types
+    } catch (err: unknown) {
+      const message = (err as Error).message || 'An error occurred with Discord authentication';
+      setError(message);
+
  codex/apply-eslint-typescript-rules
     } catch (err: any) {
       setError(err.message || "An error occurred with Discord authentication");
@@ -166,6 +183,7 @@ const Auth = (): JSX.Element => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred with Discord authentication');
+ main
  main
  main
  main

@@ -13,6 +13,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Reply, Forward, Archive, Star, Clock } from 'lucide-react';
+ khfq01-codex/replace-instances-of-any-with-correct-types
+import AttachmentViewer from './AttachmentViewer';
+import { FileUploadResult } from '@/hooks/use-file-upload';
+
 import AttachmentViewer, { type Attachment } from './AttachmentViewer';
 
 interface Attachment {
@@ -36,6 +40,7 @@ interface Attachment {
   size?: number;
 }
  main
+ main
 
 interface Message {
   id: string;
@@ -44,6 +49,9 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  attachments: string | FileUploadResult[] | null;
+
  codex/add-typescript-prop-types-to-components
   attachments: Attachment[] | string;
 
@@ -60,6 +68,7 @@ interface Message {
   attachments: string | Record<string, unknown>[] | null;
 
   attachments: Attachment[];
+ main
  main
  main
  main

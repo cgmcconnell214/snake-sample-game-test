@@ -50,6 +50,12 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+ khfq01-codex/replace-instances-of-any-with-correct-types
+      retry: (failureCount, error: unknown) => {
+        // TODO: Verify correct error type
+        const status = (error as { status?: number }).status;
+        if (status && status >= 400 && status < 500) return false;
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
       retry: (failureCount, error: { status?: number }) => {
 
@@ -68,6 +74,7 @@ const queryClient = new QueryClient({
  main
         // Don't retry on 4xx errors
         if (error?.status >= 400 && error?.status < 500) return false;
+ main
         return failureCount < 3;
       },
       staleTime: 5 * 60 * 1000, // 5 minutes

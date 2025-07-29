@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
 
 interface Profile {
  xgqza0-codex/replace-instances-of-any-with-correct-types
@@ -38,6 +39,11 @@ interface Profile {
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  profile: Database['public']['Tables']['profiles']['Row'] | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
   profile: Profile | null;
   loading: boolean;
@@ -62,10 +68,14 @@ interface AuthContextType {
  main
  main
  main
+ main
   signUp: (
     email: string,
     password: string,
     metadata?: Record<string, unknown>
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  ) => Promise<{ error: AuthError | null }>;
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
   ) => Promise<{ error: Error | null }>;
 
@@ -76,6 +86,7 @@ interface AuthContextType {
   ) => Promise<{ error: Error | null }>;
 
   ) => Promise<{ error: unknown }>;
+ main
  main
  main
  main
@@ -97,7 +108,10 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(null);       
+         khfq01-codex/replace-instances-of-any-with-correct-types
+  const [profile, setProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null);
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -108,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
 
   const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
+ main
  main
  main
  main
@@ -277,6 +292,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return { error: null };
     } catch (error: unknown) {
+ khfq01-codex/replace-instances-of-any-with-correct-types
+      console.error('Sign in error:', error);
+      return { error: error as AuthError };
+    }
+  };
+
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
 
  codex/replace-all-instances-of-any-in-codebase
@@ -304,17 +326,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
  main
  main
  main
+ main
   const signUp = async (
     email: string,
     password: string,
     metadata?: Record<string, unknown>
   ) => {
+ khfq01-codex/replace-instances-of-any-with-correct-types
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
 
  codex/replace-all-instances-of-any-in-codebase
 
  codex/replace-any-with-correct-typescript-types
 
+ main
  main
  main
  main
@@ -342,6 +368,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return { error: null };
     } catch (error: unknown) {
+ khfq01-codex/replace-instances-of-any-with-correct-types
+      console.error('Sign up error:', error);
+      return { error: error as AuthError };
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
 
  codex/replace-all-instances-of-any-in-codebase
@@ -354,6 +384,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
  main
       console.error('Sign up error:', error);
       return { error: error as Error };
+ main
     }
   };
 

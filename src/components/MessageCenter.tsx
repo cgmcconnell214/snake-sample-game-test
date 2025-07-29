@@ -42,6 +42,9 @@ import MessageDetail from './message-center/MessageDetail';
 import ComposeMessage from './message-center/ComposeMessage';
 import ProfileBanner from './message-center/ProfileBanner';
 import MessageSearch from './message-center/MessageSearch';
+ khfq01-codex/replace-instances-of-any-with-correct-types
+import { FileUploadResult } from '@/hooks/use-file-upload';
+
 import type { Attachment } from './message-center/AttachmentViewer';
 
 interface Attachment {
@@ -65,6 +68,7 @@ interface Attachment {
   size?: number;
 }
  main
+ main
 
 interface Message {
   id: string;
@@ -73,6 +77,9 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  attachments: string | FileUploadResult[] | null;
+
  codex/add-typescript-prop-types-to-components
   attachments: Attachment[] | string;
 
@@ -89,6 +96,7 @@ interface Message {
   attachments: string | Record<string, unknown>[] | null;
 
   attachments: Attachment[];
+ main
  main
  main
  main

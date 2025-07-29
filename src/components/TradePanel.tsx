@@ -118,6 +118,15 @@ export function TradePanel() {
       // Reset form
       setQuantity("");
       setPrice("");
+ khfq01-codex/replace-instances-of-any-with-correct-types
+      
+    } catch (error: unknown) {
+      console.error('Order creation error:', error);
+      const message = (error as Error).message || 'Failed to create order. Please try again.';
+      toast({
+        title: "Order Failed",
+        description: message,
+
  codex/apply-eslint-typescript-rules
     } catch (error: any) {
       console.error("Order creation error:", error);
@@ -150,6 +159,7 @@ export function TradePanel() {
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         description: (error as any).message || "Failed to create order. Please try again.",
+ main
  main
  main
  main

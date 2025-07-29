@@ -64,6 +64,11 @@ export function useAvatar(): UseAvatarResult {
 
       return { url: publicUrl };
     } catch (err: unknown) {
+ khfq01-codex/replace-instances-of-any-with-correct-types
+      console.error('Avatar upload error:', err);
+      const message = (err as Error).message || 'Failed to upload avatar';
+      setError(message);
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
 
  codex/replace-all-instances-of-any-in-codebase
@@ -84,6 +89,7 @@ export function useAvatar(): UseAvatarResult {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'Failed to upload avatar');
+ main
  main
       throw err;
  main

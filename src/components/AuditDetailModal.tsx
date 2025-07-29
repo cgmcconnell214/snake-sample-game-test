@@ -25,10 +25,18 @@ import {
   Activity,
   Lock,
   Globe,
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  Zap
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Json } from '@/integrations/supabase/types';
+
   Zap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+ main
 
 interface AuditLog {
   id: number;
@@ -44,6 +52,13 @@ interface AuditLog {
 interface AuditDetail {
   id: string;
   event_id: string;
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  request_data: Json | null;
+  response_data: Json | null;
+  error_details: Json | null;
+  execution_time_ms: number;
+  security_context: Json | null;
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
   request_data: Record<string, unknown> | null;
   response_data: Record<string, unknown> | null;
@@ -77,6 +92,7 @@ interface AuditDetail {
   error_details: Record<string, unknown>;
   execution_time_ms: number;
   security_context: Record<string, unknown>;
+ main
  main
  main
  main

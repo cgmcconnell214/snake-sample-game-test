@@ -35,6 +35,11 @@ import {
   MessageSquare, 
  main
   ChevronRight,
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  Paperclip
+} from 'lucide-react';
+import { FileUploadResult } from '@/hooks/use-file-upload';
+
   Paperclip,
 } from "lucide-react";
 
@@ -44,6 +49,7 @@ interface Attachment {
   type?: string;
   size?: number;
 }
+ main
 
 interface Message {
   id: string;
@@ -52,6 +58,9 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  attachments: string | FileUploadResult[] | null;
+
  codex/add-typescript-prop-types-to-components
   attachments: Attachment[] | string;
 
@@ -68,6 +77,7 @@ interface Message {
   attachments: string | Record<string, unknown>[] | null;
 
   attachments: Attachment[];
+ main
  main
  main
  main

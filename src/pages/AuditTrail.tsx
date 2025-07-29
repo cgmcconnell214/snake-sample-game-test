@@ -38,10 +38,24 @@ interface AuditLog {
   ipAddress: string;
 }
 
+interface AuditLog {
+  id: number;
+  timestamp: string;
+  action: string;
+  user: string;
+  details: string;
+  type: string;
+  status: string;
+  ipAddress: string;
+}
+
 const AuditTrail = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
 
  codex/replace-all-instances-of-any-in-codebase
@@ -69,6 +83,7 @@ const AuditTrail = () => {
  main
  main
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
+ main
  main
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 

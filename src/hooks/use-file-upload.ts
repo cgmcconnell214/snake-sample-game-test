@@ -95,6 +95,11 @@ export function useFileUpload(): UseFileUploadResult {
 
       return results;
     } catch (err: unknown) {
+ khfq01-codex/replace-instances-of-any-with-correct-types
+      console.error('Upload error:', err);
+      const message = (err as Error).message || 'Failed to upload files';
+      setError(message);
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
 
  codex/replace-all-instances-of-any-in-codebase
@@ -115,6 +120,7 @@ export function useFileUpload(): UseFileUploadResult {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'Failed to upload files');
+ main
  main
       throw err;
  main

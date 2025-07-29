@@ -38,6 +38,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+ khfq01-codex/replace-instances-of-any-with-correct-types
+import type { Database } from '@/integrations/supabase/types';
+
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+type ComplianceAlertRow = Database['public']['Tables']['compliance_alerts']['Row'];
+type TradeExecutionRow = Database['public']['Tables']['trade_executions']['Row'] & {
+  buyer?: { first_name: string | null; last_name: string | null; email: string | null };
+  seller?: { first_name: string | null; last_name: string | null; email: string | null };
+};
+import { 
+  Users, 
+  AlertTriangle, 
+
 
 interface AdminUser {
   id: string;
@@ -71,6 +84,7 @@ interface TradeExecution {
 import {
   Users,
   AlertTriangle,
+ main
   TrendingUp, 
   DollarSign, 
  main
@@ -117,6 +131,11 @@ const Admin = () => {
  main
   const { profile } = useAuth();
   const { toast } = useToast();
+ khfq01-codex/replace-instances-of-any-with-correct-types
+  const [users, setUsers] = useState<ProfileRow[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlertRow[]>([]);
+  const [trades, setTrades] = useState<TradeExecutionRow[]>([]);
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
   const [users, setUsers] = useState<Record<string, unknown>[]>([]);
   const [alerts, setAlerts] = useState<Record<string, unknown>[]>([]);
@@ -178,6 +197,7 @@ const Admin = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [alerts, setAlerts] = useState<ComplianceAlertItem[]>([]);
   const [trades, setTrades] = useState<TradeExecution[]>([]);
+ main
  main
  main
  main
@@ -409,6 +429,9 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+ khfq01-codex/replace-instances-of-any-with-correct-types
+                  {users.map((user: ProfileRow) => (
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
                   {users.map((user) => (
 
@@ -422,6 +445,7 @@ const Admin = () => {
                   {users.map((user: UserRecord) => (
 
                   {users.map((user) => (
+ main
  main
  main
  main
@@ -500,6 +524,9 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+ khfq01-codex/replace-instances-of-any-with-correct-types
+                  {alerts.map((alert: ComplianceAlertRow) => (
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
                   {alerts.map((alert) => (
 
@@ -513,6 +540,7 @@ const Admin = () => {
                   {alerts.map((alert: ComplianceAlert) => (
 
                   {alerts.map((alert) => (
+ main
  main
  main
  main
@@ -572,6 +600,9 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+ khfq01-codex/replace-instances-of-any-with-correct-types
+                  {trades.map((trade: TradeExecutionRow) => (
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
                   {trades.map((trade) => (
 
@@ -585,6 +616,7 @@ const Admin = () => {
                   {trades.map((trade: TradeRecord) => (
 
                   {trades.map((trade) => (
+ main
  main
  main
  main

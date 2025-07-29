@@ -42,6 +42,14 @@ import {
   TrendingUp,
   Wallet
 } from 'lucide-react';
+ khfq01-codex/replace-instances-of-any-with-correct-types
+import type { User } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
+
+interface ProfileBannerProps {
+  user: User | null;
+  profile: Database['public']['Tables']['profiles']['Row'] | null;
+
 import { User } from '@supabase/supabase-js';
 
  codex/add-typescript-prop-types-to-components
@@ -98,6 +106,7 @@ interface ProfileBannerProps {
 
   user: User | null;
   profile: Record<string, unknown> | null;
+ main
  main
  main
  main
