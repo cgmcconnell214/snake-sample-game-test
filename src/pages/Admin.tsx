@@ -8,9 +8,39 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Users, 
-  AlertTriangle, 
+
+interface AdminUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  subscription_tier: string;
+  kyc_status: string;
+  compliance_risk: string;
+}
+
+interface ComplianceAlertItem {
+  id: string;
+  alert_type: string;
+  severity: string;
+  message: string;
+  created_at: string;
+}
+
+interface TradeExecution {
+  id: string;
+  asset_symbol: string;
+  buyer?: { email: string } | null;
+  seller?: { email: string } | null;
+  quantity: number;
+  price: number;
+  settlement_status: string;
+  execution_time: string;
+}
+import {
+  Users,
+  AlertTriangle,
   TrendingUp, 
   DollarSign, 
   Download,
@@ -22,9 +52,9 @@ import {
 const Admin = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
-  const [users, setUsers] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [trades, setTrades] = useState([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlertItem[]>([]);
+  const [trades, setTrades] = useState<TradeExecution[]>([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeTraders: 0,
@@ -245,7 +275,7 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user: any) => (
+                  {users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>{user.first_name} {user.last_name}</TableCell>
                       <TableCell>{user.email}</TableCell>
@@ -300,7 +330,7 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {alerts.map((alert: any) => (
+                  {alerts.map((alert) => (
                     <TableRow key={alert.id}>
                       <TableCell>{alert.alert_type}</TableCell>
                       <TableCell>
@@ -350,7 +380,7 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {trades.map((trade: any) => (
+                  {trades.map((trade) => (
                     <TableRow key={trade.id}>
                       <TableCell>{trade.asset_symbol}</TableCell>
                       <TableCell>{trade.buyer?.email}</TableCell>

@@ -54,69 +54,69 @@ import {
 
 // Core Platform
 const coreItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Tokenize Assets", url: "/tokenize", icon: Coins },
-  { title: "Trading", url: "/trading", icon: TrendingUp },
-  { title: "Portfolio", url: "/portfolio", icon: Briefcase },
+  { title: "Dashboard", url: "/app/", icon: LayoutDashboard },
+  { title: "Tokenize Assets", url: "/app/tokenize", icon: Coins },
+  { title: "Trading", url: "/app/trading", icon: TrendingUp },
+  { title: "Portfolio", url: "/app/portfolio", icon: Briefcase },
 ]
 
 // 1. AI & Automation Layer
 const aiAutomationItems = [
-  { title: "AI Agents", url: "/ai-agents", icon: Bot },
-  { title: "Smart Contracts", url: "/smart-contracts", icon: FileCheck },
-  { title: "Workflow Automation", url: "/workflow-automation", icon: Workflow },
+  { title: "AI Agents", url: "/app/ai-agents", icon: Bot },
+  { title: "Smart Contracts", url: "/app/smart-contracts", icon: FileCheck },
+  { title: "Workflow Automation", url: "/app/workflow-automation", icon: Workflow },
 ]
 
 // 2. Education & Onboarding Layer
 const educationItems = [
-  { title: "Learning Portal", url: "/learning", icon: GraduationCap },
-  { title: "Certification", url: "/certification", icon: Award },
-  { title: "Live Classes", url: "/live-classes", icon: Calendar },
+  { title: "Learning Portal", url: "/app/learning", icon: GraduationCap },
+  { title: "Certification", url: "/app/certification", icon: Award },
+  { title: "Live Classes", url: "/app/live-classes", icon: Calendar },
 ]
 
 // 3. Spiritual / Sovereign Layer
 const spiritualItems = [
-  { title: "Divine Trust Vault", url: "/divine-trust", icon: Archive },
-  { title: "Kingdom Entry", url: "/kingdom-entry", icon: Users },
-  { title: "Sacred Law", url: "/sacred-law", icon: Feather },
+  { title: "Divine Trust Vault", url: "/app/divine-trust", icon: Archive },
+  { title: "Kingdom Entry", url: "/app/kingdom-entry", icon: Users },
+  { title: "Sacred Law", url: "/app/sacred-law", icon: Feather },
 ]
 
 // 4. Marketplace & Exchange Layer
 const marketplaceItems = [
-  { title: "P2P Marketplace", url: "/marketplace", icon: Store },
-  { title: "Liquidity Pools", url: "/liquidity", icon: Layers },
-  { title: "Escrow Vaults", url: "/escrow", icon: Building },
+  { title: "P2P Marketplace", url: "/app/marketplace", icon: Store },
+  { title: "Liquidity Pools", url: "/app/liquidity", icon: Layers },
+  { title: "Escrow Vaults", url: "/app/escrow", icon: Building },
 ]
 
 // Compliance & Security (Existing)
 const complianceItems = [
-  { title: "KYC Center", url: "/kyc", icon: UserCheck },
-  { title: "Compliance", url: "/compliance", icon: Shield },
-  { title: "Audit Trail", url: "/audit", icon: Activity },
-  { title: "Reports", url: "/reports", icon: FileText },
+  { title: "KYC Center", url: "/app/kyc", icon: UserCheck },
+  { title: "Compliance", url: "/app/compliance", icon: Shield },
+  { title: "Audit Trail", url: "/app/audit", icon: Activity },
+  { title: "Reports", url: "/app/reports", icon: FileText },
 ]
 
 // 5. Admin & Infrastructure Layer
 const adminItems = [
-  { title: "Node Management", url: "/node-management", icon: GitBranch },
-  { title: "Data Sync", url: "/data-sync", icon: Webhook },
-  { title: "System Diagnostics", url: "/diagnostics", icon: Monitor },
+  { title: "Node Management", url: "/app/node-management", icon: GitBranch },
+  { title: "Data Sync", url: "/app/data-sync", icon: Webhook },
+  { title: "System Diagnostics", url: "/app/diagnostics", icon: Monitor },
 ]
 
 // Bonus Features
 const bonusItems = [
-  { title: "Legal Safehouse", url: "/legal-safehouse", icon: Lock },
-  { title: "Asset Provenance", url: "/asset-provenance", icon: History },
-  { title: "Tokenomics", url: "/tokenomics", icon: BarChart3 },
-  { title: "Dev Playground", url: "/dev-playground", icon: Code },
+  { title: "Legal Safehouse", url: "/app/legal-safehouse", icon: Lock },
+  { title: "Asset Provenance", url: "/app/asset-provenance", icon: History },
+  { title: "Tokenomics", url: "/app/tokenomics", icon: BarChart3 },
+  { title: "Dev Playground", url: "/app/dev-playground", icon: Code },
 ]
 
 // System & User
 const systemItems = [
-  { title: "Profile", url: "/profile", icon: User },
-  { title: "Messages", url: "/messages", icon: Mail },
-  { title: "IP Assets", url: "/ip-tokenization", icon: Coins },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Profile", url: "/app/profile", icon: User },
+  { title: "Messages", url: "/app/messages", icon: Mail },
+  { title: "IP Assets", url: "/app/ip-tokenization", icon: Coins },
+  { title: "Settings", url: "/app/settings", icon: Settings },
 ]
 
 export function AppSidebar() {

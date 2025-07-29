@@ -20,6 +20,13 @@ import ComposeMessage from './message-center/ComposeMessage';
 import ProfileBanner from './message-center/ProfileBanner';
 import MessageSearch from './message-center/MessageSearch';
 
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+
 interface Message {
   id: string;
   sender_id: string | null;
@@ -27,7 +34,7 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+  attachments: Attachment[];
   is_read: boolean;
   is_archived: boolean;
   created_at: string;
