@@ -9,7 +9,11 @@ import {
 } from "@/components/ui/toast";
 
 export function Toaster(): JSX.Element {
+ codex/add-typescript-prop-types-to-components
+  const { toasts } = useToast()
+
   const { toasts } = useToast();
+ main
 
   return (
     <ToastProvider>

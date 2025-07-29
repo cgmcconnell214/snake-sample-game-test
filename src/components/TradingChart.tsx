@@ -56,7 +56,7 @@ export function TradingChart({ symbol = "GOLD-TOKEN", currentPrice = 131.20, cha
   symbol?: string
   currentPrice?: number
   change?: number
-}) {
+}): JSX.Element {
   const [timeframe, setTimeframe] = useState("1H")
   const [chartData, setChartData] = useState<ChartDataPoint[]>(() => generateMockChartData(currentPrice))
   const isPositive = change >= 0

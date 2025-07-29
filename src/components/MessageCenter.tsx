@@ -73,6 +73,9 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ codex/add-typescript-prop-types-to-components
+  attachments: Attachment[] | string;
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
   attachments: Attachment[] | string | null;
 
@@ -90,6 +93,7 @@ interface Message {
  main
  main
  main
+ main
   is_read: boolean;
   is_archived: boolean;
   created_at: string;
@@ -97,6 +101,13 @@ interface Message {
     first_name: string;
     last_name: string;
   } | null;
+}
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
 }
 
 const MessageCenter: React.FC = () => {

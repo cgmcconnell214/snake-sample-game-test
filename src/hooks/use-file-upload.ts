@@ -8,7 +8,18 @@ export interface FileUploadResult {
   type: string;
 }
 
-export function useFileUpload() {
+export interface UseFileUploadResult {
+  uploadFiles: (
+    files: File[],
+    bucketName?: string,
+    folderPath?: string
+  ) => Promise<FileUploadResult[]>
+  uploading: boolean
+  progress: number
+  error: string | null
+}
+
+export function useFileUpload(): UseFileUploadResult {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);

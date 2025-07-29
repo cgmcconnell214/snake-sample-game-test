@@ -6,7 +6,14 @@ export interface AvatarUploadResult {
   url: string;
 }
 
-export function useAvatar() {
+export interface UseAvatarResult {
+  uploadAvatar: (file: File) => Promise<AvatarUploadResult | null>
+  uploading: boolean
+  progress: number
+  error: string | null
+}
+
+export function useAvatar(): UseAvatarResult {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);

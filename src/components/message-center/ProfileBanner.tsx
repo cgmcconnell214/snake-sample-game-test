@@ -11,6 +11,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+ codex/add-typescript-prop-types-to-components
+
  xgqza0-codex/replace-instances-of-any-with-correct-types
 import { User } from '@supabase/supabase-js';
 import { 
@@ -19,10 +21,13 @@ import {
   Shield, 
 
  main
+ main
 import {
   Settings,
   Bell,
   Shield,
+ codex/add-typescript-prop-types-to-components
+
  codex/apply-eslint-typescript-rules
   Crown,
   MessageSquare,
@@ -31,12 +36,29 @@ import {
 } from "lucide-react";
 
  main
+ main
   Crown,
   MessageSquare,
   TrendingUp,
   Wallet
 } from 'lucide-react';
 import { User } from '@supabase/supabase-js';
+
+ codex/add-typescript-prop-types-to-components
+interface UserProfile {
+  avatar_url?: string;
+  display_name?: string;
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  subscription_tier?: string;
+  role?: string;
+  bio?: string;
+}
+
+interface ProfileBannerProps {
+  user: User | null;
+  profile: UserProfile | null;
 
 import { User } from '@supabase/supabase-js';
 
@@ -76,6 +98,7 @@ interface ProfileBannerProps {
 
   user: User | null;
   profile: Record<string, unknown> | null;
+ main
  main
  main
  main
