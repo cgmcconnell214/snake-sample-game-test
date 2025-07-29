@@ -8,9 +8,39 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Users, 
-  AlertTriangle, 
+
+interface AdminUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  subscription_tier: string;
+  kyc_status: string;
+  compliance_risk: string;
+}
+
+interface ComplianceAlertItem {
+  id: string;
+  alert_type: string;
+  severity: string;
+  message: string;
+  created_at: string;
+}
+
+interface TradeExecution {
+  id: string;
+  asset_symbol: string;
+  buyer?: { email: string } | null;
+  seller?: { email: string } | null;
+  quantity: number;
+  price: number;
+  settlement_status: string;
+  execution_time: string;
+}
+import {
+  Users,
+  AlertTriangle,
   TrendingUp, 
   DollarSign, 
   Download,
@@ -19,12 +49,98 @@ import {
   Clock
 } from 'lucide-react';
 
+interface AdminUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  subscription_tier: string;
+  kyc_status: string;
+  compliance_risk: string;
+}
+
+interface ComplianceAlert {
+  id: string;
+  alert_type: string;
+  severity: string;
+  message: string;
+  created_at: string;
+}
+
+interface TradeRecord {
+  id: string;
+  asset_symbol: string;
+  buyer?: { email?: string };
+  seller?: { email?: string };
+  quantity: number;
+  price: number;
+  settlement_status: string;
+  execution_time: string;
+}
+
 const Admin = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
-  const [users, setUsers] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [trades, setTrades] = useState([]);
+ codex/replace-all-instances-of-any-in-codebase
+  interface AdminUser {
+
+ codex/replace-any-with-correct-typescript-types
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
+  const [trades, setTrades] = useState<TradeRecord[]>([]);
+
+ codex/replace-instances-of-any-with-correct-types
+  interface UserRecord {
+ main
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    role: string;
+    subscription_tier: string;
+    kyc_status: string;
+    compliance_risk: string;
+  }
+
+  interface ComplianceAlert {
+    id: string;
+    alert_type: string;
+    severity: string;
+    message: string;
+    created_at: string;
+  }
+
+ codex/replace-all-instances-of-any-in-codebase
+  interface TradeExecution {
+
+  interface TradeRecord {
+ main
+    id: string;
+    asset_symbol: string;
+    buyer?: { email: string } | null;
+    seller?: { email: string } | null;
+    quantity: number;
+    price: number;
+    settlement_status: string;
+    execution_time: string;
+  }
+
+ codex/replace-all-instances-of-any-in-codebase
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
+  const [trades, setTrades] = useState<TradeExecution[]>([]);
+
+  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
+  const [trades, setTrades] = useState<TradeRecord[]>([]);
+
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlertItem[]>([]);
+  const [trades, setTrades] = useState<TradeExecution[]>([]);
+ main
+ main
+ main
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeTraders: 0,
@@ -245,7 +361,19 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user: any) => (
+ codex/replace-all-instances-of-any-in-codebase
+                  {users.map((user: AdminUser) => (
+
+ codex/replace-any-with-correct-typescript-types
+                  {users.map((user: AdminUser) => (
+
+ codex/replace-instances-of-any-with-correct-types
+                  {users.map((user: UserRecord) => (
+
+                  {users.map((user) => (
+ main
+ main
+ main
                     <TableRow key={user.id}>
                       <TableCell>{user.first_name} {user.last_name}</TableCell>
                       <TableCell>{user.email}</TableCell>
@@ -300,7 +428,19 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {alerts.map((alert: any) => (
+ codex/replace-all-instances-of-any-in-codebase
+                  {alerts.map((alert: ComplianceAlert) => (
+
+ codex/replace-any-with-correct-typescript-types
+                  {alerts.map((alert: ComplianceAlert) => (
+
+ codex/replace-instances-of-any-with-correct-types
+                  {alerts.map((alert: ComplianceAlert) => (
+
+                  {alerts.map((alert) => (
+ main
+ main
+ main
                     <TableRow key={alert.id}>
                       <TableCell>{alert.alert_type}</TableCell>
                       <TableCell>
@@ -350,7 +490,19 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {trades.map((trade: any) => (
+ codex/replace-all-instances-of-any-in-codebase
+                  {trades.map((trade: TradeExecution) => (
+
+ codex/replace-any-with-correct-typescript-types
+                  {trades.map((trade: TradeRecord) => (
+
+ codex/replace-instances-of-any-with-correct-types
+                  {trades.map((trade: TradeRecord) => (
+
+                  {trades.map((trade) => (
+ main
+ main
+ main
                     <TableRow key={trade.id}>
                       <TableCell>{trade.asset_symbol}</TableCell>
                       <TableCell>{trade.buyer?.email}</TableCell>

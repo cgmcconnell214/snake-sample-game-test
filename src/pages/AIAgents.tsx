@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Bot, Plus, Settings, Zap, DollarSign, Users, Star } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/integrations/supabase/client"
+import { injectContractTemplate } from "@/lib/contractTemplates"
 
 interface AIAgent {
   id: string
@@ -123,6 +124,8 @@ export default function AIAgents() {
       })
       return
     }
+
+    await injectContractTemplate('rent')
 
     const agent = agents.find(a => a.id === agentId)
     if (!agent) return

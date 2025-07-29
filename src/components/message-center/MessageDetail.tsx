@@ -4,7 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Reply, Forward, Archive, Star, Clock } from 'lucide-react';
-import AttachmentViewer from './AttachmentViewer';
+import AttachmentViewer, { type Attachment } from './AttachmentViewer';
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
 
 interface Message {
   id: string;
@@ -13,7 +27,19 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+ codex/replace-all-instances-of-any-in-codebase
+  attachments: Attachment[] | string | null;
+
+ codex/replace-any-with-correct-typescript-types
+  attachments: Attachment[] | string;
+
+ codex/replace-instances-of-any-with-correct-types
+  attachments: string | Record<string, unknown>[] | null;
+
+  attachments: Attachment[];
+ main
+ main
+ main
   is_read: boolean;
   is_archived: boolean;
   created_at: string;

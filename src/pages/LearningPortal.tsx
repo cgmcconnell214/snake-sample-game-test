@@ -1,11 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { injectContractTemplate } from "@/lib/contractTemplates"
 import { GraduationCap, Book, Play, Award } from "lucide-react"
 import { useState } from "react"
 
 export default function LearningPortal() {
+ codex/audit-frontend-and-backend-codebase-for-errors
   const [activeCourse, setActiveCourse] = useState<string | null>(null)
 
+
+  const handleLearn = async () => {
+    await injectContractTemplate('learn')
+  }
+ main
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -31,6 +38,7 @@ export default function LearningPortal() {
             <p className="text-sm text-muted-foreground mb-4">
               Fundamental concepts of asset tokenization
             </p>
+ codex/audit-frontend-and-backend-codebase-for-errors
             <Button
               variant="outline"
               className="w-full"
@@ -38,6 +46,9 @@ export default function LearningPortal() {
             >
               Start Course
             </Button>
+
+            <Button variant="outline" className="w-full" onClick={handleLearn}>Start Course</Button>
+ main
           </CardContent>
         </Card>
 

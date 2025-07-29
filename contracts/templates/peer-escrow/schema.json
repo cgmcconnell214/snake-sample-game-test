@@ -1,0 +1,7 @@
+{
+  "buyer": "string",
+  "seller": "string",
+  "amount": "number",
+  "token": "string",
+  "release_condition": "string"
+}
