@@ -2,6 +2,13 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+
+interface Attachment {
+  name: string;
+  url?: string;
+  type?: string;
+  size?: number;
+}
 import { 
   Clock, 
   AlertCircle, 
@@ -20,7 +27,7 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: any;
+  attachments: Attachment[];
   is_read: boolean;
   is_archived: boolean;
   created_at: string;

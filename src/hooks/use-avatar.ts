@@ -56,9 +56,10 @@ export function useAvatar() {
       await refreshProfile();
 
       return { url: publicUrl };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Avatar upload error:', err);
-      setError(err.message || 'Failed to upload avatar');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setError((err as any).message || 'Failed to upload avatar');
       throw err;
     } finally {
       setUploading(false);
