@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { GitBranch, Wifi, Activity, Globe } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { GitBranch, Wifi, Activity, Globe } from "lucide-react";
 
-export default function NodeManagement() {
+export default function NodeManagement(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Node Management</h1>
-          <p className="text-muted-foreground">Manage network nodes and peer connections</p>
+          <p className="text-muted-foreground">
+            Manage network nodes and peer connections
+          </p>
         </div>
         <Button>
           <Globe className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function NodeManagement() {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor active peer connections and network health
             </p>
-            <Button variant="outline" className="w-full">View Peers</Button>
+            <Button variant="outline" className="w-full">
+              View Peers
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function NodeManagement() {
             <p className="text-sm text-muted-foreground mb-4">
               Track network performance and latency metrics
             </p>
-            <Button variant="outline" className="w-full">View Logs</Button>
+            <Button variant="outline" className="w-full">
+              View Logs
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function NodeManagement() {
             <p className="text-sm text-muted-foreground mb-4">
               Manage trust levels for network relays
             </p>
-            <Button variant="outline" className="w-full">Configure Trust</Button>
+            <Button variant="outline" className="w-full">
+              Configure Trust
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

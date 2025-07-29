@@ -1,149 +1,162 @@
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { ScrollText, Plus, FileText, Crown, Shield } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { ScrollText, Plus, FileText, Crown, Shield } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DivineTrustDocument {
-  id: string
-  title: string
-  document_type: string
-  content: string
-  approval_status: string
-  creator_id: string
-  approved_by?: string
-  approved_at?: string
-  created_at: string
+  id: string;
+  title: string;
+  document_type: string;
+  content: string;
+  approval_status: string;
+  creator_id: string;
+  approved_by?: string;
+  approved_at?: string;
+  created_at: string;
 }
 
-export default function DivineTrust() {
-  const [documents, setDocuments] = useState<DivineTrustDocument[]>([])
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+export default function DivineTrust(): JSX.Element {
+  const [documents, setDocuments] = useState<DivineTrustDocument[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newDocument, setNewDocument] = useState({
     title: "",
     document_type: "covenant",
     content: "",
-    document_data: {}
-  })
-  const [selectedType, setSelectedType] = useState("all")
-  const { toast } = useToast()
+    document_data: {},
+  });
+  const [selectedType, setSelectedType] = useState("all");
+  const { toast } = useToast();
 
   useEffect(() => {
+ codex/update-useeffect-dependency-arrays
     fetchDocuments()
-  }, [])
+  }, [fetchDocuments])
+
+    fetchDocuments();
+  }, []);
+ main
 
   const fetchDocuments = async () => {
     const { data, error } = await supabase
-      .from('divine_trust_documents')
-      .select('*')
-      .order('created_at', { ascending: false })
+      .from("divine_trust_documents")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to fetch trust documents",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
-    setDocuments(data || [])
-  }
+    setDocuments(data || []);
+  };
 
   const handleCreateDocument = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please sign in to create a document",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     const { data, error } = await supabase
-      .from('divine_trust_documents')
+      .from("divine_trust_documents")
       .insert({
         ...newDocument,
-        creator_id: user.id
+        creator_id: user.id,
       })
       .select()
-      .single()
+      .single();
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to create trust document",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     toast({
       title: "Success",
       description: "Trust document created successfully",
-    })
+    });
 
-    setDocuments([data, ...documents])
-    setIsCreateModalOpen(false)
+    setDocuments([data, ...documents]);
+    setIsCreateModalOpen(false);
     setNewDocument({
       title: "",
       document_type: "covenant",
       content: "",
-      document_data: {}
-    })
+      document_data: {},
+    });
 
     // Create Kingdom Entry record
-    await supabase
-      .from('kingdom_entry_records')
-      .insert({
-        user_id: user.id,
-        entry_type: 'document_creation',
-        entry_data: {
-          document_id: data.id,
-          document_type: newDocument.document_type,
-          title: newDocument.title
-        },
-        trust_level: 1,
-        document_refs: [data.id]
-      })
-  }
+    await supabase.from("kingdom_entry_records").insert({
+      user_id: user.id,
+      entry_type: "document_creation",
+      entry_data: {
+        document_id: data.id,
+        document_type: newDocument.document_type,
+        title: newDocument.title,
+      },
+      trust_level: 1,
+      document_refs: [data.id],
+    });
+  };
 
   const handleApproveDocument = async (documentId: string) => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
 
     const { error } = await supabase
-      .from('divine_trust_documents')
+      .from("divine_trust_documents")
       .update({
-        approval_status: 'approved',
+        approval_status: "approved",
         approved_by: user.id,
-        approved_at: new Date().toISOString()
+        approved_at: new Date().toISOString(),
       })
-      .eq('id', documentId)
+      .eq("id", documentId);
 
     if (error) {
       toast({
         title: "Error",
         description: "Failed to approve document",
-        variant: "destructive"
-      })
-      return
+        variant: "destructive",
+      });
+      return;
     }
 
     toast({
       title: "Success",
       description: "Document approved successfully",
-    })
+    });
 
-    fetchDocuments()
-  }
+    fetchDocuments();
+  };
 
   const documentTemplates = [
     {
@@ -162,7 +175,7 @@ I pledge to:
 
 Witnessed this day: [DATE]
 Signature: ________________
-Trust Level: Initiate`
+Trust Level: Initiate`,
     },
     {
       type: "agreement",
@@ -179,20 +192,22 @@ Terms and Conditions:
 5. Sacred Laws Compliance
 
 Effective Date: [DATE]
-Trust Hierarchy Level: [LEVEL]`
-    }
-  ]
+Trust Hierarchy Level: [LEVEL]`,
+    },
+  ];
 
-  const filteredDocuments = documents.filter(doc => 
-    selectedType === "all" || doc.document_type === selectedType
-  )
+  const filteredDocuments = documents.filter(
+    (doc) => selectedType === "all" || doc.document_type === selectedType,
+  );
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Divine Trust Vault</h1>
-          <p className="text-muted-foreground">Sacred documents and covenants for trust hierarchy</p>
+          <p className="text-muted-foreground">
+            Sacred documents and covenants for trust hierarchy
+          </p>
         </div>
         <Button onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -224,7 +239,13 @@ Trust Hierarchy Level: [LEVEL]`
                   <ScrollText className="h-5 w-5" />
                   <CardTitle className="text-lg">{document.title}</CardTitle>
                 </div>
-                <Badge variant={document.approval_status === 'approved' ? 'default' : 'secondary'}>
+                <Badge
+                  variant={
+                    document.approval_status === "approved"
+                      ? "default"
+                      : "secondary"
+                  }
+                >
                   {document.approval_status}
                 </Badge>
               </div>
@@ -260,7 +281,7 @@ Trust Hierarchy Level: [LEVEL]`
                   <FileText className="h-4 w-4 mr-2" />
                   View Full
                 </Button>
-                {document.approval_status === 'pending' && (
+                {document.approval_status === "pending" && (
                   <Button onClick={() => handleApproveDocument(document.id)}>
                     <Crown className="h-4 w-4" />
                   </Button>
@@ -274,7 +295,9 @@ Trust Hierarchy Level: [LEVEL]`
       {filteredDocuments.length === 0 && (
         <div className="text-center py-12">
           <ScrollText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No trust documents found. Create the first one!</p>
+          <p className="text-muted-foreground">
+            No trust documents found. Create the first one!
+          </p>
         </div>
       )}
 
@@ -290,14 +313,21 @@ Trust Hierarchy Level: [LEVEL]`
                 <Input
                   id="title"
                   value={newDocument.title}
-                  onChange={(e) => setNewDocument({ ...newDocument, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewDocument({ ...newDocument, title: e.target.value })
+                  }
                   placeholder="e.g., Sacred Covenant of Trust"
                 />
               </div>
 
               <div>
                 <Label htmlFor="document_type">Document Type</Label>
-                <Select value={newDocument.document_type} onValueChange={(value) => setNewDocument({ ...newDocument, document_type: value })}>
+                <Select
+                  value={newDocument.document_type}
+                  onValueChange={(value) =>
+                    setNewDocument({ ...newDocument, document_type: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -318,12 +348,14 @@ Trust Hierarchy Level: [LEVEL]`
                       key={template.type}
                       variant="outline"
                       size="sm"
-                      onClick={() => setNewDocument({
-                        ...newDocument,
-                        title: template.title,
-                        document_type: template.type,
-                        content: template.content
-                      })}
+                      onClick={() =>
+                        setNewDocument({
+                          ...newDocument,
+                          title: template.title,
+                          document_type: template.type,
+                          content: template.content,
+                        })
+                      }
                     >
                       Use {template.title}
                     </Button>
@@ -336,7 +368,9 @@ Trust Hierarchy Level: [LEVEL]`
                 <Textarea
                   id="content"
                   value={newDocument.content}
-                  onChange={(e) => setNewDocument({ ...newDocument, content: e.target.value })}
+                  onChange={(e) =>
+                    setNewDocument({ ...newDocument, content: e.target.value })
+                  }
                   placeholder="Enter the sacred document content..."
                   className="min-h-[300px]"
                 />
@@ -347,7 +381,10 @@ Trust Hierarchy Level: [LEVEL]`
                   <Shield className="h-4 w-4 mr-2" />
                   Create Document
                 </Button>
-                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateModalOpen(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -356,5 +393,5 @@ Trust Hierarchy Level: [LEVEL]`
         </div>
       )}
     </div>
-  )
+  );
 }

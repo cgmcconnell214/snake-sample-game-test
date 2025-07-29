@@ -1,3 +1,33 @@
+ codex/apply-eslint-typescript-rules
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Users,
+  AlertTriangle,
+  TrendingUp,
+  DollarSign,
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,23 +38,150 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Users, 
-  AlertTriangle, 
+
+interface AdminUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  subscription_tier: string;
+  kyc_status: string;
+  compliance_risk: string;
+}
+
+interface ComplianceAlertItem {
+  id: string;
+  alert_type: string;
+  severity: string;
+  message: string;
+  created_at: string;
+}
+
+interface TradeExecution {
+  id: string;
+  asset_symbol: string;
+  buyer?: { email: string } | null;
+  seller?: { email: string } | null;
+  quantity: number;
+  price: number;
+  settlement_status: string;
+  execution_time: string;
+}
+import {
+  Users,
+  AlertTriangle,
   TrendingUp, 
   DollarSign, 
+ main
   Download,
   CheckCircle,
   XCircle,
-  Clock
-} from 'lucide-react';
+  Clock,
+} from "lucide-react";
+
+ codex/apply-eslint-typescript-rules
+const Admin = (): JSX.Element => {
+
+interface AdminUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  subscription_tier: string;
+  kyc_status: string;
+  compliance_risk: string;
+}
+
+interface ComplianceAlert {
+  id: string;
+  alert_type: string;
+  severity: string;
+  message: string;
+  created_at: string;
+}
+
+interface TradeRecord {
+  id: string;
+  asset_symbol: string;
+  buyer?: { email?: string };
+  seller?: { email?: string };
+  quantity: number;
+  price: number;
+  settlement_status: string;
+  execution_time: string;
+}
 
 const Admin = () => {
+ main
   const { profile } = useAuth();
   const { toast } = useToast();
-  const [users, setUsers] = useState([]);
-  const [alerts, setAlerts] = useState([]);
-  const [trades, setTrades] = useState([]);
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
+  const [alerts, setAlerts] = useState<Record<string, unknown>[]>([]);
+  const [trades, setTrades] = useState<Record<string, unknown>[]>([]);
+
+ codex/replace-all-instances-of-any-in-codebase
+  interface AdminUser {
+
+ codex/replace-any-with-correct-typescript-types
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
+  const [trades, setTrades] = useState<TradeRecord[]>([]);
+
+ codex/replace-instances-of-any-with-correct-types
+  interface UserRecord {
+ main
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    role: string;
+    subscription_tier: string;
+    kyc_status: string;
+    compliance_risk: string;
+  }
+
+  interface ComplianceAlert {
+    id: string;
+    alert_type: string;
+    severity: string;
+    message: string;
+    created_at: string;
+  }
+
+ codex/replace-all-instances-of-any-in-codebase
+  interface TradeExecution {
+
+  interface TradeRecord {
+ main
+    id: string;
+    asset_symbol: string;
+    buyer?: { email: string } | null;
+    seller?: { email: string } | null;
+    quantity: number;
+    price: number;
+    settlement_status: string;
+    execution_time: string;
+  }
+
+ codex/replace-all-instances-of-any-in-codebase
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
+  const [trades, setTrades] = useState<TradeExecution[]>([]);
+
+  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
+  const [trades, setTrades] = useState<TradeRecord[]>([]);
+
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [alerts, setAlerts] = useState<ComplianceAlertItem[]>([]);
+  const [trades, setTrades] = useState<TradeExecution[]>([]);
+ main
+ main
+ main
+ main
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeTraders: 0,
@@ -34,10 +191,10 @@ const Admin = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (profile?.role === 'admin') {
+    if (profile?.role === "admin") {
       loadAdminData();
     }
-  }, [profile]);
+  }, [profile, loadAdminData]);
 
   const loadAdminData = async () => {
     try {
@@ -45,39 +202,41 @@ const Admin = () => {
 
       // Load users
       const { data: usersData } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false })
         .limit(20);
 
       // Load compliance alerts
       const { data: alertsData } = await supabase
-        .from('compliance_alerts')
-        .select('*')
-        .eq('resolved', false)
-        .order('created_at', { ascending: false })
+        .from("compliance_alerts")
+        .select("*")
+        .eq("resolved", false)
+        .order("created_at", { ascending: false })
         .limit(10);
 
       // Load recent trades
       const { data: tradesData } = await supabase
-        .from('trade_executions')
-        .select(`
+        .from("trade_executions")
+        .select(
+          `
           *,
           buyer:buyer_id(first_name, last_name, email),
           seller:seller_id(first_name, last_name, email)
-        `)
-        .order('execution_time', { ascending: false })
+        `,
+        )
+        .order("execution_time", { ascending: false })
         .limit(20);
 
       // Calculate stats
       const { count: totalUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
 
       const { count: pendingAlerts } = await supabase
-        .from('compliance_alerts')
-        .select('*', { count: 'exact', head: true })
-        .eq('resolved', false);
+        .from("compliance_alerts")
+        .select("*", { count: "exact", head: true })
+        .eq("resolved", false);
 
       setUsers(usersData || []);
       setAlerts(alertsData || []);
@@ -88,9 +247,8 @@ const Admin = () => {
         totalVolume: 0, // Calculate from trades
         pendingAlerts: pendingAlerts || 0,
       });
-
     } catch (error) {
-      console.error('Error loading admin data:', error);
+      console.error("Error loading admin data:", error);
       toast({
         title: "Error",
         description: "Failed to load admin data",
@@ -104,13 +262,13 @@ const Admin = () => {
   const resolveAlert = async (alertId: string) => {
     try {
       const { error } = await supabase
-        .from('compliance_alerts')
-        .update({ 
-          resolved: true, 
+        .from("compliance_alerts")
+        .update({
+          resolved: true,
           resolved_at: new Date().toISOString(),
-          resolved_by: profile.user_id
+          resolved_by: profile.user_id,
         })
-        .eq('id', alertId);
+        .eq("id", alertId);
 
       if (error) throw error;
 
@@ -121,7 +279,7 @@ const Admin = () => {
 
       loadAdminData();
     } catch (error) {
-      console.error('Error resolving alert:', error);
+      console.error("Error resolving alert:", error);
       toast({
         title: "Error",
         description: "Failed to resolve alert",
@@ -138,11 +296,11 @@ const Admin = () => {
         description: "Compliance report export has been started",
       });
     } catch (error) {
-      console.error('Error exporting report:', error);
+      console.error("Error exporting report:", error);
     }
   };
 
-  if (profile?.role !== 'admin') {
+  if (profile?.role !== "admin") {
     return (
       <div className="container mx-auto p-6">
         <Alert variant="destructive">
@@ -187,7 +345,9 @@ const Admin = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Traders</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Traders
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -201,13 +361,17 @@ const Admin = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.totalVolume.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              ${stats.totalVolume.toLocaleString()}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Alerts</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Pending Alerts
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -245,25 +409,61 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user: any) => (
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+                  {users.map((user) => (
+
+ codex/replace-all-instances-of-any-in-codebase
+                  {users.map((user: AdminUser) => (
+
+ codex/replace-any-with-correct-typescript-types
+                  {users.map((user: AdminUser) => (
+
+ codex/replace-instances-of-any-with-correct-types
+                  {users.map((user: UserRecord) => (
+
+                  {users.map((user) => (
+ main
+ main
+ main
+ main
                     <TableRow key={user.id}>
-                      <TableCell>{user.first_name} {user.last_name}</TableCell>
+                      <TableCell>
+                        {user.first_name} {user.last_name}
+                      </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <Badge variant={user.role === 'admin' ? 'destructive' : 'default'}>
+                        <Badge
+                          variant={
+                            user.role === "admin" ? "destructive" : "default"
+                          }
+                        >
                           {user.role}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{user.subscription_tier}</Badge>
+                        <Badge variant="outline">
+                          {user.subscription_tier}
+                        </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={user.kyc_status === 'approved' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={
+                            user.kyc_status === "approved"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
                           {user.kyc_status}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={user.compliance_risk === 'low' ? 'default' : 'destructive'}>
+                        <Badge
+                          variant={
+                            user.compliance_risk === "low"
+                              ? "default"
+                              : "destructive"
+                          }
+                        >
                           {user.compliance_risk}
                         </Badge>
                       </TableCell>
@@ -300,11 +500,33 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {alerts.map((alert: any) => (
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+                  {alerts.map((alert) => (
+
+ codex/replace-all-instances-of-any-in-codebase
+                  {alerts.map((alert: ComplianceAlert) => (
+
+ codex/replace-any-with-correct-typescript-types
+                  {alerts.map((alert: ComplianceAlert) => (
+
+ codex/replace-instances-of-any-with-correct-types
+                  {alerts.map((alert: ComplianceAlert) => (
+
+                  {alerts.map((alert) => (
+ main
+ main
+ main
+ main
                     <TableRow key={alert.id}>
                       <TableCell>{alert.alert_type}</TableCell>
                       <TableCell>
-                        <Badge variant={alert.severity === 'critical' ? 'destructive' : 'default'}>
+                        <Badge
+                          variant={
+                            alert.severity === "critical"
+                              ? "destructive"
+                              : "default"
+                          }
+                        >
                           {alert.severity}
                         </Badge>
                       </TableCell>
@@ -313,8 +535,8 @@ const Admin = () => {
                         {new Date(alert.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           onClick={() => resolveAlert(alert.id)}
                         >
                           Resolve
@@ -350,7 +572,23 @@ const Admin = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {trades.map((trade: any) => (
+ xgqza0-codex/replace-instances-of-any-with-correct-types
+                  {trades.map((trade) => (
+
+ codex/replace-all-instances-of-any-in-codebase
+                  {trades.map((trade: TradeExecution) => (
+
+ codex/replace-any-with-correct-typescript-types
+                  {trades.map((trade: TradeRecord) => (
+
+ codex/replace-instances-of-any-with-correct-types
+                  {trades.map((trade: TradeRecord) => (
+
+                  {trades.map((trade) => (
+ main
+ main
+ main
+ main
                     <TableRow key={trade.id}>
                       <TableCell>{trade.asset_symbol}</TableCell>
                       <TableCell>{trade.buyer?.email}</TableCell>
@@ -358,7 +596,13 @@ const Admin = () => {
                       <TableCell>{trade.quantity}</TableCell>
                       <TableCell>${trade.price}</TableCell>
                       <TableCell>
-                        <Badge variant={trade.settlement_status === 'settled' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={
+                            trade.settlement_status === "settled"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
                           {trade.settlement_status}
                         </Badge>
                       </TableCell>

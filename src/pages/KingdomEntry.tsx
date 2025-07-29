@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Users, UserCheck, Feather, Crown } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Users, UserCheck, Feather, Crown } from "lucide-react";
 
-export default function KingdomEntry() {
+export default function KingdomEntry(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Kingdom Entry Logs</h1>
-          <p className="text-muted-foreground">Sacred registry and witness management</p>
+          <p className="text-muted-foreground">
+            Sacred registry and witness management
+          </p>
         </div>
         <Button>
           <Crown className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function KingdomEntry() {
             <p className="text-sm text-muted-foreground mb-4">
               View all souls registered in the kingdom
             </p>
-            <Button variant="outline" className="w-full">View Registry</Button>
+            <Button variant="outline" className="w-full">
+              View Registry
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function KingdomEntry() {
             <p className="text-sm text-muted-foreground mb-4">
               Sacred oaths and commitments made
             </p>
-            <Button variant="outline" className="w-full">View Oaths</Button>
+            <Button variant="outline" className="w-full">
+              View Oaths
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function KingdomEntry() {
             <p className="text-sm text-muted-foreground mb-4">
               Cryptographic witness verification
             </p>
-            <Button variant="outline" className="w-full">Manage Witnesses</Button>
+            <Button variant="outline" className="w-full">
+              Manage Witnesses
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

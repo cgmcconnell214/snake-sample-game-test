@@ -1,0 +1,7 @@
+{
+  "bot_id": "string",
+  "lease_period": "number",
+  "price_per_day": "number",
+  "lessee": "string",
+  "lessor": "string"
+}

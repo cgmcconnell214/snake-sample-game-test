@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Calendar, Users, Video, Archive } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar, Users, Video, Archive } from "lucide-react";
 
-export default function LiveClasses() {
+export default function LiveClasses(): JSX.Element {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Live Classes & Calls</h1>
-          <p className="text-muted-foreground">Join live educational sessions and workshops</p>
+          <p className="text-muted-foreground">
+            Join live educational sessions and workshops
+          </p>
         </div>
         <Button>
           <Calendar className="h-4 w-4 mr-2" />
@@ -28,7 +30,9 @@ export default function LiveClasses() {
             <p className="text-sm text-muted-foreground mb-4">
               View upcoming classes and workshops
             </p>
-            <Button variant="outline" className="w-full">View Calendar</Button>
+            <Button variant="outline" className="w-full">
+              View Calendar
+            </Button>
           </CardContent>
         </Card>
 
@@ -43,7 +47,9 @@ export default function LiveClasses() {
             <p className="text-sm text-muted-foreground mb-4">
               Register for live sessions and get reminders
             </p>
-            <Button variant="outline" className="w-full">Browse Events</Button>
+            <Button variant="outline" className="w-full">
+              Browse Events
+            </Button>
           </CardContent>
         </Card>
 
@@ -58,10 +64,12 @@ export default function LiveClasses() {
             <p className="text-sm text-muted-foreground mb-4">
               Access recordings of past sessions
             </p>
-            <Button variant="outline" className="w-full">View Archive</Button>
+            <Button variant="outline" className="w-full">
+              View Archive
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }
