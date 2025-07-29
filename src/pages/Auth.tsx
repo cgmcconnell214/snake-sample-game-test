@@ -45,12 +45,18 @@ const Auth = () => {
         setError(error.message);
       }
     } catch (err: unknown) {
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+      const error = err as Error;
+      setError(error.message || 'An error occurred during sign in');
+
  codex/replace-instances-of-any-with-correct-types
       const error = err as Error;
       setError(error.message || 'An error occurred during sign in');
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred during sign in');
+ main
  main
     } finally {
       setLoading(false);
@@ -84,12 +90,18 @@ const Auth = () => {
         setError(error.message);
       }
     } catch (err: unknown) {
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+      const error = err as Error;
+      setError(error.message || 'An error occurred during sign up');
+
  codex/replace-instances-of-any-with-correct-types
       const error = err as Error;
       setError(error.message || 'An error occurred during sign up');
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred during sign up');
+ main
  main
     } finally {
       setLoading(false);
@@ -112,12 +124,18 @@ const Auth = () => {
         setError(error.message);
       }
     } catch (err: unknown) {
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+      const error = err as Error;
+      setError(error.message || 'An error occurred with Discord authentication');
+
  codex/replace-instances-of-any-with-correct-types
       const error = err as Error;
       setError(error.message || 'An error occurred with Discord authentication');
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setError((err as any).message || 'An error occurred with Discord authentication');
+ main
  main
     } finally {
       setLoading(false);

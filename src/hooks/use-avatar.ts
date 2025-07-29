@@ -57,6 +57,13 @@ export function useAvatar() {
 
       return { url: publicUrl };
     } catch (err: unknown) {
+ codex/replace-any-with-correct-typescript-types
+      // TODO: Verify correct error type
+      console.error('Avatar upload error:', err);
+      const error = err as Error;
+      setError(error.message || 'Failed to upload avatar');
+      throw error;
+
       console.error('Avatar upload error:', err);
  codex/replace-instances-of-any-with-correct-types
       const error = err as Error;
@@ -66,6 +73,7 @@ export function useAvatar() {
       setError((err as any).message || 'Failed to upload avatar');
  main
       throw err;
+ main
     } finally {
       setUploading(false);
     }

@@ -33,6 +33,13 @@ interface AuditLog {
 interface AuditDetail {
   id: string;
   event_id: string;
+ codex/replace-any-with-correct-typescript-types
+  request_data: Record<string, unknown>;
+  response_data: Record<string, unknown>;
+  error_details: Record<string, unknown>;
+  execution_time_ms: number;
+  security_context: Record<string, unknown>;
+
  codex/replace-instances-of-any-with-correct-types
   request_data: Record<string, unknown> | null;
   response_data: Record<string, unknown> | null;
@@ -45,6 +52,7 @@ interface AuditDetail {
   error_details: Record<string, unknown>;
   execution_time_ms: number;
   security_context: Record<string, unknown>;
+ main
  main
   compliance_flags: string[];
   created_at: string;

@@ -23,6 +23,8 @@ const AuditTrail = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+ codex/replace-any-with-correct-typescript-types
+
  codex/replace-instances-of-any-with-correct-types
   interface AuditLog {
     id: number;
@@ -36,6 +38,7 @@ const AuditTrail = () => {
   }
 
 
+ main
  main
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);

@@ -2,6 +2,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+ codex/replace-any-with-correct-typescript-types
+import type { Attachment } from './AttachmentViewer';
+
 
 interface Attachment {
   name: string;
@@ -9,6 +12,7 @@ interface Attachment {
   type?: string;
   size?: number;
 }
+ main
 import { 
   Clock, 
   AlertCircle, 
@@ -27,10 +31,14 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
+ codex/replace-any-with-correct-typescript-types
+  attachments: Attachment[] | string;
+
  codex/replace-instances-of-any-with-correct-types
   attachments: string | Record<string, unknown>[] | null;
 
   attachments: Attachment[];
+ main
  main
   is_read: boolean;
   is_archived: boolean;

@@ -16,8 +16,23 @@ import {
 import { User } from '@supabase/supabase-js';
 
 interface ProfileBannerProps {
+ codex/replace-any-with-correct-typescript-types
+  user: {
+    email?: string;
+  } | null;
+  profile: {
+    avatar_url?: string;
+    display_name?: string;
+    first_name?: string;
+    username?: string;
+    role?: string;
+    subscription_tier?: string;
+    bio?: string;
+  } | null;
+
   user: User | null;
   profile: Record<string, unknown> | null;
+ main
   unreadCount: number;
 }
 
