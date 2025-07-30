@@ -7,10 +7,10 @@ export interface AvatarUploadResult {
 }
 
 export interface UseAvatarResult {
-  uploadAvatar: (file: File) => Promise<AvatarUploadResult | null>
-  uploading: boolean
-  progress: number
-  error: string | null
+  uploadAvatar: (file: File) => Promise<AvatarUploadResult | null>;
+  uploading: boolean;
+  progress: number;
+  error: string | null;
 }
 
 export function useAvatar(): UseAvatarResult {
@@ -21,21 +21,21 @@ export function useAvatar(): UseAvatarResult {
 
   const uploadAvatar = async (file: File): Promise<AvatarUploadResult | null> => {
     if (!file || !user?.id) return null;
-    
+
     setUploading(true);
     setProgress(0);
     setError(null);
-    
+
     try {
       // Create unique filename
       const fileName = `${user.id}/avatar-${Date.now()}.${file.name.split('.').pop()}`;
-      
+
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: true
+          upsert: true,
         });
 
       if (uploadError) {
@@ -64,35 +64,10 @@ export function useAvatar(): UseAvatarResult {
 
       return { url: publicUrl };
     } catch (err: unknown) {
- khfq01-codex/replace-instances-of-any-with-correct-types
       console.error('Avatar upload error:', err);
       const message = (err as Error).message || 'Failed to upload avatar';
       setError(message);
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
-
- codex/replace-all-instances-of-any-in-codebase
-
- codex/replace-any-with-correct-typescript-types
-      // TODO: Verify correct error type
- main
-      console.error('Avatar upload error:', err);
-      const error = err as Error;
-      setError(error.message || 'Failed to upload avatar');
-      throw error;
-
- main
-      console.error('Avatar upload error:', err);
- codex/replace-instances-of-any-with-correct-types
-      const error = err as Error;
-      setError(error.message || 'Failed to upload avatar');
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setError((err as any).message || 'Failed to upload avatar');
- main
- main
-      throw err;
- main
+      return null;
     } finally {
       setUploading(false);
     }
