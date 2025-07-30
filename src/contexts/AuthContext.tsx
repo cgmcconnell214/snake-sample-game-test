@@ -2,23 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import type { Database } from '@/integrations/supabase/types';
 
 interface Profile {
- xgqza0-codex/replace-instances-of-any-with-correct-types
   id?: string;
-  user_id?: string;
-  avatar_url?: string;
-  display_name?: string;
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  bio?: string;
-  role?: string;
-  subscription_tier?: string;
-
- codex/replace-all-instances-of-any-in-codebase
-
   user_id: string;
   role?: string;
   subscription_tier?: string;
@@ -31,66 +17,21 @@ interface Profile {
   display_name?: string;
   username?: string;
   bio?: string;
- main
+  two_factor_enabled?: boolean;
   [key: string]: unknown;
- main
 }
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
- khfq01-codex/replace-instances-of-any-with-correct-types
-  profile: Database['public']['Tables']['profiles']['Row'] | null;
+  profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
-  profile: Profile | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-
- codex/replace-all-instances-of-any-in-codebase
-  profile: Profile | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
-
- codex/replace-any-with-correct-typescript-types
-  profile: Profile | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-
-  profile: Record<string, unknown> | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: unknown }>;
- codex/replace-instances-of-any-with-correct-types
-  signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<{ error: unknown }>;
-
- main
- main
- main
- main
   signUp: (
     email: string,
     password: string,
     metadata?: Record<string, unknown>
- khfq01-codex/replace-instances-of-any-with-correct-types
   ) => Promise<{ error: AuthError | null }>;
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
-  ) => Promise<{ error: Error | null }>;
-
- codex/replace-all-instances-of-any-in-codebase
-  ) => Promise<{ error: unknown }>;
-
- codex/replace-any-with-correct-typescript-types
-  ) => Promise<{ error: Error | null }>;
-
-  ) => Promise<{ error: unknown }>;
- main
- main
- main
- main
- main
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   checkSubscription: () => Promise<void>;
@@ -108,24 +49,8 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);       
-         khfq01-codex/replace-instances-of-any-with-correct-types
-  const [profile, setProfile] = useState<Database['public']['Tables']['profiles']['Row'] | null>(null);
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-
- codex/replace-all-instances-of-any-in-codebase
-  const [profile, setProfile] = useState<Profile | null>(null);
-
- codex/replace-any-with-correct-typescript-types
-  const [profile, setProfile] = useState<Profile | null>(null);
-
-  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
- main
- main
- main
- main
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -260,7 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, [refreshProfile]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -292,59 +217,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return { error: null };
     } catch (error: unknown) {
- khfq01-codex/replace-instances-of-any-with-correct-types
       console.error('Sign in error:', error);
       return { error: error as AuthError };
     }
   };
 
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
-
- codex/replace-all-instances-of-any-in-codebase
-
- codex/replace-any-with-correct-typescript-types
-      // TODO: Verify correct error type
-
- main
- main
- main
-      console.error('Sign in error:', error);
-      return { error: error as Error };
-    }
-  };
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
-
- codex/replace-all-instances-of-any-in-codebase
-
- codex/replace-any-with-correct-typescript-types
-
- codex/replace-instances-of-any-with-correct-types
-  const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
-
- main
- main
- main
- main
   const signUp = async (
     email: string,
     password: string,
     metadata?: Record<string, unknown>
   ) => {
- khfq01-codex/replace-instances-of-any-with-correct-types
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
-
- codex/replace-all-instances-of-any-in-codebase
-
- codex/replace-any-with-correct-typescript-types
-
- main
- main
- main
- main
- main
     try {
       cleanupAuthState();
       
@@ -368,23 +250,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       return { error: null };
     } catch (error: unknown) {
- khfq01-codex/replace-instances-of-any-with-correct-types
       console.error('Sign up error:', error);
       return { error: error as AuthError };
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
-
- codex/replace-all-instances-of-any-in-codebase
-
- codex/replace-any-with-correct-typescript-types
-      // TODO: Verify correct error type
-
- main
- main
- main
-      console.error('Sign up error:', error);
-      return { error: error as Error };
- main
     }
   };
 

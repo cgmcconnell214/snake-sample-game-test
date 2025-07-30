@@ -1,45 +1,14 @@
- codex/apply-eslint-typescript-rules
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown } from "lucide-react";
-
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { TrendingUp, TrendingDown } from "lucide-react"
- main
 
 interface ChartDataPoint {
   time: string;
   price: number;
   volume: number;
 }
-
- codex/apply-eslint-typescript-rules
-const mockChartData: ChartDataPoint[] = [
-  { time: "09:00", price: 125.5, volume: 1250 },
-  { time: "09:30", price: 127.2, volume: 1890 },
-  { time: "10:00", price: 124.8, volume: 2100 },
-  { time: "10:30", price: 128.9, volume: 1750 },
-  { time: "11:00", price: 132.4, volume: 2300 },
-  { time: "11:30", price: 129.7, volume: 1680 },
-  { time: "12:00", price: 131.2, volume: 1950 },
-];
-
-export function TradingChart({
-  symbol = "GOLD-TOKEN",
-  currentPrice = 131.2,
-  change = 2.4,
-}: {
-  symbol?: string;
-  currentPrice?: number;
-  change?: number;
-}): JSX.Element {
-  const [timeframe, setTimeframe] = useState("1H");
-  const isPositive = change >= 0;
 
 function generateMockChartData(basePrice: number): ChartDataPoint[] {
   const points: ChartDataPoint[] = []
@@ -60,7 +29,6 @@ export function TradingChart({ symbol = "GOLD-TOKEN", currentPrice = 131.20, cha
   const [timeframe, setTimeframe] = useState("1H")
   const [chartData, setChartData] = useState<ChartDataPoint[]>(() => generateMockChartData(currentPrice))
   const isPositive = change >= 0
- main
 
   useEffect(() => {
     setChartData(generateMockChartData(currentPrice))
@@ -153,35 +121,17 @@ export function TradingChart({ symbol = "GOLD-TOKEN", currentPrice = 131.20, cha
               fill="none"
               stroke="hsl(var(--primary))"
               strokeWidth="2"
- codex/apply-eslint-typescript-rules
-              points={mockChartData
-                .map(
-                  (point, i) =>
-                    `${(i * 400) / (mockChartData.length - 1)},${200 - ((point.price - 120) / 15) * 200}`,
-                )
-                .join(" ")}
-
               points={chartData.map((point, i) =>
                 `${(i * 400) / (chartData.length - 1)},${200 - ((point.price - currentPrice) / 15 + 0.5) * 200}`
               ).join(' ')}
- main
             />
 
             {/* Fill area */}
             <polygon
               fill="url(#priceGradient)"
- codex/apply-eslint-typescript-rules
-              points={`0,200 ${mockChartData
-                .map(
-                  (point, i) =>
-                    `${(i * 400) / (mockChartData.length - 1)},${200 - ((point.price - 120) / 15) * 200}`,
-                )
-                .join(" ")} 400,200`}
-
               points={`0,200 ${chartData.map((point, i) =>
                 `${(i * 400) / (chartData.length - 1)},${200 - ((point.price - currentPrice) / 15 + 0.5) * 200}`
               ).join(' ')} 400,200`}
- main
             />
           </svg>
 

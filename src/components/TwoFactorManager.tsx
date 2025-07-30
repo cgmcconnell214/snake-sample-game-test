@@ -17,12 +17,12 @@ import {
   Key,
   AlertTriangle,
   CheckCircle,
- codex/apply-eslint-typescript-rules
   Copy,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { generateSecret, generateOtpAuthURL, verifyToken } from "@/lib/totp";
 import {
   Dialog,
   DialogContent,
@@ -31,15 +31,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-  Copy
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { generateSecret, generateOtpAuthURL, verifyToken } from '@/lib/totp';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
- main
 
 const TwoFactorManager: React.FC = () => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -70,27 +61,11 @@ const TwoFactorManager: React.FC = () => {
   const enable2FA = async () => {
     setLoading(true);
     try {
- codex/apply-eslint-typescript-rules
-      // In a real implementation, you would:
-      // 1. Generate a secret key
-      // 2. Create QR code URL for authenticator apps
-      // 3. Verify the user can generate valid codes
-
-      // For demo purposes, we'll simulate this
-      const secret =
-        "MOCK_SECRET_" + Math.random().toString(36).substring(2, 15);
-      const codes = generateBackupCodes();
-
-      setQrCodeUrl(
-        `otpauth://totp/God's%20Realm:${user?.email}?secret=${secret}&issuer=God's%20Realm`,
-      );
-
       const newSecret = generateSecret();
       const codes = generateBackupCodes();
 
       setSecret(newSecret);
       setQrCodeUrl(generateOtpAuthURL(newSecret, user?.email || 'user', "God's Realm"));
- main
       setBackupCodes(codes);
       setShowSetup(true);
     } catch (error) {

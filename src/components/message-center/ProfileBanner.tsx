@@ -1,58 +1,19 @@
- codex/apply-eslint-typescript-rules
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-import React from 'react';
 import { User } from '@supabase/supabase-js';
-import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
- codex/add-typescript-prop-types-to-components
-
- xgqza0-codex/replace-instances-of-any-with-correct-types
-import { User } from '@supabase/supabase-js';
-import { 
-  Settings, 
-  Bell, 
-  Shield, 
-
- main
- main
 import {
   Settings,
   Bell,
   Shield,
- codex/add-typescript-prop-types-to-components
-
- codex/apply-eslint-typescript-rules
   Crown,
   MessageSquare,
   TrendingUp,
   Wallet,
 } from "lucide-react";
 
- main
- main
-  Crown,
-  MessageSquare,
-  TrendingUp,
-  Wallet
-} from 'lucide-react';
- khfq01-codex/replace-instances-of-any-with-correct-types
-import type { User } from '@supabase/supabase-js';
-import type { Database } from '@/integrations/supabase/types';
-
-interface ProfileBannerProps {
-  user: User | null;
-  profile: Database['public']['Tables']['profiles']['Row'] | null;
-
-import { User } from '@supabase/supabase-js';
-
- codex/add-typescript-prop-types-to-components
 interface UserProfile {
   avatar_url?: string;
   display_name?: string;
@@ -67,50 +28,6 @@ interface UserProfile {
 interface ProfileBannerProps {
   user: User | null;
   profile: UserProfile | null;
-
-import { User } from '@supabase/supabase-js';
-
-interface UserProfileInfo {
-  avatar_url?: string;
-  display_name?: string;
-  first_name?: string;
-  username?: string;
-  role?: string;
-  subscription_tier?: string;
-  bio?: string;
-}
- main
-
-interface ProfileBannerProps {
- xgqza0-codex/replace-instances-of-any-with-correct-types
-  user: User | null;
-  profile: UserProfileInfo | null;
-
- codex/replace-all-instances-of-any-in-codebase
-  user: User | null;
-  profile: Record<string, unknown> | null;
-
- codex/replace-any-with-correct-typescript-types
-  user: {
-    email?: string;
-  } | null;
-  profile: {
-    avatar_url?: string;
-    display_name?: string;
-    first_name?: string;
-    username?: string;
-    role?: string;
-    subscription_tier?: string;
-    bio?: string;
-  } | null;
-
-  user: User | null;
-  profile: Record<string, unknown> | null;
- main
- main
- main
- main
- main
   unreadCount: number;
 }
 
