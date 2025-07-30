@@ -9,16 +9,9 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
- codex/install-and-configure-vitest-for-testing
-    "test": "vitest"
-
- codex/generate-final-production-readiness-checklist
     "test": "vitest",
-    "coverage": "vitest run --coverage"
-
-    "deploy:contract": "node scripts/deploy-contract.js"
- main
- main
+    "coverage": "vitest run --coverage",
+    "deploy:contract": "node scripts/deploy-contract.js",
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -93,7 +86,6 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1",
- codex/install-and-configure-vitest-for-testing
     "vitest": "^1.4.0",
     "@testing-library/react": "^14.2.1",
     "@testing-library/jest-dom": "^6.4.2",
@@ -101,6 +93,5 @@
 
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.6.0"
- main
   }
 }
