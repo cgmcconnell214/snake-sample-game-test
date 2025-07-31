@@ -522,7 +522,6 @@ const UserProfile: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="activity" className="space-y-4">
- codex/apply-eslint-typescript-rules
               <Card>
                 <CardContent className="text-center py-8">
                   <Users className="h-8 w-8 mx-auto text-muted-foreground mb-2" />

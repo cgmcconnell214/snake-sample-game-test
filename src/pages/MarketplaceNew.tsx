@@ -1,4 +1,3 @@
- codex/apply-eslint-typescript-rules
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,13 +49,8 @@ export default function Marketplace(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
- codex/update-useeffect-dependency-arrays
-    fetchMarketplaceAssets()
-  }, [fetchMarketplaceAssets])
-
     fetchMarketplaceAssets();
   }, []);
- main
 
   const fetchMarketplaceAssets = async () => {
     const { data, error } = await supabase

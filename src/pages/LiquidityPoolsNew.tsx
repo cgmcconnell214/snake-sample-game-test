@@ -38,13 +38,8 @@ export default function LiquidityPools(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
- codex/update-useeffect-dependency-arrays
-    fetchLiquidityPools()
-  }, [fetchLiquidityPools])
-
     fetchLiquidityPools();
   }, []);
- main
 
   const fetchLiquidityPools = async () => {
     // Mock data since we don't have the table yet

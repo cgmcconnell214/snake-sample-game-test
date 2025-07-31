@@ -8,12 +8,8 @@ import {
   ToastViewport,
 } from "@/components/ui/toast";
 
-export function Toaster(): JSX.Element {
- codex/add-typescript-prop-types-to-components
-  const { toasts } = useToast()
-
+export function Toaster() {
   const { toasts } = useToast();
- main
 
   return (
     <ToastProvider>

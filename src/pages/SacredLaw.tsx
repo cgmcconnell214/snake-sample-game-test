@@ -43,15 +43,9 @@ export default function SacredLaw(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
- codex/update-useeffect-dependency-arrays
-    fetchPrinciples()
-    checkAdminStatus()
-  }, [fetchPrinciples, checkAdminStatus])
-
     fetchPrinciples();
     checkAdminStatus();
   }, []);
- main
 
   const checkAdminStatus = async () => {
     const {

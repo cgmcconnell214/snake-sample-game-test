@@ -53,13 +53,8 @@ export default function LearningPortal(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
- codex/update-useeffect-dependency-arrays
-    fetchCourses()
-  }, [fetchCourses])
-
     fetchCourses();
   }, []);
- main
 
   const fetchCourses = async () => {
     const { data, error } = await supabase
@@ -176,7 +171,6 @@ export default function LearningPortal(): JSX.Element {
     fetchCourses();
   };
 
- codex/apply-eslint-typescript-rules
   const filteredCourses = courses.filter((course) => {
     const matchesSearch =
       course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

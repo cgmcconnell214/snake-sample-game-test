@@ -297,7 +297,6 @@ const WalletIntegration: React.FC = () => {
               <p className="text-sm text-muted-foreground">
                 You can also use a third-party wallet provider:
               </p>
- codex/apply-eslint-typescript-rules
               <div className="grid grid-cols-2 gap-2 mt-2">
                 <Button
                   variant="outline"

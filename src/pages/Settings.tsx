@@ -1,4 +1,3 @@
- codex/apply-eslint-typescript-rules
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -15,21 +14,9 @@ import { Shield, CreditCard, User, LogOut, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import WalletIntegration from "@/components/WalletIntegration";
+import TwoFactorManager from "@/components/TwoFactorManager";
 
-import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Shield, CreditCard, User, LogOut, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import WalletIntegration from '@/components/WalletIntegration';
-import TwoFactorManager from '@/components/TwoFactorManager';
- main
-
-const Settings = (): JSX.Element => {
+const Settings = () => {
   const { user, profile, signOut, checkSubscription } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -423,7 +410,6 @@ const Settings = (): JSX.Element => {
             </Badge>
           </div>
 
- codex/apply-eslint-typescript-rules
           <div className="mt-4">
             <Button
               variant="outline"
@@ -438,11 +424,10 @@ const Settings = (): JSX.Element => {
             </Button>
           </div>
         </CardContent>
-
-          <TwoFactorManager />
-      </CardContent>
- main
       </Card>
+
+      {/* Two-Factor Authentication */}
+      <TwoFactorManager />
 
       {/* Wallet Integration */}
       <WalletIntegration />

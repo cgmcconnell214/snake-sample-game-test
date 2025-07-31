@@ -41,13 +41,8 @@ export default function DivineTrust(): JSX.Element {
   const { toast } = useToast();
 
   useEffect(() => {
- codex/update-useeffect-dependency-arrays
-    fetchDocuments()
-  }, [fetchDocuments])
-
     fetchDocuments();
   }, []);
- main
 
   const fetchDocuments = async () => {
     const { data, error } = await supabase

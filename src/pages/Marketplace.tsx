@@ -1,18 +1,11 @@
- codex/apply-eslint-typescript-rules
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Store, Plus, Search, Clock } from "lucide-react";
-
-export default function Marketplace(): JSX.Element {
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Store, Plus, Search, Clock } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 export default function Marketplace() {
-  const navigate = useNavigate()
- main
+  const navigate = useNavigate();
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -40,11 +33,7 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Create new asset listings for trading
             </p>
- codex/apply-eslint-typescript-rules
-            <Button variant="outline" className="w-full">
-
             <Button variant="outline" className="w-full" onClick={() => navigate('/app/tokenize')}>
- main
               Create Listing
             </Button>
           </CardContent>
@@ -61,11 +50,7 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Explore available assets and opportunities
             </p>
- codex/apply-eslint-typescript-rules
-            <Button variant="outline" className="w-full">
-
             <Button variant="outline" className="w-full" onClick={() => navigate('/app/marketplace-new')}>
- main
               Browse Market
             </Button>
           </CardContent>
@@ -82,11 +67,7 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               View pending and active trading contracts
             </p>
- codex/apply-eslint-typescript-rules
-            <Button variant="outline" className="w-full">
-
             <Button variant="outline" className="w-full" onClick={() => navigate('/app/smart-contracts')}>
- main
               View Queue
             </Button>
           </CardContent>

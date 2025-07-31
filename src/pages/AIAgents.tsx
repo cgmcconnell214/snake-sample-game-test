@@ -1,4 +1,3 @@
- codex/apply-eslint-typescript-rules
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,20 +23,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Bot, Plus, Settings, Zap, DollarSign, Users, Star } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
-import { injectContractTemplate } from "@/lib/contractTemplates"
- main
+import { injectContractTemplate } from "@/lib/contractTemplates";
 
 interface AIAgent {
   id: string;
@@ -52,16 +38,10 @@ interface AIAgent {
   created_at: string;
 }
 
- codex/apply-eslint-typescript-rules
-export default function AIAgents(): JSX.Element {
+export default function AIAgents() {
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-export default function AIAgents() {
-  const [agents, setAgents] = useState<AIAgent[]>([])
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [editingAgent, setEditingAgent] = useState<AIAgent | null>(null)
- main
+  const [editingAgent, setEditingAgent] = useState<AIAgent | null>(null);
   const [newAgent, setNewAgent] = useState({
     name: "",
     description: "",
@@ -75,13 +55,8 @@ export default function AIAgents() {
   const { toast } = useToast();
 
   useEffect(() => {
- codex/update-useeffect-dependency-arrays
-    fetchAgents()
-  }, [fetchAgents])
-
     fetchAgents();
   }, []);
- main
 
   const fetchAgents = async () => {
     const { data, error } = await supabase
@@ -171,15 +146,10 @@ export default function AIAgents() {
       return;
     }
 
- codex/apply-eslint-typescript-rules
     const agent = agents.find((a) => a.id === agentId);
     if (!agent) return;
 
-    await injectContractTemplate('rent')
-
-    const agent = agents.find(a => a.id === agentId)
-    if (!agent) return
- main
+    await injectContractTemplate('rent');
 
     const totalAmount = tokensToPurchase * agent.price_per_use;
 
@@ -216,7 +186,6 @@ export default function AIAgents() {
     fetchAgents();
   };
 
- codex/apply-eslint-typescript-rules
   const filteredAgents = agents.filter((agent) => {
     const matchesSearch =
       agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -227,30 +196,22 @@ export default function AIAgents() {
   });
 
   const handleUpdateAgent = async (updated: Partial<AIAgent>) => {
-    if (!editingAgent) return
+    if (!editingAgent) return;
     const { data, error } = await supabase
       .from('ai_agents')
       .update(updated)
       .eq('id', editingAgent.id)
       .select()
-      .single()
+      .single();
 
     if (error) {
-      toast({ title: 'Error', description: 'Failed to update agent', variant: 'destructive' })
-      return
+      toast({ title: 'Error', description: 'Failed to update agent', variant: 'destructive' });
+      return;
     }
-    setAgents(prev => prev.map(a => (a.id === data.id ? data : a)))
-    setEditingAgent(null)
-    toast({ title: 'Agent Updated' })
-  }
-
-  const filteredAgents = agents.filter(agent => {
-    const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         agent.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || agent.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
- main
+    setAgents(prev => prev.map(a => (a.id === data.id ? data : a)));
+    setEditingAgent(null);
+    toast({ title: 'Agent Updated' });
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
