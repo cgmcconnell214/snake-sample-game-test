@@ -20,63 +20,26 @@ import { Activity, Search, Download, Filter, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AuditDetailModal from "@/components/AuditDetailModal";
 
+interface AuditLog {
+  id: number;
+  timestamp: string;
+  action: string;
+  user: string;
+  details: string;
+  type: string;
+  status: string;
+  ipAddress: string;
+}
+
 const AuditTrail = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [selectedAuditLog, setSelectedAuditLog] = useState<any>(null);
-
-interface AuditLog {
-  id: number;
-  timestamp: string;
-  action: string;
-  user: string;
-  details: string;
-  type: string;
-  status: string;
-  ipAddress: string;
-}
-
-interface AuditLog {
-  id: number;
-  timestamp: string;
-  action: string;
-  user: string;
-  details: string;
-  type: string;
-  status: string;
-  ipAddress: string;
-}
-
-const AuditTrail = () => {
-  const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
-  interface AuditLog {
-    id: number;
-    timestamp: string;
-    action: string;
-    user: string;
-    details: string;
-    type: string;
-    status: string;
-    ipAddress: string;
-  }
-
-
-
- main
- main
- main
- main
-  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
- main
- main
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Mock audit trail data
-  const auditLogs = [
+  const auditLogs: AuditLog[] = [
     {
       id: 1,
       timestamp: "2024-01-20T10:30:00Z",
@@ -139,7 +102,7 @@ const AuditTrail = () => {
     },
   ];
 
-  const handleExport = (): JSX.Element => {
+  const handleExport = () => {
     toast({
       title: "Export Started",
       description: "Audit trail export has been initiated.",
