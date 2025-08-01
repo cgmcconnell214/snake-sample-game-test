@@ -171,25 +171,25 @@ export default function LiveClasses(): JSX.Element {
     });
   };
 
-  const handleScheduleSession = (): JSX.Element => {
+  const handleScheduleSession = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleViewCalendar = (): JSX.Element => {
+  const handleViewCalendar = () => {
     toast({
       title: "Calendar Integration",
       description: "Opening calendar view with all upcoming classes",
     });
   };
 
-  const handleRSVPEvents = (): JSX.Element => {
+  const handleRSVPEvents = () => {
     toast({
       title: "RSVP to Events",
       description: "View and RSVP to upcoming educational events",
     });
   };
 
-  const handleViewArchive = (): JSX.Element => {
+  const handleViewArchive = () => {
     toast({
       title: "Replay Archive",
       description: "Access recordings of past live classes",

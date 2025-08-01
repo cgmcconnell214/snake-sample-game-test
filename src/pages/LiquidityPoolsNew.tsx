@@ -86,25 +86,25 @@ export default function LiquidityPools(): JSX.Element {
     setPools(mockPools);
   };
 
-  const handleAddLiquidity = (): JSX.Element => {
+  const handleAddLiquidity = () => {
     setIsAddLiquidityOpen(true);
   };
 
-  const handleViewCommodityPools = (): JSX.Element => {
+  const handleViewCommodityPools = () => {
     toast({
       title: "Commodity Pools",
       description: "Showing commodity-backed liquidity pools",
     });
   };
 
-  const handleBondLiquidity = (): JSX.Element => {
+  const handleBondLiquidity = () => {
     toast({
       title: "Bond Liquidity",
       description: "Opening bonded liquidity options with lock periods",
     });
   };
 
-  const handleViewTimers = (): JSX.Element => {
+  const handleViewTimers = () => {
     toast({
       title: "Interest Timers",
       description: "Viewing time-locked liquidity positions and rewards",

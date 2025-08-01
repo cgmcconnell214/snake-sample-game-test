@@ -138,21 +138,21 @@ export default function SacredLaw(): JSX.Element {
     }
   };
 
-  const handleViewPillars = (): JSX.Element => {
+  const handleViewPillars = () => {
     toast({
       title: "72 Pillars",
       description: "Opening the foundational pillars of sacred governance",
     });
   };
 
-  const handleStudyFramework = (): JSX.Element => {
+  const handleStudyFramework = () => {
     toast({
       title: "Mirror Law Framework",
       description: "Studying the law of correspondence: As above, so below",
     });
   };
 
-  const handleStudyProtocol = (): JSX.Element => {
+  const handleStudyProtocol = () => {
     if (isAdmin) {
       setIsCreateModalOpen(true);
     } else {

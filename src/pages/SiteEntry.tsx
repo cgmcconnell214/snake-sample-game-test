@@ -26,7 +26,7 @@ export default function SiteEntry(): JSX.Element {
 
   useEffect(() => {
     // Generate device fingerprint
-    const generateFingerprint = (): JSX.Element => {
+    const generateFingerprint = (): string => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       ctx?.fillText("fingerprint", 2, 2);
@@ -47,7 +47,7 @@ export default function SiteEntry(): JSX.Element {
     setDeviceFingerprint(generateFingerprint());
   }, []);
 
-  const handleTermsAcceptance = (): JSX.Element => {
+  const handleTermsAcceptance = () => {
     if (!acceptedTerms || !acceptedLiability) {
       toast({
         title: "Agreement Required",

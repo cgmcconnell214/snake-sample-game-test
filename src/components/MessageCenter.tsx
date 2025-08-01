@@ -34,7 +34,7 @@ interface Message {
   subject: string;
   content: string;
   message_type: string;
-  attachments: Attachment[] | string | null;
+  attachments: any;
   is_read: boolean;
   is_archived: boolean;
   created_at: string;

@@ -171,15 +171,6 @@ export default function LearningPortal(): JSX.Element {
     fetchCourses();
   };
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch =
-      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "all" || course.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
   const handleDeleteCourse = async (courseId: string) => {
     const { error } = await supabase
       .from('educational_courses')
@@ -208,7 +199,6 @@ export default function LearningPortal(): JSX.Element {
     const matchesCategory = selectedCategory === "all" || course.category === selectedCategory
     return matchesSearch && matchesCategory
   })
- main
 
   return (
     <div className="container mx-auto p-6 space-y-6">

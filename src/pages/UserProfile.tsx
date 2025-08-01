@@ -81,14 +81,6 @@ const UserProfile: React.FC = () => {
     phone: "",
   });
 
-  useEffect(() => {
-    if (user) {
-      fetchUserProfile();
-      fetchUserPosts();
-      fetchUserActivity();
-    }
-  }, [user, fetchUserProfile, fetchUserPosts]);
-
   const fetchUserProfile = async () => {
     try {
       const { data, error } = await supabase
@@ -130,6 +122,15 @@ const UserProfile: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+      fetchUserPosts();
+      fetchUserActivity();
+    }
+  }, [user]);
+
 
   const fetchUserActivity = async () => {
     try {
@@ -552,7 +553,6 @@ const UserProfile: React.FC = () => {
                   ))}
                 </div>
               )}
- main
             </TabsContent>
           </Tabs>
         </div>

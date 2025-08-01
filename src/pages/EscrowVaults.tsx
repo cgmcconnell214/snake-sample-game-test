@@ -126,7 +126,7 @@ export default function EscrowVaults(): JSX.Element {
     });
   };
 
-  const handleViewContracts = (): JSX.Element => {
+  const handleViewContracts = () => {
     const userVaults = vaults.filter((v) => v.status === "active");
     toast({
       title: "Active Contracts",
@@ -134,7 +134,7 @@ export default function EscrowVaults(): JSX.Element {
     });
   };
 
-  const handleCheckStatus = (): JSX.Element => {
+  const handleCheckStatus = () => {
     const pendingVaults = vaults.filter((v) => v.status === "pending");
     toast({
       title: "Pending Releases",
@@ -142,7 +142,7 @@ export default function EscrowVaults(): JSX.Element {
     });
   };
 
-  const handleViewDisputes = (): JSX.Element => {
+  const handleViewDisputes = () => {
     toast({
       title: "Dispute Resolution",
       description:

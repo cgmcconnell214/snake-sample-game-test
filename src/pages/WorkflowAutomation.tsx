@@ -170,12 +170,12 @@ export default function WorkflowAutomation(): JSX.Element {
     });
   };
 
-  const handleConfigureRules = (): JSX.Element => {
+  const handleConfigureRules = () => {
     setActiveTab("rules");
     setIsCreateModalOpen(true);
   };
 
-  const handleSetTriggers = (): JSX.Element => {
+  const handleSetTriggers = () => {
     setActiveTab("triggers");
     // Create a real IP licensing trigger rule
     setNewRule({
@@ -197,7 +197,7 @@ export default function WorkflowAutomation(): JSX.Element {
     setIsCreateModalOpen(true);
   };
 
-  const handleSetupLogic = (): JSX.Element => {
+  const handleSetupLogic = () => {
     setActiveTab("logic");
     // Create escrow release logic rule
     setNewRule({

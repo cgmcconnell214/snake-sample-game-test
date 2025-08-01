@@ -54,8 +54,8 @@ interface ComplianceAlert {
 interface TradeRecord {
   id: string;
   asset_symbol: string;
-  buyer?: { email: string } | null;
-  seller?: { email: string } | null;
+  buyer?: any;
+  seller?: any;
   quantity: number;
   price: number;
   settlement_status: string;
@@ -76,12 +76,6 @@ const Admin = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (profile?.role === "admin") {
-      loadAdminData();
-    }
-  }, [profile, loadAdminData]);
-
   const loadAdminData = async () => {
     try {
       setLoading(true);
@@ -101,16 +95,14 @@ const Admin = () => {
         .order("created_at", { ascending: false })
         .limit(10);
 
-      // Load recent trades
+      // Load recent trades with proper joins
       const { data: tradesData } = await supabase
         .from("trade_executions")
-        .select(
-          `
+        .select(`
           *,
-          buyer:buyer_id(first_name, last_name, email),
-          seller:seller_id(first_name, last_name, email)
-        `,
-        )
+          buyer:profiles!buyer_id(email),
+          seller:profiles!seller_id(email)
+        `)
         .order("execution_time", { ascending: false })
         .limit(20);
 
@@ -144,6 +136,13 @@ const Admin = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (profile?.role === "admin") {
+      loadAdminData();
+    }
+  }, [profile]);
+
 
   const resolveAlert = async (alertId: string) => {
     try {

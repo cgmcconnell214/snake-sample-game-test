@@ -76,12 +76,6 @@ const IPTokenization: React.FC = () => {
     valuation: 0,
   });
 
-  useEffect(() => {
-    if (user) {
-      fetchData();
-    }
-  }, [user, fetchData]);
-
   const fetchData = async () => {
     try {
       // Fetch IP assets
@@ -118,6 +112,13 @@ const IPTokenization: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    }
+  }, [user]);
+
 
   const calculateTokenMetrics = (revenue: number, valuation: number) => {
     // Based on example: 500k/yr revenue = 1M tokens at $0.50/yr yield

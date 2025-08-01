@@ -13,17 +13,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, Search, Filter, Star, TrendingUp, Package } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/integrations/supabase/client"
-import { injectContractTemplate } from "@/lib/contractTemplates"
- main
+import { injectContractTemplate } from "@/lib/contractTemplates";
 
 interface MarketplaceAsset {
   id: string;
@@ -80,7 +70,7 @@ export default function Marketplace(): JSX.Element {
     setAssets(assetsWithMarketData);
   };
 
-  const handleListAsset = (): JSX.Element => {
+  const handleListAsset = () => {
     toast({
       title: "List New Asset",
       description: "Redirecting to asset tokenization page...",
@@ -88,14 +78,14 @@ export default function Marketplace(): JSX.Element {
     window.location.href = "/tokenize";
   };
 
-  const handleBrowseOffers = (): JSX.Element => {
+  const handleBrowseOffers = () => {
     toast({
       title: "Browse Offers",
       description: "Showing all available trading offers",
     });
   };
 
-  const handleViewContracts = (): JSX.Element => {
+  const handleViewContracts = () => {
     toast({
       title: "Contract Queue",
       description: "Viewing active and pending smart contracts",
