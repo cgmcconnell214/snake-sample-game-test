@@ -2,29 +2,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Archive, Scroll, Shield, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function DivineTrust(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleCreateCovenant = () => {
-    toast({
-      title: "Create Covenant",
-      description: "Initiating sacred covenant creation",
-    });
+    navigate('/app/divine-trust-new');
   };
 
   const handleViewDocuments = () => {
-    toast({
-      title: "Trust Documents",
-      description: "Accessing sacred trust documents",
-    });
+    navigate('/app/divine-trust-new');
   };
 
   const handleBeginRite = () => {
-    toast({
-      title: "Sacred Initiation",
-      description: "Beginning sacred initiation ceremony",
-    });
+    navigate('/app/kingdom-entry');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">

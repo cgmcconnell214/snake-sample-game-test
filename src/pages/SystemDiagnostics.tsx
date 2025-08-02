@@ -2,36 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Monitor, AlertTriangle, Brain, Gauge } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function SystemDiagnostics(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleRunDiagnostics = () => {
-    toast({
-      title: "System Diagnostics",
-      description: "Running comprehensive system health check",
-    });
+    navigate('/app/audit-trail');
   };
 
   const handleViewEvents = () => {
-    toast({
-      title: "Audit Events",
-      description: "Loading system audit trail",
-    });
+    navigate('/app/audit-trail');
   };
 
   const handleTrackMemory = () => {
-    toast({
-      title: "AI Memory Tracker",
-      description: "Monitoring AI agent memory usage",
-    });
+    navigate('/app/ai-agents');
   };
 
   const handleMonitorDrift = () => {
-    toast({
-      title: "Kernel Drift Watcher",
-      description: "Detecting system kernel drift patterns",
-    });
+    navigate('/app/admin');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">

@@ -2,36 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3, TrendingUp, PieChart, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function TokenomicsPage(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleGenerateReport = () => {
-    toast({
-      title: "Generate Report",
-      description: "Creating comprehensive tokenomics report",
-    });
+    navigate('/app/reports');
   };
 
   const handleViewVelocity = () => {
-    toast({
-      title: "Velocity Metrics",
-      description: "Loading token velocity analytics",
-    });
+    navigate('/app/trading');
   };
 
   const handleAnalyzeSupply = () => {
-    toast({
-      title: "Supply Analytics",
-      description: "Analyzing token supply distribution",
-    });
+    navigate('/app/portfolio');
   };
 
   const handleViewFlows = () => {
-    toast({
-      title: "Contract Flow",
-      description: "Visualizing smart contract interactions",
-    });
+    navigate('/app/smart-contracts');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">

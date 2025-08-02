@@ -2,36 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Webhook, Database, Zap, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function DataSync(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleCreateWebhook = () => {
-    toast({
-      title: "Create Webhook",
-      description: "Opening webhook configuration interface",
-    });
+    navigate('/app/workflow-automation');
   };
 
   const handleViewLogs = () => {
-    toast({
-      title: "Database Logs",
-      description: "Loading Supabase operation logs",
-    });
+    navigate('/app/audit-trail');
   };
 
   const handleSetupFlows = () => {
-    toast({
-      title: "API Flows",
-      description: "Configuring automation workflows",
-    });
+    navigate('/app/workflow-automation');
   };
 
   const handleCheckStatus = () => {
-    toast({
-      title: "LLM Sync Status",
-      description: "Checking AI model synchronization status",
-    });
+    navigate('/app/system-diagnostics');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">

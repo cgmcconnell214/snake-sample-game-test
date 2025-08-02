@@ -2,36 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { History, Eye, Search, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function AssetProvenance(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleTrackAsset = () => {
-    toast({
-      title: "Asset Tracking",
-      description: "Asset tracking feature coming soon",
-    });
+    navigate('/app/tokenize');
   };
 
   const handleViewTimeline = () => {
-    toast({
-      title: "Visual Timeline",
-      description: "Opening asset timeline visualization",
-    });
+    navigate('/app/audit-trail');
   };
 
   const handleTrackCommodity = () => {
-    toast({
-      title: "Commodity Tracking",
-      description: "Initiating commodity provenance tracking",
-    });
+    navigate('/app/tokenize');
   };
 
   const handleViewJourney = () => {
-    toast({
-      title: "IP Asset Journey",
-      description: "Loading intellectual property journey",
-    });
+    navigate('/app/ip-tokenization');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">

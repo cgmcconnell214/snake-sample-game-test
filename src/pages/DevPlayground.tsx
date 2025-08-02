@@ -2,44 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Code, GitFork, Rocket, TestTube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function DevPlayground(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleNewProject = () => {
-    // Implement actual project creation logic
-    console.log("Creating new development project");
-    toast({
-      title: "New Project",
-      description: "Development project created successfully",
-    });
+    navigate('/app/smart-contracts');
   };
 
   const handleStartTesting = () => {
-    // Implement actual testing environment logic
-    console.log("Launching testing environment");
-    toast({
-      title: "Test Environment",
-      description: "Testing environment launched successfully",
-    });
+    navigate('/app/smart-contracts');
   };
 
   const handleBrowseForks = () => {
-    // Implement actual fork browsing logic
-    console.log("Loading contract forks");
-    toast({
-      title: "Browse Forks",
-      description: "Loading available contract forks",
-    });
+    navigate('/app/smart-contracts');
   };
 
   const handleDeploy = () => {
-    // Implement actual deployment logic
-    console.log("Deploying contract to network");
-    toast({
-      title: "Deploy Contract",
-      description: "Contract deployment initiated successfully",
-    });
+    navigate('/app/smart-contracts');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">
