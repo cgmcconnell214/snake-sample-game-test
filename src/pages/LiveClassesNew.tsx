@@ -94,11 +94,28 @@ export default function LiveClasses(): JSX.Element {
     const zoomMeetingId = `${Math.floor(Math.random() * 1000000000)}`;
     const zoomPassword = Math.random().toString(36).substring(2, 8);
 
+    // Validate required fields
+    if (!newClass.title || !newClass.scheduled_at) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide a title and scheduled date/time",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { data, error } = await supabase
       .from("live_classes")
       .insert({
-        ...newClass,
+        title: newClass.title,
+        description: newClass.description,
         host_id: user.id,
+        class_type: newClass.class_type,
+        price_per_attendee: newClass.price_per_attendee,
+        max_attendees: newClass.max_attendees,
+        scheduled_at: newClass.scheduled_at,
+        duration_minutes: newClass.duration_minutes,
+        is_monetized: newClass.is_monetized,
         zoom_meeting_id: zoomMeetingId,
         zoom_password: zoomPassword,
       })
