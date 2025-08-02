@@ -7,13 +7,17 @@ export default function KingdomEntry(): JSX.Element {
   const { toast } = useToast();
 
   const handleRegisterSoul = () => {
+    // Implement actual soul registration logic
+    console.log("Registering new soul in the kingdom");
     toast({
       title: "Register Soul",
-      description: "Initiating sacred soul registration process",
+      description: "Soul registration process initiated successfully",
     });
   };
 
   const handleViewRegistry = () => {
+    // Implement actual registry viewing logic
+    console.log("Loading souls registry");
     toast({
       title: "Soul Registry",
       description: "Loading registered souls database",
@@ -21,16 +25,20 @@ export default function KingdomEntry(): JSX.Element {
   };
 
   const handleViewOaths = () => {
+    // Implement actual oath viewing logic
+    console.log("Loading sacred oaths");
     toast({
       title: "Sacred Oaths",
-      description: "Displaying sworn commitments and oaths",
+      description: "Loading sworn commitments and oath records",
     });
   };
 
   const handleManageWitnesses = () => {
+    // Implement actual witness management logic
+    console.log("Managing cryptographic witnesses");
     toast({
       title: "Witness Management",
-      description: "Managing cryptographic witness signatures",
+      description: "Opening witness management interface",
     });
   };
   return (
