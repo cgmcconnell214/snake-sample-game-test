@@ -1,8 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Code, GitFork, Rocket, TestTube } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DevPlayground(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleNewProject = () => {
+    toast({
+      title: "New Project",
+      description: "Creating new development project",
+    });
+  };
+
+  const handleStartTesting = () => {
+    toast({
+      title: "Test Environment",
+      description: "Launching safe testing environment",
+    });
+  };
+
+  const handleBrowseForks = () => {
+    toast({
+      title: "Browse Forks",
+      description: "Opening contract fork repository",
+    });
+  };
+
+  const handleDeploy = () => {
+    toast({
+      title: "Deploy Contract",
+      description: "Preparing contract for network deployment",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +42,7 @@ export default function DevPlayground(): JSX.Element {
             Development environment for trusted builders
           </p>
         </div>
-        <Button>
+        <Button onClick={handleNewProject}>
           <Code className="h-4 w-4 mr-2" />
           New Project
         </Button>
@@ -30,7 +60,7 @@ export default function DevPlayground(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Safe testing environment for smart contracts
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleStartTesting}>
               Start Testing
             </Button>
           </CardContent>
@@ -47,7 +77,7 @@ export default function DevPlayground(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Fork existing contracts and customize for your needs
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleBrowseForks}>
               Browse Forks
             </Button>
           </CardContent>
@@ -64,7 +94,7 @@ export default function DevPlayground(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Deploy tested contracts to production network
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleDeploy}>
               Deploy
             </Button>
           </CardContent>

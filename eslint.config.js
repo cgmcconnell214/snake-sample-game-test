@@ -25,12 +25,9 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
- codex/generate-final-production-readiness-checklist
-
       "@typescript-eslint/no-require-imports": "off",
       "@typescript-eslint/no-empty-object-type": "off",
       "@typescript-eslint/no-unused-expressions": "off",
- main
     },
   }
 );

@@ -1,8 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock, FileText, Shield, Scale } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LegalSafehouse(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleCreateDocument = () => {
+    toast({
+      title: "Create Document",
+      description: "Opening legal document creation wizard",
+    });
+  };
+
+  const handleCreateAffidavit = () => {
+    toast({
+      title: "Create Affidavit",
+      description: "Starting sworn statement creation process",
+    });
+  };
+
+  const handleMakeDeclaration = () => {
+    toast({
+      title: "Make Declaration",
+      description: "Initiating formal rights declaration",
+    });
+  };
+
+  const handleFileExemption = () => {
+    toast({
+      title: "File Exemption",
+      description: "Creating sacred exemption notice",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +42,7 @@ export default function LegalSafehouse(): JSX.Element {
             Secure legal documents and exemption notices
           </p>
         </div>
-        <Button>
+        <Button onClick={handleCreateDocument}>
           <FileText className="h-4 w-4 mr-2" />
           Create Document
         </Button>
@@ -30,7 +60,7 @@ export default function LegalSafehouse(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Create and manage sworn statements and affidavits
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleCreateAffidavit}>
               Create Affidavit
             </Button>
           </CardContent>
@@ -47,7 +77,7 @@ export default function LegalSafehouse(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Formal declarations of rights and status
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleMakeDeclaration}>
               Make Declaration
             </Button>
           </CardContent>
@@ -64,7 +94,7 @@ export default function LegalSafehouse(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Religious and ecclesiastical exemption documents
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleFileExemption}>
               File Exemption
             </Button>
           </CardContent>

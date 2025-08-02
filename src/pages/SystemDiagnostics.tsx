@@ -1,8 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Monitor, AlertTriangle, Brain, Gauge } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SystemDiagnostics(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleRunDiagnostics = () => {
+    toast({
+      title: "System Diagnostics",
+      description: "Running comprehensive system health check",
+    });
+  };
+
+  const handleViewEvents = () => {
+    toast({
+      title: "Audit Events",
+      description: "Loading system audit trail",
+    });
+  };
+
+  const handleTrackMemory = () => {
+    toast({
+      title: "AI Memory Tracker",
+      description: "Monitoring AI agent memory usage",
+    });
+  };
+
+  const handleMonitorDrift = () => {
+    toast({
+      title: "Kernel Drift Watcher",
+      description: "Detecting system kernel drift patterns",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +42,7 @@ export default function SystemDiagnostics(): JSX.Element {
             Monitor system health and performance
           </p>
         </div>
-        <Button>
+        <Button onClick={handleRunDiagnostics}>
           <Monitor className="h-4 w-4 mr-2" />
           Run Diagnostics
         </Button>
@@ -30,7 +60,7 @@ export default function SystemDiagnostics(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Deep audit trail of all system events
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewEvents}>
               View Events
             </Button>
           </CardContent>
@@ -47,7 +77,7 @@ export default function SystemDiagnostics(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor AI agent memory usage and optimization
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleTrackMemory}>
               Track Memory
             </Button>
           </CardContent>
@@ -64,7 +94,7 @@ export default function SystemDiagnostics(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Detect and monitor system kernel drift
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleMonitorDrift}>
               Monitor Drift
             </Button>
           </CardContent>

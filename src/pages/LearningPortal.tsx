@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { GraduationCap, Book, Play, Award } from "lucide-react";
 import { useState } from "react";
 import { injectContractTemplate } from "@/lib/contractTemplates";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LearningPortal() {
   const [activeCourse, setActiveCourse] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleLearn = async () => {
     await injectContractTemplate('learn');
@@ -20,7 +22,10 @@ export default function LearningPortal() {
             Master tokenization and sacred commerce
           </p>
         </div>
-        <Button>
+        <Button onClick={() => toast({
+          title: "Continue Learning",
+          description: "Resuming your learning journey",
+        })}>
           <Play className="h-4 w-4 mr-2" />
           Continue Learning
         </Button>

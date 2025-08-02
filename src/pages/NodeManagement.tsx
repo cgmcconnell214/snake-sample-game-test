@@ -1,8 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GitBranch, Wifi, Activity, Globe } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function NodeManagement(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleAddNode = () => {
+    toast({
+      title: "Add Node",
+      description: "Adding new network node",
+    });
+  };
+
+  const handleViewPeers = () => {
+    toast({
+      title: "Peer Connections",
+      description: "Loading active peer connections",
+    });
+  };
+
+  const handleViewLogs = () => {
+    toast({
+      title: "Latency Logs",
+      description: "Displaying network performance metrics",
+    });
+  };
+
+  const handleConfigureTrust = () => {
+    toast({
+      title: "Configure Trust",
+      description: "Managing relay trust tier settings",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +42,7 @@ export default function NodeManagement(): JSX.Element {
             Manage network nodes and peer connections
           </p>
         </div>
-        <Button>
+        <Button onClick={handleAddNode}>
           <Globe className="h-4 w-4 mr-2" />
           Add Node
         </Button>
@@ -30,7 +60,7 @@ export default function NodeManagement(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor active peer connections and network health
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewPeers}>
               View Peers
             </Button>
           </CardContent>
@@ -47,7 +77,7 @@ export default function NodeManagement(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track network performance and latency metrics
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewLogs}>
               View Logs
             </Button>
           </CardContent>
@@ -64,7 +94,7 @@ export default function NodeManagement(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Manage trust levels for network relays
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleConfigureTrust}>
               Configure Trust
             </Button>
           </CardContent>

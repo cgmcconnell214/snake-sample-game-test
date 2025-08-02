@@ -1,8 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarChart3, TrendingUp, PieChart, Activity } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function TokenomicsPage(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleGenerateReport = () => {
+    toast({
+      title: "Generate Report",
+      description: "Creating comprehensive tokenomics report",
+    });
+  };
+
+  const handleViewVelocity = () => {
+    toast({
+      title: "Velocity Metrics",
+      description: "Loading token velocity analytics",
+    });
+  };
+
+  const handleAnalyzeSupply = () => {
+    toast({
+      title: "Supply Analytics",
+      description: "Analyzing token supply distribution",
+    });
+  };
+
+  const handleViewFlows = () => {
+    toast({
+      title: "Contract Flow",
+      description: "Visualizing smart contract interactions",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +42,7 @@ export default function TokenomicsPage(): JSX.Element {
             Real-time metrics and economic analytics
           </p>
         </div>
-        <Button>
+        <Button onClick={handleGenerateReport}>
           <TrendingUp className="h-4 w-4 mr-2" />
           Generate Report
         </Button>
@@ -30,7 +60,7 @@ export default function TokenomicsPage(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track token velocity and circulation patterns
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewVelocity}>
               View Velocity
             </Button>
           </CardContent>
@@ -47,7 +77,7 @@ export default function TokenomicsPage(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor token supply distribution and inflation
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleAnalyzeSupply}>
               Analyze Supply
             </Button>
           </CardContent>
@@ -64,7 +94,7 @@ export default function TokenomicsPage(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Visualize smart contract interactions and flows
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewFlows}>
               View Flows
             </Button>
           </CardContent>

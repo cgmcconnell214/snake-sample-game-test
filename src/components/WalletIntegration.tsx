@@ -301,12 +301,7 @@ const WalletIntegration: React.FC = () => {
                 <Button
                   variant="outline"
                   className="justify-start"
-                  onClick={() =>
-                    toast({
-                      title: "Coming Soon",
-                      description: "XRP Pay integration coming soon!",
-                    })
-                  }
+                  onClick={() => window.open('https://xrpl.org/xrp-pay', '_blank')}
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
                   XRP Pay
@@ -314,37 +309,12 @@ const WalletIntegration: React.FC = () => {
                 <Button
                   variant="outline"
                   className="justify-start"
-                  onClick={() =>
-                    toast({
-                      title: "Coming Soon",
-                      description: "Xumm wallet integration coming soon!",
-                    })
-                  }
+                  onClick={() => window.open('https://xumm.app', '_blank')}
                 >
                   <Wallet className="h-4 w-4 mr-2" />
                   Xumm
                 </Button>
               </div>
-
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <Button
-                    variant="outline"
-                    className="justify-start"
-                    onClick={() => window.open('https://xrpl.org/xrp-pay', '_blank')}
-                  >
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    XRP Pay
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="justify-start"
-                    onClick={() => window.open('https://xumm.app', '_blank')}
-                  >
-                    <Wallet className="h-4 w-4 mr-2" />
-                    Xumm
-                  </Button>
-                </div>
- main
             </div>
           </TabsContent>
         </Tabs>

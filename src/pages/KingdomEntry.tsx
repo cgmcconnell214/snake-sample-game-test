@@ -1,8 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, UserCheck, Feather, Crown } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function KingdomEntry(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleRegisterSoul = () => {
+    toast({
+      title: "Register Soul",
+      description: "Initiating sacred soul registration process",
+    });
+  };
+
+  const handleViewRegistry = () => {
+    toast({
+      title: "Soul Registry",
+      description: "Loading registered souls database",
+    });
+  };
+
+  const handleViewOaths = () => {
+    toast({
+      title: "Sacred Oaths",
+      description: "Displaying sworn commitments and oaths",
+    });
+  };
+
+  const handleManageWitnesses = () => {
+    toast({
+      title: "Witness Management",
+      description: "Managing cryptographic witness signatures",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +42,7 @@ export default function KingdomEntry(): JSX.Element {
             Sacred registry and witness management
           </p>
         </div>
-        <Button>
+        <Button onClick={handleRegisterSoul}>
           <Crown className="h-4 w-4 mr-2" />
           Register Soul
         </Button>
@@ -30,7 +60,7 @@ export default function KingdomEntry(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               View all souls registered in the kingdom
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewRegistry}>
               View Registry
             </Button>
           </CardContent>
@@ -47,7 +77,7 @@ export default function KingdomEntry(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Sacred oaths and commitments made
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewOaths}>
               View Oaths
             </Button>
           </CardContent>
@@ -64,7 +94,7 @@ export default function KingdomEntry(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Cryptographic witness verification
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleManageWitnesses}>
               Manage Witnesses
             </Button>
           </CardContent>

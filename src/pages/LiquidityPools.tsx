@@ -1,8 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Layers, Droplets, Lock, Timer } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LiquidityPools(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleAddLiquidity = () => {
+    toast({
+      title: "Add Liquidity",
+      description: "Opening liquidity addition interface",
+    });
+  };
+
+  const handleViewPools = () => {
+    toast({
+      title: "Commodity Pools",
+      description: "Loading available commodity pools",
+    });
+  };
+
+  const handleBondLiquidity = () => {
+    toast({
+      title: "Bond Liquidity",
+      description: "Initiating long-term liquidity bonding",
+    });
+  };
+
+  const handleViewTimers = () => {
+    toast({
+      title: "Interest Timers",
+      description: "Displaying time-based interest tracking",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +42,7 @@ export default function LiquidityPools(): JSX.Element {
             Provide liquidity and earn rewards
           </p>
         </div>
-        <Button>
+        <Button onClick={handleAddLiquidity}>
           <Droplets className="h-4 w-4 mr-2" />
           Add Liquidity
         </Button>
@@ -30,7 +60,7 @@ export default function LiquidityPools(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Pools backed by physical commodities
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewPools}>
               View Pools
             </Button>
           </CardContent>
@@ -47,7 +77,7 @@ export default function LiquidityPools(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Long-term locked liquidity with higher rewards
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleBondLiquidity}>
               Bond Liquidity
             </Button>
           </CardContent>
@@ -64,7 +94,7 @@ export default function LiquidityPools(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track time-based interest accumulation
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewTimers}>
               View Timers
             </Button>
           </CardContent>

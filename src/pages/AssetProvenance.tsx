@@ -1,8 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { History, Eye, Search, Clock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AssetProvenance(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleTrackAsset = () => {
+    toast({
+      title: "Asset Tracking",
+      description: "Asset tracking feature coming soon",
+    });
+  };
+
+  const handleViewTimeline = () => {
+    toast({
+      title: "Visual Timeline",
+      description: "Opening asset timeline visualization",
+    });
+  };
+
+  const handleTrackCommodity = () => {
+    toast({
+      title: "Commodity Tracking",
+      description: "Initiating commodity provenance tracking",
+    });
+  };
+
+  const handleViewJourney = () => {
+    toast({
+      title: "IP Asset Journey",
+      description: "Loading intellectual property journey",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +42,7 @@ export default function AssetProvenance(): JSX.Element {
             Visual history and tracking of tokenized assets
           </p>
         </div>
-        <Button>
+        <Button onClick={handleTrackAsset}>
           <Search className="h-4 w-4 mr-2" />
           Track Asset
         </Button>
@@ -30,7 +60,7 @@ export default function AssetProvenance(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Complete visual timeline of asset lifecycle
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewTimeline}>
               View Timeline
             </Button>
           </CardContent>
@@ -47,7 +77,7 @@ export default function AssetProvenance(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track physical commodities from origin to token
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleTrackCommodity}>
               Track Commodity
             </Button>
           </CardContent>
@@ -64,7 +94,7 @@ export default function AssetProvenance(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Follow intellectual property from creation to tokenization
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewJourney}>
               View Journey
             </Button>
           </CardContent>

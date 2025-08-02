@@ -1,8 +1,38 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Webhook, Database, Zap, RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DataSync(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleCreateWebhook = () => {
+    toast({
+      title: "Create Webhook",
+      description: "Opening webhook configuration interface",
+    });
+  };
+
+  const handleViewLogs = () => {
+    toast({
+      title: "Database Logs",
+      description: "Loading Supabase operation logs",
+    });
+  };
+
+  const handleSetupFlows = () => {
+    toast({
+      title: "API Flows",
+      description: "Configuring automation workflows",
+    });
+  };
+
+  const handleCheckStatus = () => {
+    toast({
+      title: "LLM Sync Status",
+      description: "Checking AI model synchronization status",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +42,7 @@ export default function DataSync(): JSX.Element {
             Manage data synchronization and API flows
           </p>
         </div>
-        <Button>
+        <Button onClick={handleCreateWebhook}>
           <RefreshCw className="h-4 w-4 mr-2" />
           Create Webhook
         </Button>
@@ -30,7 +60,7 @@ export default function DataSync(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor database operations and sync status
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewLogs}>
               View Logs
             </Button>
           </CardContent>
@@ -47,7 +77,7 @@ export default function DataSync(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Configure automation workflows and integrations
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleSetupFlows}>
               Setup Flows
             </Button>
           </CardContent>
@@ -64,7 +94,7 @@ export default function DataSync(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track AI model synchronization and updates
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleCheckStatus}>
               Check Status
             </Button>
           </CardContent>

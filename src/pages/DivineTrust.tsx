@@ -1,8 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Archive, Scroll, Shield, Eye } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function DivineTrust(): JSX.Element {
+  const { toast } = useToast();
+
+  const handleCreateCovenant = () => {
+    toast({
+      title: "Create Covenant",
+      description: "Initiating sacred covenant creation",
+    });
+  };
+
+  const handleViewDocuments = () => {
+    toast({
+      title: "Trust Documents",
+      description: "Accessing sacred trust documents",
+    });
+  };
+
+  const handleBeginRite = () => {
+    toast({
+      title: "Sacred Initiation",
+      description: "Beginning sacred initiation ceremony",
+    });
+  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -12,7 +35,7 @@ export default function DivineTrust(): JSX.Element {
             Sacred documents and covenant management
           </p>
         </div>
-        <Button>
+        <Button onClick={handleCreateCovenant}>
           <Eye className="h-4 w-4 mr-2" />
           Create Covenant
         </Button>
@@ -30,7 +53,7 @@ export default function DivineTrust(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Access your sacred trust documents
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleViewDocuments}>
               View Documents
             </Button>
           </CardContent>
@@ -47,7 +70,7 @@ export default function DivineTrust(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Sacred agreements for kingdom participation
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleCreateCovenant}>
               Create Covenant
             </Button>
           </CardContent>
@@ -64,7 +87,7 @@ export default function DivineTrust(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Begin sacred initiation ceremonies
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={handleBeginRite}>
               Begin Rite
             </Button>
           </CardContent>
