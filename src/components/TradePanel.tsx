@@ -10,6 +10,7 @@ import { TrendingUp, TrendingDown, DollarSign, Loader2, AlertCircle } from "luci
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { injectContractTemplate } from "@/lib/contractTemplates";
+import { useTradingData } from "@/hooks/useTradingData";
 
 export function TradePanel(): JSX.Element {
   const [orderType, setOrderType] = useState("limit");
@@ -20,17 +21,15 @@ export function TradePanel(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // Mock available assets - in real app, fetch from tokenized_assets table
-  const availableAssets = [
-    {
-      id: "asset-1",
-      symbol: "GOLD001",
-      name: "Premium Gold Bars",
-      price: 131.2,
-    },
-    { id: "asset-2", symbol: "SILVER01", name: "Silver Bullion", price: 10.15 },
-    { id: "asset-3", symbol: "OIL-Q1", name: "Crude Oil Futures", price: 84.5 },
-  ];
+  // Import real trading data
+  const { assets } = useTradingData();
+  
+  const availableAssets = assets.map(asset => ({
+    id: asset.id,
+    symbol: asset.asset_symbol,
+    name: asset.asset_name,
+    price: asset.current_price,
+  }));
 
   const asset = availableAssets.find((a) => a.id === selectedAsset);
   const walletBalance = 50000;

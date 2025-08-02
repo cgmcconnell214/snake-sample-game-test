@@ -1370,6 +1370,53 @@ export type Database = {
         }
         Relationships: []
       }
+      market_data: {
+        Row: {
+          asset_id: string
+          created_at: string
+          current_price: number
+          high_24h: number
+          id: string
+          last_updated: string
+          low_24h: number
+          market_cap: number
+          price_change_24h: number
+          volume_24h: number
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          current_price?: number
+          high_24h?: number
+          id?: string
+          last_updated?: string
+          low_24h?: number
+          market_cap?: number
+          price_change_24h?: number
+          volume_24h?: number
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          current_price?: number
+          high_24h?: number
+          id?: string
+          last_updated?: string
+          low_24h?: number
+          market_cap?: number
+          price_change_24h?: number
+          volume_24h?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_data_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "tokenized_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null

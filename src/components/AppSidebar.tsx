@@ -66,6 +66,7 @@ const coreItems = [
 // 1. AI & Automation Layer
 const aiAutomationItems = [
   { title: "AI Agents", url: "/app/ai-agents", icon: Bot },
+  { title: "AI Trading Bots", url: "/app/ai-trading-bots", icon: Zap },
   { title: "Smart Contracts", url: "/app/smart-contracts", icon: FileCheck },
   {
     title: "Workflow Automation",

@@ -23,6 +23,7 @@ import IPTokenization from "./components/IPTokenization";
 import Admin from "./pages/Admin";
 import Blockchain from "./pages/Blockchain";
 import AIAgents from "./pages/AIAgents";
+import AITradingBots from "./pages/AITradingBots";
 import SmartContracts from "./pages/SmartContracts";
 import WorkflowAutomation from "./pages/WorkflowAutomation";
 import LearningPortal from "./pages/LearningPortal";
@@ -127,6 +128,7 @@ const App = () => (
                                 
                                 {/* New 5-Layer Navigation */}
                                 <Route path="ai-agents" element={<AIAgents />} />
+                                <Route path="ai-trading-bots" element={<AITradingBots />} />
                                 <Route path="smart-contracts" element={<SmartContracts />} />
                                 <Route path="workflow-automation" element={<WorkflowAutomation />} />
                                 <Route path="learning" element={<LearningPortal />} />
