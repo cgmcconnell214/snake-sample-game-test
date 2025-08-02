@@ -847,6 +847,80 @@ export type Database = {
           },
         ]
       }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          parent_comment_id: string | null
+          post_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          post_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "user_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "user_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1373,6 +1447,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       user_messages: {
         Row: {
           attachments: Json | null
@@ -1479,9 +1574,13 @@ export type Database = {
           id: string
           is_public: boolean | null
           location: string | null
+          notification_settings: Json | null
           phone: string | null
           post_count: number | null
+          privacy_settings: Json | null
+          profile_banner_url: string | null
           social_links: Json | null
+          theme_preferences: Json | null
           updated_at: string | null
           user_id: string
           username: string | null
@@ -1497,9 +1596,13 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           location?: string | null
+          notification_settings?: Json | null
           phone?: string | null
           post_count?: number | null
+          privacy_settings?: Json | null
+          profile_banner_url?: string | null
           social_links?: Json | null
+          theme_preferences?: Json | null
           updated_at?: string | null
           user_id: string
           username?: string | null
@@ -1515,9 +1618,13 @@ export type Database = {
           id?: string
           is_public?: boolean | null
           location?: string | null
+          notification_settings?: Json | null
           phone?: string | null
           post_count?: number | null
+          privacy_settings?: Json | null
+          profile_banner_url?: string | null
           social_links?: Json | null
+          theme_preferences?: Json | null
           updated_at?: string | null
           user_id?: string
           username?: string | null
