@@ -413,12 +413,13 @@ const Settings = () => {
           <div className="mt-4">
             <Button
               variant="outline"
-              onClick={() =>
+              onClick={() => {
+                // Navigate to security settings or open a security modal
                 toast({
                   title: "Security Settings",
-                  description: "Security settings update feature coming soon.",
-                })
-              }
+                  description: "Use the Two-Factor Authentication section below to enhance security.",
+                });
+              }}
             >
               Update Security Settings
             </Button>

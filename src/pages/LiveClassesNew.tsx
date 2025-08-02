@@ -106,9 +106,10 @@ export default function LiveClasses(): JSX.Element {
       .single();
 
     if (error) {
+      console.error("Live class creation error:", error);
       toast({
         title: "Error",
-        description: "Failed to create live class",
+        description: `Failed to create live class: ${error.message}`,
         variant: "destructive",
       });
       return;
@@ -176,23 +177,30 @@ export default function LiveClasses(): JSX.Element {
   };
 
   const handleViewCalendar = () => {
-    toast({
-      title: "Calendar Integration",
-      description: "Opening calendar view with all upcoming classes",
-    });
+    // Navigate to a calendar component or dedicated calendar page
+    window.open('https://calendar.google.com', '_blank');
   };
 
   const handleRSVPEvents = () => {
-    toast({
-      title: "RSVP to Events",
-      description: "View and RSVP to upcoming educational events",
-    });
+    // Show existing classes as events to RSVP to
+    if (classes.length > 0) {
+      toast({
+        title: "Available Events",
+        description: `${classes.length} upcoming classes available to join`,
+      });
+    } else {
+      toast({
+        title: "No Events",
+        description: "No upcoming events to RSVP to. Create the first one!",
+      });
+    }
   };
 
   const handleViewArchive = () => {
+    // Navigate to a replay archive or show recorded sessions
     toast({
-      title: "Replay Archive",
-      description: "Access recordings of past live classes",
+      title: "Archive Feature",
+      description: "Session recordings will be available after classes complete",
     });
   };
 
