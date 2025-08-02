@@ -64,8 +64,86 @@ export default function SocialFeed() {
   useEffect(() => {
     if (user) {
       fetchFeed();
+      setupRealtimeSubscription();
     }
   }, [user]);
+
+  const setupRealtimeSubscription = () => {
+    if (!user) return;
+
+    // Subscribe to new posts
+    const postsChannel = supabase
+      .channel('public-posts')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'user_posts',
+          filter: 'is_public=eq.true'
+        },
+        async (payload) => {
+          const newPost = payload.new as any;
+          
+          // Get user profile for the new post
+          const { data: userProfile } = await supabase
+            .from('user_profiles')
+            .select('user_id, display_name, username, avatar_url')
+            .eq('user_id', newPost.user_id)
+            .single();
+
+          const postWithProfile = {
+            ...newPost,
+            user_profiles: userProfile,
+            is_liked: false
+          };
+
+          setPosts(prev => [postWithProfile, ...prev]);
+        }
+      )
+      .subscribe();
+
+    // Subscribe to like updates
+    const likesChannel = supabase
+      .channel('post-likes-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'post_likes'
+        },
+        async (payload) => {
+          const likeData = (payload.new || payload.old) as any;
+          if (!likeData?.post_id) return;
+
+          setPosts(prev => prev.map(post => {
+            if (post.id === likeData.post_id) {
+              if (payload.eventType === 'INSERT') {
+                return {
+                  ...post,
+                  like_count: (post.like_count || 0) + 1,
+                  is_liked: likeData.user_id === user.id ? true : post.is_liked
+                };
+              } else if (payload.eventType === 'DELETE') {
+                return {
+                  ...post,
+                  like_count: Math.max(0, (post.like_count || 0) - 1),
+                  is_liked: likeData.user_id === user.id ? false : post.is_liked
+                };
+              }
+            }
+            return post;
+          }));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(postsChannel);
+      supabase.removeChannel(likesChannel);
+    };
+  };
 
   const fetchFeed = async () => {
     try {

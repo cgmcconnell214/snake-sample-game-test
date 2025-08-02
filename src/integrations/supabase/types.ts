@@ -1786,6 +1786,27 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_notifications: {
+        Args: { target_user_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          message: string
+          data: Json
+          is_read: boolean
+          created_at: string
+        }[]
+      }
+      mark_all_notifications_read: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
+      mark_notification_read: {
+        Args: { notification_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       compliance_risk: "low" | "medium" | "high" | "critical"

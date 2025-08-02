@@ -45,8 +45,37 @@ export default function FollowersPage() {
     if (user) {
       fetchFollowData();
       fetchSuggestedUsers();
+      setupRealtimeSubscription();
     }
   }, [user]);
+
+  const setupRealtimeSubscription = () => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('user-follows-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_follows'
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            // Refresh data when someone follows/unfollows
+            fetchFollowData();
+          } else if (payload.eventType === 'DELETE') {
+            fetchFollowData();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
 
   const fetchFollowData = async () => {
     if (!user) return;

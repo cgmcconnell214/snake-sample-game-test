@@ -46,15 +46,23 @@ export default function NotificationCenter() {
 
     try {
       setLoading(true);
+      // Use direct SQL query to fetch notifications
       const { data, error } = await supabase
-        .rpc('get_user_notifications', { target_user_id: user.id });
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        return;
+      }
 
       if (data) {
         // Get actor profiles for notifications
         const actorIds = [...new Set(data.map((n: any) => n.data?.actor_id).filter(Boolean))];
-        let profiles = [];
+        let profiles: any[] = [];
         
         if (actorIds.length > 0) {
           const { data: profilesData } = await supabase
@@ -126,7 +134,10 @@ export default function NotificationCenter() {
   const markAsRead = async (notificationId: string) => {
     try {
       const { error } = await supabase
-        .rpc('mark_notification_read', { notification_id: notificationId });
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId)
+        .eq('user_id', user?.id);
 
       if (error) throw error;
 
@@ -146,7 +157,10 @@ export default function NotificationCenter() {
 
     try {
       const { error } = await supabase
-        .rpc('mark_all_notifications_read', { target_user_id: user.id });
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
 
       if (error) throw error;
 
