@@ -47,29 +47,30 @@ export default function NotificationCenter() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(50);
+        .rpc('get_user_notifications', { target_user_id: user.id });
 
       if (error) throw error;
 
       if (data) {
         // Get actor profiles for notifications
-        const actorIds = [...new Set(data.map(n => n.data?.actor_id).filter(Boolean))];
-        const { data: profiles } = await supabase
-          .from('user_profiles')
-          .select('user_id, display_name, username, avatar_url')
-          .in('user_id', actorIds);
+        const actorIds = [...new Set(data.map((n: any) => n.data?.actor_id).filter(Boolean))];
+        let profiles = [];
+        
+        if (actorIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('user_profiles')
+            .select('user_id, display_name, username, avatar_url')
+            .in('user_id', actorIds);
+          profiles = profilesData || [];
+        }
 
-        const notificationsWithProfiles = data.map(notification => ({
+        const notificationsWithProfiles = data.map((notification: any) => ({
           ...notification,
-          actor_profile: profiles?.find(p => p.user_id === notification.data?.actor_id) || null
+          actor_profile: profiles?.find((p: any) => p.user_id === notification.data?.actor_id) || null
         }));
 
         setNotifications(notificationsWithProfiles);
-        setUnreadCount(data.filter(n => !n.is_read).length);
+        setUnreadCount(data.filter((n: any) => !n.is_read).length);
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -92,7 +93,7 @@ export default function NotificationCenter() {
           filter: `user_id=eq.${user.id}`
         },
         async (payload) => {
-          const newNotification = payload.new as Notification;
+          const newNotification = payload.new as any;
           
           // Get actor profile if available
           if (newNotification.data?.actor_id) {
@@ -125,14 +126,12 @@ export default function NotificationCenter() {
   const markAsRead = async (notificationId: string) => {
     try {
       const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('id', notificationId);
+        .rpc('mark_notification_read', { notification_id: notificationId });
 
       if (error) throw error;
 
       setNotifications(prev => 
-        prev.map(n => 
+        prev.map((n: any) => 
           n.id === notificationId ? { ...n, is_read: true } : n
         )
       );
@@ -147,15 +146,12 @@ export default function NotificationCenter() {
 
     try {
       const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('user_id', user.id)
-        .eq('is_read', false);
+        .rpc('mark_all_notifications_read', { target_user_id: user.id });
 
       if (error) throw error;
 
       setNotifications(prev => 
-        prev.map(n => ({ ...n, is_read: true }))
+        prev.map((n: any) => ({ ...n, is_read: true }))
       );
       setUnreadCount(0);
     } catch (error) {
