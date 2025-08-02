@@ -2,36 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock, FileText, Shield, Scale } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function LegalSafehouse(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleCreateDocument = () => {
-    toast({
-      title: "Create Document",
-      description: "Opening legal document creation wizard",
-    });
+    navigate('/app/divine-trust');
   };
 
   const handleCreateAffidavit = () => {
-    toast({
-      title: "Create Affidavit",
-      description: "Starting sworn statement creation process",
-    });
+    navigate('/app/kingdom-entry');
   };
 
   const handleMakeDeclaration = () => {
-    toast({
-      title: "Make Declaration",
-      description: "Initiating formal rights declaration",
-    });
+    navigate('/app/sacred-law');
   };
 
   const handleFileExemption = () => {
-    toast({
-      title: "File Exemption",
-      description: "Creating sacred exemption notice",
-    });
+    navigate('/app/compliance');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">

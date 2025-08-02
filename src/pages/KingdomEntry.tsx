@@ -2,44 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, UserCheck, Feather, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function KingdomEntry(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleRegisterSoul = () => {
-    // Implement actual soul registration logic
-    console.log("Registering new soul in the kingdom");
-    toast({
-      title: "Register Soul",
-      description: "Soul registration process initiated successfully",
-    });
+    navigate('/app/kyc');
   };
 
   const handleViewRegistry = () => {
-    // Implement actual registry viewing logic
-    console.log("Loading souls registry");
-    toast({
-      title: "Soul Registry",
-      description: "Loading registered souls database",
-    });
+    navigate('/app/profile');
   };
 
   const handleViewOaths = () => {
-    // Implement actual oath viewing logic
-    console.log("Loading sacred oaths");
-    toast({
-      title: "Sacred Oaths",
-      description: "Loading sworn commitments and oath records",
-    });
+    navigate('/app/sacred-law');
   };
 
   const handleManageWitnesses = () => {
-    // Implement actual witness management logic
-    console.log("Managing cryptographic witnesses");
-    toast({
-      title: "Witness Management",
-      description: "Opening witness management interface",
-    });
+    navigate('/app/divine-trust');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">

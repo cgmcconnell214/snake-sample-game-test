@@ -48,6 +48,10 @@ import SocialFeed from "./components/social/SocialFeed";
 import EnhancedUserProfile from "./components/social/EnhancedUserProfile";
 import FollowersPage from "./components/social/FollowersPage";
 import NotificationCenter from "./components/NotificationCenter";
+import MarketplaceNew from "./pages/MarketplaceNew";
+import LearningPortalNew from "./pages/LearningPortalNew";
+import LiveClassesNew from "./pages/LiveClassesNew";
+import LiquidityPoolsNew from "./pages/LiquidityPoolsNew";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -126,13 +130,17 @@ const App = () => (
                                 <Route path="smart-contracts" element={<SmartContracts />} />
                                 <Route path="workflow-automation" element={<WorkflowAutomation />} />
                                 <Route path="learning" element={<LearningPortal />} />
+                                <Route path="learning/courses" element={<LearningPortalNew />} />
                                 <Route path="certification" element={<Certification />} />
                                 <Route path="live-classes" element={<LiveClasses />} />
+                                <Route path="live-classes/new" element={<LiveClassesNew />} />
                                 <Route path="divine-trust" element={<DivineTrust />} />
                                 <Route path="kingdom-entry" element={<KingdomEntry />} />
                                 <Route path="sacred-law" element={<SacredLaw />} />
                                 <Route path="marketplace" element={<Marketplace />} />
+                                <Route path="marketplace/browse" element={<MarketplaceNew />} />
                                 <Route path="liquidity" element={<LiquidityPools />} />
+                                <Route path="liquidity/pools" element={<LiquidityPoolsNew />} />
                                 <Route path="escrow" element={<EscrowVaults />} />
                                 <Route path="node-management" element={<NodeManagement />} />
                                 <Route path="data-sync" element={<DataSync />} />

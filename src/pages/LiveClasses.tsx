@@ -2,29 +2,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, Video, Archive } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function LiveClasses(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleScheduleSession = () => {
-    toast({
-      title: "Schedule Session",
-      description: "Opening session scheduling interface",
-    });
+    navigate('/app/live-classes/new');
   };
 
   const handleViewCalendar = () => {
-    toast({
-      title: "Class Calendar",
-      description: "Loading upcoming classes and workshops",
-    });
+    navigate('/app/live-classes/new');
   };
 
   const handleBrowseEvents = () => {
-    toast({
-      title: "Browse Events",
-      description: "Showing available events for RSVP",
-    });
+    navigate('/app/live-classes/new');
   };
 
   const handleViewArchive = () => {

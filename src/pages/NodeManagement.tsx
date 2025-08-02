@@ -2,9 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GitBranch, Wifi, Activity, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function NodeManagement(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAddNode = () => {
     toast({
@@ -14,24 +16,15 @@ export default function NodeManagement(): JSX.Element {
   };
 
   const handleViewPeers = () => {
-    toast({
-      title: "Peer Connections",
-      description: "Loading active peer connections",
-    });
+    navigate('/app/diagnostics');
   };
 
   const handleViewLogs = () => {
-    toast({
-      title: "Latency Logs",
-      description: "Displaying network performance metrics",
-    });
+    navigate('/app/audit');
   };
 
   const handleConfigureTrust = () => {
-    toast({
-      title: "Configure Trust",
-      description: "Managing relay trust tier settings",
-    });
+    navigate('/app/divine-trust');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">

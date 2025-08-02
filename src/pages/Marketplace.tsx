@@ -39,7 +39,7 @@ export default function Marketplace() {
           </CardContent>
         </Card>
 
-        <Card onClick={() => navigate('/app/marketplace-new')} className="cursor-pointer">
+        <Card onClick={() => navigate('/app/marketplace/browse')} className="cursor-pointer">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5" />
@@ -50,7 +50,7 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Explore available assets and opportunities
             </p>
-            <Button variant="outline" className="w-full" onClick={() => navigate('/app/marketplace-new')}>
+            <Button variant="outline" className="w-full" onClick={() => navigate('/app/marketplace/browse')}>
               Browse Market
             </Button>
           </CardContent>

@@ -2,44 +2,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Layers, Droplets, Lock, Timer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function LiquidityPools(): JSX.Element {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAddLiquidity = () => {
-    // Implement actual liquidity addition logic
-    console.log("Adding liquidity to pool");
-    toast({
-      title: "Add Liquidity",
-      description: "Successfully added liquidity to the pool",
-    });
+    navigate('/app/liquidity/pools');
   };
 
   const handleViewPools = () => {
-    // Implement actual pool viewing logic
-    console.log("Loading commodity pools");
-    toast({
-      title: "Commodity Pools",
-      description: "Loading commodity pools data",
-    });
+    navigate('/app/liquidity/pools');
   };
 
   const handleBondLiquidity = () => {
-    // Implement actual liquidity bonding logic
-    console.log("Bonding liquidity for long-term rewards");
-    toast({
-      title: "Bond Liquidity",
-      description: "Successfully bonded liquidity for enhanced rewards",
-    });
+    navigate('/app/liquidity/pools');
   };
 
   const handleViewTimers = () => {
-    // Implement actual timer viewing logic
-    console.log("Loading interest timers");
-    toast({
-      title: "Interest Timers",
-      description: "Loading time-based interest tracking data",
-    });
+    navigate('/app/liquidity/pools');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">

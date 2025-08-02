@@ -4,10 +4,12 @@ import { GraduationCap, Book, Play, Award } from "lucide-react";
 import { useState } from "react";
 import { injectContractTemplate } from "@/lib/contractTemplates";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function LearningPortal() {
   const [activeCourse, setActiveCourse] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleLearn = async () => {
     await injectContractTemplate('learn');
@@ -29,9 +31,9 @@ export default function LearningPortal() {
             Master tokenization and sacred commerce
           </p>
         </div>
-        <Button onClick={handleContinueLearning}>
+        <Button onClick={() => navigate('/app/learning/courses')}>
           <Play className="h-4 w-4 mr-2" />
-          Continue Learning
+          Browse All Courses
         </Button>
       </div>
 
@@ -50,7 +52,7 @@ export default function LearningPortal() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => setActiveCourse('Tokenization 101')}
+              onClick={() => navigate('/app/learning/courses')}
             >
               Start Course
             </Button>
@@ -71,9 +73,9 @@ export default function LearningPortal() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => setActiveCourse('Compliance Academy')}
+              onClick={() => navigate('/app/certification')}
             >
-              Learn More
+              View Certifications
             </Button>
           </CardContent>
         </Card>
@@ -92,9 +94,9 @@ export default function LearningPortal() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => setActiveCourse('Ecclesiastical Trust Law')}
+              onClick={() => navigate('/app/sacred-law')}
             >
-              Explore
+              Explore Sacred Law
             </Button>
           </CardContent>
         </Card>
