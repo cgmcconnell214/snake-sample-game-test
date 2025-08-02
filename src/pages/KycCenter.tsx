@@ -19,24 +19,109 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const KycCenter = (): JSX.Element => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    idFront?: File;
+    idBack?: File;
+    proofAddress?: File;
+  }>({});
+
+  const handleFileUpload = (fileType: 'idFront' | 'idBack' | 'proofAddress', file: File) => {
+    setUploadedFiles(prev => ({
+      ...prev,
+      [fileType]: file
+    }));
+    toast({
+      title: "File Selected",
+      description: `${file.name} selected for upload`,
+    });
+  };
+
+  const removeFile = (fileType: 'idFront' | 'idBack' | 'proofAddress') => {
+    setUploadedFiles(prev => {
+      const newFiles = { ...prev };
+      delete newFiles[fileType];
+      return newFiles;
+    });
+  };
 
   const handleDocumentUpload = async () => {
-    setIsSubmitting(true);
-    // Simulate document upload
-    setTimeout(() => {
+    const { idFront, idBack, proofAddress } = uploadedFiles;
+    
+    if (!idFront || !idBack || !proofAddress) {
       toast({
-        title: "Document Uploaded",
-        description: "Your document has been submitted for verification.",
+        title: "Missing Documents",
+        description: "Please upload all required documents before submitting",
+        variant: "destructive",
       });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // Upload files to Supabase Storage
+      const uploads = await Promise.all([
+        supabase.storage
+          .from('kyc-documents')
+          .upload(`${user.id}/id-front-${Date.now()}.${idFront.name.split('.').pop()}`, idFront),
+        supabase.storage
+          .from('kyc-documents')
+          .upload(`${user.id}/id-back-${Date.now()}.${idBack.name.split('.').pop()}`, idBack),
+        supabase.storage
+          .from('kyc-documents')
+          .upload(`${user.id}/proof-address-${Date.now()}.${proofAddress.name.split('.').pop()}`, proofAddress)
+      ]);
+
+      const errors = uploads.filter(upload => upload.error);
+      if (errors.length > 0) {
+        throw new Error("Failed to upload some documents");
+      }
+
+      // Update profile with submitted documents status
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          kyc_status: 'pending',
+          kyc_submitted_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      toast({
+        title: "Documents Submitted Successfully",
+        description: "Your KYC documents have been uploaded and are under review",
+      });
+      
+      // Clear uploaded files
+      setUploadedFiles({});
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: "There was an error uploading your documents. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -157,32 +242,70 @@ const KycCenter = (): JSX.Element => {
               <div className="space-y-4">
                 <Label htmlFor="id-front">Government ID (Front)</Label>
                 <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                  <FileText className="h-8 w-8 mx-auto text-muted-foreground" />
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Click to upload or drag and drop
-                  </p>
-                  <Input
-                    id="id-front"
-                    type="file"
-                    accept="image/*,.pdf"
-                    className="mt-2"
-                  />
+                  {uploadedFiles.idFront ? (
+                    <div className="flex items-center justify-between p-2 bg-muted rounded">
+                      <span className="text-sm">{uploadedFiles.idFront.name}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => removeFile('idFront')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <FileText className="h-8 w-8 mx-auto text-muted-foreground" />
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Click to upload or drag and drop
+                      </p>
+                      <Input
+                        id="id-front"
+                        type="file"
+                        accept="image/*,.pdf"
+                        className="mt-2"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload('idFront', file);
+                        }}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-4">
                 <Label htmlFor="id-back">Government ID (Back)</Label>
                 <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                  <FileText className="h-8 w-8 mx-auto text-muted-foreground" />
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Click to upload or drag and drop
-                  </p>
-                  <Input
-                    id="id-back"
-                    type="file"
-                    accept="image/*,.pdf"
-                    className="mt-2"
-                  />
+                  {uploadedFiles.idBack ? (
+                    <div className="flex items-center justify-between p-2 bg-muted rounded">
+                      <span className="text-sm">{uploadedFiles.idBack.name}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => removeFile('idBack')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <FileText className="h-8 w-8 mx-auto text-muted-foreground" />
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Click to upload or drag and drop
+                      </p>
+                      <Input
+                        id="id-back"
+                        type="file"
+                        accept="image/*,.pdf"
+                        className="mt-2"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload('idBack', file);
+                        }}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -192,17 +315,36 @@ const KycCenter = (): JSX.Element => {
             <div className="space-y-4">
               <Label htmlFor="proof-address">Proof of Address</Label>
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                <FileText className="h-8 w-8 mx-auto text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Utility bill, bank statement, or lease agreement (less than 3
-                  months old)
-                </p>
-                <Input
-                  id="proof-address"
-                  type="file"
-                  accept="image/*,.pdf"
-                  className="mt-2"
-                />
+                {uploadedFiles.proofAddress ? (
+                  <div className="flex items-center justify-between p-2 bg-muted rounded">
+                    <span className="text-sm">{uploadedFiles.proofAddress.name}</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => removeFile('proofAddress')}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <FileText className="h-8 w-8 mx-auto text-muted-foreground" />
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Utility bill, bank statement, or lease agreement (less than 3
+                      months old)
+                    </p>
+                    <Input
+                      id="proof-address"
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="mt-2"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload('proofAddress', file);
+                      }}
+                    />
+                  </>
+                )}
               </div>
             </div>
 

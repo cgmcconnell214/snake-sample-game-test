@@ -157,10 +157,7 @@ export default function Marketplace(): JSX.Element {
 
       {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleListAsset}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5" />
@@ -171,16 +168,17 @@ export default function Marketplace(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Tokenize and list your assets for peer-to-peer trading
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleListAsset}
+            >
               List Asset
             </Button>
           </CardContent>
         </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleBrowseOffers}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5" />
@@ -191,16 +189,17 @@ export default function Marketplace(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Explore available assets and trading opportunities
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleBrowseOffers}
+            >
               Browse Offers
             </Button>
           </CardContent>
         </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleViewContracts}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ShoppingCart className="h-5 w-5" />
@@ -211,7 +210,11 @@ export default function Marketplace(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               View active trades and pending smart contracts
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleViewContracts}
+            >
               View Queue
             </Button>
           </CardContent>
@@ -296,7 +299,17 @@ export default function Marketplace(): JSX.Element {
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Buy Now
                 </Button>
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  aria-label="Add to favorites"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toast({
+                      title: "Favorite Asset",
+                      description: `Added ${asset.asset_name} to favorites`,
+                    });
+                  }}
+                >
                   <Star className="h-4 w-4" />
                 </Button>
               </div>

@@ -337,7 +337,16 @@ const Admin = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            toast({
+                              title: "Edit User",
+                              description: `Editing user: ${user.first_name} ${user.last_name}`,
+                            });
+                          }}
+                        >
                           Edit
                         </Button>
                       </TableCell>

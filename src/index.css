@@ -2,6 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Enhanced button alignment and spacing utilities */
+.btn-grid {
+  @apply grid gap-2;
+}
+
+.btn-grid-2 {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.btn-grid-3 {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-2;
+}
+
+.btn-flex {
+  @apply flex gap-2 items-center;
+}
+
+.btn-flex-between {
+  @apply flex justify-between items-center gap-2;
+}
+
+/* Card button consistency */
+.card-action-button {
+  @apply w-full justify-center;
+}
+
 /* Professional Trading Platform Design System */
 
 @layer base {

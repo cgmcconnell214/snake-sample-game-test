@@ -243,10 +243,7 @@ export default function LiquidityPools(): JSX.Element {
 
       {/* Pool Type Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleViewCommodityPools}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
@@ -257,16 +254,17 @@ export default function LiquidityPools(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Pools backed by physical commodities like gold and silver
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleViewCommodityPools}
+            >
               View Pools
             </Button>
           </CardContent>
         </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleBondLiquidity}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5" />
@@ -277,16 +275,17 @@ export default function LiquidityPools(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Lock liquidity for higher yields with time commitments
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleBondLiquidity}
+            >
               Bond Liquidity
             </Button>
           </CardContent>
         </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleViewTimers}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Timer className="h-5 w-5" />
@@ -297,7 +296,11 @@ export default function LiquidityPools(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track time-locked positions and upcoming reward distributions
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleViewTimers}
+            >
               View Timers
             </Button>
           </CardContent>

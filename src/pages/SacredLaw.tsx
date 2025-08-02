@@ -179,10 +179,7 @@ export default function SacredLaw(): JSX.Element {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => handleLearnPrinciple("gods-constant")}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Compass className="h-5 w-5" />
@@ -193,16 +190,17 @@ export default function SacredLaw(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               The unchanging divine principle guiding all commerce
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => handleLearnPrinciple("gods-constant")}
+            >
               Learn Principle
             </Button>
           </CardContent>
         </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleViewPillars}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Scale className="h-5 w-5" />
@@ -213,16 +211,17 @@ export default function SacredLaw(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               The foundational pillars of sacred governance
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleViewPillars}
+            >
               View Pillars
             </Button>
           </CardContent>
         </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleStudyFramework}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Feather className="h-5 w-5" />
@@ -233,7 +232,11 @@ export default function SacredLaw(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               As above, so below - the law of correspondence
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleStudyFramework}
+            >
               Study Framework
             </Button>
           </CardContent>
@@ -259,8 +262,7 @@ export default function SacredLaw(): JSX.Element {
           {principles.map((principle) => (
             <Card
               key={principle.id}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => handleLearnPrinciple(principle.id)}
+              className="hover:shadow-lg transition-shadow"
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -289,11 +291,26 @@ export default function SacredLaw(): JSX.Element {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => handleLearnPrinciple(principle.id)}
+                  >
                     Study
                   </Button>
                   {isAdmin && (
-                    <Button variant="outline" size="icon">
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      aria-label="Edit principle"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toast({
+                          title: "Edit Principle",
+                          description: `Editing ${principle.title}`,
+                        });
+                      }}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
                   )}

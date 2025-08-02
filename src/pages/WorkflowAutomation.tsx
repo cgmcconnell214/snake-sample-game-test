@@ -235,10 +235,7 @@ export default function WorkflowAutomation(): JSX.Element {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleConfigureRules}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
@@ -249,16 +246,17 @@ export default function WorkflowAutomation(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Automated rules for token minting and distribution
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleConfigureRules}
+            >
               Configure Rules
             </Button>
           </CardContent>
         </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleSetTriggers}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
@@ -269,16 +267,17 @@ export default function WorkflowAutomation(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Automatic licensing and royalty distribution
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleSetTriggers}
+            >
               Set Triggers
             </Button>
           </CardContent>
         </Card>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleSetupLogic}
-        >
+        <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Workflow className="h-5 w-5" />
@@ -289,7 +288,11 @@ export default function WorkflowAutomation(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Conditional escrow release based on milestones
             </p>
-            <Button variant="outline" className="w-full">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleSetupLogic}
+            >
               Setup Logic
             </Button>
           </CardContent>
@@ -341,10 +344,26 @@ export default function WorkflowAutomation(): JSX.Element {
                   >
                     {rule.is_active ? "Disable" : "Enable"}
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    aria-label="Configure rule settings"
+                    onClick={() => toast({
+                      title: "Rule Settings",
+                      description: `Configuring ${rule.rule_name}`,
+                    })}
+                  >
                     <Settings className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    aria-label="Execute rule manually"
+                    onClick={() => toast({
+                      title: "Manual Execution",
+                      description: `Executing ${rule.rule_name} manually`,
+                    })}
+                  >
                     <Play className="h-4 w-4" />
                   </Button>
                 </div>

@@ -4,11 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Shield, Coins, Scale, Crown, Users } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const LandingPage = () => {
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Redirect logged in users to the app
@@ -63,30 +65,34 @@ const LandingPage = () => {
               </span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => scrollToSection("mission")}
                 className="text-muted-foreground hover:text-divine-gold transition-colors"
               >
                 Mission
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => scrollToSection("features")}
                 className="text-muted-foreground hover:text-divine-gold transition-colors"
               >
                 Features
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => scrollToSection("trust")}
                 className="text-muted-foreground hover:text-divine-gold transition-colors"
               >
                 Trust
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => scrollToSection("register")}
                 className="text-muted-foreground hover:text-divine-gold transition-colors"
               >
                 Register
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -240,6 +246,13 @@ const LandingPage = () => {
             <Button
               variant="outline"
               className="border-divine-gold text-divine-gold hover:bg-divine-gold hover:text-divine-gold-foreground transition-all duration-300"
+              onClick={() => {
+                // Open declaration in new tab or modal
+                toast({
+                  title: "Sacred Declaration",
+                  description: "Opening the full divine trust declaration",
+                });
+              }}
             >
               📜 Read Full Declaration
             </Button>
