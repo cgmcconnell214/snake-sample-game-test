@@ -13,6 +13,13 @@ export default function LearningPortal() {
     await injectContractTemplate('learn');
   };
 
+  const handleContinueLearning = () => {
+    toast({
+      title: "Continue Learning",
+      description: "Resuming your learning journey",
+    });
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -22,10 +29,7 @@ export default function LearningPortal() {
             Master tokenization and sacred commerce
           </p>
         </div>
-        <Button onClick={() => toast({
-          title: "Continue Learning",
-          description: "Resuming your learning journey",
-        })}>
+        <Button onClick={handleContinueLearning}>
           <Play className="h-4 w-4 mr-2" />
           Continue Learning
         </Button>
