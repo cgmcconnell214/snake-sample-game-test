@@ -23,18 +23,18 @@ import { useAuth } from '@/contexts/AuthContext';
 interface Post {
   id: string;
   content: string;
-  media_urls: string[];
-  post_type: string;
-  like_count: number;
-  comment_count: number;
-  share_count: number;
-  created_at: string;
+  media_urls: string[] | null;
+  post_type: string | null;
+  like_count: number | null;
+  comment_count: number | null;
+  share_count: number | null;
+  created_at: string | null;
   user_id: string;
-  user_profiles: {
-    display_name: string;
-    username: string;
-    avatar_url: string;
-  };
+  user_profiles?: {
+    display_name: string | null;
+    username: string | null;
+    avatar_url: string | null;
+  } | null;
   is_liked?: boolean;
 }
 
@@ -43,11 +43,11 @@ interface Comment {
   content: string;
   created_at: string;
   user_id: string;
-  user_profiles: {
-    display_name: string;
-    username: string;
-    avatar_url: string;
-  };
+  user_profiles?: {
+    display_name: string | null;
+    username: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 export default function SocialFeed() {
@@ -69,25 +69,25 @@ export default function SocialFeed() {
 
   const fetchFeed = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: postsData, error } = await supabase
         .from('user_posts')
-        .select(`
-          *,
-          user_profiles!inner (
-            display_name,
-            username,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
 
-      // Check which posts the user has liked
-      if (data && user) {
-        const postIds = data.map(post => post.id);
+      if (postsData && user) {
+        // Get user profiles for posts
+        const userIds = [...new Set(postsData.map(post => post.user_id))];
+        const { data: profiles } = await supabase
+          .from('user_profiles')
+          .select('user_id, display_name, username, avatar_url')
+          .in('user_id', userIds);
+
+        // Check which posts the user has liked
+        const postIds = postsData.map(post => post.id);
         const { data: likes } = await supabase
           .from('post_likes')
           .select('post_id')
@@ -96,12 +96,13 @@ export default function SocialFeed() {
 
         const likedPostIds = new Set(likes?.map(like => like.post_id) || []);
         
-        const postsWithLikes = data.map(post => ({
+        const postsWithProfiles = postsData.map(post => ({
           ...post,
+          user_profiles: profiles?.find(p => p.user_id === post.user_id) || null,
           is_liked: likedPostIds.has(post.id)
         }));
 
-        setPosts(postsWithLikes);
+        setPosts(postsWithProfiles);
       }
     } catch (error) {
       console.error('Error fetching feed:', error);
@@ -165,19 +166,25 @@ export default function SocialFeed() {
           post_type: mediaUrls.length > 0 ? 'media' : 'text',
           is_public: true
         })
-        .select(`
-          *,
-          user_profiles!inner (
-            display_name,
-            username,
-            avatar_url
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
 
-      setPosts(prev => [{ ...data, is_liked: false }, ...prev]);
+      // Get user profile for the new post
+      const { data: userProfile } = await supabase
+        .from('user_profiles')
+        .select('user_id, display_name, username, avatar_url')
+        .eq('user_id', user.id)
+        .single();
+
+      const newPost = {
+        ...data,
+        user_profiles: userProfile,
+        is_liked: false
+      };
+
+      setPosts(prev => [newPost, ...prev]);
       setNewPostContent('');
       setUploadedFiles([]);
       
@@ -237,22 +244,29 @@ export default function SocialFeed() {
 
   const fetchComments = async (postId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: commentsData, error } = await supabase
         .from('post_comments')
-        .select(`
-          *,
-          user_profiles!inner (
-            display_name,
-            username,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
 
-      setComments(prev => ({ ...prev, [postId]: data || [] }));
+      if (commentsData) {
+        // Get user profiles for comments
+        const userIds = [...new Set(commentsData.map(comment => comment.user_id))];
+        const { data: profiles } = await supabase
+          .from('user_profiles')
+          .select('user_id, display_name, username, avatar_url')
+          .in('user_id', userIds);
+
+        const commentsWithProfiles = commentsData.map(comment => ({
+          ...comment,
+          user_profiles: profiles?.find(p => p.user_id === comment.user_id) || null
+        }));
+
+        setComments(prev => ({ ...prev, [postId]: commentsWithProfiles }));
+      }
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
@@ -280,28 +294,33 @@ export default function SocialFeed() {
           post_id: postId,
           content: newComment[postId].trim()
         })
-        .select(`
-          *,
-          user_profiles!inner (
-            display_name,
-            username,
-            avatar_url
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
 
+      // Get user profile for the new comment
+      const { data: userProfile } = await supabase
+        .from('user_profiles')
+        .select('user_id, display_name, username, avatar_url')
+        .eq('user_id', user.id)
+        .single();
+
+      const newCommentData = {
+        ...data,
+        user_profiles: userProfile
+      };
+
       setComments(prev => ({
         ...prev,
-        [postId]: [...(prev[postId] || []), data]
+        [postId]: [...(prev[postId] || []), newCommentData]
       }));
 
       setNewComment(prev => ({ ...prev, [postId]: '' }));
 
       // Update post comment count
       setPosts(prev => prev.map(p => 
-        p.id === postId ? { ...p, comment_count: p.comment_count + 1 } : p
+        p.id === postId ? { ...p, comment_count: (p.comment_count || 0) + 1 } : p
       ));
     } catch (error) {
       console.error('Error adding comment:', error);

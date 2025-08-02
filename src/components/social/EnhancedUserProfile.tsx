@@ -46,36 +46,21 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfileData {
   user_id: string;
-  display_name: string;
-  username: string;
-  bio: string;
-  avatar_url: string;
-  profile_banner_url: string;
-  website: string;
-  location: string;
-  phone: string;
-  follower_count: number;
-  following_count: number;
-  post_count: number;
-  theme_preferences: {
-    theme: string;
-    accent_color: string;
-  } | null;
-  privacy_settings: {
-    profile_visibility: string;
-    show_followers: boolean;
-    show_following: boolean;
-  } | null;
-  notification_settings: {
-    email_notifications: boolean;
-    push_notifications: boolean;
-    follow_notifications: boolean;
-  } | null;
-  social_links: {
-    twitter?: string;
-    linkedin?: string;
-    github?: string;
-  } | null;
+  display_name: string | null;
+  username: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  profile_banner_url: string | null;
+  website: string | null;
+  location: string | null;
+  phone: string | null;
+  follower_count: number | null;
+  following_count: number | null;
+  post_count: number | null;
+  theme_preferences: any;
+  privacy_settings: any;
+  notification_settings: any;
+  social_links: any;
 }
 
 export default function EnhancedUserProfile() {

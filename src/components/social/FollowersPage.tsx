@@ -12,12 +12,12 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface UserProfile {
   user_id: string;
-  display_name: string;
-  username: string;
-  avatar_url: string;
-  bio: string;
-  follower_count: number;
-  following_count: number;
+  display_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  follower_count: number | null;
+  following_count: number | null;
   is_following?: boolean;
   mutual_connections?: number;
 }
@@ -27,8 +27,8 @@ interface FollowRelation {
   follower_id: string;
   following_id: string;
   created_at: string;
-  follower_profile?: UserProfile;
-  following_profile?: UserProfile;
+  follower_profile?: UserProfile | null;
+  following_profile?: UserProfile | null;
 }
 
 export default function FollowersPage() {
@@ -54,46 +54,49 @@ export default function FollowersPage() {
     try {
       setLoading(true);
 
-      // Fetch followers
+      // Fetch followers with manual joins
       const { data: followersData, error: followersError } = await supabase
         .from('user_follows')
-        .select(`
-          *,
-          follower_profile:user_profiles!follower_id (
-            user_id,
-            display_name,
-            username,
-            avatar_url,
-            bio,
-            follower_count,
-            following_count
-          )
-        `)
+        .select('*')
         .eq('following_id', user.id);
 
       if (followersError) throw followersError;
 
-      // Fetch following
+      // Get follower profiles
+      const followerIds = followersData?.map(f => f.follower_id) || [];
+      const { data: followerProfiles } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .in('user_id', followerIds);
+
+      // Fetch following with manual joins
       const { data: followingData, error: followingError } = await supabase
         .from('user_follows')
-        .select(`
-          *,
-          following_profile:user_profiles!following_id (
-            user_id,
-            display_name,
-            username,
-            avatar_url,
-            bio,
-            follower_count,
-            following_count
-          )
-        `)
+        .select('*')
         .eq('follower_id', user.id);
 
       if (followingError) throw followingError;
 
-      setFollowers(followersData || []);
-      setFollowing(followingData || []);
+      // Get following profiles
+      const followingIds = followingData?.map(f => f.following_id) || [];
+      const { data: followingProfiles } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .in('user_id', followingIds);
+
+      // Combine data
+      const followersWithProfiles = followersData?.map(f => ({
+        ...f,
+        follower_profile: followerProfiles?.find(p => p.user_id === f.follower_id)
+      })) || [];
+
+      const followingWithProfiles = followingData?.map(f => ({
+        ...f,
+        following_profile: followingProfiles?.find(p => p.user_id === f.following_id)
+      })) || [];
+
+      setFollowers(followersWithProfiles);
+      setFollowing(followingWithProfiles);
     } catch (error) {
       console.error('Error fetching follow data:', error);
       toast({
