@@ -44,6 +44,9 @@ import DevPlayground from "./pages/DevPlayground";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import SocialFeed from "./components/social/SocialFeed";
+import EnhancedUserProfile from "./components/social/EnhancedUserProfile";
+import FollowersPage from "./components/social/FollowersPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -136,6 +139,11 @@ const App = () => (
                                 <Route path="asset-provenance" element={<AssetProvenance />} />
                                 <Route path="tokenomics" element={<TokenomicsPage />} />
                                 <Route path="dev-playground" element={<DevPlayground />} />
+                                
+                                {/* Social Media Routes */}
+                                <Route path="social" element={<SocialFeed />} />
+                                <Route path="social/profile" element={<EnhancedUserProfile />} />
+                                <Route path="social/followers" element={<FollowersPage />} />
                                 
                                 <Route path="*" element={<NotFound />} />
                               </Routes>

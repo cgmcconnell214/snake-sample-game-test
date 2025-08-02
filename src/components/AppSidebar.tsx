@@ -35,6 +35,9 @@ import {
   Monitor,
   Webhook,
   AlertTriangle,
+  MessageSquare,
+  Heart,
+  Users2,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
@@ -90,6 +93,13 @@ const marketplaceItems = [
   { title: "P2P Marketplace", url: "/app/marketplace", icon: Store },
   { title: "Liquidity Pools", url: "/app/liquidity", icon: Layers },
   { title: "Escrow Vaults", url: "/app/escrow", icon: Building },
+];
+
+// Social Media Layer
+const socialItems = [
+  { title: "Social Feed", url: "/app/social", icon: MessageSquare },
+  { title: "My Profile", url: "/app/social/profile", icon: User },
+  { title: "Followers", url: "/app/social/followers", icon: Users2 },
 ];
 
 // Compliance & Security (Existing)
@@ -237,6 +247,25 @@ export function AppSidebar(): JSX.Element {
           <SidebarGroupContent>
             <SidebarMenu>
               {marketplaceItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <NavLink to={item.url} className={getNavCls}>
+                      <item.icon className="h-4 w-4" />
+                      {open && <span>{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Social Media */}
+        <SidebarGroup>
+          <SidebarGroupLabel>📱 Social Media</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {socialItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavCls}>
