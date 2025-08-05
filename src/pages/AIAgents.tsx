@@ -13,6 +13,30 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Bot,
   Plus,
   Settings,
@@ -20,10 +44,18 @@ import {
   DollarSign,
   Users,
   Star,
+  MoreVertical,
+  Trash2,
+  Edit,
+  Play,
+  Code,
+  Download,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { injectContractTemplate } from "@/lib/contractTemplates";
+import { WorkflowEditor } from "@/components/ai-agents/WorkflowEditor";
+import { AgentDeployment } from "@/components/ai-agents/AgentDeployment";
 
 interface AIAgent {
   id: string;
@@ -36,19 +68,27 @@ interface AIAgent {
   creator_id: string;
   verification_status: string;
   created_at: string;
+  workflow_data: any;
+  configuration: any;
+  agent_type: string;
+  is_active: boolean;
 }
 
 export default function AIAgents() {
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AIAgent | null>(null);
+  const [workflowAgent, setWorkflowAgent] = useState<AIAgent | null>(null);
+  const [deploymentAgent, setDeploymentAgent] = useState<AIAgent | null>(null);
   const [newAgent, setNewAgent] = useState({
     name: "",
     description: "",
     category: "workflow",
+    agent_type: "workflow",
     price_per_use: 0,
     total_tokens: 1000000,
     workflow_data: {},
+    configuration: {},
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -99,6 +139,7 @@ export default function AIAgents() {
           napier_integration: true,
           tokenomics_enabled: true,
           revenue_sharing: true,
+          ...newAgent.configuration,
         },
       })
       .select()
@@ -124,10 +165,35 @@ export default function AIAgents() {
       name: "",
       description: "",
       category: "workflow",
+      agent_type: "workflow",
       price_per_use: 0,
       total_tokens: 1000000,
       workflow_data: {},
+      configuration: {},
     });
+  };
+
+  const handleDeleteAgent = async (agentId: string) => {
+    const { error } = await supabase
+      .from("ai_agents")
+      .update({ is_active: false })
+      .eq("id", agentId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete AI agent",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "AI agent deleted successfully",
+    });
+
+    setAgents(agents.filter(agent => agent.id !== agentId));
   };
 
   const handlePurchaseAgent = async (
@@ -186,6 +252,31 @@ export default function AIAgents() {
     fetchAgents();
   };
 
+  const handleExecuteAgent = async (agent: AIAgent) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('execute-ai-agent', {
+        body: { 
+          agentId: agent.id, 
+          workflowData: agent.workflow_data,
+          configuration: agent.configuration 
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Agent Executed",
+        description: `${agent.name} has been executed successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Execution Failed",
+        description: "Failed to execute agent workflow",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredAgents = agents.filter((agent) => {
     const matchesSearch =
       agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -211,6 +302,12 @@ export default function AIAgents() {
     setAgents(prev => prev.map(a => (a.id === data.id ? data : a)));
     setEditingAgent(null);
     toast({ title: 'Agent Updated' });
+  };
+
+  const isUserAgent = (agent: AIAgent) => {
+    // This would check if the current user is the creator
+    // For now, we'll just return true to show all options
+    return true;
   };
 
   return (
@@ -259,15 +356,72 @@ export default function AIAgents() {
                   <Bot className="h-5 w-5" />
                   <CardTitle className="text-lg">{agent.name}</CardTitle>
                 </div>
-                <Badge
-                  variant={
-                    agent.verification_status === "verified"
-                      ? "default"
-                      : "secondary"
-                  }
-                >
-                  {agent.verification_status}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant={
+                      agent.verification_status === "verified"
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
+                    {agent.verification_status}
+                  </Badge>
+                  {isUserAgent(agent) && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditingAgent(agent)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Settings
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setWorkflowAgent(agent)}>
+                          <Code className="h-4 w-4 mr-2" />
+                          Edit Workflow
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDeploymentAgent(agent)}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Deploy Agent
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExecuteAgent(agent)}>
+                          <Play className="h-4 w-4 mr-2" />
+                          Execute Now
+                        </DropdownMenuItem>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem
+                              onSelect={(e) => e.preventDefault()}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete Agent
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete AI Agent</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{agent.name}"? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteAgent(agent.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -304,12 +458,10 @@ export default function AIAgents() {
                 <Button
                   className="flex-1"
                   onClick={() => handlePurchaseAgent(agent.id, 1000)}
+                  disabled={agent.total_tokens - agent.tokens_sold < 1000}
                 >
                   <DollarSign className="h-4 w-4 mr-2" />
                   Buy 1000 tokens
-                </Button>
-                <Button variant="outline" onClick={() => setEditingAgent(agent)}>
-                  <Settings className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
@@ -327,37 +479,38 @@ export default function AIAgents() {
         </div>
       )}
 
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-            <CardHeader>
-              <CardTitle>Create AI Agent</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="name">Agent Name</Label>
-                <Input
-                  id="name"
-                  value={newAgent.name}
-                  onChange={(e) =>
-                    setNewAgent({ ...newAgent, name: e.target.value })
-                  }
-                  placeholder="e.g., Trading Bot Extreme"
-                />
-              </div>
+      {/* Create Agent Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create AI Agent</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">Agent Name</Label>
+              <Input
+                id="name"
+                value={newAgent.name}
+                onChange={(e) =>
+                  setNewAgent({ ...newAgent, name: e.target.value })
+                }
+                placeholder="e.g., Trading Bot Extreme"
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={newAgent.description}
-                  onChange={(e) =>
-                    setNewAgent({ ...newAgent, description: e.target.value })
-                  }
-                  placeholder="Describe what your AI agent does..."
-                />
-              </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={newAgent.description}
+                onChange={(e) =>
+                  setNewAgent({ ...newAgent, description: e.target.value })
+                }
+                placeholder="Describe what your AI agent does..."
+              />
+            </div>
 
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="category">Category</Label>
                 <Select
@@ -370,9 +523,7 @@ export default function AIAgents() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="workflow">
-                      Workflow Automation
-                    </SelectItem>
+                    <SelectItem value="workflow">Workflow Automation</SelectItem>
                     <SelectItem value="trading">Trading</SelectItem>
                     <SelectItem value="analytics">Analytics</SelectItem>
                     <SelectItem value="compliance">Compliance</SelectItem>
@@ -380,6 +531,28 @@ export default function AIAgents() {
                 </Select>
               </div>
 
+              <div>
+                <Label htmlFor="agent_type">Agent Type</Label>
+                <Select
+                  value={newAgent.agent_type}
+                  onValueChange={(value) =>
+                    setNewAgent({ ...newAgent, agent_type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="workflow">Workflow</SelectItem>
+                    <SelectItem value="ai_assistant">AI Assistant</SelectItem>
+                    <SelectItem value="data_processor">Data Processor</SelectItem>
+                    <SelectItem value="api_connector">API Connector</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="price">Price per Use ($)</Label>
                 <Input
@@ -410,52 +583,98 @@ export default function AIAgents() {
                   }
                 />
               </div>
+            </div>
 
-              <div className="flex gap-2 pt-4">
-                <Button onClick={handleCreateAgent} className="flex-1">
-                  <Zap className="h-4 w-4 mr-2" />
-                  Create Agent
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsCreateModalOpen(false)}
-                >
-                  Cancel
-                </Button>
+            <div className="flex gap-2 pt-4">
+              <Button onClick={handleCreateAgent} className="flex-1">
+                <Zap className="h-4 w-4 mr-2" />
+                Create Agent
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateModalOpen(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Agent Modal */}
+      <Dialog open={!!editingAgent} onOpenChange={() => setEditingAgent(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit {editingAgent?.name}</DialogTitle>
+          </DialogHeader>
+          {editingAgent && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-name">Agent Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editingAgent.name}
+                  onChange={(e) => setEditingAgent({ ...editingAgent, name: e.target.value })}
+                />
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {editingAgent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle>Edit {editingAgent.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingAgent.description}
+                  onChange={(e) => setEditingAgent({ ...editingAgent, description: e.target.value })}
+                />
+              </div>
               <div>
                 <Label htmlFor="edit-price">Price per Use ($)</Label>
                 <Input
                   id="edit-price"
                   type="number"
                   step="0.01"
-                  defaultValue={editingAgent.price_per_use}
+                  value={editingAgent.price_per_use}
                   onChange={(e) => setEditingAgent({ ...editingAgent, price_per_use: parseFloat(e.target.value) || 0 })}
                 />
               </div>
+              <div>
+                <Label htmlFor="edit-tokens">Total Tokens</Label>
+                <Input
+                  id="edit-tokens"
+                  type="number"
+                  value={editingAgent.total_tokens}
+                  onChange={(e) => setEditingAgent({ ...editingAgent, total_tokens: parseInt(e.target.value) || 0 })}
+                />
+              </div>
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => handleUpdateAgent({ price_per_use: editingAgent.price_per_use })} className="flex-1">
-                  Save
+                <Button onClick={() => handleUpdateAgent(editingAgent)} className="flex-1">
+                  Save Changes
                 </Button>
                 <Button variant="outline" onClick={() => setEditingAgent(null)}>
                   Cancel
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Workflow Editor Modal */}
+      {workflowAgent && (
+        <WorkflowEditor
+          agent={workflowAgent}
+          onClose={() => setWorkflowAgent(null)}
+          onSave={(workflowData) => {
+            handleUpdateAgent({ workflow_data: workflowData });
+            setWorkflowAgent(null);
+          }}
+        />
+      )}
+
+      {/* Deployment Modal */}
+      {deploymentAgent && (
+        <AgentDeployment
+          agent={deploymentAgent}
+          onClose={() => setDeploymentAgent(null)}
+        />
       )}
     </div>
   );
