@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_agent_executions: {
+        Row: {
+          agent_id: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          input_data: Json
+          output_data: Json | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          agent_id: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          input_data?: Json
+          output_data?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          agent_id?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          input_data?: Json
+          output_data?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_executions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_agent_purchases: {
         Row: {
           agent_id: string
@@ -2545,6 +2592,10 @@ export type Database = {
           notification_data?: Json
         }
         Returns: string
+      }
+      execute_ai_agent_workflow: {
+        Args: { agent_id: string; workflow_data: Json; input_data?: Json }
+        Returns: Json
       }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
