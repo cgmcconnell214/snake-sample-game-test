@@ -59,6 +59,7 @@ import { WorkflowEditor } from "@/components/ai-agents/WorkflowEditor";
 import { AgentDeployment } from "@/components/ai-agents/AgentDeployment";
 import { AgentAuditor } from "@/components/ai-agents/AgentAuditor";
 import { ComprehensiveTestDashboard } from "@/components/ai-agents/ComprehensiveTestDashboard";
+import { AgentExecutionConsole } from "@/components/ai-agents/AgentExecutionConsole";
 
 interface AIAgent {
   id: string;
@@ -555,6 +556,8 @@ export default function AIAgents() {
           </SelectContent>
         </Select>
       </div>
+
+      <AgentExecutionConsole />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredAgents.map((agent) => (
