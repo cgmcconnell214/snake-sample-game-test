@@ -312,21 +312,27 @@ export default function AIAgents() {
   });
 
   const handleUpdateAgent = async (updated: Partial<AIAgent>) => {
-    if (!editingAgent) return;
+    // Get the agent to update - could be editingAgent or workflowAgent
+    const agentToUpdate = editingAgent || workflowAgent;
+    if (!agentToUpdate) return;
+    
     const { data, error } = await supabase
       .from('ai_agents')
       .update(updated)
-      .eq('id', editingAgent.id)
+      .eq('id', agentToUpdate.id)
       .select()
       .single();
 
     if (error) {
+      console.error('Update error:', error);
       toast({ title: 'Error', description: 'Failed to update agent', variant: 'destructive' });
       return;
     }
+    
+    console.log('Agent updated successfully:', data);
     setAgents(prev => prev.map(a => (a.id === data.id ? data : a)));
     setEditingAgent(null);
-    toast({ title: 'Agent Updated' });
+    toast({ title: 'Agent Updated', description: 'Changes saved successfully' });
   };
 
   const isUserAgent = (agent: AIAgent) => {

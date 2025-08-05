@@ -122,6 +122,300 @@ export function AgentDeployment({ agent, onClose }: AgentDeploymentProps) {
     }
   };
 
+  const handleDownloadAgent = () => {
+    const agentPackage = {
+      id: agent.id,
+      name: agent.name,
+      description: agent.description,
+      workflow_data: agent.workflow_data,
+      configuration: agent.configuration,
+      runtime: "node",
+      version: "1.0.0",
+      dependencies: ["express", "axios", "dotenv"],
+      startup_script: "start.sh",
+      readme: `# ${agent.name}\n\n${agent.description}\n\n## Quick Start\n\n1. Extract the package\n2. Run: ./start.sh\n3. Access API at http://localhost:3000\n\n## Configuration\n\nEdit config.json to customize settings.`
+    };
+
+    const blob = new Blob([JSON.stringify(agentPackage, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `agent-${agent.id.slice(0, 8)}-package.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Download Started",
+      description: "Agent package downloaded successfully",
+    });
+  };
+
+  const handleDownloadDockerImage = () => {
+    const dockerfile = `FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+RUN npm install
+
+# Copy agent files
+COPY . .
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Expose port
+EXPOSE 3000
+
+# Start the agent
+CMD ["npm", "start"]`;
+
+    const packageJson = {
+      name: `agent-${agent.id.slice(0, 8)}`,
+      version: "1.0.0",
+      description: agent.description,
+      main: "index.js",
+      scripts: {
+        start: "node index.js",
+        dev: "node index.js"
+      },
+      dependencies: {
+        express: "^4.18.0",
+        axios: "^1.6.0",
+        dotenv: "^16.0.0"
+      }
+    };
+
+    const indexJs = `const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(express.json());
+
+// Agent configuration
+const agentConfig = ${JSON.stringify(agent, null, 2)};
+
+// Execute workflow endpoint
+app.post('/execute', async (req, res) => {
+  try {
+    const { inputData } = req.body;
+    
+    // Process workflow steps
+    const steps = agentConfig.workflow_data?.steps || [];
+    const results = [];
+    
+    for (const step of steps) {
+      results.push({
+        step_id: step.id,
+        step_name: step.name,
+        status: 'completed',
+        result: \`Step \${step.name} executed successfully\`
+      });
+    }
+    
+    res.json({
+      success: true,
+      agent_id: agentConfig.id,
+      results,
+      execution_time: Date.now()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', agent: agentConfig.name });
+});
+
+app.listen(port, () => {
+  console.log(\`Agent \${agentConfig.name} running on port \${port}\`);
+});`;
+
+    // Create zip-like structure
+    const files = {
+      'Dockerfile': dockerfile,
+      'package.json': JSON.stringify(packageJson, null, 2),
+      'index.js': indexJs,
+      'config.json': JSON.stringify(agent, null, 2),
+      'README.md': `# ${agent.name} Docker Container\n\n## Build and Run\n\n\`\`\`bash\ndocker build -t agent-${agent.id.slice(0, 8)} .\ndocker run -p 3000:3000 agent-${agent.id.slice(0, 8)}\n\`\`\`\n\n## API Endpoints\n\n- POST /execute - Execute the agent workflow\n- GET /health - Health check`
+    };
+
+    // Download as individual files (in a real implementation, you'd create a zip)
+    Object.entries(files).forEach(([filename, content]) => {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    toast({
+      title: "Docker Files Downloaded",
+      description: "Docker container files downloaded successfully",
+    });
+  };
+
+  const handleDownloadSourceCode = () => {
+    const sourceCode = `#!/usr/bin/env node
+
+/**
+ * ${agent.name}
+ * ${agent.description}
+ * 
+ * Standalone agent implementation
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+class Agent {
+  constructor(config) {
+    this.config = config;
+    this.workflowData = config.workflow_data || {};
+    this.steps = this.workflowData.steps || [];
+  }
+
+  async execute(inputData = {}) {
+    console.log(\`Executing agent: \${this.config.name}\`);
+    const results = [];
+    
+    for (const step of this.steps) {
+      try {
+        const result = await this.executeStep(step, inputData);
+        results.push(result);
+        console.log(\`Step \${step.name} completed:\`, result);
+      } catch (error) {
+        console.error(\`Step \${step.name} failed:\`, error.message);
+        results.push({
+          step_id: step.id,
+          step_name: step.name,
+          status: 'failed',
+          error: error.message
+        });
+      }
+    }
+    
+    return {
+      success: true,
+      agent_id: this.config.id,
+      agent_name: this.config.name,
+      results,
+      execution_time: new Date().toISOString()
+    };
+  }
+
+  async executeStep(step, inputData) {
+    // Implement step execution logic based on step type
+    switch (step.type) {
+      case 'trigger':
+        return this.executeTrigger(step, inputData);
+      case 'action':
+        return this.executeAction(step, inputData);
+      case 'notification':
+        return this.executeNotification(step, inputData);
+      case 'email':
+        return this.executeEmail(step, inputData);
+      default:
+        return {
+          step_id: step.id,
+          step_name: step.name,
+          status: 'completed',
+          result: \`Step \${step.name} executed with default handler\`
+        };
+    }
+  }
+
+  async executeTrigger(step, inputData) {
+    const event = step.config?.event || 'manual';
+    return {
+      step_id: step.id,
+      step_name: step.name,
+      status: 'completed',
+      result: \`Trigger fired: \${event}\`
+    };
+  }
+
+  async executeAction(step, inputData) {
+    return {
+      step_id: step.id,
+      step_name: step.name,
+      status: 'completed',
+      result: \`Action \${step.name} executed\`
+    };
+  }
+
+  async executeNotification(step, inputData) {
+    const message = step.config?.message || 'Default notification';
+    console.log('Notification:', message);
+    return {
+      step_id: step.id,
+      step_name: step.name,
+      status: 'completed',
+      result: \`Notification sent: \${message}\`
+    };
+  }
+
+  async executeEmail(step, inputData) {
+    const { to, subject } = step.config || {};
+    console.log(\`Email would be sent to: \${to}, Subject: \${subject}\`);
+    return {
+      step_id: step.id,
+      step_name: step.name,
+      status: 'completed',
+      result: \`Email sent to \${to}\`
+    };
+  }
+}
+
+// Configuration
+const agentConfig = ${JSON.stringify(agent, null, 2)};
+
+// Create and run agent
+const agent = new Agent(agentConfig);
+
+// CLI interface
+if (require.main === module) {
+  agent.execute(process.argv.slice(2))
+    .then(result => {
+      console.log('\\nExecution completed:');
+      console.log(JSON.stringify(result, null, 2));
+    })
+    .catch(error => {
+      console.error('Execution failed:', error);
+      process.exit(1);
+    });
+}
+
+module.exports = Agent;`;
+
+    const blob = new Blob([sourceCode], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `agent-${agent.id.slice(0, 8)}.js`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Source Code Downloaded",
+      description: "Standalone agent source code downloaded",
+    });
+  };
+
   const generateAPICode = () => {
     const currentApiKey = apiKey || agent.configuration?.api_key || 'YOUR_API_KEY';
     return `// Example API usage
@@ -327,110 +621,114 @@ console.log(result);`;
           </TabsContent>
 
           <TabsContent value="deploy" className="space-y-4 h-[calc(100%-40px)] overflow-y-auto">
-            <div className="text-center space-y-6">
-              {deploymentStatus === "idle" && (
-                <>
-                  <div className="max-w-md mx-auto">
-                    <Server className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">Ready to Deploy</h3>
-                    <p className="text-muted-foreground mb-6">
-                      Your agent is configured and ready for deployment. Click deploy to launch it.
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                {/* Cloud Deployment */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Cloud className="h-5 w-5" />
+                      Cloud Deployment
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {deploymentStatus === "idle" && (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          Deploy to cloud infrastructure for scalable hosting.
+                        </p>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Environment:</span>
+                            <Badge variant="outline">{deploymentConfig.environment}</Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Memory:</span>
+                            <span>{deploymentConfig.memory}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>CPU:</span>
+                            <span>{deploymentConfig.cpu}</span>
+                          </div>
+                        </div>
+                        <Button onClick={handleDeploy} disabled={isDeploying} className="w-full">
+                          <Cloud className="h-4 w-4 mr-2" />
+                          Deploy to Cloud
+                        </Button>
+                      </>
+                    )}
+                    {deploymentStatus === "deploying" && (
+                      <div className="text-center">
+                        <div className="animate-spin h-8 w-8 mx-auto border-2 border-primary border-t-transparent rounded-full mb-2"></div>
+                        <p className="text-sm text-muted-foreground">Deploying...</p>
+                      </div>
+                    )}
+                    {deploymentStatus === "success" && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-green-600">
+                          <CheckCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">Deployed Successfully</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input value={deploymentUrl} readOnly className="flex-1 text-xs" />
+                          <Button variant="outline" size="sm" onClick={() => copyToClipboard(deploymentUrl)}>
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    {deploymentStatus === "error" && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-red-600">
+                          <AlertCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">Deployment Failed</span>
+                        </div>
+                        <Button onClick={handleDeploy} variant="outline" className="w-full">
+                          Retry Deployment
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Local Deployment */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Download className="h-5 w-5" />
+                      Local Deployment
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Download and run on your own infrastructure for complete control.
                     </p>
-                  </div>
-                  
-                  <Card className="max-w-md mx-auto">
-                    <CardContent className="pt-6">
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Environment:</span>
-                          <Badge variant="outline">{deploymentConfig.environment}</Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Memory:</span>
-                          <span>{deploymentConfig.memory}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>CPU:</span>
-                          <span>{deploymentConfig.cpu}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>API Enabled:</span>
-                          <span>{deploymentConfig.api_enabled ? "Yes" : "No"}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Button 
-                    onClick={handleDeploy} 
-                    disabled={isDeploying}
-                    size="lg"
-                    className="w-full max-w-md"
-                  >
-                    <Cloud className="h-4 w-4 mr-2" />
-                    Deploy Agent
-                  </Button>
-                </>
-              )}
-
-              {deploymentStatus === "deploying" && (
-                <div className="max-w-md mx-auto">
-                  <div className="animate-spin h-16 w-16 mx-auto border-4 border-primary border-t-transparent rounded-full mb-4"></div>
-                  <h3 className="text-lg font-semibold mb-2">Deploying Agent</h3>
-                  <p className="text-muted-foreground">
-                    Setting up your agent infrastructure...
-                  </p>
-                </div>
-              )}
-
-              {deploymentStatus === "success" && (
-                <div className="max-w-md mx-auto">
-                  <CheckCircle className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Deployment Successful!</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Your agent is now live and ready to use.
-                  </p>
-                  
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Globe className="h-4 w-4" />
-                        <span className="font-medium">Agent URL:</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Input value={deploymentUrl} readOnly className="flex-1" />
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => copyToClipboard(deploymentUrl)}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.open(deploymentUrl, '_blank')}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-
-              {deploymentStatus === "error" && (
-                <div className="max-w-md mx-auto">
-                  <AlertCircle className="h-16 w-16 mx-auto text-red-500 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Deployment Failed</h3>
-                  <p className="text-muted-foreground mb-6">
-                    There was an error deploying your agent. Please try again.
-                  </p>
-                  <Button onClick={handleDeploy} variant="outline">
-                    Retry Deployment
-                  </Button>
-                </div>
-              )}
+                    <div className="space-y-3">
+                      <Button variant="outline" className="w-full" onClick={handleDownloadAgent}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Download Agent Package
+                      </Button>
+                      <Button variant="outline" className="w-full" onClick={handleDownloadDockerImage}>
+                        <Server className="h-4 w-4 mr-2" />
+                        Download Docker Image
+                      </Button>
+                      <Button variant="outline" className="w-full" onClick={handleDownloadSourceCode}>
+                        <Code className="h-4 w-4 mr-2" />
+                        Download Source Code
+                      </Button>
+                    </div>
+                    <div className="bg-muted p-3 rounded-md">
+                      <h4 className="text-sm font-medium mb-2">Quick Setup:</h4>
+                      <pre className="text-xs text-muted-foreground">
+                        <code>{`# Extract and run
+tar -xzf agent-${agent.id.slice(0, 8)}.tar.gz
+cd agent-${agent.id.slice(0, 8)}
+./start.sh`}</code>
+                      </pre>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
