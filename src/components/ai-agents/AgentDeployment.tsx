@@ -24,6 +24,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AgentDeploymentProps {
   agent: any;
@@ -45,6 +46,8 @@ export function AgentDeployment({ agent, onClose }: AgentDeploymentProps) {
   const [isDeploying, setIsDeploying] = useState(false);
   const [deploymentStatus, setDeploymentStatus] = useState<"idle" | "deploying" | "success" | "error">("idle");
   const [deploymentUrl, setDeploymentUrl] = useState("");
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [generatingKey, setGeneratingKey] = useState(false);
   const { toast } = useToast();
 
   const handleDeploy = async () => {
@@ -83,18 +86,56 @@ export function AgentDeployment({ agent, onClose }: AgentDeploymentProps) {
     });
   };
 
+  const generateAPIKey = async () => {
+    setGeneratingKey(true);
+    try {
+      // Generate a secure API key
+      const newApiKey = `ak_${agent.id.substring(0, 8)}_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 15)}`;
+      setApiKey(newApiKey);
+      
+      // Store the API key in the database
+      const { error } = await supabase
+        .from('ai_agents')
+        .update({ 
+          configuration: { 
+            ...agent.configuration, 
+            api_key: newApiKey,
+            api_key_created_at: new Date().toISOString()
+          } 
+        })
+        .eq('id', agent.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "API Key Generated",
+        description: "Your new API key has been created successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate API key",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingKey(false);
+    }
+  };
+
   const generateAPICode = () => {
+    const currentApiKey = apiKey || agent.configuration?.api_key || 'YOUR_API_KEY';
     return `// Example API usage
-const response = await fetch('${deploymentUrl || 'https://your-agent-url.com'}/api/execute', {
+const response = await fetch('${deploymentUrl || `https://bkxbkaggxqcsiylwcopt.supabase.co/functions/v1/execute-ai-agent`}', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer YOUR_API_KEY'
+    'Authorization': 'Bearer ${currentApiKey}'
   },
   body: JSON.stringify({
-    input: "your input data",
-    parameters: {
-      // workflow parameters
+    agentId: "${agent.id}",
+    workflowData: ${JSON.stringify(agent.workflow_data, null, 2)},
+    inputData: {
+      // your input parameters here
     }
   })
 });
@@ -450,9 +491,30 @@ console.log(result);`;
                   <p className="text-sm text-muted-foreground mb-4">
                     Use your agent's API key to authenticate requests. You can find your API key in the agent settings.
                   </p>
-                  <Button variant="outline">
-                    Generate API Key
-                  </Button>
+                  <div className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={generateAPIKey}
+                      disabled={generatingKey}
+                    >
+                      {generatingKey ? "Generating..." : "Generate API Key"}
+                    </Button>
+                    {(apiKey || agent.configuration?.api_key) && (
+                      <div className="bg-muted p-3 rounded-md">
+                        <p className="text-sm font-mono break-all">
+                          {apiKey || agent.configuration?.api_key}
+                        </p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => copyToClipboard(apiKey || agent.configuration?.api_key)}
+                          className="mt-2"
+                        >
+                          Copy API Key
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>

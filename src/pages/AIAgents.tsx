@@ -40,6 +40,7 @@ import {
   Bot,
   Plus,
   Settings,
+  TestTube,
   Zap,
   DollarSign,
   Users,
@@ -56,6 +57,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { injectContractTemplate } from "@/lib/contractTemplates";
 import { WorkflowEditor } from "@/components/ai-agents/WorkflowEditor";
 import { AgentDeployment } from "@/components/ai-agents/AgentDeployment";
+import { AgentAuditor } from "@/components/ai-agents/AgentAuditor";
 
 interface AIAgent {
   id: string;
@@ -92,6 +94,7 @@ export default function AIAgents() {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showAuditMode, setShowAuditMode] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -258,20 +261,42 @@ export default function AIAgents() {
         body: { 
           agentId: agent.id, 
           workflowData: agent.workflow_data,
-          configuration: agent.configuration 
+          configuration: agent.configuration,
+          inputData: {
+            triggered_by: 'manual',
+            triggered_at: new Date().toISOString(),
+            user_id: (await supabase.auth.getUser()).data.user?.id
+          }
         }
       });
 
       if (error) throw error;
 
+      const result = data?.result || {};
+      const stepResults = result.step_results || [];
+      const totalSteps = result.total_steps || 0;
+      const successfulSteps = result.successful_steps || 0;
+      const failedSteps = result.failed_steps || 0;
+
       toast({
-        title: "Agent Executed",
-        description: `${agent.name} has been executed successfully`,
+        title: "Agent Executed Successfully",
+        description: `${agent.name}: ${successfulSteps}/${totalSteps} steps completed successfully${failedSteps > 0 ? `, ${failedSteps} failed` : ''}`,
       });
+
+      // Log detailed results for debugging
+      console.log('Agent execution results:', {
+        agent_id: agent.id,
+        total_steps: totalSteps,
+        successful_steps: successfulSteps,
+        failed_steps: failedSteps,
+        step_details: stepResults
+      });
+
     } catch (error) {
+      console.error('Agent execution error:', error);
       toast({
         title: "Execution Failed",
-        description: "Failed to execute agent workflow",
+        description: `Failed to execute ${agent.name}: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     }
@@ -312,17 +337,30 @@ export default function AIAgents() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">AI Agents Marketplace</h1>
-          <p className="text-muted-foreground">
-            Discover and deploy tokenized AI workflow automations
-          </p>
+      {showAuditMode ? (
+        <AgentAuditor />
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">AI Agents Marketplace</h1>
+              <p className="text-muted-foreground">
+                Discover and deploy tokenized AI workflow automations
+              </p>
+            </div>
+        <div className="flex gap-2">
+          <Button 
+            variant={showAuditMode ? "default" : "outline"} 
+            onClick={() => setShowAuditMode(!showAuditMode)}
+          >
+            <TestTube className="h-4 w-4 mr-2" />
+            {showAuditMode ? "Exit Audit" : "Audit Mode"}
+          </Button>
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Agent
+          </Button>
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Agent
-        </Button>
       </div>
 
       <div className="flex gap-4 mb-6">
@@ -675,6 +713,8 @@ export default function AIAgents() {
           agent={deploymentAgent}
           onClose={() => setDeploymentAgent(null)}
         />
+      )}
+        </>
       )}
     </div>
   );
