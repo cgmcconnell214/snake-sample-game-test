@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_agent_execution_logs: {
+        Row: {
+          agent_id: string | null
+          created_at: string | null
+          data: Json | null
+          execution_id: string | null
+          id: string
+          log_level: string | null
+          message: string
+          step_id: string | null
+          step_name: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          created_at?: string | null
+          data?: Json | null
+          execution_id?: string | null
+          id?: string
+          log_level?: string | null
+          message: string
+          step_id?: string | null
+          step_name?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          created_at?: string | null
+          data?: Json | null
+          execution_id?: string | null
+          id?: string
+          log_level?: string | null
+          message?: string
+          step_id?: string | null
+          step_name?: string | null
+          timestamp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_execution_logs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_execution_logs_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_agent_executions: {
         Row: {
           agent_id: string
@@ -2583,6 +2637,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_stuck_executions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       create_notification: {
         Args: {
           target_user_id: string
@@ -2594,7 +2652,7 @@ export type Database = {
         Returns: string
       }
       execute_ai_agent_workflow: {
-        Args: { agent_id: string; workflow_data: Json; input_data?: Json }
+        Args: { agent_id: string; workflow_data?: Json; input_data?: Json }
         Returns: Json
       }
       get_current_user_role: {

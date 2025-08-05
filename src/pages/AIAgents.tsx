@@ -51,6 +51,7 @@ import {
   Play,
   Code,
   Download,
+  BarChart3,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,7 +60,8 @@ import { WorkflowEditor } from "@/components/ai-agents/WorkflowEditor";
 import { AgentDeployment } from "@/components/ai-agents/AgentDeployment";
 import { AgentAuditor } from "@/components/ai-agents/AgentAuditor";
 import { ComprehensiveTestDashboard } from "@/components/ai-agents/ComprehensiveTestDashboard";
-import { AgentExecutionConsole } from "@/components/ai-agents/AgentExecutionConsole";
+import { EnhancedExecutionConsole } from "@/components/ai-agents/EnhancedExecutionConsole";
+import { AgentExecutionAnalyzer } from "@/components/ai-agents/AgentExecutionAnalyzer";
 
 interface AIAgent {
   id: string;
@@ -98,6 +100,7 @@ export default function AIAgents() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showAuditMode, setShowAuditMode] = useState(false);
   const [showComprehensiveTest, setShowComprehensiveTest] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -498,6 +501,16 @@ export default function AIAgents() {
     <div className="container mx-auto p-6 space-y-6">
       {showComprehensiveTest ? (
         <ComprehensiveTestDashboard onClose={() => setShowComprehensiveTest(false)} />
+      ) : showAnalytics ? (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">AI Agent Analytics</h2>
+            <Button onClick={() => setShowAnalytics(false)} variant="outline">
+              Back to Agents
+            </Button>
+          </div>
+          <AgentExecutionAnalyzer />
+        </div>
       ) : showAuditMode ? (
         <AgentAuditor />
       ) : (
@@ -510,6 +523,13 @@ export default function AIAgents() {
               </p>
             </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => setShowAnalytics(true)}
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytics
+          </Button>
           <Button 
             variant="outline"
             onClick={() => setShowComprehensiveTest(true)}
@@ -557,7 +577,7 @@ export default function AIAgents() {
         </Select>
       </div>
 
-      <AgentExecutionConsole />
+      <EnhancedExecutionConsole />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredAgents.map((agent) => (

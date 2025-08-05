@@ -181,8 +181,25 @@ serve(async (req) => {
       }
     }
 
+    // Log each step execution
+    for (const stepResult of executionResults) {
+      await supabase.from('ai_agent_execution_logs').insert({
+        execution_id: executionResult.execution_id,
+        agent_id: agentId,
+        log_level: stepResult.status === 'success' ? 'info' : 'error',
+        message: stepResult.status === 'success' 
+          ? `Step completed: ${stepResult.step_id}` 
+          : `Step failed: ${stepResult.step_id} - ${stepResult.error}`,
+        step_id: stepResult.step_id,
+        step_name: workflowData.steps?.find(s => s.id === stepResult.step_id)?.name || stepResult.step_id,
+        data: stepResult.output || {}
+      });
+    }
+
     // Update execution record with completion
     const executionId = executionResult.execution_id;
+    const executionTimeMs = Date.now() - new Date(executionResult.result?.started_at || Date.now()).getTime();
+    
     if (executionId) {
       await supabase
         .from('ai_agent_executions')
@@ -192,13 +209,28 @@ serve(async (req) => {
           output_data: {
             ...executionResult.result,
             step_results: executionResults,
+            step_details: executionResults, // Also store as step_details for compatibility
             total_steps: executionResults.length,
             successful_steps: executionResults.filter(r => r.status === 'success').length,
             failed_steps: executionResults.filter(r => r.status === 'error').length
           },
-          execution_time_ms: executionResult.result?.execution_time_ms || 500
+          execution_time_ms: executionTimeMs
         })
         .eq('id', executionId);
+
+      // Log execution completion
+      await supabase.from('ai_agent_execution_logs').insert({
+        execution_id: executionId,
+        agent_id: agentId,
+        log_level: 'info',
+        message: `Agent execution completed successfully`,
+        data: {
+          total_steps: executionResults.length,
+          successful_steps: executionResults.filter(r => r.status === 'success').length,
+          failed_steps: executionResults.filter(r => r.status === 'error').length,
+          execution_time_ms: executionTimeMs
+        }
+      });
     }
 
     console.log('Agent execution completed successfully');

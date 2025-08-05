@@ -90,7 +90,10 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
       
       if (readError) throw readError;
       
-      // Test database write
+      // Test database write - get current user first
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const testData = {
         name: `Test Agent ${Date.now()}`,
         description: 'Integration test agent',
@@ -98,7 +101,23 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
         agent_type: 'workflow',
         price_per_use: 0,
         total_tokens: 1000,
-        creator_id: (await supabase.auth.getUser()).data.user?.id
+        creator_id: user.id,
+        configuration: {
+          test_mode: true,
+          napier_integration: false,
+          tokenomics_enabled: false,
+          revenue_sharing: false
+        },
+        workflow_data: {
+          steps: [
+            {
+              id: 'test-step',
+              type: 'trigger',
+              name: 'Test Step',
+              config: { trigger_type: 'manual' }
+            }
+          ]
+        }
       };
       
       const { data: created, error: writeError } = await supabase
