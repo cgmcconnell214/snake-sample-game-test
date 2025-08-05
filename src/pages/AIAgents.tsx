@@ -176,6 +176,156 @@ export default function AIAgents() {
     });
   };
 
+  const handleCreateTestingAgent = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to create an AI agent",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const testingAgentData = {
+      name: "Site Functionality Tester",
+      description: "Comprehensive agent that tests all major functionality across the app including trading, IP tokenization, learning portal, live classes, and workflow automation.",
+      category: "analytics",
+      agent_type: "workflow",
+      price_per_use: 0,
+      total_tokens: 10000000,
+      creator_id: user.id,
+      workflow_data: {
+        steps: [
+          {
+            id: "trigger-test",
+            type: "trigger",
+            name: "Site Test Trigger",
+            config: {
+              trigger_type: "manual",
+              description: "Initiates comprehensive site testing"
+            }
+          },
+          {
+            id: "test-trading",
+            type: "action",
+            name: "Test Trading Functions",
+            config: {
+              action_type: "api_call",
+              endpoint: "/api/trading/test",
+              description: "Tests order placement, market data retrieval, and portfolio management"
+            }
+          },
+          {
+            id: "test-tokenization",
+            type: "action",
+            name: "Test IP Tokenization",
+            config: {
+              action_type: "api_call",
+              endpoint: "/api/tokenization/test",
+              description: "Tests asset creation, token issuance, and staking functionality"
+            }
+          },
+          {
+            id: "test-learning",
+            type: "action",
+            name: "Test Learning Portal",
+            config: {
+              action_type: "api_call",
+              endpoint: "/api/learning/test",
+              description: "Tests course creation, enrollment, and progress tracking"
+            }
+          },
+          {
+            id: "test-classes",
+            type: "action",
+            name: "Test Live Classes",
+            config: {
+              action_type: "api_call",
+              endpoint: "/api/classes/test",
+              description: "Tests class scheduling, registration, and session management"
+            }
+          },
+          {
+            id: "test-escrow",
+            type: "action",
+            name: "Test Escrow Vaults",
+            config: {
+              action_type: "api_call",
+              endpoint: "/api/escrow/test",
+              description: "Tests vault creation, locking, and unlock conditions"
+            }
+          },
+          {
+            id: "test-compliance",
+            type: "action",
+            name: "Test Compliance Systems",
+            config: {
+              action_type: "api_call",
+              endpoint: "/api/compliance/test",
+              description: "Tests KYC verification, monitoring, and alert systems"
+            }
+          },
+          {
+            id: "notification-results",
+            type: "notification",
+            name: "Test Results Notification",
+            config: {
+              message: "Site functionality testing completed successfully!",
+              notification_type: "success",
+              description: "Sends notification with comprehensive test results"
+            }
+          },
+          {
+            id: "generate-report",
+            type: "data",
+            name: "Generate Test Report",
+            config: {
+              data_type: "report",
+              format: "json",
+              description: "Compiles all test results into a comprehensive report"
+            }
+          }
+        ],
+        triggers: ["manual"],
+        conditions: []
+      },
+      configuration: {
+        test_depth: "comprehensive",
+        include_performance: true,
+        include_security: true,
+        generate_recommendations: true,
+        napier_integration: true,
+        tokenomics_enabled: true,
+        revenue_sharing: false
+      }
+    };
+
+    const { data, error } = await supabase
+      .from("ai_agents")
+      .insert(testingAgentData)
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create testing agent",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Testing Agent Created",
+      description: "Site Functionality Tester has been created and is ready for deployment.",
+    });
+
+    setAgents([data, ...agents]);
+  };
+
   const handleDeleteAgent = async (agentId: string) => {
     const { error } = await supabase
       .from("ai_agents")
@@ -361,6 +511,10 @@ export default function AIAgents() {
           >
             <TestTube className="h-4 w-4 mr-2" />
             {showAuditMode ? "Exit Audit" : "Audit Mode"}
+          </Button>
+          <Button onClick={handleCreateTestingAgent} variant="secondary">
+            <Bot className="h-4 w-4 mr-2" />
+            Create Testing Agent
           </Button>
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
