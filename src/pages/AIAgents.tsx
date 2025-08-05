@@ -58,6 +58,7 @@ import { injectContractTemplate } from "@/lib/contractTemplates";
 import { WorkflowEditor } from "@/components/ai-agents/WorkflowEditor";
 import { AgentDeployment } from "@/components/ai-agents/AgentDeployment";
 import { AgentAuditor } from "@/components/ai-agents/AgentAuditor";
+import { ComprehensiveTestDashboard } from "@/components/ai-agents/ComprehensiveTestDashboard";
 
 interface AIAgent {
   id: string;
@@ -95,6 +96,7 @@ export default function AIAgents() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showAuditMode, setShowAuditMode] = useState(false);
+  const [showComprehensiveTest, setShowComprehensiveTest] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -493,7 +495,9 @@ export default function AIAgents() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {showAuditMode ? (
+      {showComprehensiveTest ? (
+        <ComprehensiveTestDashboard onClose={() => setShowComprehensiveTest(false)} />
+      ) : showAuditMode ? (
         <AgentAuditor />
       ) : (
         <>
@@ -506,11 +510,18 @@ export default function AIAgents() {
             </div>
         <div className="flex gap-2">
           <Button 
+            variant="outline"
+            onClick={() => setShowComprehensiveTest(true)}
+          >
+            <TestTube className="h-4 w-4 mr-2" />
+            Comprehensive Testing
+          </Button>
+          <Button 
             variant={showAuditMode ? "default" : "outline"} 
             onClick={() => setShowAuditMode(!showAuditMode)}
           >
             <TestTube className="h-4 w-4 mr-2" />
-            {showAuditMode ? "Exit Audit" : "Audit Mode"}
+            {showAuditMode ? "Exit Audit" : "Basic Audit"}
           </Button>
           <Button onClick={handleCreateTestingAgent} variant="secondary">
             <Bot className="h-4 w-4 mr-2" />
@@ -571,7 +582,7 @@ export default function AIAgents() {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuItem onClick={() => setEditingAgent(agent)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Settings
