@@ -377,8 +377,8 @@ export function EnhancedExecutionConsole() {
           </TabsContent>
 
           <TabsContent value="backend-logs" className="space-y-4">
-            <div className="flex gap-4">
-              <div className="flex-1">
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex-1 min-w-[200px]">
                 <Input
                   placeholder="Search backend logs..."
                   value={searchTerm}
@@ -386,18 +386,34 @@ export function EnhancedExecutionConsole() {
                   className="w-full"
                 />
               </div>
-              <Select value={logLevelFilter} onValueChange={setLogLevelFilter}>
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="debug">Debug</SelectItem>
-                  <SelectItem value="info">Info</SelectItem>
-                  <SelectItem value="warn">Warning</SelectItem>
-                  <SelectItem value="error">Error</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Select value={logLevelFilter} onValueChange={setLogLevelFilter}>
+                  <SelectTrigger className="w-36">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="debug">Debug</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="warn">Warning</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant={logLevelFilter === 'info' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setLogLevelFilter(logLevelFilter === 'info' ? 'all' : 'info')}
+                >
+                  Info
+                </Button>
+                <Button
+                  variant={logLevelFilter === 'debug' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setLogLevelFilter(logLevelFilter === 'debug' ? 'all' : 'debug')}
+                >
+                  Debug
+                </Button>
+              </div>
             </div>
 
             <ScrollArea className="h-96 w-full">
@@ -419,7 +435,11 @@ export function EnhancedExecutionConsole() {
                               {log.step_name}
                             </Badge>
                           )}
-                          <Badge className={getLogLevelColor(log.log_level)}>
+                          <Badge 
+                            className={getLogLevelColor(log.log_level) + ' cursor-pointer'}
+                            onClick={() => setLogLevelFilter(log.log_level)}
+                            title={`Filter by ${log.log_level}`}
+                          >
                             {log.log_level.toUpperCase()}
                           </Badge>
                         </div>

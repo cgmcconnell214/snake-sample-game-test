@@ -512,7 +512,15 @@ export default function AIAgents() {
           <AgentExecutionAnalyzer />
         </div>
       ) : showAuditMode ? (
-        <AgentAuditor />
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Basic Audit</h2>
+            <Button onClick={() => setShowAuditMode(false)} variant="outline">
+              Back to Agents
+            </Button>
+          </div>
+          <AgentAuditor />
+        </div>
       ) : (
         <>
           <div className="flex items-center justify-between">
@@ -523,35 +531,36 @@ export default function AIAgents() {
               </p>
             </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline"
-            onClick={() => setShowAnalytics(true)}
-          >
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Analytics
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={() => setShowComprehensiveTest(true)}
-          >
-            <TestTube className="h-4 w-4 mr-2" />
-            Comprehensive Testing
-          </Button>
-          <Button 
-            variant={showAuditMode ? "default" : "outline"} 
-            onClick={() => setShowAuditMode(!showAuditMode)}
-          >
-            <TestTube className="h-4 w-4 mr-2" />
-            {showAuditMode ? "Exit Audit" : "Basic Audit"}
-          </Button>
-          <Button onClick={handleCreateTestingAgent} variant="secondary">
-            <Bot className="h-4 w-4 mr-2" />
-            Create Testing Agent
-          </Button>
-          <Button onClick={() => setIsCreateModalOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Agent
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <MoreVertical className="h-4 w-4 mr-2" />
+                Actions
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="z-50 w-56">
+              <DropdownMenuItem onClick={() => setShowAnalytics(true)}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Analytics
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowComprehensiveTest(true)}>
+                <TestTube className="h-4 w-4 mr-2" />
+                Comprehensive Testing
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowAuditMode(!showAuditMode)}>
+                <TestTube className="h-4 w-4 mr-2" />
+                {showAuditMode ? 'Exit Audit' : 'Basic Audit'}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCreateTestingAgent}>
+                <Bot className="h-4 w-4 mr-2" />
+                Create Testing Agent
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsCreateModalOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Agent
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -605,7 +614,7 @@ export default function AIAgents() {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuContent align="end" className="z-50 w-48">
                         <DropdownMenuItem onClick={() => setEditingAgent(agent)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Settings
@@ -716,6 +725,7 @@ export default function AIAgents() {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create AI Agent</DialogTitle>
+            <p className="text-sm text-muted-foreground">Fill in details for the new AI agent.</p>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -838,6 +848,7 @@ export default function AIAgents() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Edit {editingAgent?.name}</DialogTitle>
+            <p className="text-sm text-muted-foreground">Update the properties for this agent.</p>
           </DialogHeader>
           {editingAgent && (
             <div className="space-y-4">
