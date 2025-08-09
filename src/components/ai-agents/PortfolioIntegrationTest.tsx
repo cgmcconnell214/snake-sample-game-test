@@ -121,7 +121,7 @@ export function PortfolioIntegrationTest() {
           // Test 4: Verify purchase appears in portfolio
           const { data: purchases, error: purchaseFetchError } = await supabase
             .from('ai_agent_purchases')
-            .select('*, ai_agents(*)')
+            .select('*')
             .eq('buyer_id', user.id);
 
           const purchaseVisible = purchases?.some(p => p.agent_id === createdAgent.id);
@@ -136,21 +136,17 @@ export function PortfolioIntegrationTest() {
           }]);
         }
 
-        // Test 5: Create IP asset for tokenization
-        const { data: ipAsset, error: tokenError } = await supabase
-          .from('ip_assets')
+        // Test 5: Create tokenized asset for the agent
+        const symbol = createdAgent.name.replace(/[^A-Z0-9]/gi, '').slice(0, 6).toUpperCase() || 'AGNT';
+        const { data: tokenized, error: tokenError } = await supabase
+          .from('tokenized_assets')
           .insert({
-            name: `${createdAgent.name} Token`,
-            description: `Tokenized version of ${createdAgent.name}`,
-            ip_type: 'ai_agent',
             creator_id: user.id,
-            total_tokens: createdAgent.total_tokens,
-            valuation: createdAgent.total_tokens * createdAgent.price_per_use,
-            annual_yield_percentage: 0.05,
-            metadata: {
-              agent_id: createdAgent.id,
-              source_type: 'ai_agent'
-            }
+            total_supply: createdAgent.total_tokens,
+            asset_symbol: symbol,
+            asset_name: `${createdAgent.name} Token`,
+            description: `Tokenized version of ${createdAgent.name}`,
+            metadata: { agent_id: createdAgent.id, source_type: 'ai_agent' }
           })
           .select()
           .single();
@@ -166,7 +162,7 @@ export function PortfolioIntegrationTest() {
             testName: 'Agent Tokenization',
             status: 'pass',
             details: 'Successfully tokenized agent',
-            data: { ipAssetId: ipAsset.id }
+            data: { assetId: tokenized.id }
           }]);
 
           // Test 6: Create token holdings
@@ -174,7 +170,7 @@ export function PortfolioIntegrationTest() {
             .from('ip_token_holdings')
             .insert({
               holder_id: user.id,
-              ip_asset_id: ipAsset.id,
+              ip_asset_id: tokenized.id,
               tokens_held: 10000,
               tokens_staked: 5000
             })
@@ -195,21 +191,21 @@ export function PortfolioIntegrationTest() {
               data: { holdingsId: holdings.id }
             }]);
 
-            // Test 7: Verify IP assets appear in portfolio
+            // Test 7: Verify tokenized assets appear in portfolio
             const { data: userAssets, error: assetsFetchError } = await supabase
-              .from('ip_assets')
+              .from('tokenized_assets')
               .select('*')
               .eq('creator_id', user.id)
               .eq('is_active', true);
 
-            const assetVisible = userAssets?.some(a => a.id === ipAsset.id);
+            const assetVisible = userAssets?.some(a => a.id === tokenized.id);
 
             setTestResults(prev => [...prev, {
               testName: 'Tokenized Assets Portfolio',
               status: assetVisible ? 'pass' : 'fail',
               details: assetVisible
-                ? 'Tokenized agent visible in IP assets portfolio'
-                : 'Tokenized agent NOT visible in IP assets portfolio',
+                ? 'Tokenized agent visible in assets portfolio'
+                : 'Tokenized agent NOT visible in assets portfolio',
               data: { totalAssets: userAssets?.length }
             }]);
           }

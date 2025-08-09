@@ -39,10 +39,32 @@ serve(async (req) => {
 
     console.log(`Executing AI agent: ${agentId}`);
 
+    // Normalize agentId: accept UUID or agent name
+    let resolvedAgentId = agentId as string;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(resolvedAgentId)) {
+      const { data: agentLookup, error: lookupError } = await supabase
+        .from('ai_agents')
+        .select('id')
+        .eq('name', resolvedAgentId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (lookupError || !agentLookup?.id) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid agent identifier', details: 'Provide a valid UUID or an existing agent name' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      resolvedAgentId = agentLookup.id;
+    }
+
     // Call the database function to execute the workflow
     const { data: executionResult, error: executionError } = await supabase
       .rpc('execute_ai_agent_workflow', {
-        agent_id: agentId,
+        agent_id: resolvedAgentId,
         workflow_data: workflowData || {},
         input_data: inputData
       });
@@ -62,12 +84,22 @@ serve(async (req) => {
       
       for (const step of workflowData.steps) {
         console.log(`Executing step: ${step.name} (${step.type})`);
-        let stepResult = { step_id: step.id, status: 'success', output: null, error: null };
+        let stepResult = { step_id: step.id, status: 'success', output: null as any, error: null as any };
+
+        // Log step start (debug)
+        await supabase.from('ai_agent_execution_logs').insert({
+          execution_id: executionResult.execution_id,
+          agent_id: resolvedAgentId,
+          log_level: 'debug',
+          message: `Step start: ${step.id}`,
+          step_id: step.id,
+          step_name: step.name,
+          data: { type: step.type, config: step.config || {} }
+        });
         
         try {
           switch (step.type) {
             case 'trigger':
-              // Execute trigger logic
               stepResult.output = {
                 triggered: true,
                 event: step.config?.event || 'manual',
@@ -75,31 +107,23 @@ serve(async (req) => {
               };
               console.log(`Trigger executed: ${step.config?.event || 'unknown'}`);
               break;
-              
             case 'notification':
-              // Send notification
               const message = step.config?.message || 'No message configured';
               const recipient = step.config?.recipient || 'system';
-              
-              // Insert notification into database
               await supabase.from('notifications').insert({
                 user_id: executionResult.result?.agent?.creator_id || null,
                 type: 'workflow_notification',
                 title: 'Workflow Notification',
                 message: message,
-                data: { step_id: step.id, agent_id: agentId }
+                data: { step_id: step.id, agent_id: resolvedAgentId }
               });
-              
               stepResult.output = { message_sent: true, recipient, message };
               console.log(`Notification sent: ${message}`);
               break;
-              
             case 'email':
-              // Email functionality (placeholder)
               const emailTo = step.config?.to || 'no-recipient';
               const emailSubject = step.config?.subject || 'Workflow Email';
               const emailBody = step.config?.body || 'Email from workflow';
-              
               stepResult.output = { 
                 email_queued: true, 
                 to: emailTo, 
@@ -108,12 +132,9 @@ serve(async (req) => {
               };
               console.log(`Email queued to: ${emailTo}`);
               break;
-              
             case 'action':
-              // Execute custom action
               const actionType = step.config?.action_type || 'unknown';
               const actionData = step.config?.data || {};
-              
               stepResult.output = {
                 action_executed: true,
                 action_type: actionType,
@@ -122,12 +143,9 @@ serve(async (req) => {
               };
               console.log(`Action executed: ${step.name} (${actionType})`);
               break;
-              
             case 'data':
-              // Data processing
               const operation = step.config?.operation || 'process';
               const sourceData = inputData || {};
-              
               stepResult.output = {
                 operation_completed: true,
                 operation: operation,
@@ -136,12 +154,9 @@ serve(async (req) => {
               };
               console.log(`Data operation completed: ${operation}`);
               break;
-              
             case 'condition':
-              // Conditional logic
               const condition = step.config?.condition || 'true';
               const evaluation = eval(condition.replace(/[^\w\s><=!&|()]/g, '')) || true;
-              
               stepResult.output = {
                 condition_evaluated: true,
                 condition: condition,
@@ -150,11 +165,8 @@ serve(async (req) => {
               };
               console.log(`Condition evaluated: ${condition} = ${evaluation}`);
               break;
-              
             case 'schedule':
-              // Schedule functionality
               const scheduleTime = step.config?.schedule_time || new Date();
-              
               stepResult.output = {
                 scheduled: true,
                 schedule_time: scheduleTime,
@@ -162,7 +174,6 @@ serve(async (req) => {
               };
               console.log(`Action scheduled for: ${scheduleTime}`);
               break;
-              
             default:
               stepResult.output = {
                 executed: true,
@@ -173,38 +184,39 @@ serve(async (req) => {
           }
         } catch (error) {
           stepResult.status = 'error';
-          stepResult.error = error.message;
+          stepResult.error = (error as Error).message;
           console.error(`Step execution failed: ${step.name}`, error);
         }
+
+        // Log step result immediately
+        await supabase.from('ai_agent_execution_logs').insert({
+          execution_id: executionResult.execution_id,
+          agent_id: resolvedAgentId,
+          log_level: stepResult.status === 'success' ? 'info' : 'error',
+          message: stepResult.status === 'success' 
+            ? `Step completed: ${stepResult.step_id}` 
+            : `Step failed: ${stepResult.step_id} - ${stepResult.error}`,
+          step_id: stepResult.step_id,
+          step_name: step.name,
+          data: stepResult.output || {}
+        });
         
         executionResults.push(stepResult);
       }
     }
 
-    // Log each step execution
-    for (const stepResult of executionResults) {
-      await supabase.from('ai_agent_execution_logs').insert({
-        execution_id: executionResult.execution_id,
-        agent_id: agentId,
-        log_level: stepResult.status === 'success' ? 'info' : 'error',
-        message: stepResult.status === 'success' 
-          ? `Step completed: ${stepResult.step_id}` 
-          : `Step failed: ${stepResult.step_id} - ${stepResult.error}`,
-        step_id: stepResult.step_id,
-        step_name: workflowData.steps?.find(s => s.id === stepResult.step_id)?.name || stepResult.step_id,
-        data: stepResult.output || {}
-      });
-    }
+    // Step logs are emitted in real-time above for terminal-like visibility
 
     // Update execution record with completion
     const executionId = executionResult.execution_id;
     const executionTimeMs = Date.now() - new Date(executionResult.result?.started_at || Date.now()).getTime();
+    const hasFailed = executionResults.some((r) => r.status === 'error');
     
     if (executionId) {
       await supabase
         .from('ai_agent_executions')
         .update({
-          status: 'completed',
+          status: hasFailed ? 'failed' : 'completed',
           completed_at: new Date().toISOString(),
           output_data: {
             ...executionResult.result,
@@ -221,9 +233,9 @@ serve(async (req) => {
       // Log execution completion
       await supabase.from('ai_agent_execution_logs').insert({
         execution_id: executionId,
-        agent_id: agentId,
-        log_level: 'info',
-        message: `Agent execution completed successfully`,
+        agent_id: resolvedAgentId,
+        log_level: hasFailed ? 'warn' : 'info',
+        message: hasFailed ? 'Agent execution completed with errors' : 'Agent execution completed successfully',
         data: {
           total_steps: executionResults.length,
           successful_steps: executionResults.filter(r => r.status === 'success').length,

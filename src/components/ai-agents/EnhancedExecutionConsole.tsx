@@ -265,6 +265,18 @@ export function EnhancedExecutionConsole() {
     URL.revokeObjectURL(url);
   };
 
+  const cleanupStuck = async () => {
+    try {
+      await supabase.rpc('cleanup_stuck_executions');
+      toast({ title: 'Cleanup triggered', description: 'Stuck executions marked as failed.' });
+      fetchExecutionLogs();
+      fetchBackendLogs();
+    } catch (error) {
+      console.error('Cleanup error:', error);
+      toast({ title: 'Cleanup failed', description: 'Could not cleanup stuck executions', variant: 'destructive' });
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -277,6 +289,10 @@ export function EnhancedExecutionConsole() {
             <Button onClick={exportLogs} variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
               Export
+            </Button>
+            <Button onClick={cleanupStuck} variant="outline" size="sm">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Clean stuck
             </Button>
             <Button onClick={() => { fetchExecutionLogs(); fetchBackendLogs(); }} variant="outline" size="sm" disabled={isLoading}>
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />

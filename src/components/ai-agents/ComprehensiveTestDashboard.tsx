@@ -314,16 +314,32 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
         ]
       };
 
-      // Execute the agent
+      // user already fetched above
+
+      const { data: createdAgent, error: createErr } = await supabase
+        .from('ai_agents')
+        .insert({
+          name: `Comprehensive Test Agent ${Date.now()}`,
+          description: 'Agent used for comprehensive execution tests',
+          category: 'analytics',
+          agent_type: 'workflow',
+          price_per_use: 0,
+          total_tokens: 10000,
+          creator_id: user.id,
+          workflow_data: testWorkflow,
+          configuration: { test_mode: true, comprehensive_audit: true, log_level: 'debug' }
+        })
+        .select()
+        .single();
+
+      if (createErr) throw createErr;
+
+      // Execute the agent with its UUID so backend logging works
       const { data: executionResult, error: execError } = await supabase.functions.invoke('execute-ai-agent', {
         body: {
-          agentId: 'test-execution-agent',
+          agentId: createdAgent.id,
           workflowData: testWorkflow,
-          configuration: {
-            test_mode: true,
-            comprehensive_audit: true,
-            log_level: 'debug'
-          },
+          configuration: { test_mode: true, comprehensive_audit: true, log_level: 'debug' },
           inputData: {
             triggered_by: 'comprehensive_test',
             test_timestamp: Date.now(),
@@ -419,7 +435,7 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
       // Check purchased agents
       const { data: purchases, error: purchaseFetchError } = await supabase
         .from('ai_agent_purchases')
-        .select('*, ai_agents(*)')
+        .select('*')
         .eq('buyer_id', user.id);
 
       if (purchaseFetchError) throw purchaseFetchError;
