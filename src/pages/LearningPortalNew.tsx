@@ -346,6 +346,9 @@ export default function LearningPortal(): JSX.Element {
                     <Button variant="secondary" asChild>
                       <a href={`/app/learning/creator/${course.id}`}>Edit</a>
                     </Button>
+                    <Button variant="outline" asChild>
+                      <a href={`/app/learning/creator`}>Creator Portal</a>
+                    </Button>
                     <Button variant="destructive" onClick={() => handleDeleteCourse(course.id)}>
                       Delete
                     </Button>

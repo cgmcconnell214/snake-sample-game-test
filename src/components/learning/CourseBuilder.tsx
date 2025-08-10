@@ -67,6 +67,15 @@ export default function CourseBuilder() {
   const [skills, setSkills] = useState<any[]>([]);
   const { toast } = useToast();
   const { uploadFiles, uploading, progress } = useFileUpload();
+  
+  // Creator portal states
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [editableCourse, setEditableCourse] = useState<Partial<Course> | null>(null);
+  const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [studentProfiles, setStudentProfiles] = useState<Record<string, any>>({});
+  const [analytics, setAnalytics] = useState<{ total: number; paid: number; free: number; revenue: number }>({ total: 0, paid: 0, free: 0, revenue: 0 });
 
   const [newCourse, setNewCourse] = useState({
     title: "",
@@ -102,12 +111,13 @@ export default function CourseBuilder() {
     fetchSkills();
   }, []);
 
-  useEffect(() => {
-    if (selectedCourse) {
-      fetchCourseLessons(selectedCourse.id);
-      fetchCourseAssignments(selectedCourse.id);
-    }
-  }, [selectedCourse]);
+useEffect(() => {
+  if (selectedCourse) {
+    fetchCourseLessons(selectedCourse.id);
+    fetchCourseAssignments(selectedCourse.id);
+    fetchCourseEnrollments(selectedCourse.id);
+  }
+}, [selectedCourse]);
 
   const fetchUserCourses = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -157,10 +167,142 @@ export default function CourseBuilder() {
       .eq("course_id", courseId)
       .order("created_at", { ascending: false });
 
-    if (data) setAssignments(data as Assignment[]);
+  if (data) setAssignments(data as Assignment[]);
   };
 
-  const handleCreateCourse = async () => {
+  const fetchCourseEnrollments = async (courseId: string) => {
+    const { data, error } = await supabase
+      .from('course_enrollments')
+      .select('*')
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false });
+
+    if (error) return;
+    setEnrollments(data || []);
+
+    const ids = Array.from(new Set((data || []).map((e: any) => e.student_id))).filter(Boolean);
+    if (ids.length) {
+      const { data: profiles } = await supabase
+        .from('user_profiles')
+        .select('user_id, display_name, username, avatar_url')
+        .in('user_id', ids);
+      const map: Record<string, any> = {};
+      (profiles || []).forEach((p: any) => { map[p.user_id] = p; });
+      setStudentProfiles(map);
+    } else {
+      setStudentProfiles({});
+    }
+
+    const total = (data || []).length;
+    const paid = (data || []).filter((e: any) => e.payment_status === 'paid' && (e.payment_amount || 0) > 0).length;
+    const free = (data || []).filter((e: any) => (e.payment_amount || 0) === 0 || e.payment_provider === 'free').length;
+    const revenue = (data || []).reduce((sum: number, e: any) => sum + (e.payment_status === 'paid' ? (e.payment_amount || 0) : 0), 0);
+    setAnalytics({ total, paid, free, revenue });
+  };
+
+  const handleSaveSettings = async () => {
+    if (!selectedCourse || !editableCourse) return;
+    const update = {
+      title: editableCourse.title ?? selectedCourse.title,
+      description: editableCourse.description ?? selectedCourse.description,
+      category: editableCourse.category ?? selectedCourse.category,
+      price_per_student: editableCourse.price_per_student ?? selectedCourse.price_per_student,
+      is_published: (editableCourse as any).is_published ?? selectedCourse.is_published,
+    };
+    const { data, error } = await supabase
+      .from('educational_courses')
+      .update(update)
+      .eq('id', selectedCourse.id)
+      .select()
+      .single();
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to save settings', variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Saved', description: 'Course settings updated' });
+    setSelectedCourse(data as Course);
+    setCourses((prev) => prev.map((c) => (c.id === data.id ? (data as Course) : c)));
+    setIsSettingsOpen(false);
+  };
+
+  const handleUpdateLesson = async () => {
+    if (!editingLesson) return;
+    const { data, error } = await supabase
+      .from('course_lessons')
+      .update({
+        title: editingLesson.title,
+        content: editingLesson.content,
+        video_url: editingLesson.video_url,
+        duration_minutes: editingLesson.duration_minutes,
+        lesson_type: editingLesson.lesson_type,
+        is_preview: editingLesson.is_preview,
+        lesson_number: editingLesson.lesson_number,
+      })
+      .eq('id', editingLesson.id)
+      .select()
+      .single();
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to update lesson', variant: 'destructive' });
+      return;
+    }
+    setLessons((prev) => prev.map((l) => (l.id === data.id ? (data as Lesson) : l)));
+    setEditingLesson(null);
+    toast({ title: 'Updated', description: 'Lesson updated successfully' });
+  };
+
+  const handleUpdateAssignment = async () => {
+    if (!editingAssignment) return;
+    const { data, error } = await supabase
+      .from('course_assignments')
+      .update({
+        title: editingAssignment.title,
+        description: editingAssignment.description,
+        assignment_type: editingAssignment.assignment_type,
+        questions: editingAssignment.questions,
+        max_score: editingAssignment.max_score,
+        passing_score: editingAssignment.passing_score,
+        attempts_allowed: editingAssignment.attempts_allowed,
+        is_required: editingAssignment.is_required,
+        time_limit_minutes: editingAssignment.time_limit_minutes,
+        due_date: editingAssignment.due_date,
+      })
+      .eq('id', editingAssignment.id)
+      .select()
+      .single();
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to update assignment', variant: 'destructive' });
+      return;
+    }
+    setAssignments((prev) => prev.map((a) => (a.id === data.id ? (data as Assignment) : a)));
+    setEditingAssignment(null);
+    toast({ title: 'Updated', description: 'Assignment updated successfully' });
+  };
+
+  const handleDeleteAssignment = async (assignmentId: string) => {
+    const { error } = await supabase
+      .from('course_assignments')
+      .delete()
+      .eq('id', assignmentId);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to delete assignment', variant: 'destructive' });
+      return;
+    }
+    setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
+    toast({ title: 'Deleted', description: 'Assignment deleted successfully' });
+  };
+
+  const handleRemoveEnrollment = async (enrollmentId: string) => {
+    const { error } = await supabase
+      .from('course_enrollments')
+      .delete()
+      .eq('id', enrollmentId);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to remove enrollment', variant: 'destructive' });
+      return;
+    }
+    setEnrollments((prev) => prev.filter((e) => e.id !== enrollmentId));
+    toast({ title: 'Removed', description: 'Student removed from course' });
+  };
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast({
@@ -477,7 +619,7 @@ export default function CourseBuilder() {
                             Publish Course
                           </Button>
                         )}
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => { setEditableCourse(selectedCourse); setIsSettingsOpen(true); }}>
                           <Settings className="h-4 w-4 mr-2" />
                           Settings
                         </Button>
@@ -534,7 +676,7 @@ export default function CourseBuilder() {
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => setEditingLesson(lesson)}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button 
@@ -634,10 +776,10 @@ export default function CourseBuilder() {
                               </p>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => setEditingAssignment(assignment)}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => handleDeleteAssignment(assignment.id!)}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -730,10 +872,24 @@ export default function CourseBuilder() {
                   <CardHeader>
                     <CardTitle>Enrolled Students</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      Student management features coming soon...
-                    </p>
+                  <CardContent className="space-y-3">
+                    {enrollments.length > 0 ? (
+                      <div className="space-y-2">
+                        {enrollments.map((e: any) => (
+                          <div key={e.id} className="flex items-center justify-between border rounded p-3">
+                            <div>
+                              <p className="font-medium">{studentProfiles[e.student_id]?.display_name || studentProfiles[e.student_id]?.username || e.student_id}</p>
+                              <p className="text-sm text-muted-foreground">{e.payment_provider} • {e.payment_status} • ${e.payment_amount || 0}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="outline" size="sm" onClick={() => handleRemoveEnrollment(e.id)}>Remove</Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground">No students enrolled yet.</p>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -744,13 +900,205 @@ export default function CourseBuilder() {
                     <CardTitle>Course Analytics</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground">
-                      Analytics dashboard coming soon...
-                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="text-center p-4 border rounded">
+                        <Users className="h-6 w-6 mx-auto mb-2" />
+                        <p className="text-2xl font-bold">{analytics.total}</p>
+                        <p className="text-sm text-muted-foreground">Total Enrollments</p>
+                      </div>
+                      <div className="text-center p-4 border rounded">
+                        <DollarSign className="h-6 w-6 mx-auto mb-2" />
+                        <p className="text-2xl font-bold">{analytics.paid}</p>
+                        <p className="text-sm text-muted-foreground">Paid</p>
+                      </div>
+                      <div className="text-center p-4 border rounded">
+                        <Badge className="mx-auto mb-2">Free</Badge>
+                        <p className="text-2xl font-bold">{analytics.free}</p>
+                        <p className="text-sm text-muted-foreground">Free Enrollments</p>
+                      </div>
+                      <div className="text-center p-4 border rounded">
+                        <BarChart className="h-6 w-6 mx-auto mb-2" />
+                        <p className="text-2xl font-bold">${analytics.revenue.toFixed(2)}</p>
+                        <p className="text-sm text-muted-foreground">Revenue</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
             </Tabs>
+
+            {/* Modals */}
+            <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+              <DialogContent className="max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Course Settings</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Title</Label>
+                    <Input value={editableCourse?.title ?? ''} onChange={(e) => setEditableCourse({ ...(editableCourse || {}), title: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>Description</Label>
+                    <Textarea value={editableCourse?.description ?? ''} onChange={(e) => setEditableCourse({ ...(editableCourse || {}), description: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>Category</Label>
+                    <Select value={editableCourse?.category ?? selectedCourse.category} onValueChange={(v) => setEditableCourse({ ...(editableCourse || {}), category: v })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="blockchain">Blockchain</SelectItem>
+                        <SelectItem value="trading">Trading</SelectItem>
+                        <SelectItem value="compliance">Compliance</SelectItem>
+                        <SelectItem value="tokenization">Tokenization</SelectItem>
+                        <SelectItem value="defi">DeFi</SelectItem>
+                        <SelectItem value="sacred-law">Sacred Law</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Price per Student ($)</Label>
+                    <Input type="number" step="0.01" value={editableCourse?.price_per_student ?? selectedCourse.price_per_student} onChange={(e) => setEditableCourse({ ...(editableCourse || {}), price_per_student: parseFloat(e.target.value) || 0 })} />
+                  </div>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={(editableCourse?.is_published as any) ?? selectedCourse.is_published} onChange={(e) => setEditableCourse({ ...(editableCourse || {}), is_published: e.target.checked } as any)} />
+                    <span className="text-sm">Published</span>
+                  </label>
+                  <div className="flex gap-2 pt-2">
+                    <Button onClick={handleSaveSettings} className="flex-1">Save</Button>
+                    <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>Cancel</Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!editingLesson} onOpenChange={(o) => { if (!o) setEditingLesson(null); }}>
+              <DialogContent className="max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Edit Lesson</DialogTitle>
+                </DialogHeader>
+                {editingLesson && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Lesson #</Label>
+                        <Input type="number" value={editingLesson.lesson_number} onChange={(e) => setEditingLesson({ ...editingLesson, lesson_number: parseInt(e.target.value) || 1 })} />
+                      </div>
+                      <div>
+                        <Label>Type</Label>
+                        <Select value={editingLesson.lesson_type} onValueChange={(v: any) => setEditingLesson({ ...editingLesson, lesson_type: v })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="video">Video</SelectItem>
+                            <SelectItem value="text">Text</SelectItem>
+                            <SelectItem value="quiz">Quiz</SelectItem>
+                            <SelectItem value="assignment">Assignment</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Title</Label>
+                      <Input value={editingLesson.title} onChange={(e) => setEditingLesson({ ...editingLesson, title: e.target.value })} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Duration (min)</Label>
+                        <Input type="number" value={editingLesson.duration_minutes} onChange={(e) => setEditingLesson({ ...editingLesson, duration_minutes: parseInt(e.target.value) || 0 })} />
+                      </div>
+                      <div>
+                        <Label>Video URL</Label>
+                        <Input value={editingLesson.video_url || ''} onChange={(e) => setEditingLesson({ ...editingLesson, video_url: e.target.value })} />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Content</Label>
+                      <Textarea value={editingLesson.content} onChange={(e) => setEditingLesson({ ...editingLesson, content: e.target.value })} />
+                    </div>
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" checked={editingLesson.is_preview} onChange={(e) => setEditingLesson({ ...editingLesson, is_preview: e.target.checked })} />
+                      <span className="text-sm">Preview lesson</span>
+                    </label>
+                    <div className="flex gap-2 pt-2">
+                      <Button onClick={handleUpdateLesson} className="flex-1">Save</Button>
+                      <Button variant="outline" onClick={() => setEditingLesson(null)}>Cancel</Button>
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!editingAssignment} onOpenChange={(o) => { if (!o) setEditingAssignment(null); }}>
+              <DialogContent className="max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Edit Assignment</DialogTitle>
+                </DialogHeader>
+                {editingAssignment && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Type</Label>
+                        <Select value={editingAssignment.assignment_type} onValueChange={(v: any) => setEditingAssignment({ ...editingAssignment, assignment_type: v })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="quiz">Quiz</SelectItem>
+                            <SelectItem value="essay">Essay</SelectItem>
+                            <SelectItem value="project">Project</SelectItem>
+                            <SelectItem value="practical">Practical</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Attempts Allowed</Label>
+                        <Input type="number" value={editingAssignment.attempts_allowed} onChange={(e) => setEditingAssignment({ ...editingAssignment, attempts_allowed: parseInt(e.target.value) || 1 })} />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Title</Label>
+                      <Input value={editingAssignment.title} onChange={(e) => setEditingAssignment({ ...editingAssignment, title: e.target.value })} />
+                    </div>
+                    <div>
+                      <Label>Description</Label>
+                      <Textarea value={editingAssignment.description} onChange={(e) => setEditingAssignment({ ...editingAssignment, description: e.target.value })} />
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label>Max Score</Label>
+                        <Input type="number" value={editingAssignment.max_score} onChange={(e) => setEditingAssignment({ ...editingAssignment, max_score: parseInt(e.target.value) || 100 })} />
+                      </div>
+                      <div>
+                        <Label>Passing Score</Label>
+                        <Input type="number" value={editingAssignment.passing_score} onChange={(e) => setEditingAssignment({ ...editingAssignment, passing_score: parseInt(e.target.value) || 70 })} />
+                      </div>
+                      <div>
+                        <Label>Time Limit (min)</Label>
+                        <Input type="number" value={editingAssignment.time_limit_minutes || 0} onChange={(e) => setEditingAssignment({ ...editingAssignment, time_limit_minutes: parseInt(e.target.value) || undefined })} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Due Date</Label>
+                        <Input type="datetime-local" value={editingAssignment.due_date || ''} onChange={(e) => setEditingAssignment({ ...editingAssignment, due_date: e.target.value })} />
+                      </div>
+                      <label className="flex items-center gap-2 mt-6">
+                        <input type="checkbox" checked={editingAssignment.is_required} onChange={(e) => setEditingAssignment({ ...editingAssignment, is_required: e.target.checked })} />
+                        <span className="text-sm">Required</span>
+                      </label>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button onClick={handleUpdateAssignment} className="flex-1">Save</Button>
+                      <Button variant="outline" onClick={() => setEditingAssignment(null)}>Cancel</Button>
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
           ) : (
             <Card>
               <CardContent className="text-center py-12">
