@@ -3,7 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Award, CheckCircle, Clock, Star, Trophy, Book, Users } from "lucide-react";
+import CertificationList, {
+  CertificationItem,
+} from "@/components/certification/CertificationList";
+import { Award, CheckCircle, Star, Trophy, Book } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -200,6 +203,31 @@ export default function Certification(): JSX.Element {
 
   const overallProgress = certifications.reduce((acc, cert) => acc + cert.progress, 0) / certifications.length;
 
+  const certificationItems: CertificationItem[] = certifications.map((cert) => ({
+    id: cert.id,
+    name: cert.name,
+    description: cert.description,
+    level: cert.level,
+    levelVariant: getLevelColor(cert.level) as CertificationItem["levelVariant"],
+    progress: cert.progress,
+    requirements: cert.requirements,
+    rewards: cert.rewards,
+    estimatedTime: cert.estimated_time,
+    icon: Trophy,
+    isCompleted: cert.is_completed,
+    actionLabel:
+      cert.progress === 0
+        ? "Start Certification"
+        : cert.is_completed
+        ? undefined
+        : "Continue",
+    actionVariant: cert.progress === 0 ? "default" : "outline",
+    onAction:
+      cert.progress === 0 || !cert.is_completed
+        ? () => handleStartCertification(cert.id)
+        : undefined,
+  }));
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -258,76 +286,10 @@ export default function Certification(): JSX.Element {
         {/* Certification Paths */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-xl font-semibold">Certification Paths</h2>
-          {certifications.map((cert) => (
-            <Card key={cert.id} className="relative overflow-hidden">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Trophy className="h-5 w-5" />
-                      {cert.name}
-                      <Badge variant={getLevelColor(cert.level)}>
-                        Level {cert.level}
-                      </Badge>
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {cert.description}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{cert.progress}%</div>
-                    <div className="text-xs text-muted-foreground">Complete</div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Progress value={cert.progress} className="h-2" />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Requirements</h4>
-                    <ul className="space-y-1">
-                      {cert.requirements.map((req, index) => (
-                        <li key={index} className="text-sm flex items-center gap-2">
-                          <CheckCircle className={`h-3 w-3 ${index < cert.requirements.length * (cert.progress / 100) ? 'text-green-500' : 'text-muted-foreground'}`} />
-                          {req}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium mb-2">Rewards</h4>
-                    <ul className="space-y-1">
-                      {cert.rewards.map((reward, index) => (
-                        <li key={index} className="text-sm flex items-center gap-2">
-                          <Star className="h-3 w-3 text-yellow-500" />
-                          {reward}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    Estimated time: {cert.estimated_time}
-                  </div>
-                  
-                  {cert.progress === 0 ? (
-                    <Button onClick={() => handleStartCertification(cert.id)}>
-                      Start Certification
-                    </Button>
-                  ) : cert.is_completed ? (
-                    <Badge variant="default">Completed</Badge>
-                  ) : (
-                    <Button variant="outline">Continue</Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <CertificationList
+            certifications={certificationItems}
+            gridClassName="grid-cols-1"
+          />
         </div>
 
         {/* User Badges */}

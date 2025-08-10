@@ -1,28 +1,55 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import CertificationList, {
+  CertificationItem,
+} from "@/components/certification/CertificationList";
 import { Award, CheckCircle, Clock, Star } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 export default function Certification(): JSX.Element {
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleViewBadges = () => {
-    navigate('/app/badges');
+    navigate("/app/badges");
   };
 
   const handleViewChecklist = () => {
-    navigate('/app/onboarding');
+    navigate("/app/onboarding");
   };
 
   const handleViewProgress = () => {
-    navigate('/app/badges');
+    navigate("/app/badges");
   };
 
   const handleCheckAccess = () => {
-    navigate('/app/certification');
+    navigate("/app/certification");
   };
+
+  const certifications: CertificationItem[] = [
+    {
+      id: "checklist",
+      name: "Onboarding Checklist",
+      description: "Complete essential steps to get started",
+      icon: CheckCircle,
+      actionLabel: "View Checklist",
+      onAction: handleViewChecklist,
+    },
+    {
+      id: "badges",
+      name: "Badge Progression",
+      description: "Track your progress through skill levels",
+      icon: Star,
+      actionLabel: "View Progress",
+      onAction: handleViewProgress,
+    },
+    {
+      id: "access",
+      name: "Access Gating by Level",
+      description: "Unlock features based on certification level",
+      icon: Clock,
+      actionLabel: "Check Access",
+      onAction: handleCheckAccess,
+    },
+  ];
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -37,59 +64,7 @@ export default function Certification(): JSX.Element {
           View My Badges
         </Button>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
-              Onboarding Checklist
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Complete essential steps to get started
-            </p>
-            <Button variant="outline" className="w-full" onClick={handleViewChecklist}>
-              View Checklist
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5" />
-              Badge Progression
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Track your progress through skill levels
-            </p>
-            <Button variant="outline" className="w-full" onClick={handleViewProgress}>
-              View Progress
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Access Gating by Level
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Unlock features based on certification level
-            </p>
-            <Button variant="outline" className="w-full" onClick={handleCheckAccess}>
-              Check Access
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <CertificationList certifications={certifications} />
     </div>
   );
 }
