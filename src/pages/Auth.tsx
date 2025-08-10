@@ -16,6 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Icons } from "@/components/ui/icons";
 import { supabase } from "@/integrations/supabase/client";
+import zxcvbn from "zxcvbn";
+import { Progress } from "@/components/ui/progress";
 import ReCAPTCHA from "react-google-recaptcha";
 
 const Auth = (): JSX.Element => {
@@ -33,6 +35,15 @@ const Auth = (): JSX.Element => {
   const location = useLocation();
   const [acceptedSignin, setAcceptedSignin] = useState(false);
   const [acceptedSignup, setAcceptedSignup] = useState(false);
+  const [passwordScore, setPasswordScore] = useState(0);
+  const strengthLabels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+  const strengthColors = [
+    "text-red-500",
+    "text-red-500",
+    "text-yellow-500",
+    "text-green-500",
+    "text-green-600",
+  ];
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const signInCaptchaRef = useRef<ReCAPTCHA>(null);
   const signUpCaptchaRef = useRef<ReCAPTCHA>(null);
@@ -44,7 +55,12 @@ const Auth = (): JSX.Element => {
   }, [user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (name === "password") {
+      const { score } = zxcvbn(value);
+      setPasswordScore(score);
+    }
     setError(null);
   };
 
@@ -96,6 +112,12 @@ const Auth = (): JSX.Element => {
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
+      setLoading(false);
+      return;
+    }
+
+    if (passwordScore < 2) {
+      setError("Password is too weak");
       setLoading(false);
       return;
     }
@@ -193,6 +215,14 @@ const Auth = (): JSX.Element => {
                     disabled={loading}
                     required
                   />
+                  {formData.password && (
+                    <div className="space-y-1">
+                      <Progress value={(passwordScore / 4) * 100} className="h-2" />
+                      <p className={`text-xs ${strengthColors[passwordScore]}`}>
+                        Strength: {strengthLabels[passwordScore]}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-start gap-2">
                   <Checkbox
@@ -275,6 +305,14 @@ const Auth = (): JSX.Element => {
                     disabled={loading}
                     required
                   />
+                  {formData.password && (
+                    <div className="space-y-1">
+                      <Progress value={(passwordScore / 4) * 100} className="h-2" />
+                      <p className={`text-xs ${strengthColors[passwordScore]}`}>
+                        Strength: {strengthLabels[passwordScore]}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
