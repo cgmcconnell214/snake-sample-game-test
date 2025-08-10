@@ -107,7 +107,7 @@ serve(async (req) => {
               };
               console.log(`Trigger executed: ${step.config?.event || 'unknown'}`);
               break;
-            case 'notification':
+            case 'notification': {
               const message = step.config?.message || 'No message configured';
               const recipient = step.config?.recipient || 'system';
               await supabase.from('notifications').insert({
@@ -120,7 +120,8 @@ serve(async (req) => {
               stepResult.output = { message_sent: true, recipient, message };
               console.log(`Notification sent: ${message}`);
               break;
-            case 'email':
+            }
+            case 'email': {
               const emailTo = step.config?.to || 'no-recipient';
               const emailSubject = step.config?.subject || 'Workflow Email';
               const emailBody = step.config?.body || 'Email from workflow';
@@ -132,7 +133,8 @@ serve(async (req) => {
               };
               console.log(`Email queued to: ${emailTo}`);
               break;
-            case 'action':
+            }
+            case 'action': {
               const actionType = step.config?.action_type || 'unknown';
               const actionData = step.config?.data || {};
               stepResult.output = {
@@ -143,7 +145,8 @@ serve(async (req) => {
               };
               console.log(`Action executed: ${step.name} (${actionType})`);
               break;
-            case 'data':
+            }
+            case 'data': {
               const operation = step.config?.operation || 'process';
               const sourceData = inputData || {};
               stepResult.output = {
@@ -154,7 +157,8 @@ serve(async (req) => {
               };
               console.log(`Data operation completed: ${operation}`);
               break;
-            case 'condition':
+            }
+            case 'condition': {
               const condition = step.config?.condition || 'true';
               const evaluation = eval(condition.replace(/[^\w\s><=!&|()]/g, '')) || true;
               stepResult.output = {
@@ -165,7 +169,8 @@ serve(async (req) => {
               };
               console.log(`Condition evaluated: ${condition} = ${evaluation}`);
               break;
-            case 'schedule':
+            }
+            case 'schedule': {
               const scheduleTime = step.config?.schedule_time || new Date();
               stepResult.output = {
                 scheduled: true,
@@ -174,6 +179,7 @@ serve(async (req) => {
               };
               console.log(`Action scheduled for: ${scheduleTime}`);
               break;
+            }
             default:
               stepResult.output = {
                 executed: true,

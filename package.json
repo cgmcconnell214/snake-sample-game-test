@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "engines": {
-    "node": ">=14.13.1"
+    "node": ">=18.17.0"
   },
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,11 @@
     "preview": "vite preview",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "deploy:contract": "node scripts/deploy-contract.js"
+    "deploy:contract": "node scripts/deploy-contract.js",
+
+    "scrub": "node scripts/scrub-codex.js",
+    "fix": "npm run scrub && prettier --write . && eslint --fix .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -94,6 +98,17 @@
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1",
     "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+
+    "husky": "^9.1.4",
+    "lint-staged": "^15.2.8",
+    "prettier": "^3.3.3"
+  },
+  "lint-staged": {
+    "*": "node scripts/scrub-codex.js",
+    "*.{js,jsx,ts,tsx,css,md,mdx,json,yml,yaml,html}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }
