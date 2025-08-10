@@ -1,19 +1,30 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { generateXrplCurrencyCode } from "../utils.ts";
+import { z } from "https://esm.sh/zod@3.23.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface TokenizeRequest {
-  asset_name: string;
-  asset_symbol: string;
-  description?: string;
-  total_supply: number;
-  metadata?: any;
-}
+const rateLimitMap = new Map<string, { count: number; startTime: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 5;
+
+const tokenizeSchema = z.object({
+  asset_name: z.string().min(1, "Asset name is required"),
+  asset_symbol: z
+    .string()
+    .regex(/^[A-Z0-9]{3,12}$/i, "Asset symbol must be 3-12 alphanumeric characters"),
+  description: z.string().max(500).optional(),
+  total_supply: z
+    .number()
+    .int()
+    .positive("Total supply must be a positive integer"),
+  metadata: z.record(z.any()).optional(),
+});
+type TokenizeRequest = z.infer<typeof tokenizeSchema>;
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -31,8 +42,8 @@ serve(async (req) => {
     { auth: { persistSession: false } }
   );
 
+  const startTime = Date.now();
   try {
-    const startTime = Date.now();
     logStep("Function started");
 
     const authHeader = req.headers.get("Authorization");
@@ -57,13 +68,47 @@ serve(async (req) => {
       throw new Error("Standard subscription required for tokenization");
     }
 
-    const requestData: TokenizeRequest = await req.json();
-    logStep("Request data parsed", requestData);
-
-    // Validate required fields
-    if (!requestData.asset_name || !requestData.asset_symbol || !requestData.total_supply) {
-      throw new Error("Missing required fields: asset_name, asset_symbol, total_supply");
+    // Rate limiting
+    const now = Date.now();
+    const rateInfo = rateLimitMap.get(user.id);
+    if (rateInfo && now - rateInfo.startTime < RATE_LIMIT_WINDOW) {
+      if (rateInfo.count >= RATE_LIMIT_MAX_REQUESTS) {
+        logStep("Rate limit exceeded", { userId: user.id });
+        const execTime = now - startTime;
+        logStep(`Execution time: ${execTime}ms`);
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 429,
+          },
+        );
+      }
+      rateInfo.count += 1;
+      rateLimitMap.set(user.id, rateInfo);
+    } else {
+      rateLimitMap.set(user.id, { count: 1, startTime: now });
     }
+
+    const requestJson = await req.json();
+    const parsed = tokenizeSchema.safeParse(requestJson);
+    if (!parsed.success) {
+      const errors = parsed.error.issues
+        .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+        .join('; ');
+      logStep("Validation failed", { errors });
+      const execTime = Date.now() - startTime;
+      logStep(`Execution time: ${execTime}ms`);
+      return new Response(
+        JSON.stringify({ error: "Invalid request data", details: errors }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        },
+      );
+    }
+    const requestData: TokenizeRequest = parsed.data;
+    logStep("Request data parsed", requestData);
 
     // Generate XRPL currency code (3-character for standard, hex for custom)
     const xrpl_currency_code = generateXrplCurrencyCode(requestData.asset_symbol);
