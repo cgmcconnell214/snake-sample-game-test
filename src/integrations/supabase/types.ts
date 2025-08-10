@@ -715,6 +715,42 @@ export type Database = {
           },
         ]
       }
+      course_enrollment_links: {
+        Row: {
+          code: string
+          course_id: string
+          created_at: string
+          creator_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number
+          used_count: number
+        }
+        Insert: {
+          code: string
+          course_id: string
+          created_at?: string
+          creator_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          course_id?: string
+          created_at?: string
+          creator_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          used_count?: number
+        }
+        Relationships: []
+      }
       course_enrollments: {
         Row: {
           completion_status: string
@@ -979,6 +1015,7 @@ export type Database = {
           is_published: boolean
           price_per_student: number
           requirements: Json
+          slug: string | null
           title: string
           total_students: number
           updated_at: string
@@ -993,6 +1030,7 @@ export type Database = {
           is_published?: boolean
           price_per_student?: number
           requirements?: Json
+          slug?: string | null
           title: string
           total_students?: number
           updated_at?: string
@@ -1007,6 +1045,7 @@ export type Database = {
           is_published?: boolean
           price_per_student?: number
           requirements?: Json
+          slug?: string | null
           title?: string
           total_students?: number
           updated_at?: string

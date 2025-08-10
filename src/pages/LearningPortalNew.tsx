@@ -51,10 +51,19 @@ export default function LearningPortal(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { toast } = useToast();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const slugify = (str: string) =>
+    str
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setCurrentUserId(user?.id ?? null));
     fetchCourses();
   }, []);
+
 
   const fetchCourses = async () => {
     const { data, error } = await supabase
@@ -88,12 +97,15 @@ export default function LearningPortal(): JSX.Element {
       return;
     }
 
+    const slug = `${slugify(newCourse.title)}-${Math.random().toString(36).slice(2,7)}`;
+
     const { data, error } = await supabase
       .from("educational_courses")
       .insert({
         ...newCourse,
         creator_id: user.id,
         is_published: true,
+        slug,
       })
       .select()
       .single();
@@ -101,7 +113,7 @@ export default function LearningPortal(): JSX.Element {
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to create course",
+        description: error.message || "Failed to create course",
         variant: "destructive",
       });
       return;
@@ -111,6 +123,18 @@ export default function LearningPortal(): JSX.Element {
       title: "Success",
       description: "Course created successfully",
     });
+
+    // Prompt to promote as a social post
+    setTimeout(async () => {
+      if (window.confirm("Promote this course with a post on your profile?")) {
+        await supabase.from('user_posts').insert({
+          user_id: user.id,
+          content: `I just launched a new course: ${data.title}! Check it out: ${window.location.origin}/app/learning/courses/${data.slug}`,
+          is_public: true,
+        });
+        toast({ title: 'Posted', description: 'A promotional post was published to your profile.' });
+      }
+    }, 0);
 
     setCourses([data, ...courses]);
     setIsCreateModalOpen(false);
@@ -123,7 +147,6 @@ export default function LearningPortal(): JSX.Element {
       requirements: [],
     });
   };
-
   const handleEnrollCourse = async (courseId: string) => {
     const {
       data: { user },
@@ -139,6 +162,10 @@ export default function LearningPortal(): JSX.Element {
 
     const course = courses.find((c) => c.id === courseId);
     if (!course) return;
+    if (user.id === course.creator_id) {
+      toast({ title: 'Creator Access', description: 'You already own this course.' });
+      return;
+    }
 
     if (!course.price_per_student || course.price_per_student === 0) {
       const { error } = await supabase.from("course_enrollments").insert({
@@ -165,35 +192,35 @@ export default function LearningPortal(): JSX.Element {
       return;
     }
 
-    const provider = window.prompt("Choose payment provider: type 'stripe' or 'xrpl'", 'stripe')?.toLowerCase();
-    if (provider === 'stripe') {
-      const amount_cents = Math.round((course.price_per_student || 0) * 100);
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          amount_cents,
-          product_name: `Course Enrollment: ${course.title}`,
-          metadata: { resource_type: 'course', course_id: courseId }
-        }
-      });
-      if (error) {
-        toast({ title: 'Payment Error', description: error.message || 'Failed to start payment', variant: 'destructive' });
-        return;
+    toast({ title: 'Choose Payment', description: 'Select Stripe or XRPL to continue.' });
+  };
+
+  const handleEnrollStripe = async (courseId: string) => {
+    const course = courses.find((c) => c.id === courseId);
+    if (!course) return;
+    const amount_cents = Math.round((course.price_per_student || 0) * 100);
+    const { data, error } = await supabase.functions.invoke('create-payment', {
+      body: {
+        amount_cents,
+        product_name: `Course Enrollment: ${course.title}`,
+        metadata: { resource_type: 'course', course_id: courseId }
       }
-      if (data?.url) {
-        window.open(data.url, '_blank');
-        toast({
-          title: 'Complete Payment',
-          description: 'Stripe Checkout opened in a new tab. You will be enrolled upon successful payment.',
-        });
-      }
-    } else if (provider === 'xrpl') {
-      toast({
-        title: 'XRPL Payment',
-        description: 'XRPL wallet payment requires platform wallet configuration. Please configure XRPL_WALLET_SEED.',
-      });
-    } else {
-      toast({ title: 'Cancelled', description: 'Enrollment not started.' });
+    });
+    if (error) {
+      toast({ title: 'Payment Error', description: error.message || 'Failed to start payment', variant: 'destructive' });
+      return;
     }
+    if (data?.url) {
+      window.open(data.url, '_blank');
+      toast({ title: 'Complete Payment', description: 'Stripe Checkout opened in a new tab.' });
+    }
+  };
+
+  const handleEnrollXRPL = async (_courseId: string) => {
+    toast({
+      title: 'XRPL Payment',
+      description: 'XRPL wallet payment requires platform wallet configuration. Please configure XRPL_WALLET_SEED.',
+    });
   };
 
   const handleDeleteCourse = async (courseId: string) => {
@@ -300,22 +327,30 @@ export default function LearningPortal(): JSX.Element {
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <Button
-                  className="flex-1"
-                  onClick={() => handleEnrollCourse(course.id)}
-                >
-                  <Play className="h-4 w-4 mr-2" />
-                  {course.price_per_student === 0
-                    ? "Enroll Free"
-                    : "Enroll Now"}
+              <div className="flex flex-wrap gap-2">
+                {course.price_per_student === 0 ? (
+                  <Button onClick={() => handleEnrollCourse(course.id)}>
+                    <Play className="h-4 w-4 mr-2" /> Enroll Free
+                  </Button>
+                ) : (
+                  <>
+                    <Button onClick={() => handleEnrollStripe(course.id)}>Pay with Stripe</Button>
+                    <Button variant="secondary" onClick={() => handleEnrollXRPL(course.id)}>Pay with XRPL</Button>
+                  </>
+                )}
+                <Button variant="outline" asChild>
+                  <a href={`/app/learning/courses/${(course as any).slug ?? course.id}`}>View</a>
                 </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDeleteCourse(course.id)}
-                >
-                  Delete
-                </Button>
+                {currentUserId === course.creator_id && (
+                  <>
+                    <Button variant="secondary" asChild>
+                      <a href={`/app/learning/creator/${course.id}`}>Edit</a>
+                    </Button>
+                    <Button variant="destructive" onClick={() => handleDeleteCourse(course.id)}>
+                      Delete
+                    </Button>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>

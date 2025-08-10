@@ -53,6 +53,10 @@ import MarketplaceNew from "./pages/MarketplaceNew";
 import LearningPortalNew from "./pages/LearningPortalNew";
 import LiveClassesNew from "./pages/LiveClassesNew";
 import LiquidityPoolsNew from "./pages/LiquidityPoolsNew";
+import CourseDetail from "./pages/CourseDetail";
+import CourseCreator from "./pages/CourseCreator";
+import CourseBuilder from "@/components/learning/CourseBuilder";
+import RedeemEnrollment from "./pages/RedeemEnrollment";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -133,6 +137,9 @@ const App = () => (
                                 <Route path="workflow-automation" element={<WorkflowAutomation />} />
                                 <Route path="learning" element={<LearningPortal />} />
                                 <Route path="learning/courses" element={<LearningPortalNew />} />
+                                <Route path="learning/courses/:slug" element={<CourseDetail />} />
+                                <Route path="learning/creator" element={<CourseCreator />} />
+                                <Route path="learning/creator/:id" element={<CourseBuilder />} />
                                 <Route path="certification" element={<Certification />} />
                                 <Route path="live-classes" element={<LiveClasses />} />
                                 <Route path="live-classes/new" element={<LiveClassesNew />} />
@@ -167,8 +174,11 @@ const App = () => (
                   </ProtectedRoute>
                 </ErrorBoundary>
               } />
-            </Routes>
-          </BrowserRouter>
+              </Routes>
+              <Routes>
+                <Route path="/redeem/:code" element={<RedeemEnrollment />} />
+              </Routes>
+            </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
     </ErrorBoundary>
