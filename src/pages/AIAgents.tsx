@@ -39,12 +39,9 @@ import {
 import {
   Bot,
   Plus,
-  Settings,
   TestTube,
   Zap,
   DollarSign,
-  Users,
-  Star,
   MoreVertical,
   Trash2,
   Edit,
