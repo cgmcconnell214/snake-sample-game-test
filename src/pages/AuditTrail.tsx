@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -19,6 +19,7 @@ import {
 import { Activity, Search, Download, Filter, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AuditDetailModal from "@/components/AuditDetailModal";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AuditLog {
   id: number;
@@ -36,71 +37,42 @@ const AuditTrail = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // Mock audit trail data
-  const auditLogs: AuditLog[] = [
-    {
-      id: 1,
-      timestamp: "2024-01-20T10:30:00Z",
-      action: "Token Creation",
-      user: "john.doe@example.com",
-      details: "Created XRPL-GOLD token with 1000 total supply",
-      type: "tokenization",
-      status: "success",
-      ipAddress: "192.168.1.100",
-    },
-    {
-      id: 2,
-      timestamp: "2024-01-20T09:15:00Z",
-      action: "Trade Execution",
-      user: "jane.smith@example.com",
-      details: "Executed trade: 50 XRPL-USD for 2.1 XRPL-GOLD",
-      type: "trading",
-      status: "success",
-      ipAddress: "192.168.1.101",
-    },
-    {
-      id: 3,
-      timestamp: "2024-01-20T08:45:00Z",
-      action: "Login Attempt",
-      user: "admin@example.com",
-      details: "Successful login with 2FA",
-      type: "authentication",
-      status: "success",
-      ipAddress: "192.168.1.102",
-    },
-    {
-      id: 4,
-      timestamp: "2024-01-19T16:22:00Z",
-      action: "Failed Login",
-      user: "unknown@example.com",
-      details: "Failed login attempt - invalid credentials",
-      type: "authentication",
-      status: "failed",
-      ipAddress: "10.0.0.50",
-    },
-    {
-      id: 5,
-      timestamp: "2024-01-19T14:10:00Z",
-      action: "KYC Verification",
-      user: "new.user@example.com",
-      details: "KYC documents submitted for verification",
-      type: "compliance",
-      status: "pending",
-      ipAddress: "192.168.1.103",
-    },
-    {
-      id: 6,
-      timestamp: "2024-01-19T11:30:00Z",
-      action: "Settings Update",
-      user: "admin@example.com",
-      details: "Updated security settings - enabled IP whitelist",
-      type: "configuration",
-      status: "success",
-      ipAddress: "192.168.1.102",
-    },
-  ];
+  const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "medium",
+  });
+
+  useEffect(() => {
+    fetchAuditLogs();
+  }, []);
+
+  const fetchAuditLogs = async () => {
+    const { data, error } = await supabase
+      .from("audit_event_details")
+      .select("id, created_at, request_data, response_data, security_context")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching audit logs:", error);
+      return;
+    }
+
+    const logs: AuditLog[] = (data || []).map((e) => ({
+      id: Number(e.id),
+      timestamp: e.created_at,
+      action: (e.request_data as any)?.action ?? "Unknown",
+      user: (e.security_context as any)?.user_id ?? "Unknown",
+      details: JSON.stringify((e.request_data as any)?.parameters ?? {}),
+      type: (e.request_data as any)?.action ?? "unknown",
+      status: (e.response_data as any)?.status ?? "unknown",
+      ipAddress: (e.security_context as any)?.ip_address ?? "Unknown",
+    }));
+
+    setAuditLogs(logs);
+  };
 
   const handleExport = () => {
     toast({
@@ -231,7 +203,7 @@ const AuditTrail = () => {
                     <span>User: {log.user}</span>
                     <span>IP: {log.ipAddress}</span>
                     <span>
-                      Time: {new Date(log.timestamp).toLocaleString()}
+                      Time: {dateTimeFormatter.format(new Date(log.timestamp))}
                     </span>
                   </div>
                 </div>
