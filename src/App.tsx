@@ -148,7 +148,14 @@ const App = () => (
                                 <Route path="live-classes" element={<LiveClasses />} />
                                 <Route path="live-classes/new" element={<LiveClassesNew />} />
                                 <Route path="divine-trust" element={<DivineTrust />} />
-                                <Route path="kingdom-entry" element={<KingdomEntry />} />
+                                <Route
+                                  path="kingdom-entry"
+                                  element={
+                                    <ProtectedRoute requiredRole="premium">
+                                      <KingdomEntry />
+                                    </ProtectedRoute>
+                                  }
+                                />
                                 <Route path="sacred-law" element={<SacredLaw />} />
                                 <Route path="marketplace" element={<Marketplace />} />
                                 <Route path="marketplace/browse" element={<MarketplaceNew />} />
