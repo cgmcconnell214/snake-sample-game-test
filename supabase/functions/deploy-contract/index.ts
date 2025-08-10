@@ -11,6 +11,12 @@ interface DeployRequest {
   template: string;
 }
 
+// Restrict deployments to known templates only
+const TEMPLATE_WHITELIST = [
+  'marketplace',
+  'p2p-trading',
+];
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[DEPLOY-CONTRACT] ${step}${detailsStr}`);
@@ -55,11 +61,11 @@ serve(async (req) => {
     const requestData: DeployRequest = await req.json();
     logStep("Request data parsed", requestData);
 
-    if (!requestData.template) {
-      throw new Error("Template not specified");
+    if (!requestData.template || !TEMPLATE_WHITELIST.includes(requestData.template)) {
+      throw new Error(`Template must be one of: ${TEMPLATE_WHITELIST.join(', ')}`);
     }
 
-    const templatePath = new URL(`../templates/${requestData.template}.json`, import.meta.url);
+    const templatePath = new URL(`../../contract-templates/${requestData.template}.json`, import.meta.url);
     const templateText = await Deno.readTextFile(templatePath);
     const template = JSON.parse(templateText);
     logStep("Template loaded", { template: requestData.template });
