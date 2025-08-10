@@ -41,10 +41,10 @@ export default function Certification(): JSX.Element {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5" />
-              Onboarding Checklist
-            </CardTitle>
+              <CardTitle>Onboarding Checklist</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
@@ -58,10 +58,10 @@ export default function Certification(): JSX.Element {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Star className="h-5 w-5" />
-              Badge Progression
-            </CardTitle>
+              <CardTitle>Badge Progression</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
@@ -75,10 +75,10 @@ export default function Certification(): JSX.Element {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Access Gating by Level
-            </CardTitle>
+              <CardTitle>Access Gating by Level</CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
