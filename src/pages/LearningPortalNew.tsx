@@ -35,6 +35,7 @@ interface Course {
   is_published: boolean;
   course_content: any;
   created_at: string;
+  slug?: string;
 }
 
 export default function LearningPortal(): JSX.Element {
@@ -163,7 +164,8 @@ export default function LearningPortal(): JSX.Element {
     const course = courses.find((c) => c.id === courseId);
     if (!course) return;
     if (user.id === course.creator_id) {
-      toast({ title: 'Creator Access', description: 'You already own this course.' });
+      // Allow creators to view without paywall
+      window.location.href = `/app/learning/courses/${course.slug ?? course.id}`;
       return;
     }
 

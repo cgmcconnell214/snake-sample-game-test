@@ -9,7 +9,8 @@ import { Play, Share2 } from "lucide-react";
 
 export default function CourseDetail(): JSX.Element {
   const { slug } = useParams();
-  const [course, setCourse] = useState<any>(null);
+const [course, setCourse] = useState<any>(null);
+  const [isCreator, setIsCreator] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,6 +34,15 @@ export default function CourseDetail(): JSX.Element {
     };
     if (slug) fetchCourse();
   }, [slug, toast]);
+
+  useEffect(() => {
+    const checkCreator = async () => {
+      if (!course) return setIsCreator(false);
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsCreator(!!user && user.id === course.creator_id);
+    };
+    checkCreator();
+  }, [course]);
 
   const handleEnrollStripe = async () => {
     if (!course) return;
@@ -92,15 +102,28 @@ export default function CourseDetail(): JSX.Element {
             <span className="font-semibold">{course.price_per_student === 0 ? 'Free' : `$${course.price_per_student}`}</span>
           </div>
 
-          <div className="flex gap-2">
-            {course.price_per_student === 0 ? (
-              <Button onClick={handleEnrollFree}>
-                <Play className="h-4 w-4 mr-2" /> Enroll Free
-              </Button>
+          <div className="flex gap-2 flex-wrap">
+            {isCreator ? (
+              <>
+                <Button asChild>
+                  <Link to={`/app/learning/creator/${course.id}`}>Edit in Creator</Link>
+                </Button>
+                <Button variant="secondary" asChild>
+                  <Link to="/app/learning/creator">Manage Links</Link>
+                </Button>
+              </>
             ) : (
               <>
-                <Button onClick={handleEnrollStripe}>Pay with Stripe</Button>
-                <Button variant="secondary" onClick={handleEnrollXRPL}>Pay with XRPL</Button>
+                {course.price_per_student === 0 ? (
+                  <Button onClick={handleEnrollFree}>
+                    <Play className="h-4 w-4 mr-2" /> Enroll Free
+                  </Button>
+                ) : (
+                  <>
+                    <Button onClick={handleEnrollStripe}>Pay with Stripe</Button>
+                    <Button variant="secondary" onClick={handleEnrollXRPL}>Pay with XRPL</Button>
+                  </>
+                )}
               </>
             )}
             <Button asChild variant="outline">

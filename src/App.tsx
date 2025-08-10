@@ -57,6 +57,8 @@ import CourseDetail from "./pages/CourseDetail";
 import CourseCreator from "./pages/CourseCreator";
 import CourseBuilder from "@/components/learning/CourseBuilder";
 import RedeemEnrollment from "./pages/RedeemEnrollment";
+import Onboarding from "./pages/Onboarding";
+import BadgeProgression from "./pages/BadgeProgression";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -141,6 +143,8 @@ const App = () => (
                                 <Route path="learning/creator" element={<CourseCreator />} />
                                 <Route path="learning/creator/:id" element={<CourseBuilder />} />
                                 <Route path="certification" element={<Certification />} />
+                                <Route path="onboarding" element={<Onboarding />} />
+                                <Route path="badges" element={<BadgeProgression />} />
                                 <Route path="live-classes" element={<LiveClasses />} />
                                 <Route path="live-classes/new" element={<LiveClassesNew />} />
                                 <Route path="divine-trust" element={<DivineTrust />} />

@@ -54,6 +54,8 @@ export default function LiveClasses(): JSX.Element {
     is_monetized: false,
   });
   const { toast } = useToast();
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showRSVP, setShowRSVP] = useState(false);
 
   useEffect(() => {
     fetchClasses();
@@ -213,23 +215,11 @@ export default function LiveClasses(): JSX.Element {
   };
 
   const handleViewCalendar = () => {
-    // Navigate to a calendar component or dedicated calendar page
-    window.open('https://calendar.google.com', '_blank');
+    setShowCalendar((v) => !v);
   };
 
   const handleRSVPEvents = () => {
-    // Show existing classes as events to RSVP to
-    if (classes.length > 0) {
-      toast({
-        title: "Available Events",
-        description: `${classes.length} upcoming classes available to join`,
-      });
-    } else {
-      toast({
-        title: "No Events",
-        description: "No upcoming events to RSVP to. Create the first one!",
-      });
-    }
+    setShowRSVP((v) => !v);
   };
 
   const handleViewArchive = () => {
@@ -253,69 +243,64 @@ export default function LiveClasses(): JSX.Element {
           <Plus className="h-4 w-4 mr-2" />
           Schedule Session
         </Button>
-      </div>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleViewCalendar}
-        >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Calendar
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              View upcoming classes and schedule new sessions
-            </p>
-            <Button variant="outline" className="w-full">
-              View Schedule
-            </Button>
-          </CardContent>
-        </Card>
+        {showCalendar && (
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" /> Calendar
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Lightweight calendar: group classes by date */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(classes.reduce((acc: Record<string, LiveClass[]>, c) => {
+                  const d = new Date(c.scheduled_at).toDateString();
+                  acc[d] = acc[d] || [];
+                  acc[d].push(c);
+                  return acc;
+                }, {})).map(([date, items]) => (
+                  <div key={date} className="border rounded-md p-3">
+                    <div className="font-semibold mb-2">{date}</div>
+                    <ul className="space-y-2">
+                      {items.map((ci) => (
+                        <li key={ci.id} className="flex items-center justify-between text-sm">
+                          <span>{ci.title}</span>
+                          <Button size="sm" variant="outline" onClick={() => handleJoinClass(ci.id)}>RSVP</Button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+                {classes.length === 0 && <div className="text-muted-foreground">No scheduled classes.</div>}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleRSVPEvents}
-        >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              RSVP to Events
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Register for upcoming educational events and workshops
-            </p>
-            <Button variant="outline" className="w-full">
-              Browse Events
-            </Button>
-          </CardContent>
-        </Card>
+        {showRSVP && (
+          <Card>
+            <CardHeader>
+              <CardTitle>RSVP Events</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {classes.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between border rounded-md p-3">
+                    <div>
+                      <div className="font-medium">{c.title}</div>
+                      <div className="text-xs text-muted-foreground">{new Date(c.scheduled_at).toLocaleString()}</div>
+                    </div>
+                    <Button size="sm" onClick={() => handleJoinClass(c.id)}>RSVP</Button>
+                  </div>
+                ))}
+                {classes.length === 0 && <div className="text-muted-foreground">No upcoming events.</div>}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={handleViewArchive}
-        >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Video className="h-5 w-5" />
-              Replay Archive
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Access recordings of past sessions and workshops
-            </p>
-            <Button variant="outline" className="w-full">
-              View Archive
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Upcoming Classes */}
       <div className="space-y-4">

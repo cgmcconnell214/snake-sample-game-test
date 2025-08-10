@@ -755,27 +755,36 @@ export type Database = {
         Row: {
           completion_status: string
           course_id: string
+          created_at: string
           enrollment_date: string
           id: string
           payment_amount: number
+          payment_provider: string | null
+          payment_status: string | null
           progress_data: Json
           student_id: string
         }
         Insert: {
           completion_status?: string
           course_id: string
+          created_at?: string
           enrollment_date?: string
           id?: string
           payment_amount: number
+          payment_provider?: string | null
+          payment_status?: string | null
           progress_data?: Json
           student_id: string
         }
         Update: {
           completion_status?: string
           course_id?: string
+          created_at?: string
           enrollment_date?: string
           id?: string
           payment_amount?: number
+          payment_provider?: string | null
+          payment_status?: string | null
           progress_data?: Json
           student_id?: string
         }

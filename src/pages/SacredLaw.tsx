@@ -128,14 +128,12 @@ export default function SacredLaw(): JSX.Element {
     });
   };
 
+  const [studyPrinciple, setStudyPrinciple] = useState<SacredPrinciple | null>(null);
+  const [editPrinciple, setEditPrinciple] = useState<SacredPrinciple | null>(null);
+
   const handleLearnPrinciple = (principleId: string) => {
-    const principle = principles.find((p) => p.id === principleId);
-    if (principle) {
-      toast({
-        title: "Studying Principle",
-        description: `Learning: ${principle.title}`,
-      });
-    }
+    const principle = principles.find((p) => p.id === principleId) || null;
+    setStudyPrinciple(principle);
   };
 
   const handleViewPillars = () => {
@@ -305,10 +303,7 @@ export default function SacredLaw(): JSX.Element {
                       aria-label="Edit principle"
                       onClick={(e) => {
                         e.stopPropagation();
-                        toast({
-                          title: "Edit Principle",
-                          description: `Editing ${principle.title}`,
-                        });
+                        setEditPrinciple(principle);
                       }}
                     >
                       <Edit className="h-4 w-4" />
@@ -320,6 +315,19 @@ export default function SacredLaw(): JSX.Element {
           ))}
         </div>
       </div>
+
+      {studyPrinciple && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setStudyPrinciple(null)}>
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <CardTitle>{studyPrinciple.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-wrap text-sm text-foreground/90">{studyPrinciple.content}</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {isCreateModalOpen && isAdmin && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -405,6 +413,68 @@ export default function SacredLaw(): JSX.Element {
                 >
                   Cancel
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {editPrinciple && isAdmin && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setEditPrinciple(null)}>
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <CardHeader>
+              <CardTitle>Edit Sacred Principle</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="title_edit">Principle Title</Label>
+                <Input
+                  id="title_edit"
+                  value={editPrinciple.title}
+                  onChange={(e) => setEditPrinciple({ ...editPrinciple, title: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="order_edit">Order</Label>
+                <Input
+                  id="order_edit"
+                  type="number"
+                  value={editPrinciple.principle_order}
+                  onChange={(e) => setEditPrinciple({ ...editPrinciple, principle_order: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="content_edit">Content</Label>
+                <Textarea
+                  id="content_edit"
+                  value={editPrinciple.content}
+                  onChange={(e) => setEditPrinciple({ ...editPrinciple, content: e.target.value })}
+                  className="min-h-[200px]"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button
+                  onClick={async () => {
+                    const { error } = await supabase
+                      .from('sacred_law_principles')
+                      .update({
+                        title: editPrinciple.title,
+                        content: editPrinciple.content,
+                        principle_order: editPrinciple.principle_order,
+                      })
+                      .eq('id', editPrinciple.id);
+                    if (error) {
+                      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+                      return;
+                    }
+                    toast({ title: 'Updated', description: 'Principle updated successfully' });
+                    setEditPrinciple(null);
+                    fetchPrinciples();
+                  }}
+                >
+                  Save Changes
+                </Button>
+                <Button variant="outline" onClick={() => setEditPrinciple(null)}>Cancel</Button>
               </div>
             </CardContent>
           </Card>

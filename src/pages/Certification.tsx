@@ -9,15 +9,15 @@ export default function Certification(): JSX.Element {
   const navigate = useNavigate();
 
   const handleViewBadges = () => {
-    navigate('/app/user-profile');
+    navigate('/app/badges');
   };
 
   const handleViewChecklist = () => {
-    navigate('/app/kyc');
+    navigate('/app/onboarding');
   };
 
   const handleViewProgress = () => {
-    navigate('/app/learning/courses');
+    navigate('/app/badges');
   };
 
   const handleCheckAccess = () => {
