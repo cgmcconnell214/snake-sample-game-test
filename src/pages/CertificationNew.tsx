@@ -224,10 +224,10 @@ export default function Certification(): JSX.Element {
       {/* Overall Progress */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Book className="h-5 w-5" />
-            Your Learning Journey
-          </CardTitle>
+            <CardTitle>Your Learning Journey</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -263,13 +263,13 @@ export default function Certification(): JSX.Element {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Trophy className="h-5 w-5" />
-                      {cert.name}
+                      <CardTitle>{cert.name}</CardTitle>
                       <Badge variant={getLevelColor(cert.level)}>
                         Level {cert.level}
                       </Badge>
-                    </CardTitle>
+                    </div>
                     <p className="text-sm text-muted-foreground mt-1">
                       {cert.description}
                     </p>
@@ -335,10 +335,10 @@ export default function Certification(): JSX.Element {
           <h2 className="text-xl font-semibold">Your Badges</h2>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <Award className="h-5 w-5" />
-                Earned Badges
-              </CardTitle>
+                <CardTitle>Earned Badges</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {userBadges.length === 0 ? (
