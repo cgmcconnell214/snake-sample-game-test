@@ -93,6 +93,11 @@ const Admin = () => {
         .order("created_at", { ascending: false })
         .limit(20),
       supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
   const USERS_PER_PAGE = 20;
   const ALERTS_PER_PAGE = 10;
   const TRADES_PER_PAGE = 20;
