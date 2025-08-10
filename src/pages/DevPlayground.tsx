@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Code, GitFork, Rocket, TestTube } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import ScrapeBot from "@/components/ScrapeBot";
 
 export default function DevPlayground(): JSX.Element {
   const { toast } = useToast();
@@ -87,6 +88,16 @@ export default function DevPlayground(): JSX.Element {
             <Button variant="outline" className="w-full" onClick={handleDeploy}>
               Deploy
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Scrape Bot */}
+        <Card className="col-span-1 md:col-span-2 lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Scrape Bot</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrapeBot />
           </CardContent>
         </Card>
       </div>
