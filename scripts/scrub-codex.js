@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-/* Scrubs chat/agent artifacts from source files before commit. */
-const fs = require("fs");
-const path = require("path");
+// ESM version of the Codex scrubber
+import fs from "node:fs";
+import path from "node:path";
 
 const exts = new Set([
   ".ts",".tsx",".js",".jsx",".mjs",".cjs",
@@ -33,54 +33,17 @@ function scrubText(text, filePath) {
     out = out.replace(/```[\s\S]*?```/g, "");
   }
 
-  // 2) Remove common “chat dump” headers/paths and diff artifacts
+  // 2) Remove common chat/diff artifacts
   out = out
-    // lines like "main," or "main"
     .replace(/^\s*main,?\s*$/gmi, "")
-    // stray path lines like "code/..., src/..., pages/..." (standalone lines)
     .replace(/^[ \t]*(?:code|src|app|pages|public|components|lib|server)\/[^\n]*$/gmi, "")
-    // “File:” / “Path:” labels
     .replace(/^[ \t]*(?:File|Filename|Path)\s*:\s*.*$/gmi, "")
-    // diff/unified patch headers
     .replace(/^diff --git.*$/gmi, "")
     .replace(/^index [0-9a-f]+\.\.[0-9a-f]+.*$/gmi, "")
     .replace(/^--- a\/.*$/gmi, "")
     .replace(/^\+\+\+ b\/.*$/gmi, "")
     .replace(/^@@ .* @@.*$/gmi, "")
-    // leading + / - from pasted diffs (but keep legitimate TypeScript import lines, etc.)
-    .replace(/^[+-](?=[^+\-*/=].*)/gmi, (m, i, s) => {
-      // if the line looks like diff noise, drop the plus/minus
-      return "";
-    })
-    // “```ts title=..” or “```json title=..” fence markers
-    .replace(/^```[a-z0-9-]+.*$/gmi, "")
-    .replace(/^```$/gmi, "");
+    // drop leading + / - from pasted diffs (best‑effort)
+    .replace(/^[+-](?=[^+\-*/=].*)/gmi, "");
 
-  // 3) Try to heal JSON-ish blobs (remove trailing commas)
-  if (filePath.endsWith(".json")) {
-    // remove // and /* */ comments
-    out = out.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
-    // remove trailing commas before ] or }
-    out = out.replace(/,(\s*[\]}])/g, "$1");
-    // best-effort min check
-    try { JSON.parse(out); } catch { /* leave as-is if still invalid */ }
-  }
-
-  // 4) Collapse accidental multiple blank lines
-  out = out.replace(/\n{3,}/g, "\n\n");
-
-  return out;
-}
-
-let changed = 0;
-for (const file of walk(process.cwd())) {
-  if (!isCodeLike(file)) continue;
-  const orig = fs.readFileSync(file, "utf8");
-  const scrb = scrubText(orig, file);
-  if (scrb !== orig) {
-    fs.writeFileSync(file, scrb, "utf8");
-    changed++;
-  }
-}
-
-console.log(`scrub-codex: cleaned ${changed} file(s).`);
+  //
