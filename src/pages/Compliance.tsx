@@ -19,10 +19,12 @@ import {
   Eye,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Compliance = (): JSX.Element => {
   const { profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   // Mock compliance data
@@ -201,6 +203,18 @@ const Compliance = (): JSX.Element => {
                       <Badge variant={getSeverityColor(alert.severity)}>
                         {alert.severity.toUpperCase()}
                       </Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          navigate(
+                            `/audit?search=${encodeURIComponent(alert.type)}&type=compliance&alertId=${alert.id}`,
+                          )
+                        }
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Audit Trail
+                      </Button>
                       {alert.status === "pending" && (
                         <Button size="sm" variant="outline">
                           Review

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -19,6 +19,7 @@ import {
 import { Activity, Search, Download, Filter, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AuditDetailModal from "@/components/AuditDetailModal";
+import { useSearchParams } from "react-router-dom";
 
 interface AuditLog {
   id: number;
@@ -37,6 +38,14 @@ const AuditTrail = () => {
   const [filterType, setFilterType] = useState("all");
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const search = searchParams.get("search");
+    const type = searchParams.get("type");
+    if (search) setSearchTerm(search);
+    if (type) setFilterType(type);
+  }, [searchParams]);
 
   // Mock audit trail data
   const auditLogs: AuditLog[] = [
