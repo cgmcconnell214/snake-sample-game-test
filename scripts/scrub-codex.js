@@ -55,6 +55,7 @@ function scrubText(text, filePath) {
 // Execute scrubbing across repo
 let changed = 0;
 for (const file of walk(process.cwd())) {
+  if (file.endsWith("scripts/scrub-codex.js")) continue;
   if (!isCodeLike(file)) continue;
   const orig = fs.readFileSync(file, "utf8");
   const scrb = scrubText(orig, file);
