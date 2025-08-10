@@ -10,7 +10,7 @@ export default function Onboarding(): JSX.Element {
   const [steps, setSteps] = useState([
     { key: 'kyc', label: 'Complete KYC Verification', done: false, link: '/app/kyc' },
     { key: 'profile', label: 'Complete Profile Details', done: false, link: '/app/profile' },
-    { key: 'first-course', label: 'Enroll in Your First Course', done: false, link: '/app/learning/courses' },
+    { key: 'first-course', label: 'Enroll in Your First Course', done: false, link: '/app/learning' },
     { key: 'join-class', label: 'Join a Live Class', done: false, link: '/app/live-classes/new' },
   ]);
 

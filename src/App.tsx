@@ -50,7 +50,6 @@ import EnhancedUserProfile from "./components/social/EnhancedUserProfile";
 import FollowersPage from "./components/social/FollowersPage";
 import NotificationCenter from "./components/NotificationCenter";
 import MarketplaceNew from "./pages/MarketplaceNew";
-import LearningPortalNew from "./pages/LearningPortalNew";
 import LiveClassesNew from "./pages/LiveClassesNew";
 import LiquidityPoolsNew from "./pages/LiquidityPoolsNew";
 import CourseDetail from "./pages/CourseDetail";
@@ -138,7 +137,6 @@ const App = () => (
                                 <Route path="smart-contracts" element={<SmartContracts />} />
                                 <Route path="workflow-automation" element={<WorkflowAutomation />} />
                                 <Route path="learning" element={<LearningPortal />} />
-                                <Route path="learning/courses" element={<LearningPortalNew />} />
                                 <Route path="learning/courses/:slug" element={<CourseDetail />} />
                                 <Route path="learning/creator" element={<CourseCreator />} />
                                 <Route path="learning/creator/:id" element={<CourseBuilder />} />
