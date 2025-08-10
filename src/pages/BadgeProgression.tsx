@@ -54,7 +54,16 @@ export default function BadgeProgression(): JSX.Element {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{b.badge_name}</span>
-                <Badge variant="secondary">{new Date(b.created_at || b.awarded_at || Date.now()).toLocaleDateString()}</Badge>
+                <Badge
+                  variant="secondary"
+                  aria-label={`${b.badge_name} earned on ${new Date(
+                    b.created_at || b.awarded_at || Date.now(),
+                  ).toLocaleDateString()}`}
+                >
+                  {new Date(
+                    b.created_at || b.awarded_at || Date.now(),
+                  ).toLocaleDateString()}
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
