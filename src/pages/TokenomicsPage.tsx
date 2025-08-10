@@ -17,7 +17,7 @@ export default function TokenomicsPage(): JSX.Element {
   };
 
   const handleAnalyzeSupply = () => {
-    navigate('/app/portfolio');
+    navigate('/app/token-supply');
   };
 
   const handleViewFlows = () => {

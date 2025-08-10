@@ -41,6 +41,7 @@ import SystemDiagnostics from "./pages/SystemDiagnostics";
 import LegalSafehouse from "./pages/LegalSafehouse";
 import AssetProvenance from "./pages/AssetProvenance";
 import TokenomicsPage from "./pages/TokenomicsPage";
+import TokenSupply from "./pages/TokenSupply";
 import DevPlayground from "./pages/DevPlayground";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
@@ -161,6 +162,7 @@ const App = () => (
                                 <Route path="legal-safehouse" element={<LegalSafehouse />} />
                                 <Route path="asset-provenance" element={<AssetProvenance />} />
                                 <Route path="tokenomics" element={<TokenomicsPage />} />
+                                <Route path="token-supply" element={<TokenSupply />} />
                                 <Route path="dev-playground" element={<DevPlayground />} />
                                 
                                 {/* Social Media Routes */}

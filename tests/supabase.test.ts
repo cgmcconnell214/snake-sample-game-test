@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { generateXrplCurrencyCode } from '../supabase/functions/utils'
 
 describe('generateXrplCurrencyCode', () => {
