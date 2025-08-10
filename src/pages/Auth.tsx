@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Icons } from "@/components/ui/icons";
 import { supabase } from "@/integrations/supabase/client";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Auth = (): JSX.Element => {
   const { user, signIn, signUp } = useAuth();
@@ -32,6 +33,9 @@ const Auth = (): JSX.Element => {
   const location = useLocation();
   const [acceptedSignin, setAcceptedSignin] = useState(false);
   const [acceptedSignup, setAcceptedSignup] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const signInCaptchaRef = useRef<ReCAPTCHA>(null);
+  const signUpCaptchaRef = useRef<ReCAPTCHA>(null);
   const initialTab = new URLSearchParams(location.search).get("mode") === "signup" ? "signup" : "signin";
   useEffect(() => {
     if (user) {
@@ -50,6 +54,10 @@ const Auth = (): JSX.Element => {
       setError("Please accept the Terms and Privacy Policy to continue.");
       return;
     }
+    if (!captchaToken) {
+      setError("Please complete the captcha.");
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -62,6 +70,8 @@ const Auth = (): JSX.Element => {
       setError(err.message || "An error occurred during sign in");
     } finally {
       setLoading(false);
+      signInCaptchaRef.current?.reset();
+      setCaptchaToken(null);
     }
   };
 
@@ -69,6 +79,10 @@ const Auth = (): JSX.Element => {
     e.preventDefault();
     if (!acceptedSignup) {
       setError("Please accept the Terms and Privacy Policy to continue.");
+      return;
+    }
+    if (!captchaToken) {
+      setError("Please complete the captcha.");
       return;
     }
     setLoading(true);
@@ -99,6 +113,8 @@ const Auth = (): JSX.Element => {
       setError(err.message || "An error occurred during sign up");
     } finally {
       setLoading(false);
+      signUpCaptchaRef.current?.reset();
+      setCaptchaToken(null);
     }
   };
 
@@ -136,7 +152,15 @@ const Auth = (): JSX.Element => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue={initialTab} className="w-full">
+          <Tabs
+            defaultValue={initialTab}
+            className="w-full"
+            onValueChange={() => {
+              setCaptchaToken(null);
+              signInCaptchaRef.current?.reset();
+              signUpCaptchaRef.current?.reset();
+            }}
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -180,6 +204,11 @@ const Auth = (): JSX.Element => {
                     I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
                   </label>
                 </div>
+                <ReCAPTCHA
+                  ref={signInCaptchaRef}
+                  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                  onChange={(token) => setCaptchaToken(token)}
+                />
                 {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
@@ -270,6 +299,11 @@ const Auth = (): JSX.Element => {
                     I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
                   </label>
                 </div>
+                <ReCAPTCHA
+                  ref={signUpCaptchaRef}
+                  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                  onChange={(token) => setCaptchaToken(token)}
+                />
                 {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
