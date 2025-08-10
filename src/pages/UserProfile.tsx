@@ -31,6 +31,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAvatar } from "@/hooks/use-avatar";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface UserProfile {
   id: string;
@@ -74,12 +77,26 @@ const UserProfile: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const [editForm, setEditForm] = useState({
-    display_name: "",
-    bio: "",
-    website: "",
-    location: "",
-    phone: "",
+  const profileSchema = z.object({
+    display_name: z.string().min(1, "Display name is required"),
+    bio: z.string().optional(),
+    website: z.union([z.string().url("Invalid URL"), z.literal("")]).optional(),
+    location: z.string().optional(),
+    phone: z.string().optional(),
+  });
+
+  type ProfileForm = z.infer<typeof profileSchema>;
+
+  const form = useForm<ProfileForm>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      display_name: "",
+      bio: "",
+      website: "",
+      location: "",
+      phone: "",
+    },
+    mode: "onChange",
   });
 
   const fetchUserProfile = async () => {
@@ -94,7 +111,7 @@ const UserProfile: React.FC = () => {
 
       if (data) {
         setUserProfile(data);
-        setEditForm({
+        form.reset({
           display_name: data.display_name || "",
           bio: data.bio || "",
           website: data.website || "",
@@ -173,10 +190,10 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const saveProfile = async () => {
+  const saveProfile = async (values: ProfileForm) => {
     try {
       // Generate username if not provided
-      let username = editForm.display_name
+      let username = values.display_name
         .toLowerCase()
         .replace(/\s+/g, ".")
         .replace(/[^a-z0-9.]/g, "");
@@ -188,7 +205,7 @@ const UserProfile: React.FC = () => {
         {
           user_id: user?.id,
           username: username,
-          ...editForm,
+          ...values,
         },
         { onConflict: "user_id" },
       );
@@ -260,7 +277,10 @@ const UserProfile: React.FC = () => {
         <h1 className="text-3xl font-bold">Profile</h1>
         <Button
           variant={editing ? "default" : "outline"}
-          onClick={() => (editing ? saveProfile() : setEditing(true))}
+          onClick={() =>
+            editing ? form.handleSubmit(saveProfile)() : setEditing(true)
+          }
+          disabled={editing && !form.formState.isValid}
         >
           {editing ? (
             <>
@@ -312,16 +332,17 @@ const UserProfile: React.FC = () => {
               </div>
               <CardTitle>
                 {editing ? (
-                  <Input
-                    value={editForm.display_name}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({
-                        ...prev,
-                        display_name: e.target.value,
-                      }))
-                    }
-                    placeholder="Display name"
-                  />
+                  <div className="space-y-1">
+                    <Input
+                      {...form.register("display_name")}
+                      placeholder="Display name"
+                    />
+                    {form.formState.errors.display_name && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.display_name.message}
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   userProfile?.display_name || "User"
                 )}
@@ -332,14 +353,18 @@ const UserProfile: React.FC = () => {
               <div>
                 <label className="text-sm font-medium">Bio</label>
                 {editing ? (
-                  <Textarea
-                    value={editForm.bio}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, bio: e.target.value }))
-                    }
-                    placeholder="Tell us about yourself..."
-                    rows={3}
-                  />
+                  <div className="space-y-1">
+                    <Textarea
+                      {...form.register("bio")}
+                      placeholder="Tell us about yourself..."
+                      rows={3}
+                    />
+                    {form.formState.errors.bio && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.bio.message}
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground mt-1">
                     {userProfile?.bio || "No bio available"}
@@ -348,49 +373,53 @@ const UserProfile: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                {userProfile?.location && (
+                {(editing || userProfile?.location) && (
                   <div className="flex items-center space-x-2 text-sm">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     {editing ? (
-                      <Input
-                        value={editForm.location}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({
-                            ...prev,
-                            location: e.target.value,
-                          }))
-                        }
-                        placeholder="Location"
-                      />
+                      <div className="w-full space-y-1">
+                        <Input
+                          {...form.register("location")}
+                          placeholder="Location"
+                        />
+                        {form.formState.errors.location && (
+                          <p className="text-sm text-destructive">
+                            {form.formState.errors.location.message}
+                          </p>
+                        )}
+                      </div>
                     ) : (
-                      <span>{userProfile.location}</span>
+                      <span>{userProfile?.location}</span>
                     )}
                   </div>
                 )}
 
-                {userProfile?.website && (
+                {(editing || userProfile?.website) && (
                   <div className="flex items-center space-x-2 text-sm">
                     <Globe className="h-4 w-4 text-muted-foreground" />
                     {editing ? (
-                      <Input
-                        value={editForm.website}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({
-                            ...prev,
-                            website: e.target.value,
-                          }))
-                        }
-                        placeholder="Website"
-                      />
+                      <div className="w-full space-y-1">
+                        <Input
+                          {...form.register("website")}
+                          placeholder="Website"
+                        />
+                        {form.formState.errors.website && (
+                          <p className="text-sm text-destructive">
+                            {form.formState.errors.website.message}
+                          </p>
+                        )}
+                      </div>
                     ) : (
-                      <a
-                        href={userProfile.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {userProfile.website}
-                      </a>
+                      userProfile?.website && (
+                        <a
+                          href={userProfile.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {userProfile.website}
+                        </a>
+                      )
                     )}
                   </div>
                 )}
