@@ -76,6 +76,35 @@ const Admin = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  const fetchAdminLists = async () => {
+    const [
+      { data: usersData },
+      { data: alertsData },
+      { data: tradesData },
+    ] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
+  const USERS_PER_PAGE = 20;
+  const ALERTS_PER_PAGE = 10;
+  const TRADES_PER_PAGE = 20;
+  const [userOffset, setUserOffset] = useState(0);
+  const [alertOffset, setAlertOffset] = useState(0);
+  const [tradeOffset, setTradeOffset] = useState(0);
+
   const loadAdminData = async () => {
     try {
       setLoading(true);
@@ -85,7 +114,7 @@ const Admin = () => {
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false })
-        .limit(20);
+        .range(userOffset, userOffset + USERS_PER_PAGE - 1);
 
       // Load compliance alerts
       const { data: alertsData } = await supabase
@@ -93,7 +122,9 @@ const Admin = () => {
         .select("*")
         .eq("resolved", false)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(10),
+      supabase
+        .range(alertOffset, alertOffset + ALERTS_PER_PAGE - 1);
 
       // Load recent trades with proper joins
       const { data: tradesData } = await supabase
@@ -104,27 +135,49 @@ const Admin = () => {
           seller:profiles!seller_id(email)
         `)
         .order("execution_time", { ascending: false })
-        .limit(20);
+        .limit(20),
+    ]);
+        .range(tradeOffset, tradeOffset + TRADES_PER_PAGE - 1);
 
-      // Calculate stats
-      const { count: totalUsers } = await supabase
+    return {
+      users: usersData || [],
+      alerts: alertsData || [],
+      trades: tradesData || [],
+    };
+  };
+
+  const fetchAdminStats = async () => {
+    const [{ count: totalUsers }, { count: pendingAlerts }] = await Promise.all([
+      supabase
         .from("profiles")
-        .select("*", { count: "exact", head: true });
-
-      const { count: pendingAlerts } = await supabase
+        .select("*", { count: "exact", head: true }),
+      supabase
         .from("compliance_alerts")
         .select("*", { count: "exact", head: true })
-        .eq("resolved", false);
+        .eq("resolved", false),
+    ]);
 
-      setUsers(usersData || []);
-      setAlerts(alertsData || []);
-      setTrades(tradesData || []);
-      setStats({
-        totalUsers: totalUsers || 0,
-        activeTraders: 0, // Calculate from recent activity
-        totalVolume: 0, // Calculate from trades
-        pendingAlerts: pendingAlerts || 0,
-      });
+    return {
+      totalUsers: totalUsers || 0,
+      activeTraders: 0, // Calculate from recent activity
+      totalVolume: 0, // Calculate from trades
+      pendingAlerts: pendingAlerts || 0,
+    };
+  };
+
+  const loadAdminData = async () => {
+    try {
+      setLoading(true);
+
+      const [listData, statsData] = await Promise.all([
+        fetchAdminLists(),
+        fetchAdminStats(),
+      ]);
+
+      setUsers(listData.users);
+      setAlerts(listData.alerts);
+      setTrades(listData.trades);
+      setStats(statsData);
     } catch (error) {
       console.error("Error loading admin data:", error);
       toast({
@@ -141,7 +194,9 @@ const Admin = () => {
     if (profile?.role === "admin") {
       loadAdminData();
     }
-  }, [profile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.role]);
+  }, [profile, userOffset, alertOffset, tradeOffset]);
 
 
   const resolveAlert = async (alertId: string) => {
@@ -354,6 +409,24 @@ const Admin = () => {
                   ))}
                 </TableBody>
               </Table>
+              <div className="flex justify-between mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setUserOffset((prev) => Math.max(0, prev - USERS_PER_PAGE))
+                  }
+                  disabled={userOffset === 0}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setUserOffset((prev) => prev + USERS_PER_PAGE)}
+                  disabled={users.length < USERS_PER_PAGE}
+                >
+                  Next
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -408,6 +481,24 @@ const Admin = () => {
                   ))}
                 </TableBody>
               </Table>
+              <div className="flex justify-between mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setAlertOffset((prev) => Math.max(0, prev - ALERTS_PER_PAGE))
+                  }
+                  disabled={alertOffset === 0}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setAlertOffset((prev) => prev + ALERTS_PER_PAGE)}
+                  disabled={alerts.length < ALERTS_PER_PAGE}
+                >
+                  Next
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -459,6 +550,24 @@ const Admin = () => {
                   ))}
                 </TableBody>
               </Table>
+              <div className="flex justify-between mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setTradeOffset((prev) => Math.max(0, prev - TRADES_PER_PAGE))
+                  }
+                  disabled={tradeOffset === 0}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setTradeOffset((prev) => prev + TRADES_PER_PAGE)}
+                  disabled={trades.length < TRADES_PER_PAGE}
+                >
+                  Next
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

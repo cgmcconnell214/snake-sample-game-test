@@ -1,28 +1,68 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import AssetProvenanceCard from "@/components/AssetProvenanceCard";
 import { History, Eye, Search, Clock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
+interface ProvenanceCard {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  actionLabel: string;
+  action: string;
+}
+
 export default function AssetProvenance(): JSX.Element {
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const [cards, setCards] = useState<ProvenanceCard[]>([]);
 
   const handleTrackAsset = () => {
     navigate('/app/tokenize');
   };
 
-  const handleViewTimeline = () => {
-    navigate('/app/audit-trail');
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const response = await fetch('/api/asset-provenance');
+        if (!response.ok) throw new Error('Failed to fetch asset provenance');
+        const data = await response.json();
+        setCards(data);
+      } catch (error) {
+        console.error('Error loading asset provenance:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load asset provenance cards',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    fetchCards();
+  }, [toast]);
+
+  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    history: History,
+    eye: Eye,
+    clock: Clock,
   };
 
-  const handleTrackCommodity = () => {
-    navigate('/app/tokenize');
+  const handleAction = (path: string) => {
+    navigate(path);
+  const navigateTo = (path: string) => {
+    try {
+      navigate(path);
+    } catch (error) {
+      console.error("Navigation failed:", error);
+      toast({
+        title: "Navigation failed",
+        description: "Unable to navigate to the requested page.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleViewJourney = () => {
-    navigate('/app/ip-tokenization');
-  };
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -32,13 +72,48 @@ export default function AssetProvenance(): JSX.Element {
             Visual history and tracking of tokenized assets
           </p>
         </div>
-        <Button onClick={handleTrackAsset}>
+        <Button onClick={() => navigateTo('/app/tokenize')}>
           <Search className="h-4 w-4 mr-2" />
           Track Asset
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AssetProvenanceCard
+          icon={<History className="h-5 w-5" />}
+          title="Visual History"
+          description="Complete visual timeline of asset lifecycle"
+          action={
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewTimeline}
+            >
+        {cards.map((card) => {
+          const Icon = iconMap[card.icon] || History;
+          return (
+            <Card key={card.id}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Icon className="h-5 w-5" />
+                  {card.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {card.description}
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleAction(card.action)}
+                >
+                  {card.actionLabel}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -50,12 +125,22 @@ export default function AssetProvenance(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Complete visual timeline of asset lifecycle
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewTimeline}>
+            <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/audit-trail')}>
               View Timeline
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
 
+        <AssetProvenanceCard
+          icon={<Eye className="h-5 w-5" />}
+          title="Commodity Tracking"
+          description="Track physical commodities from origin to token"
+          action={
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleTrackCommodity}
+            >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -67,12 +152,22 @@ export default function AssetProvenance(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track physical commodities from origin to token
             </p>
-            <Button variant="outline" className="w-full" onClick={handleTrackCommodity}>
+            <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/tokenize')}>
               Track Commodity
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
 
+        <AssetProvenanceCard
+          icon={<Clock className="h-5 w-5" />}
+          title="IP Asset Journey"
+          description="Follow intellectual property from creation to tokenization"
+          action={
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewJourney}
+            >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -84,11 +179,11 @@ export default function AssetProvenance(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Follow intellectual property from creation to tokenization
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewJourney}>
+            <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/ip-tokenization')}>
               View Journey
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       </div>
     </div>
   );
