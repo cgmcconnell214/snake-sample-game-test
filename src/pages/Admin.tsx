@@ -141,7 +141,8 @@ const Admin = () => {
     if (profile?.role === "admin") {
       loadAdminData();
     }
-  }, [profile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.role]);
 
 
   const resolveAlert = async (alertId: string) => {
