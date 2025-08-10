@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// ESM version of the Codex scrubber
-import fs from "node:fs";
-import path from "node:path";
+/* Scrubs chat/agent artifacts from source files before commit. */
+const fs = require("node:fs");
+const path = require("node:path");
+
 
 const exts = new Set([
   ".ts",".tsx",".js",".jsx",".mjs",".cjs",
