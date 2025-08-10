@@ -36,6 +36,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AuditDetailModal from "@/components/AuditDetailModal";
+import Papa from "papaparse";
 
 interface AuditLog {
   id: number;
@@ -113,9 +114,19 @@ const AuditTrail = () => {
   }, [searchTerm, filterType]);
 
   const handleExport = () => {
+    const csv = Papa.unparse(filteredLogs);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `audit-trail-${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
     toast({
-      title: "Export Started",
-      description: "Audit trail export has been initiated.",
+      title: "Export Successful",
+      description: "Audit trail exported to CSV.",
     });
   };
 
