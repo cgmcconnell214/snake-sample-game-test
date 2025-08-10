@@ -270,7 +270,7 @@ export default function RealTimeTrading(): JSX.Element {
         {/* Trading Panel & Order Book */}
         <div className="space-y-6">
           <TradePanel />
-          <OrderBook />
+          <OrderBook assetId={selectedAsset?.id} symbol={selectedAsset?.asset_symbol} />
 
           {/* Market Statistics */}
           {selectedAsset && (

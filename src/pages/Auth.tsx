@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -29,6 +30,9 @@ const Auth = (): JSX.Element => {
     lastName: "",
   });
   const location = useLocation();
+  const [acceptedSignin, setAcceptedSignin] = useState(false);
+  const [acceptedSignup, setAcceptedSignup] = useState(false);
+  const initialTab = new URLSearchParams(location.search).get("mode") === "signup" ? "signup" : "signin";
   useEffect(() => {
     if (user) {
       navigate("/");
@@ -42,6 +46,10 @@ const Auth = (): JSX.Element => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedSignin) {
+      setError("Please accept the Terms and Privacy Policy to continue.");
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -59,6 +67,10 @@ const Auth = (): JSX.Element => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedSignup) {
+      setError("Please accept the Terms and Privacy Policy to continue.");
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -124,7 +136,7 @@ const Auth = (): JSX.Element => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs defaultValue={initialTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -157,6 +169,16 @@ const Auth = (): JSX.Element => {
                     disabled={loading}
                     required
                   />
+                </div>
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="signin-terms"
+                    checked={acceptedSignin}
+                    onCheckedChange={(v) => { setAcceptedSignin(Boolean(v)); setError(null); }}
+                  />
+                  <label htmlFor="signin-terms" className="text-sm text-muted-foreground">
+                    I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
+                  </label>
                 </div>
                 {error && (
                   <Alert variant="destructive">
@@ -237,6 +259,16 @@ const Auth = (): JSX.Element => {
                     disabled={loading}
                     required
                   />
+                </div>
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="signup-terms"
+                    checked={acceptedSignup}
+                    onCheckedChange={(v) => { setAcceptedSignup(Boolean(v)); setError(null); }}
+                  />
+                  <label htmlFor="signup-terms" className="text-sm text-muted-foreground">
+                    I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
+                  </label>
                 </div>
                 {error && (
                   <Alert variant="destructive">
