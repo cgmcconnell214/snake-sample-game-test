@@ -1,6 +1,6 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { TradingChart } from "@/components/TradingChart";
 import { OrderBook } from "@/components/OrderBook";
 import { TradePanel } from "@/components/TradePanel";
@@ -14,37 +14,8 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
-
-const portfolioData = [
-  {
-    symbol: "GOLD-TOKEN",
-    quantity: 125,
-    value: 16400,
-    change: 2.4,
-    status: "verified",
-  },
-  {
-    symbol: "SILVER-TOKEN",
-    quantity: 850,
-    value: 8500,
-    change: -1.2,
-    status: "verified",
-  },
-  {
-    symbol: "OIL-FUTURE",
-    quantity: 50,
-    value: 4200,
-    change: 5.7,
-    status: "pending",
-  },
-  {
-    symbol: "REAL-ESTATE-A",
-    quantity: 10,
-    value: 25000,
-    change: 1.8,
-    status: "verified",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const recentTrades = [
   {
@@ -77,12 +48,50 @@ const recentTrades = [
 ];
 
 export default function Dashboard(): JSX.Element {
+  const { profile } = useAuth();
+  const [portfolioData, setPortfolioData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      if (!profile?.user_id) return;
+      const { data, error } = await supabase
+        .from("asset_holdings")
+        .select(
+          "balance, tokenized_assets(asset_symbol, asset_name, is_active, market_data(current_price, price_change_24h))",
+        )
+        .eq("user_id", profile.user_id);
+
+      if (error) {
+        console.error("Error fetching portfolio:", error);
+        return;
+      }
+
+      const holdings = (data || []).map((holding: any) => {
+        const asset = holding.tokenized_assets || {};
+        const market = asset.market_data?.[0] || {};
+        const quantity = holding.balance || 0;
+        const price = market.current_price || 0;
+        return {
+          symbol: asset.asset_symbol || "UNKNOWN",
+          quantity,
+          value: quantity * price,
+          change: market.price_change_24h || 0,
+          status: asset.is_active ? "verified" : "pending",
+        };
+      });
+
+      setPortfolioData(holdings);
+    };
+
+    fetchPortfolio();
+  }, [profile]);
+
   const totalValue = portfolioData.reduce((sum, asset) => sum + asset.value, 0);
   const totalGain = portfolioData.reduce(
     (sum, asset) => sum + (asset.value * asset.change) / 100,
     0,
   );
-  const totalGainPercent = (totalGain / totalValue) * 100;
+  const totalGainPercent = totalValue ? (totalGain / totalValue) * 100 : 0;
 
   return (
     <div className="space-y-6 p-6">
