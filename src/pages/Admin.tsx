@@ -76,28 +76,6 @@ const Admin = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  const fetchAdminLists = async () => {
-    const [
-      { data: usersData },
-      { data: alertsData },
-      { data: tradesData },
-    ] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(20),
-      supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(20),
-      supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(20),
-      supabase
   const USERS_PER_PAGE = 20;
   const ALERTS_PER_PAGE = 10;
   const TRADES_PER_PAGE = 20;
@@ -105,39 +83,32 @@ const Admin = () => {
   const [alertOffset, setAlertOffset] = useState(0);
   const [tradeOffset, setTradeOffset] = useState(0);
 
-  const loadAdminData = async () => {
-    try {
-      setLoading(true);
+  const fetchAdminLists = async () => {
+    // Load users
+    const { data: usersData } = await supabase
+      .from("profiles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(userOffset, userOffset + USERS_PER_PAGE - 1);
 
-      // Load users
-      const { data: usersData } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .range(userOffset, userOffset + USERS_PER_PAGE - 1);
+    // Load compliance alerts
+    const { data: alertsData } = await supabase
+      .from("compliance_alerts")
+      .select("*")
+      .eq("resolved", false)
+      .order("created_at", { ascending: false })
+      .range(alertOffset, alertOffset + ALERTS_PER_PAGE - 1);
 
-      // Load compliance alerts
-      const { data: alertsData } = await supabase
-        .from("compliance_alerts")
-        .select("*")
-        .eq("resolved", false)
-        .order("created_at", { ascending: false })
-        .limit(10),
-      supabase
-        .range(alertOffset, alertOffset + ALERTS_PER_PAGE - 1);
-
-      // Load recent trades with proper joins
-      const { data: tradesData } = await supabase
-        .from("trade_executions")
-        .select(`
+    // Load recent trades with proper joins
+    const { data: tradesData } = await supabase
+      .from("trade_executions")
+      .select(`
           *,
           buyer:profiles!buyer_id(email),
           seller:profiles!seller_id(email)
         `)
-        .order("execution_time", { ascending: false })
-        .limit(20),
-    ]);
-        .range(tradeOffset, tradeOffset + TRADES_PER_PAGE - 1);
+      .order("execution_time", { ascending: false })
+      .range(tradeOffset, tradeOffset + TRADES_PER_PAGE - 1);
 
     return {
       users: usersData || [],
@@ -148,9 +119,7 @@ const Admin = () => {
 
   const fetchAdminStats = async () => {
     const [{ count: totalUsers }, { count: pendingAlerts }] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true }),
+      supabase.from("profiles").select("*", { count: "exact", head: true }),
       supabase
         .from("compliance_alerts")
         .select("*", { count: "exact", head: true })
@@ -190,13 +159,33 @@ const Admin = () => {
     }
   };
 
+  const fetchAdminStats = async () => {
+    const [{ count: totalUsers }, { count: pendingAlerts }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true }),
+      supabase
+        .from("compliance_alerts")
+        .select("*", { count: "exact", head: true })
+        .eq("resolved", false),
+    ]);
+
+    return {
+      totalUsers: totalUsers || 0,
+      activeTraders: 0, // Calculate from recent activity
+      totalVolume: 0, // Calculate from trades
+      pendingAlerts: pendingAlerts || 0,
+    };
+  };
+
+  // loadAdminData defined above
+
   useEffect(() => {
     if (profile?.role === "admin") {
       loadAdminData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.role]);
-  }, [profile, userOffset, alertOffset, tradeOffset]);
+  }, [profile?.role, userOffset, alertOffset, tradeOffset]);
 
 
   const resolveAlert = async (alertId: string) => {

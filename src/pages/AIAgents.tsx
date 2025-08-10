@@ -195,10 +195,6 @@ export default function AIAgents() {
       return;
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
     setIsLoading(true);
     try {
       const {
@@ -249,6 +245,7 @@ export default function AIAgents() {
         workflow_data: {},
         configuration: {},
       });
+      setErrors({});
     } catch (error) {
       console.error("Failed to create AI agent:", error);
       toast({
@@ -259,27 +256,7 @@ export default function AIAgents() {
     } finally {
       setIsLoading(false);
     }
-
-    toast({
-      title: "Success",
-      description: "AI agent created successfully",
-    });
-
-    setAgents([data, ...agents]);
-    setIsCreateModalOpen(false);
-    setNewAgent({
-      name: "",
-      description: "",
-      category: "workflow",
-      agent_type: "workflow",
-      price_per_use: 0,
-      total_tokens: 1000000,
-      workflow_data: {},
-      configuration: {},
-    });
-    setErrors({});
   };
-
   const handleCreateTestingAgent = async () => {
     setIsLoading(true);
     try {
@@ -612,14 +589,6 @@ export default function AIAgents() {
       }
     }
 
-    const { data, error } = await supabase
-      .from('ai_agents')
-      .update(updated)
-      .eq('id', agentToUpdate.id)
-      .select()
-      .single();
-
-    if (error) {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -631,9 +600,9 @@ export default function AIAgents() {
 
       if (error) throw error;
 
-      console.log('Agent updated successfully:', data);
       setAgents(prev => prev.map(a => (a.id === data.id ? data : a)));
       setEditingAgent(null);
+      setEditErrors({});
       toast({ title: 'Agent Updated', description: 'Changes saved successfully' });
     } catch (error) {
       console.error('Update error:', error);
@@ -641,14 +610,7 @@ export default function AIAgents() {
     } finally {
       setIsLoading(false);
     }
-
-    console.log('Agent updated successfully:', data);
-    setAgents(prev => prev.map(a => (a.id === data.id ? data : a)));
-    setEditingAgent(null);
-    setEditErrors({});
-    toast({ title: 'Agent Updated', description: 'Changes saved successfully' });
   };
-
   const isUserAgent = (agent: AIAgent) => {
     // This would check if the current user is the creator
     // For now, we'll just return true to show all options
@@ -1032,13 +994,6 @@ export default function AIAgents() {
             </div>
 
             <div className="flex gap-2 pt-4">
-              <Button
-                onClick={handleCreateAgent}
-                className="flex-1"
-                disabled={Object.values(errors).some(Boolean)}
-              >
-                <Zap className="h-4 w-4 mr-2" />
-                Create Agent
               <Button onClick={handleCreateAgent} className="flex-1" disabled={isLoading}>
                 {isLoading ? (
                   <>
@@ -1124,12 +1079,6 @@ export default function AIAgents() {
                 )}
               </div>
               <div className="flex gap-2 pt-4">
-                <Button
-                  onClick={() => handleUpdateAgent(editingAgent)}
-                  className="flex-1"
-                  disabled={Object.values(editErrors).some(Boolean)}
-                >
-                  Save Changes
                 <Button onClick={() => handleUpdateAgent(editingAgent)} className="flex-1" disabled={isLoading}>
                   {isLoading ? (
                     <>

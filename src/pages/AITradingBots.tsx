@@ -1,6 +1,5 @@
-import React from "react";
-import { Helmet } from "react-helmet";
 import React, { Suspense } from "react";
+import { Helmet } from "react-helmet";
 import { AITradingBot } from "@/components/AITradingBot";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import LoadingSpinner from "@/components/LoadingSpinner";

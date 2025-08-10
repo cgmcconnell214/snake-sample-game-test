@@ -1,40 +1,68 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import AssetProvenanceCard from "@/components/AssetProvenanceCard";
-import { History, Eye, Search, Clock } from "lucide-react";
+import { History, Eye, Clock, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProvenanceCard {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: "history" | "eye" | "clock";
   actionLabel: string;
   action: string;
 }
 
 export default function AssetProvenance(): JSX.Element {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [cards, setCards] = useState<ProvenanceCard[]>([]);
 
-  const handleTrackAsset = () => {
-    navigate('/app/tokenize');
-  };
+  useEffect(() => {
+    document.title = "Asset Provenance | Visual history and tracking";
+  }, []);
 
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const response = await fetch('/api/asset-provenance');
-        if (!response.ok) throw new Error('Failed to fetch asset provenance');
-        const data = await response.json();
+        const response = await fetch("/api/asset-provenance");
+        if (!response.ok) throw new Error("Failed to fetch asset provenance");
+        const data = (await response.json()) as ProvenanceCard[];
         setCards(data);
       } catch (error) {
-        console.error('Error loading asset provenance:', error);
+        console.error("Error loading asset provenance:", error);
+        // Fallback defaults so the page still works
+        setCards([
+          {
+            id: "visual-history",
+            title: "Visual History",
+            description: "Complete visual timeline of asset lifecycle",
+            icon: "history",
+            actionLabel: "View Timeline",
+            action: "/app/audit-trail",
+          },
+          {
+            id: "commodity-tracking",
+            title: "Commodity Tracking",
+            description: "Track physical commodities from origin to token",
+            icon: "eye",
+            actionLabel: "Track Commodity",
+            action: "/app/tokenize",
+          },
+          {
+            id: "ip-journey",
+            title: "IP Asset Journey",
+            description: "Follow intellectual property from creation to tokenization",
+            icon: "clock",
+            actionLabel: "View Journey",
+            action: "/app/ip-tokenization",
+          },
+        ]);
         toast({
-          title: 'Error',
-          description: 'Failed to load asset provenance cards',
-          variant: 'destructive',
+          title: "Unable to reach API",
+          description: "Loaded default provenance actions.",
+          variant: "secondary",
         });
       }
     };
@@ -42,14 +70,12 @@ export default function AssetProvenance(): JSX.Element {
     fetchCards();
   }, [toast]);
 
-  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  const iconMap: Record<ProvenanceCard["icon"], React.ComponentType<{ className?: string }>> = {
     history: History,
     eye: Eye,
     clock: Clock,
   };
 
-  const handleAction = (path: string) => {
-    navigate(path);
   const navigateTo = (path: string) => {
     try {
       navigate(path);
@@ -72,25 +98,15 @@ export default function AssetProvenance(): JSX.Element {
             Visual history and tracking of tokenized assets
           </p>
         </div>
-        <Button onClick={() => navigateTo('/app/tokenize')}>
+        <Button onClick={() => navigateTo("/app/tokenize")}> 
           <Search className="h-4 w-4 mr-2" />
           Track Asset
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <AssetProvenanceCard
-          icon={<History className="h-5 w-5" />}
-          title="Visual History"
-          description="Complete visual timeline of asset lifecycle"
-          action={
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleViewTimeline}
-            >
         {cards.map((card) => {
-          const Icon = iconMap[card.icon] || History;
+          const Icon = iconMap[card.icon];
           return (
             <Card key={card.id}>
               <CardHeader>
@@ -106,7 +122,7 @@ export default function AssetProvenance(): JSX.Element {
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => handleAction(card.action)}
+                  onClick={() => navigateTo(card.action)}
                 >
                   {card.actionLabel}
                 </Button>
@@ -114,76 +130,6 @@ export default function AssetProvenance(): JSX.Element {
             </Card>
           );
         })}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <History className="h-5 w-5" />
-              Visual History
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Complete visual timeline of asset lifecycle
-            </p>
-            <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/audit-trail')}>
-              View Timeline
-            </Button>
-          }
-        />
-
-        <AssetProvenanceCard
-          icon={<Eye className="h-5 w-5" />}
-          title="Commodity Tracking"
-          description="Track physical commodities from origin to token"
-          action={
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleTrackCommodity}
-            >
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Commodity Tracking
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Track physical commodities from origin to token
-            </p>
-            <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/tokenize')}>
-              Track Commodity
-            </Button>
-          }
-        />
-
-        <AssetProvenanceCard
-          icon={<Clock className="h-5 w-5" />}
-          title="IP Asset Journey"
-          description="Follow intellectual property from creation to tokenization"
-          action={
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleViewJourney}
-            >
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              IP Asset Journey
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Follow intellectual property from creation to tokenization
-            </p>
-            <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/ip-tokenization')}>
-              View Journey
-            </Button>
-          }
-        />
       </div>
     </div>
   );
