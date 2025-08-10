@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     environment: 'jsdom',
+    globals: true,
     coverage: {
       reporter: ['text', 'html', 'json'],
       provider: 'v8'
