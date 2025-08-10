@@ -76,6 +76,18 @@ const Admin = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  const fetchAdminLists = async () => {
+    const [
+      { data: usersData },
+      { data: alertsData },
+      { data: tradesData },
+    ] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20),
+      supabase
   const USERS_PER_PAGE = 20;
   const ALERTS_PER_PAGE = 10;
   const TRADES_PER_PAGE = 20;
@@ -100,6 +112,8 @@ const Admin = () => {
         .select("*")
         .eq("resolved", false)
         .order("created_at", { ascending: false })
+        .limit(10),
+      supabase
         .range(alertOffset, alertOffset + ALERTS_PER_PAGE - 1);
 
       // Load recent trades with proper joins
@@ -111,27 +125,49 @@ const Admin = () => {
           seller:profiles!seller_id(email)
         `)
         .order("execution_time", { ascending: false })
+        .limit(20),
+    ]);
         .range(tradeOffset, tradeOffset + TRADES_PER_PAGE - 1);
 
-      // Calculate stats
-      const { count: totalUsers } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true });
+    return {
+      users: usersData || [],
+      alerts: alertsData || [],
+      trades: tradesData || [],
+    };
+  };
 
-      const { count: pendingAlerts } = await supabase
+  const fetchAdminStats = async () => {
+    const [{ count: totalUsers }, { count: pendingAlerts }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true }),
+      supabase
         .from("compliance_alerts")
         .select("*", { count: "exact", head: true })
-        .eq("resolved", false);
+        .eq("resolved", false),
+    ]);
 
-      setUsers(usersData || []);
-      setAlerts(alertsData || []);
-      setTrades(tradesData || []);
-      setStats({
-        totalUsers: totalUsers || 0,
-        activeTraders: 0, // Calculate from recent activity
-        totalVolume: 0, // Calculate from trades
-        pendingAlerts: pendingAlerts || 0,
-      });
+    return {
+      totalUsers: totalUsers || 0,
+      activeTraders: 0, // Calculate from recent activity
+      totalVolume: 0, // Calculate from trades
+      pendingAlerts: pendingAlerts || 0,
+    };
+  };
+
+  const loadAdminData = async () => {
+    try {
+      setLoading(true);
+
+      const [listData, statsData] = await Promise.all([
+        fetchAdminLists(),
+        fetchAdminStats(),
+      ]);
+
+      setUsers(listData.users);
+      setAlerts(listData.alerts);
+      setTrades(listData.trades);
+      setStats(statsData);
     } catch (error) {
       console.error("Error loading admin data:", error);
       toast({
