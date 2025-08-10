@@ -1,5 +1,7 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { AITradingBot } from "@/components/AITradingBot";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const AITradingBots = (): JSX.Element => {
   return (
@@ -12,8 +14,12 @@ const AITradingBots = (): JSX.Element => {
           </p>
         </div>
       </div>
-      
-      <AITradingBot />
+
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingSpinner />}>
+          <AITradingBot />
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 };
