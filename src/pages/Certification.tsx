@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import CertificationList, {
+  CertificationItem,
+} from "@/components/certification/CertificationList";
 import { Award, CheckCircle, Clock, Star } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Certification(): JSX.Element {
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
@@ -52,20 +53,47 @@ export default function Certification(): JSX.Element {
   };
 
   const handleViewBadges = () => {
-    navigate('/app/badges');
+    navigate("/app/badges");
   };
 
   const handleViewChecklist = () => {
-    navigate('/app/onboarding');
+    navigate("/app/onboarding");
   };
 
   const handleViewProgress = () => {
-    navigate('/app/badges');
+    navigate("/app/badges");
   };
 
   const handleCheckAccess = () => {
-    navigate('/app/certification');
+    navigate("/app/certification");
   };
+
+  const certifications: CertificationItem[] = [
+    {
+      id: "checklist",
+      name: "Onboarding Checklist",
+      description: "Complete essential steps to get started",
+      icon: CheckCircle,
+      actionLabel: "View Checklist",
+      onAction: handleViewChecklist,
+    },
+    {
+      id: "badges",
+      name: "Badge Progression",
+      description: "Track your progress through skill levels",
+      icon: Star,
+      actionLabel: "View Progress",
+      onAction: handleViewProgress,
+    },
+    {
+      id: "access",
+      name: "Access Gating by Level",
+      description: "Unlock features based on certification level",
+      icon: Clock,
+      actionLabel: "Check Access",
+      onAction: handleCheckAccess,
+    },
+  ];
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -89,6 +117,7 @@ export default function Certification(): JSX.Element {
           </Button>
         </div>
       </div>
+      <CertificationList certifications={certifications} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>

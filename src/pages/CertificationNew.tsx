@@ -3,7 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Award, CheckCircle, Clock, Star, Trophy, Book, Users } from "lucide-react";
+import CertificationList, {
+  CertificationItem,
+} from "@/components/certification/CertificationList";
+import { Award, CheckCircle, Star, Trophy, Book } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -200,6 +203,31 @@ export default function Certification(): JSX.Element {
 
   const overallProgress = certifications.reduce((acc, cert) => acc + cert.progress, 0) / certifications.length;
 
+  const certificationItems: CertificationItem[] = certifications.map((cert) => ({
+    id: cert.id,
+    name: cert.name,
+    description: cert.description,
+    level: cert.level,
+    levelVariant: getLevelColor(cert.level) as CertificationItem["levelVariant"],
+    progress: cert.progress,
+    requirements: cert.requirements,
+    rewards: cert.rewards,
+    estimatedTime: cert.estimated_time,
+    icon: Trophy,
+    isCompleted: cert.is_completed,
+    actionLabel:
+      cert.progress === 0
+        ? "Start Certification"
+        : cert.is_completed
+        ? undefined
+        : "Continue",
+    actionVariant: cert.progress === 0 ? "default" : "outline",
+    onAction:
+      cert.progress === 0 || !cert.is_completed
+        ? () => handleStartCertification(cert.id)
+        : undefined,
+  }));
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -258,6 +286,10 @@ export default function Certification(): JSX.Element {
         {/* Certification Paths */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-xl font-semibold">Certification Paths</h2>
+          <CertificationList
+            certifications={certificationItems}
+            gridClassName="grid-cols-1"
+          />
           {certifications.map((cert) => (
             <Card key={cert.id} className="relative overflow-hidden">
               <CardHeader>
