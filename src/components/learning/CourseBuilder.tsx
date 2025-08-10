@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useFileUpload } from "@/hooks/use-file-upload";
 
 interface Course {
   id: string;
@@ -65,6 +66,7 @@ export default function CourseBuilder() {
   const [activeTab, setActiveTab] = useState("overview");
   const [skills, setSkills] = useState<any[]>([]);
   const { toast } = useToast();
+  const { uploadFiles, uploading, progress } = useFileUpload();
 
   const [newCourse, setNewCourse] = useState({
     title: "",

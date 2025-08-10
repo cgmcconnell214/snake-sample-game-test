@@ -140,35 +140,60 @@ export default function LearningPortal(): JSX.Element {
     const course = courses.find((c) => c.id === courseId);
     if (!course) return;
 
-    const { error } = await supabase.from("course_enrollments").insert({
-      student_id: user.id,
-      course_id: courseId,
-      payment_amount: course.price_per_student,
-    });
+    if (!course.price_per_student || course.price_per_student === 0) {
+      const { error } = await supabase.from("course_enrollments").insert({
+        student_id: user.id,
+        course_id: courseId,
+        payment_amount: 0,
+        payment_status: 'paid',
+        payment_provider: 'free',
+      });
 
-    if (error) {
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to enroll in course",
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
-        title: "Error",
-        description: "Failed to enroll in course",
-        variant: "destructive",
+        title: "Enrollment Successful",
+        description: `Enrolled in ${course.title}`,
       });
       return;
     }
 
-    // Update course student count
-    await supabase
-      .from("educational_courses")
-      .update({
-        total_students: course.total_students + 1,
-      })
-      .eq("id", courseId);
-
-    toast({
-      title: "Enrollment Successful",
-      description: `Enrolled in ${course.title}`,
-    });
-
-    fetchCourses();
+    const provider = window.prompt("Choose payment provider: type 'stripe' or 'xrpl'", 'stripe')?.toLowerCase();
+    if (provider === 'stripe') {
+      const amount_cents = Math.round((course.price_per_student || 0) * 100);
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          amount_cents,
+          product_name: `Course Enrollment: ${course.title}`,
+          metadata: { resource_type: 'course', course_id: courseId }
+        }
+      });
+      if (error) {
+        toast({ title: 'Payment Error', description: error.message || 'Failed to start payment', variant: 'destructive' });
+        return;
+      }
+      if (data?.url) {
+        window.open(data.url, '_blank');
+        toast({
+          title: 'Complete Payment',
+          description: 'Stripe Checkout opened in a new tab. You will be enrolled upon successful payment.',
+        });
+      }
+    } else if (provider === 'xrpl') {
+      toast({
+        title: 'XRPL Payment',
+        description: 'XRPL wallet payment requires platform wallet configuration. Please configure XRPL_WALLET_SEED.',
+      });
+    } else {
+      toast({ title: 'Cancelled', description: 'Enrollment not started.' });
+    }
   };
 
   const handleDeleteCourse = async (courseId: string) => {

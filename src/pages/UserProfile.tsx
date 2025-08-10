@@ -67,6 +67,7 @@ const UserProfile: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<UserPost[]>([]);
   const [activity, setActivity] = useState<{ id: string; action: string; created_at: string }[]>([])
+  const [badges, setBadges] = useState<Array<{ id: string; badge_name: string; description: string; badge_type: string; course_id: string | null; lesson_id: string | null; earned_at: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [newPost, setNewPost] = useState("");

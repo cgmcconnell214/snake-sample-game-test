@@ -2244,30 +2244,36 @@ export type Database = {
           assignment_id: string | null
           awarded_at: string
           badge_name: string
+          badge_type: string
           course_id: string | null
           description: string | null
           icon_url: string | null
           id: string
+          lesson_id: string | null
           user_id: string
         }
         Insert: {
           assignment_id?: string | null
           awarded_at?: string
           badge_name: string
+          badge_type?: string
           course_id?: string | null
           description?: string | null
           icon_url?: string | null
           id?: string
+          lesson_id?: string | null
           user_id: string
         }
         Update: {
           assignment_id?: string | null
           awarded_at?: string
           badge_name?: string
+          badge_type?: string
           course_id?: string | null
           description?: string | null
           icon_url?: string | null
           id?: string
+          lesson_id?: string | null
           user_id?: string
         }
         Relationships: []

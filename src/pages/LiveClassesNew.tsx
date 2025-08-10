@@ -167,26 +167,45 @@ export default function LiveClasses(): JSX.Element {
     const classItem = classes.find((c) => c.id === classId);
     if (!classItem) return;
 
-    // Register for class
-    const { error } = await supabase.from("class_attendees").insert({
-      class_id: classId,
-      attendee_id: user.id,
-      payment_amount: classItem.price_per_attendee,
-    });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to register for class",
-        variant: "destructive",
+    // Free vs paid registration
+    if (!classItem.price_per_attendee || classItem.price_per_attendee === 0) {
+      const { error } = await supabase.from("class_attendees").insert({
+        class_id: classId,
+        attendee_id: user.id,
+        payment_amount: 0,
+        attendance_status: 'registered',
       });
+      if (error) {
+        toast({ title: 'Error', description: error.message || 'Failed to register', variant: 'destructive' });
+        return;
+      }
+      toast({ title: 'Registered Successfully', description: `You're registered for ${classItem.title}.` });
       return;
     }
 
-    toast({
-      title: "Registered Successfully",
-      description: `You're registered for ${classItem.title}. Meeting details will be sent to you.`,
-    });
+    const provider = window.prompt("Choose payment provider: type 'stripe' or 'xrpl'", 'stripe')?.toLowerCase();
+    if (provider === 'stripe') {
+      const amount_cents = Math.round((classItem.price_per_attendee || 0) * 100);
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          amount_cents,
+          product_name: `Live Class Registration: ${classItem.title}`,
+          metadata: { resource_type: 'live_class', class_id: classId }
+        }
+      });
+      if (error) {
+        toast({ title: 'Payment Error', description: error.message || 'Failed to start payment', variant: 'destructive' });
+        return;
+      }
+      if (data?.url) {
+        window.open(data.url, '_blank');
+        toast({ title: 'Complete Payment', description: 'Stripe Checkout opened in a new tab. You will be registered upon successful payment.' });
+      }
+    } else if (provider === 'xrpl') {
+      toast({ title: 'XRPL Payment', description: 'XRPL wallet payment requires platform wallet configuration. Please configure XRPL_WALLET_SEED.' });
+    } else {
+      toast({ title: 'Cancelled', description: 'Registration not started.' });
+    }
   };
 
   const handleScheduleSession = () => {
