@@ -71,7 +71,7 @@ const UserProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [newPost, setNewPost] = useState("");
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
 
   const [editForm, setEditForm] = useState({
@@ -184,14 +184,46 @@ const UserProfile: React.FC = () => {
         username = `user_${user?.id?.slice(0, 8)}`;
       }
 
-      const { error } = await supabase.from("user_profiles").upsert(
-        {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Not authenticated");
+
+      const payload: any = {
+        profile: {
           user_id: user?.id,
-          username: username,
+          username,
           ...editForm,
         },
-        { onConflict: "user_id" },
-      );
+      };
+
+      if (profile?.two_factor_enabled) {
+        const mfaCode = prompt("Enter your 2FA code");
+        if (!mfaCode) {
+          toast({
+            title: "Verification required",
+            description: "2FA code is required to update your profile.",
+            variant: "destructive",
+          });
+          return;
+        }
+        payload.mfaCode = mfaCode;
+      } else {
+        const password = prompt("Please confirm your password");
+        if (!password) {
+          toast({
+            title: "Verification required",
+            description: "Password confirmation is required to update your profile.",
+            variant: "destructive",
+          });
+          return;
+        }
+        payload.password = password;
+      }
+
+      const { error } = await supabase.functions.invoke("update-user-profile", {
+        body: payload,
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
       if (error) throw error;
 
