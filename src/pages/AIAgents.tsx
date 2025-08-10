@@ -60,6 +60,7 @@ import { AgentAuditor } from "@/components/ai-agents/AgentAuditor";
 import { ComprehensiveTestDashboard } from "@/components/ai-agents/ComprehensiveTestDashboard";
 import { EnhancedExecutionConsole } from "@/components/ai-agents/EnhancedExecutionConsole";
 import { AgentExecutionAnalyzer } from "@/components/ai-agents/AgentExecutionAnalyzer";
+import { z } from "zod";
 
 interface AIAgent {
   id: string;
@@ -78,6 +79,17 @@ interface AIAgent {
   is_active: boolean;
 }
 
+const agentSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  agent_type: z.string().min(1, "Agent type is required"),
+  price_per_use: z.number().nonnegative("Price must be 0 or more"),
+  total_tokens: z.number().int().positive("Total tokens must be positive"),
+});
+
+type AgentForm = z.infer<typeof agentSchema>;
+
 export default function AIAgents() {
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -94,6 +106,8 @@ export default function AIAgents() {
     workflow_data: {},
     configuration: {},
   });
+  const [errors, setErrors] = useState<Partial<Record<keyof AgentForm, string>>>({});
+  const [editErrors, setEditErrors] = useState<Partial<Record<keyof AgentForm, string>>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showAuditMode, setShowAuditMode] = useState(false);
@@ -105,6 +119,42 @@ export default function AIAgents() {
   useEffect(() => {
     fetchAgents();
   }, []);
+
+  useEffect(() => {
+    const result = agentSchema.safeParse(newAgent);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        name: fieldErrors.name?.[0],
+        description: fieldErrors.description?.[0],
+        category: fieldErrors.category?.[0],
+        agent_type: fieldErrors.agent_type?.[0],
+        price_per_use: fieldErrors.price_per_use?.[0],
+        total_tokens: fieldErrors.total_tokens?.[0],
+      });
+    } else {
+      setErrors({});
+    }
+  }, [newAgent]);
+
+  useEffect(() => {
+    if (!editingAgent) {
+      setEditErrors({});
+      return;
+    }
+    const result = agentSchema.safeParse(editingAgent);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setEditErrors({
+        name: fieldErrors.name?.[0],
+        description: fieldErrors.description?.[0],
+        price_per_use: fieldErrors.price_per_use?.[0],
+        total_tokens: fieldErrors.total_tokens?.[0],
+      });
+    } else {
+      setEditErrors({});
+    }
+  }, [editingAgent]);
 
   const fetchAgents = async () => {
     setIsLoading(true);
@@ -131,6 +181,24 @@ export default function AIAgents() {
   };
 
   const handleCreateAgent = async () => {
+    const result = agentSchema.safeParse(newAgent);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        name: fieldErrors.name?.[0],
+        description: fieldErrors.description?.[0],
+        category: fieldErrors.category?.[0],
+        agent_type: fieldErrors.agent_type?.[0],
+        price_per_use: fieldErrors.price_per_use?.[0],
+        total_tokens: fieldErrors.total_tokens?.[0],
+      });
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
     setIsLoading(true);
     try {
       const {
@@ -191,6 +259,25 @@ export default function AIAgents() {
     } finally {
       setIsLoading(false);
     }
+
+    toast({
+      title: "Success",
+      description: "AI agent created successfully",
+    });
+
+    setAgents([data, ...agents]);
+    setIsCreateModalOpen(false);
+    setNewAgent({
+      name: "",
+      description: "",
+      category: "workflow",
+      agent_type: "workflow",
+      price_per_use: 0,
+      total_tokens: 1000000,
+      workflow_data: {},
+      configuration: {},
+    });
+    setErrors({});
   };
 
   const handleCreateTestingAgent = async () => {
@@ -511,6 +598,28 @@ export default function AIAgents() {
     const agentToUpdate = editingAgent || workflowAgent;
     if (!agentToUpdate) return;
 
+    if (editingAgent) {
+      const result = agentSchema.safeParse(editingAgent);
+      if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors;
+        setEditErrors({
+          name: fieldErrors.name?.[0],
+          description: fieldErrors.description?.[0],
+          price_per_use: fieldErrors.price_per_use?.[0],
+          total_tokens: fieldErrors.total_tokens?.[0],
+        });
+        return;
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('ai_agents')
+      .update(updated)
+      .eq('id', agentToUpdate.id)
+      .select()
+      .single();
+
+    if (error) {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -532,6 +641,12 @@ export default function AIAgents() {
     } finally {
       setIsLoading(false);
     }
+
+    console.log('Agent updated successfully:', data);
+    setAgents(prev => prev.map(a => (a.id === data.id ? data : a)));
+    setEditingAgent(null);
+    setEditErrors({});
+    toast({ title: 'Agent Updated', description: 'Changes saved successfully' });
   };
 
   const isUserAgent = (agent: AIAgent) => {
@@ -804,6 +919,9 @@ export default function AIAgents() {
                 placeholder="e.g., Trading Bot Extreme"
                 disabled={isLoading}
               />
+              {errors.name && (
+                <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+              )}
             </div>
 
             <div>
@@ -817,6 +935,9 @@ export default function AIAgents() {
                 placeholder="Describe what your AI agent does..."
                 disabled={isLoading}
               />
+              {errors.description && (
+                <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -839,6 +960,9 @@ export default function AIAgents() {
                     <SelectItem value="compliance">Compliance</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.category && (
+                  <p className="text-sm text-red-500 mt-1">{errors.category}</p>
+                )}
               </div>
 
               <div>
@@ -860,6 +984,9 @@ export default function AIAgents() {
                     <SelectItem value="api_connector">API Connector</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.agent_type && (
+                  <p className="text-sm text-red-500 mt-1">{errors.agent_type}</p>
+                )}
               </div>
             </div>
 
@@ -879,6 +1006,9 @@ export default function AIAgents() {
                   }
                   disabled={isLoading}
                 />
+                {errors.price_per_use && (
+                  <p className="text-sm text-red-500 mt-1">{errors.price_per_use}</p>
+                )}
               </div>
 
               <div>
@@ -895,10 +1025,20 @@ export default function AIAgents() {
                   }
                   disabled={isLoading}
                 />
+                {errors.total_tokens && (
+                  <p className="text-sm text-red-500 mt-1">{errors.total_tokens}</p>
+                )}
               </div>
             </div>
 
             <div className="flex gap-2 pt-4">
+              <Button
+                onClick={handleCreateAgent}
+                className="flex-1"
+                disabled={Object.values(errors).some(Boolean)}
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Create Agent
               <Button onClick={handleCreateAgent} className="flex-1" disabled={isLoading}>
                 {isLoading ? (
                   <>
@@ -940,6 +1080,9 @@ export default function AIAgents() {
                   onChange={(e) => setEditingAgent({ ...editingAgent, name: e.target.value })}
                   disabled={isLoading}
                 />
+                {editErrors.name && (
+                  <p className="text-sm text-red-500 mt-1">{editErrors.name}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="edit-description">Description</Label>
@@ -949,6 +1092,9 @@ export default function AIAgents() {
                   onChange={(e) => setEditingAgent({ ...editingAgent, description: e.target.value })}
                   disabled={isLoading}
                 />
+                {editErrors.description && (
+                  <p className="text-sm text-red-500 mt-1">{editErrors.description}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="edit-price">Price per Use ($)</Label>
@@ -960,6 +1106,9 @@ export default function AIAgents() {
                   onChange={(e) => setEditingAgent({ ...editingAgent, price_per_use: parseFloat(e.target.value) || 0 })}
                   disabled={isLoading}
                 />
+                {editErrors.price_per_use && (
+                  <p className="text-sm text-red-500 mt-1">{editErrors.price_per_use}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="edit-tokens">Total Tokens</Label>
@@ -970,8 +1119,17 @@ export default function AIAgents() {
                   onChange={(e) => setEditingAgent({ ...editingAgent, total_tokens: parseInt(e.target.value) || 0 })}
                   disabled={isLoading}
                 />
+                {editErrors.total_tokens && (
+                  <p className="text-sm text-red-500 mt-1">{editErrors.total_tokens}</p>
+                )}
               </div>
               <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={() => handleUpdateAgent(editingAgent)}
+                  className="flex-1"
+                  disabled={Object.values(editErrors).some(Boolean)}
+                >
+                  Save Changes
                 <Button onClick={() => handleUpdateAgent(editingAgent)} className="flex-1" disabled={isLoading}>
                   {isLoading ? (
                     <>
