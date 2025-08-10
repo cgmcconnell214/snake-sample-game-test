@@ -1,12 +1,14 @@
+import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Code, GitFork, Rocket, TestTube } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import DOMPurify from "dompurify";
 import { useNavigate } from "react-router-dom";
 
 export default function DevPlayground(): JSX.Element {
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const [code, setCode] = useState("");
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const handleNewProject = () => {
     navigate('/app/smart-contracts');
@@ -23,6 +25,20 @@ export default function DevPlayground(): JSX.Element {
   const handleDeploy = () => {
     navigate('/app/smart-contracts');
   };
+
+  const runUserCode = () => {
+    if (!iframeRef.current) return;
+    const sanitized = DOMPurify.sanitize(code, {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: [],
+    });
+    const blob = new Blob(
+      [`<!DOCTYPE html><html><body><script>${sanitized}\n<\/script></body></html>`],
+      { type: "text/html" }
+    );
+    iframeRef.current.src = URL.createObjectURL(blob);
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -90,6 +106,29 @@ export default function DevPlayground(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Run Code</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <textarea
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className="w-full h-40 p-2 border rounded mb-4 font-mono text-sm"
+            placeholder="Enter JavaScript code"
+          />
+          <Button onClick={runUserCode} className="mb-4">
+            Run Code
+          </Button>
+          <iframe
+            ref={iframeRef}
+            sandbox="allow-scripts"
+            title="code-output"
+            className="w-full h-64 border"
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
