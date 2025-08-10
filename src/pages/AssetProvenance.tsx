@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import AssetProvenanceCard from "@/components/AssetProvenanceCard";
 import { History, Eye, Search, Clock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 interface ProvenanceCard {
@@ -15,7 +15,6 @@ interface ProvenanceCard {
 }
 
 export default function AssetProvenance(): JSX.Element {
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [cards, setCards] = useState<ProvenanceCard[]>([]);
 
@@ -80,6 +79,16 @@ export default function AssetProvenance(): JSX.Element {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AssetProvenanceCard
+          icon={<History className="h-5 w-5" />}
+          title="Visual History"
+          description="Complete visual timeline of asset lifecycle"
+          action={
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewTimeline}
+            >
         {cards.map((card) => {
           const Icon = iconMap[card.icon] || History;
           return (
@@ -119,9 +128,19 @@ export default function AssetProvenance(): JSX.Element {
             <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/audit-trail')}>
               View Timeline
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
 
+        <AssetProvenanceCard
+          icon={<Eye className="h-5 w-5" />}
+          title="Commodity Tracking"
+          description="Track physical commodities from origin to token"
+          action={
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleTrackCommodity}
+            >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -136,9 +155,19 @@ export default function AssetProvenance(): JSX.Element {
             <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/tokenize')}>
               Track Commodity
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
 
+        <AssetProvenanceCard
+          icon={<Clock className="h-5 w-5" />}
+          title="IP Asset Journey"
+          description="Follow intellectual property from creation to tokenization"
+          action={
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewJourney}
+            >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -153,8 +182,8 @@ export default function AssetProvenance(): JSX.Element {
             <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/ip-tokenization')}>
               View Journey
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AssetProvenanceCard from "@/components/AssetProvenanceCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -171,14 +171,11 @@ export default function AssetProvenance(): JSX.Element {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Asset Selection Sidebar */}
         <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Tracked Assets
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
+          <AssetProvenanceCard
+            icon={<MapPin className="h-5 w-5" />}
+            title="Tracked Assets"
+          >
+            <div className="space-y-2">
               <Button
                 variant={selectedAsset === null ? "default" : "outline"}
                 className="w-full justify-start"
@@ -201,82 +198,81 @@ export default function AssetProvenance(): JSX.Element {
                   </div>
                 </Button>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </AssetProvenanceCard>
         </div>
 
         {/* Provenance Timeline */}
         <div className="lg:col-span-3">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
+          <AssetProvenanceCard
+            icon={<Clock className="h-5 w-5" />}
+            title={
+              <>
                 Provenance Timeline
                 {selectedAsset && (
                   <Badge variant="secondary">
                     {displayedRecords[0]?.asset_name}
                   </Badge>
                 )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="text-center py-8">Loading provenance records...</div>
-              ) : displayedRecords.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No provenance records found
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {displayedRecords.map((record, index) => (
-                    <div key={record.id} className="flex gap-4 p-4 border rounded-lg">
-                      <div className="flex flex-col items-center">
-                        <div className="p-2 bg-muted rounded-full">
-                          {getEventIcon(record.event_type)}
-                        </div>
-                        {index < displayedRecords.length - 1 && (
-                          <div className="w-px bg-border h-8 mt-2" />
-                        )}
+              </>
+            }
+          >
+            {loading ? (
+              <div className="text-center py-8">Loading provenance records...</div>
+            ) : displayedRecords.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No provenance records found
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {displayedRecords.map((record, index) => (
+                  <div key={record.id} className="flex gap-4 p-4 border rounded-lg">
+                    <div className="flex flex-col items-center">
+                      <div className="p-2 bg-muted rounded-full">
+                        {getEventIcon(record.event_type)}
                       </div>
-                      
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium capitalize">
-                              {record.event_type.replace("_", " ")}
-                            </h4>
-                            <Badge variant={getStatusColor(record.verification_status)}>
-                              {record.verification_status}
-                            </Badge>
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(record.timestamp).toLocaleString()}
-                          </span>
-                        </div>
-                        
-                        <p className="text-sm text-muted-foreground">
-                          {record.event_description}
-                        </p>
-                        
-                        {record.location && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            {record.location}
-                          </div>
-                        )}
-                        
-                        {record.metadata && (
-                          <div className="text-xs bg-muted p-2 rounded">
-                            <strong>Metadata:</strong> {JSON.stringify(record.metadata, null, 2)}
-                          </div>
-                        )}
-                      </div>
+                      {index < displayedRecords.length - 1 && (
+                        <div className="w-px bg-border h-8 mt-2" />
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium capitalize">
+                            {record.event_type.replace("_", " ")}
+                          </h4>
+                          <Badge variant={getStatusColor(record.verification_status)}>
+                            {record.verification_status}
+                          </Badge>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(record.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+
+                      <p className="text-sm text-muted-foreground">
+                        {record.event_description}
+                      </p>
+
+                      {record.location && (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          {record.location}
+                        </div>
+                      )}
+
+                      {record.metadata && (
+                        <div className="text-xs bg-muted p-2 rounded">
+                          <strong>Metadata:</strong> {JSON.stringify(record.metadata, null, 2)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </AssetProvenanceCard>
         </div>
       </div>
     </div>
