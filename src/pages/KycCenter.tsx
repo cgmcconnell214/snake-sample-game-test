@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
 import {
   UserCheck,
   Upload,
@@ -32,6 +33,11 @@ const KycCenter = (): JSX.Element => {
     idFront?: File;
     idBack?: File;
     proofAddress?: File;
+  }>({});
+  const [uploadProgress, setUploadProgress] = useState<{
+    idFront?: number;
+    idBack?: number;
+    proofAddress?: number;
   }>({});
 
   const handleFileUpload = (fileType: 'idFront' | 'idBack' | 'proofAddress', file: File) => {
@@ -66,27 +72,56 @@ const KycCenter = (): JSX.Element => {
     }
 
     setIsSubmitting(true);
-    
+    setUploadProgress({ idFront: 0, idBack: 0, proofAddress: 0 });
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error("User not authenticated");
       }
 
+      const uploadWithProgress = (
+        path: string,
+        file: File,
+        fileType: 'idFront' | 'idBack' | 'proofAddress'
+      ) =>
+        supabase.storage
+          .from('kyc-documents')
+          .upload(path, file, {
+            onUploadProgress: (progress) => {
+              const percent = Math.round(
+                (progress.loaded / (progress.total ?? 1)) * 100
+              );
+              setUploadProgress((prev) => ({ ...prev, [fileType]: percent }));
+            },
+          });
+
       // Upload files to Supabase Storage
       const uploads = await Promise.all([
-        supabase.storage
-          .from('kyc-documents')
-          .upload(`${user.id}/id-front-${Date.now()}.${idFront.name.split('.').pop()}`, idFront),
-        supabase.storage
-          .from('kyc-documents')
-          .upload(`${user.id}/id-back-${Date.now()}.${idBack.name.split('.').pop()}`, idBack),
-        supabase.storage
-          .from('kyc-documents')
-          .upload(`${user.id}/proof-address-${Date.now()}.${proofAddress.name.split('.').pop()}`, proofAddress)
+        uploadWithProgress(
+          `${user.id}/id-front-${Date.now()}.${
+            idFront.name.split('.').pop()
+          }`,
+          idFront,
+          'idFront'
+        ),
+        uploadWithProgress(
+          `${user.id}/id-back-${Date.now()}.${
+            idBack.name.split('.').pop()
+          }`,
+          idBack,
+          'idBack'
+        ),
+        uploadWithProgress(
+          `${user.id}/proof-address-${Date.now()}.${
+            proofAddress.name.split('.').pop()
+          }`,
+          proofAddress,
+          'proofAddress'
+        ),
       ]);
 
-      const errors = uploads.filter(upload => upload.error);
+      const errors = uploads.filter((upload) => upload.error);
       if (errors.length > 0) {
         throw new Error("Failed to upload some documents");
       }
@@ -111,6 +146,7 @@ const KycCenter = (): JSX.Element => {
       
       // Clear uploaded files
       setUploadedFiles({});
+      setUploadProgress({});
       
     } catch (error) {
       console.error('Upload error:', error);
@@ -121,6 +157,7 @@ const KycCenter = (): JSX.Element => {
       });
     } finally {
       setIsSubmitting(false);
+      setUploadProgress({});
     }
   };
 
@@ -243,15 +280,20 @@ const KycCenter = (): JSX.Element => {
                 <Label htmlFor="id-front">Government ID (Front)</Label>
                 <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                   {uploadedFiles.idFront ? (
-                    <div className="flex items-center justify-between p-2 bg-muted rounded">
-                      <span className="text-sm">{uploadedFiles.idFront.name}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => removeFile('idFront')}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                    <div>
+                      <div className="flex items-center justify-between p-2 bg-muted rounded">
+                        <span className="text-sm">{uploadedFiles.idFront.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile('idFront')}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      {typeof uploadProgress.idFront === "number" && (
+                        <Progress value={uploadProgress.idFront} className="mt-2" />
+                      )}
                     </div>
                   ) : (
                     <>
@@ -278,15 +320,20 @@ const KycCenter = (): JSX.Element => {
                 <Label htmlFor="id-back">Government ID (Back)</Label>
                 <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                   {uploadedFiles.idBack ? (
-                    <div className="flex items-center justify-between p-2 bg-muted rounded">
-                      <span className="text-sm">{uploadedFiles.idBack.name}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => removeFile('idBack')}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                    <div>
+                      <div className="flex items-center justify-between p-2 bg-muted rounded">
+                        <span className="text-sm">{uploadedFiles.idBack.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFile('idBack')}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      {typeof uploadProgress.idBack === "number" && (
+                        <Progress value={uploadProgress.idBack} className="mt-2" />
+                      )}
                     </div>
                   ) : (
                     <>
@@ -316,15 +363,20 @@ const KycCenter = (): JSX.Element => {
               <Label htmlFor="proof-address">Proof of Address</Label>
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                 {uploadedFiles.proofAddress ? (
-                  <div className="flex items-center justify-between p-2 bg-muted rounded">
-                    <span className="text-sm">{uploadedFiles.proofAddress.name}</span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => removeFile('proofAddress')}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                  <div>
+                    <div className="flex items-center justify-between p-2 bg-muted rounded">
+                      <span className="text-sm">{uploadedFiles.proofAddress.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile('proofAddress')}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {typeof uploadProgress.proofAddress === "number" && (
+                      <Progress value={uploadProgress.proofAddress} className="mt-2" />
+                    )}
                   </div>
                 ) : (
                   <>
