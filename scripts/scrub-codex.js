@@ -46,4 +46,21 @@ function scrubText(text, filePath) {
     // drop leading + / - from pasted diffs (best‑effort)
     .replace(/^[+-](?=[^+\-*/=].*)/gmi, "");
 
-  //
+  // 3) Collapse accidental multiple blank lines
+  out = out.replace(/\n{3,}/g, "\n\n");
+  return out;
+}
+
+// Execute scrubbing across repo
+let changed = 0;
+for (const file of walk(process.cwd())) {
+  if (!isCodeLike(file)) continue;
+  const orig = fs.readFileSync(file, "utf8");
+  const scrb = scrubText(orig, file);
+  if (scrb !== orig) {
+    fs.writeFileSync(file, scrb, "utf8");
+    changed++;
+  }
+}
+
+console.log(`scrub-codex: cleaned ${changed} file(s).`);
