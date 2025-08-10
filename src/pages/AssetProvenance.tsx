@@ -8,20 +8,17 @@ export default function AssetProvenance(): JSX.Element {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleTrackAsset = () => {
-    navigate('/app/tokenize');
-  };
-
-  const handleViewTimeline = () => {
-    navigate('/app/audit-trail');
-  };
-
-  const handleTrackCommodity = () => {
-    navigate('/app/tokenize');
-  };
-
-  const handleViewJourney = () => {
-    navigate('/app/ip-tokenization');
+  const navigateTo = (path: string) => {
+    try {
+      navigate(path);
+    } catch (error) {
+      console.error("Navigation failed:", error);
+      toast({
+        title: "Navigation failed",
+        description: "Unable to navigate to the requested page.",
+        variant: "destructive",
+      });
+    }
   };
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -32,7 +29,7 @@ export default function AssetProvenance(): JSX.Element {
             Visual history and tracking of tokenized assets
           </p>
         </div>
-        <Button onClick={handleTrackAsset}>
+        <Button onClick={() => navigateTo('/app/tokenize')}>
           <Search className="h-4 w-4 mr-2" />
           Track Asset
         </Button>
@@ -50,7 +47,7 @@ export default function AssetProvenance(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Complete visual timeline of asset lifecycle
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewTimeline}>
+            <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/audit-trail')}>
               View Timeline
             </Button>
           </CardContent>
@@ -67,7 +64,7 @@ export default function AssetProvenance(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track physical commodities from origin to token
             </p>
-            <Button variant="outline" className="w-full" onClick={handleTrackCommodity}>
+            <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/tokenize')}>
               Track Commodity
             </Button>
           </CardContent>
@@ -84,7 +81,7 @@ export default function AssetProvenance(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Follow intellectual property from creation to tokenization
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewJourney}>
+            <Button variant="outline" className="w-full" onClick={() => navigateTo('/app/ip-tokenization')}>
               View Journey
             </Button>
           </CardContent>
