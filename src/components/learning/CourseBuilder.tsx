@@ -303,6 +303,7 @@ useEffect(() => {
     setEnrollments((prev) => prev.filter((e) => e.id !== enrollmentId));
     toast({ title: 'Removed', description: 'Student removed from course' });
   };
+  const handleCreateCourse = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast({
@@ -598,6 +599,7 @@ useEffect(() => {
         {/* Course Content */}
         <div className="lg:col-span-3">
           {selectedCourse ? (
+            <>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -1099,7 +1101,7 @@ useEffect(() => {
                 )}
               </DialogContent>
             </Dialog>
-          ) : (
+          </>) : (
             <Card>
               <CardContent className="text-center py-12">
                 <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
