@@ -177,7 +177,7 @@ export default function Dashboard(): JSX.Element {
       {/* Main Trading Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <TradingChart />
+          <TradingChart symbol="GOLD-TOKEN" currentPrice={131.2} change={2.4} />
 
           {/* Portfolio Holdings */}
           <Card className="bg-card/50 backdrop-blur border-border/50">

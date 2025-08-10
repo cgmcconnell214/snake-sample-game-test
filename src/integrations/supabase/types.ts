@@ -2239,6 +2239,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          assignment_id: string | null
+          awarded_at: string
+          badge_name: string
+          course_id: string | null
+          description: string | null
+          icon_url: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          assignment_id?: string | null
+          awarded_at?: string
+          badge_name: string
+          course_id?: string | null
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          assignment_id?: string | null
+          awarded_at?: string
+          badge_name?: string
+          course_id?: string | null
+          description?: string | null
+          icon_url?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_behavior_log: {
         Row: {
           action: string

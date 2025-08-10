@@ -5,12 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Shield, Coins, Scale, Crown, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const LandingPage = () => {
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [termsMode, setTermsMode] = useState<'signin' | 'signup'>('signup');
+  const [agreed, setAgreed] = useState(false);
 
   useEffect(() => {
     // Redirect logged in users to the app
@@ -92,6 +97,13 @@ const LandingPage = () => {
                 className="text-muted-foreground hover:text-divine-gold transition-colors"
               >
                 Register
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => { setTermsMode('signin'); setAgreed(false); setTermsOpen(true); }}
+                className="border-divine-gold text-divine-gold hover:bg-divine-gold hover:text-divine-gold-foreground"
+              >
+                Login
               </Button>
             </div>
           </div>
@@ -273,13 +285,45 @@ const LandingPage = () => {
             <Button
               size="lg"
               className="bg-gradient-to-r from-primary to-divine-gold text-primary-foreground hover:scale-105 transition-all duration-300 shadow-divine"
-              onClick={() => navigate("/auth")}
+              onClick={() => { setTermsMode('signup'); setAgreed(false); setTermsOpen(true); }}
             >
               🔓 Register Now
             </Button>
           </div>
         </div>
       </section>
+      {/* Terms & Conditions Modal */}
+      <Dialog open={termsOpen} onOpenChange={setTermsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Agreement Required</DialogTitle>
+            <DialogDescription>
+              To proceed {termsMode === 'signin' ? 'to sign in' : 'with registration'}, you must agree to our Terms of Service and Privacy Policy.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-start gap-3 py-4">
+            <Checkbox id="terms" checked={agreed} onCheckedChange={(v) => setAgreed(Boolean(v))} />
+            <label htmlFor="terms" className="text-sm leading-tight text-muted-foreground">
+              I have read and agree to the
+              <button className="underline px-1" onClick={() => window.open('/terms', '_blank')}>Terms</button>
+              and
+              <button className="underline px-1" onClick={() => window.open('/privacy', '_blank')}>Privacy Policy</button>.
+            </label>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTermsOpen(false)}>Cancel</Button>
+            <Button
+              disabled={!agreed}
+              onClick={() => {
+                setTermsOpen(false);
+                navigate(`/auth?mode=${termsMode}`);
+              }}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="py-12 border-t border-divine-gold/20">

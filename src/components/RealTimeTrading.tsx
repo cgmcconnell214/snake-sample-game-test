@@ -173,6 +173,7 @@ export default function RealTimeTrading(): JSX.Element {
           {selectedAsset ? (
             <TradingChart
               symbol={selectedAsset.asset_symbol}
+              assetId={selectedAsset.id}
               currentPrice={selectedAsset.current_price}
               change={selectedAsset.price_change_24h}
             />

@@ -13,7 +13,7 @@ export default function Certification(): JSX.Element {
   };
 
   const handleViewChecklist = () => {
-    navigate('/app/kyc-center');
+    navigate('/app/kyc');
   };
 
   const handleViewProgress = () => {
@@ -21,7 +21,7 @@ export default function Certification(): JSX.Element {
   };
 
   const handleCheckAccess = () => {
-    navigate('/app/settings');
+    navigate('/app/certification');
   };
   return (
     <div className="container mx-auto p-6 space-y-6">
