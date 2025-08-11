@@ -42,38 +42,51 @@ export default function FollowersPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      fetchFollowData();
-      fetchSuggestedUsers();
-      setupRealtimeSubscription();
-    }
+    if (!user) return;
+    fetchFollowData();
+    fetchSuggestedUsers();
+    const cleanup = setupRealtimeSubscription();
+    return cleanup;
   }, [user]);
 
   const setupRealtimeSubscription = () => {
-    if (!user) return;
+    if (!user) return () => {};
 
-    const channel = supabase
-      .channel('user-follows-updates')
+    const incomingChannel = supabase
+      .channel('user-follows-incoming')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'user_follows'
+          table: 'user_follows',
+          filter: `following_id=eq.${user.id}`,
         },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            // Refresh data when someone follows/unfollows
-            fetchFollowData();
-          } else if (payload.eventType === 'DELETE') {
-            fetchFollowData();
-          }
+        () => {
+          fetchFollowData();
+        }
+      )
+      .subscribe();
+
+    const outgoingChannel = supabase
+      .channel('user-follows-outgoing')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_follows',
+          filter: `follower_id=eq.${user.id}`,
+        },
+        () => {
+          fetchFollowData();
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(incomingChannel);
+      supabase.removeChannel(outgoingChannel);
     };
   };
 

@@ -62,10 +62,10 @@ export default function SocialFeed() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      fetchFeed();
-      setupRealtimeSubscription();
-    }
+    if (!user) return;
+    fetchFeed();
+    const cleanup = setupRealtimeSubscription();
+    return cleanup;
   }, [user]);
 
   const setupRealtimeSubscription = () => {

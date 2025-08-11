@@ -35,10 +35,10 @@ export default function NotificationCenter() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      fetchNotifications();
-      setupRealtimeSubscription();
-    }
+    if (!user) return;
+    fetchNotifications();
+    const cleanup = setupRealtimeSubscription();
+    return cleanup;
   }, [user]);
 
   const fetchNotifications = async () => {
