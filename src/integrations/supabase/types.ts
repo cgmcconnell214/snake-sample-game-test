@@ -2726,28 +2726,8 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           display_name: string | null
-          follower_count: number | null
-          following_count: number | null
           user_id: string | null
           username: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          display_name?: string | null
-          follower_count?: number | null
-          following_count?: number | null
-          user_id?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          display_name?: string | null
-          follower_count?: number | null
-          following_count?: number | null
-          user_id?: string | null
-          username?: string | null
         }
         Relationships: []
       }
@@ -2774,6 +2754,16 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_public_user_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          display_name: string
+          username: string
+          bio: string
+          avatar_url: string
+        }[]
       }
       get_user_notifications: {
         Args: { target_user_id: string }
