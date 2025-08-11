@@ -62,7 +62,7 @@ export default function AssetProvenance(): JSX.Element {
         toast({
           title: "Unable to reach API",
           description: "Loaded default provenance actions.",
-          variant: "secondary",
+          variant: "default",
         });
       }
     };

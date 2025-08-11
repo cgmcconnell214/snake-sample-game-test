@@ -7,11 +7,13 @@ import CertificationList, {
 import { Award, CheckCircle, Clock, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Certification(): JSX.Element {
   const navigate = useNavigate();
   const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const { toast } = useToast();
 
   const handleEnroll = async (certificationId: string) => {
     try {

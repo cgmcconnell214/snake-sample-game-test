@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import CertificationList, {
   CertificationItem,
 } from "@/components/certification/CertificationList";
-import { Award, CheckCircle, Star, Trophy, Book } from "lucide-react";
+import { Award, CheckCircle, Star, Trophy, Book, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";

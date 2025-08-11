@@ -159,24 +159,6 @@ const Admin = () => {
     }
   };
 
-  const fetchAdminStats = async () => {
-    const [{ count: totalUsers }, { count: pendingAlerts }] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true }),
-      supabase
-        .from("compliance_alerts")
-        .select("*", { count: "exact", head: true })
-        .eq("resolved", false),
-    ]);
-
-    return {
-      totalUsers: totalUsers || 0,
-      activeTraders: 0, // Calculate from recent activity
-      totalVolume: 0, // Calculate from trades
-      pendingAlerts: pendingAlerts || 0,
-    };
-  };
 
   // loadAdminData defined above
 
