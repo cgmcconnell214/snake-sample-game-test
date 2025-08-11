@@ -47,6 +47,7 @@ const Auth = (): JSX.Element => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const signInCaptchaRef = useRef<ReCAPTCHA>(null);
   const signUpCaptchaRef = useRef<ReCAPTCHA>(null);
+  const recaptchaSiteKey = (import.meta as any).env?.VITE_RECAPTCHA_SITE_KEY as string | undefined;
   const initialTab = new URLSearchParams(location.search).get("mode") === "signup" ? "signup" : "signin";
   useEffect(() => {
     if (user) {
@@ -70,7 +71,7 @@ const Auth = (): JSX.Element => {
       setError("Please accept the Terms and Privacy Policy to continue.");
       return;
     }
-    if (!captchaToken) {
+    if (recaptchaSiteKey && !captchaToken) {
       setError("Please complete the captcha.");
       return;
     }
@@ -97,7 +98,7 @@ const Auth = (): JSX.Element => {
       setError("Please accept the Terms and Privacy Policy to continue.");
       return;
     }
-    if (!captchaToken) {
+    if (recaptchaSiteKey && !captchaToken) {
       setError("Please complete the captcha.");
       return;
     }
@@ -234,11 +235,13 @@ const Auth = (): JSX.Element => {
                     I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
                   </label>
                 </div>
-                <ReCAPTCHA
-                  ref={signInCaptchaRef}
-                  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                  onChange={(token) => setCaptchaToken(token)}
-                />
+                {recaptchaSiteKey && (
+                  <ReCAPTCHA
+                    ref={signInCaptchaRef}
+                    sitekey={recaptchaSiteKey}
+                    onChange={(token) => setCaptchaToken(token)}
+                  />
+                )}
                 {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
@@ -337,11 +340,13 @@ const Auth = (): JSX.Element => {
                     I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
                   </label>
                 </div>
-                <ReCAPTCHA
-                  ref={signUpCaptchaRef}
-                  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                  onChange={(token) => setCaptchaToken(token)}
-                />
+                {recaptchaSiteKey && (
+                  <ReCAPTCHA
+                    ref={signUpCaptchaRef}
+                    sitekey={recaptchaSiteKey}
+                    onChange={(token) => setCaptchaToken(token)}
+                  />
+                )}
                 {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
