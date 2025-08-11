@@ -86,11 +86,11 @@ export default function SocialFeed() {
           const newPost = payload.new as any;
           
           // Get user profile for the new post
-          const { data: userProfile } = await supabase
-            .from('user_profiles')
+          const { data: userProfile } = await (supabase as any)
+            .from('public_user_profiles')
             .select('user_id, display_name, username, avatar_url')
             .eq('user_id', newPost.user_id)
-            .single();
+            .maybeSingle();
 
           const postWithProfile = {
             ...newPost,
@@ -159,8 +159,8 @@ export default function SocialFeed() {
       if (postsData && user) {
         // Get user profiles for posts
         const userIds = [...new Set(postsData.map(post => post.user_id))];
-        const { data: profiles } = await supabase
-          .from('user_profiles')
+        const { data: profiles } = await (supabase as any)
+          .from('public_user_profiles')
           .select('user_id, display_name, username, avatar_url')
           .in('user_id', userIds);
 
@@ -250,11 +250,11 @@ export default function SocialFeed() {
       if (error) throw error;
 
       // Get user profile for the new post
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
+      const { data: userProfile } = await (supabase as any)
+        .from('public_user_profiles')
         .select('user_id, display_name, username, avatar_url')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       const newPost = {
         ...data,
@@ -333,8 +333,8 @@ export default function SocialFeed() {
       if (commentsData) {
         // Get user profiles for comments
         const userIds = [...new Set(commentsData.map(comment => comment.user_id))];
-        const { data: profiles } = await supabase
-          .from('user_profiles')
+        const { data: profiles } = await (supabase as any)
+          .from('public_user_profiles')
           .select('user_id, display_name, username, avatar_url')
           .in('user_id', userIds);
 

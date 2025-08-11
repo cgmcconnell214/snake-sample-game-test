@@ -106,9 +106,9 @@ export default function FollowersPage() {
 
       // Get follower profiles
       const followerIds = followersData?.map(f => f.follower_id) || [];
-      const { data: followerProfiles } = await supabase
-        .from('user_profiles')
-        .select('*')
+      const { data: followerProfiles } = await (supabase as any)
+        .from('public_user_profiles')
+        .select('user_id, display_name, username, avatar_url, bio, follower_count, following_count')
         .in('user_id', followerIds);
 
       // Fetch following with manual joins
@@ -121,9 +121,9 @@ export default function FollowersPage() {
 
       // Get following profiles
       const followingIds = followingData?.map(f => f.following_id) || [];
-      const { data: followingProfiles } = await supabase
-        .from('user_profiles')
-        .select('*')
+      const { data: followingProfiles } = await (supabase as any)
+        .from('public_user_profiles')
+        .select('user_id, display_name, username, avatar_url, bio, follower_count, following_count')
         .in('user_id', followingIds);
 
       // Combine data
@@ -156,9 +156,9 @@ export default function FollowersPage() {
 
     try {
       // Get users that current user is not following and exclude self
-      const { data: allUsers, error } = await supabase
-        .from('user_profiles')
-        .select('*')
+      const { data: allUsers, error } = await (supabase as any)
+        .from('public_user_profiles')
+        .select('user_id, display_name, username, avatar_url, bio, follower_count, following_count')
         .neq('user_id', user.id)
         .limit(20);
 
