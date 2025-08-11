@@ -15,11 +15,15 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import WalletIntegration from "@/components/WalletIntegration";
 import TwoFactorManager from "@/components/TwoFactorManager";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { setTheme, getStoredTheme, type ThemePreference } from "@/lib/theme";
 
 const Settings = () => {
   const { user, profile, signOut, checkSubscription } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [themePref, setThemePref] = useState<ThemePreference>(getStoredTheme());
 
   const getTierColor = (tier: string) => {
     switch (tier) {
@@ -146,6 +150,11 @@ const Settings = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  const handleThemeChange = (value: ThemePreference) => {
+    setTheme(value);
+    setThemePref(value);
+    toast({ title: "Theme updated", description: `Switched to ${value} mode.` });
   };
 
   return (
@@ -362,6 +371,31 @@ const Settings = () => {
                 )}
               </CardContent>
             </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Appearance */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <span>Appearance</span>
+          </CardTitle>
+          <CardDescription>Choose your theme preference</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="theme-select">Theme</Label>
+            <Select value={themePref} onValueChange={(v) => handleThemeChange(v as ThemePreference)}>
+              <SelectTrigger id="theme-select" className="w-[240px]">
+                <SelectValue placeholder="Select theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
