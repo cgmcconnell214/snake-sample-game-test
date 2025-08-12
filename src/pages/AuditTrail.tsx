@@ -73,6 +73,7 @@ const AuditTrail = () => {
     return "other";
   };
 
+  // Read defaults from URL
   useEffect(() => {
     const search = searchParams.get("search");
     const type = searchParams.get("type");
@@ -80,6 +81,7 @@ const AuditTrail = () => {
     if (type) setFilterType(type);
   }, [searchParams]);
 
+  // Fetch audit logs
   useEffect(() => {
     const fetchAuditLogs = async () => {
       setLoading(true);
@@ -94,16 +96,21 @@ const AuditTrail = () => {
           setAuditLogs([]);
         } else {
           const logs: AuditLog[] = (data || []).map((event: any) => {
-            const action = event?.request_data?.action || "Unknown";
+            const action = event?.request_data?.action ?? "Unknown";
+            const id = Number(event?.id ?? event?.event_id ?? 0);
+            const user =
+              event?.security_context?.user ??
+              event?.security_context?.user_id ??
+              "Unknown";
             return {
-              id: parseInt(event?.event_id, 10) || 0,
+              id,
               timestamp: event?.created_at,
               action,
-              user: event?.security_context?.user || "Unknown",
-              details: JSON.stringify(event?.request_data?.parameters || {}),
+              user,
+              details: JSON.stringify(event?.request_data?.parameters ?? {}),
               type: getActionType(action),
-              status: event?.response_data?.status || "unknown",
-              ipAddress: event?.security_context?.ip_address || "N/A",
+              status: event?.response_data?.status ?? "unknown",
+              ipAddress: event?.security_context?.ip_address ?? "N/A",
             };
           });
           setAuditLogs(logs);
@@ -119,6 +126,7 @@ const AuditTrail = () => {
     fetchAuditLogs();
   }, []);
 
+  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, filterType]);
