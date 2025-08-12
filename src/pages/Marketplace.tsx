@@ -6,7 +6,17 @@ import Seo from "@/components/Seo";
 export default function Marketplace() {
   const navigate = useNavigate();
 
-  const canonicalUrl = (typeof window !== "undefined" ? window.location.origin : "") + "/app/marketplace";
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const canonicalUrl = origin + "/app/marketplace";
+
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: origin },
+      { "@type": "ListItem", position: 2, name: "Marketplace", item: canonicalUrl },
+    ],
+  };
 
   return (
     <>
@@ -15,6 +25,7 @@ export default function Marketplace() {
         description="Peer-to-peer asset trading and smart contract offers."
         canonical={canonicalUrl}
       />
+      <script type="application/ld+json">{JSON.stringify(breadcrumbLd)}</script>
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
