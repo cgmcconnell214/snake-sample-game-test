@@ -17,9 +17,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Activity, Search, Download, Filter, Eye } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AuditDetailModal from "@/components/AuditDetailModal";
-import { supabase } from "@/integrations/supabase/client";
+import { useSearchParams } from "react-router-dom";
+import Papa from "papaparse";
 
 interface AuditLog {
   id: number;
@@ -37,47 +55,113 @@ const AuditTrail = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [searchParams] = useSearchParams();
 
-  const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "medium",
-  });
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
+  const getActionType = (action: string) => {
+    const lower = action.toLowerCase();
+    if (lower.includes("token")) return "tokenization";
+    if (lower.includes("trade")) return "trading";
+    if (lower.includes("login")) return "authentication";
+    if (lower.includes("kyc")) return "compliance";
+    if (lower.includes("setting")) return "configuration";
+    return "other";
+  };
+
+  // Read defaults from URL
   useEffect(() => {
+    const search = searchParams.get("search");
+    const type = searchParams.get("type");
+    if (search) setSearchTerm(search);
+    if (type) setFilterType(type);
+  }, [searchParams]);
+
+  // Fetch audit logs
+  useEffect(() => {
+    const fetchAuditLogs = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("audit_event_details")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Error fetching audit logs:", error);
+          setAuditLogs([]);
+        } else {
+          const logs: AuditLog[] = (data || []).map((event: any) => {
+            const action = event?.request_data?.action ?? "Unknown";
+            const id = Number(event?.id ?? event?.event_id ?? 0);
+            const user =
+              event?.security_context?.user ??
+              event?.security_context?.user_id ??
+              "Unknown";
+            return {
+              id,
+              timestamp: event?.created_at,
+              action,
+              user,
+              details: JSON.stringify(event?.request_data?.parameters ?? {}),
+              type: getActionType(action),
+              status: event?.response_data?.status ?? "unknown",
+              ipAddress: event?.security_context?.ip_address ?? "N/A",
+            };
+          });
+          setAuditLogs(logs);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        setAuditLogs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchAuditLogs();
   }, []);
 
-  const fetchAuditLogs = async () => {
-    const { data, error } = await supabase
-      .from("audit_event_details")
-      .select("id, created_at, request_data, response_data, security_context")
-      .order("created_at", { ascending: false });
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType]);
 
-    if (error) {
-      console.error("Error fetching audit logs:", error);
-      return;
-    }
+  const filteredLogs = auditLogs.filter((log) => {
+    const q = searchTerm.toLowerCase();
+    const matchesSearch =
+      log.action.toLowerCase().includes(q) ||
+      log.user.toLowerCase().includes(q) ||
+      log.details.toLowerCase().includes(q);
+    const matchesFilter = filterType === "all" || log.type === filterType;
+    return matchesSearch && matchesFilter;
+  });
 
-    const logs: AuditLog[] = (data || []).map((e) => ({
-      id: Number(e.id),
-      timestamp: e.created_at,
-      action: (e.request_data as any)?.action ?? "Unknown",
-      user: (e.security_context as any)?.user_id ?? "Unknown",
-      details: JSON.stringify((e.request_data as any)?.parameters ?? {}),
-      type: (e.request_data as any)?.action ?? "unknown",
-      status: (e.response_data as any)?.status ?? "unknown",
-      ipAddress: (e.security_context as any)?.ip_address ?? "Unknown",
-    }));
-
-    setAuditLogs(logs);
-  };
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;
+  const paginatedLogs = filteredLogs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleExport = () => {
+    const csv = Papa.unparse(filteredLogs);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `audit-trail-${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
     toast({
-      title: "Export Started",
-      description: "Audit trail export has been initiated.",
+      title: "Export Successful",
+      description: "Audit trail exported to CSV.",
     });
   };
 
@@ -110,15 +194,6 @@ const AuditTrail = () => {
         return "bg-muted/10 text-muted-foreground border-muted/20";
     }
   };
-
-  const filteredLogs = auditLogs.filter((log) => {
-    const matchesSearch =
-      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.details.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === "all" || log.type === filterType;
-    return matchesSearch && matchesFilter;
-  });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -182,45 +257,102 @@ const AuditTrail = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredLogs.map((log) => (
-              <div
-                key={log.id}
-                className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50"
-              >
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center space-x-3">
-                    <Badge variant="outline" className={getTypeColor(log.type)}>
-                      {log.type.toUpperCase()}
-                    </Badge>
-                    <h4 className="font-medium">{log.action}</h4>
-                    <Badge variant={getStatusColor(log.status)}>
-                      {log.status.toUpperCase()}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{log.details}</p>
-                  <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                    <span>User: {log.user}</span>
-                    <span>IP: {log.ipAddress}</span>
-                    <span>
-                      Time: {dateTimeFormatter.format(new Date(log.timestamp))}
-                    </span>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedAuditLog(log);
-                    setIsDetailModalOpen(true);
-                  }}
-                >
-                  <Eye className="w-4 h-4 mr-1" />
-                  Details
-                </Button>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>IP</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedLogs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell>{log.id}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className={getTypeColor(log.type)}
+                          >
+                            {log.type.toUpperCase()}
+                          </Badge>
+                          {log.action}
+                        </div>
+                      </TableCell>
+                      <TableCell>{log.user}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusColor(log.status)}>
+                          {log.status.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{log.ipAddress}</TableCell>
+                      <TableCell>
+                        {new Date(log.timestamp).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedAuditLog(log);
+                            setIsDetailModalOpen(true);
+                          }}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage((p) => Math.max(p - 1, 1));
+                      }}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        href="#"
+                        isActive={currentPage === i + 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(i + 1);
+                        }}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage((p) => Math.min(p + 1, totalPages));
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -248,7 +380,7 @@ const AuditTrail = () => {
                 auditLogs.filter(
                   (log) =>
                     new Date(log.timestamp).toDateString() ===
-                    new Date().toDateString(),
+                    new Date().toDateString()
                 ).length
               }
             </div>
