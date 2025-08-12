@@ -29,7 +29,7 @@ import AITradingBots from "./pages/AITradingBots";
 import SmartContracts from "./pages/SmartContracts";
 import WorkflowAutomation from "./pages/WorkflowAutomation";
 import LearningPortal from "./pages/LearningPortal";
-import LearningPortalNew from "./pages/LearningPortalNew"; // <-- added to satisfy route
+import LearningPortalNew from "./pages/LearningPortalNew";
 import Certification from "./pages/Certification";
 import LiveClasses from "./pages/LiveClasses";
 import DivineTrust from "./pages/DivineTrust";
@@ -175,14 +175,21 @@ const App = () => (
                               <Route path="live-classes" element={withSuspense(<LiveClasses />)} />
                               <Route path="live-classes/new" element={withSuspense(<LiveClassesNew />)} />
                               <Route path="divine-trust" element={withSuspense(<DivineTrust />)} />
-                              <Route path="kingdom-entry" element={withSuspense(<KingdomEntry />)} />
+                              <Route
+                                path="kingdom-entry"
+                                element={withSuspense(
+                                  <ProtectedRoute requiredRole="premium">
+                                    <KingdomEntry />
+                                  </ProtectedRoute>
+                                )}
+                              />
                               <Route path="sacred-law" element={withSuspense(<SacredLaw />)} />
 
                               {/* Market / Liquidity / DeFi */}
                               <Route path="marketplace" element={withSuspense(<Marketplace />)} />
                               <Route path="marketplace/browse" element={withSuspense(<MarketplaceNew />)} />
                               <Route path="liquidity" element={withSuspense(<LiquidityPools />)} />
-                              <Route path="liquidity/pools" element={withSuspense(<LiquityPoolsNew />)} />
+                              <Route path="liquidity/pools" element={withSuspense(<LiquidityPoolsNew />)} />
                               <Route path="escrow" element={withSuspense(<EscrowVaults />)} />
                               <Route path="tokenomics" element={withSuspense(<TokenomicsPage />)} />
 
@@ -210,7 +217,7 @@ const App = () => (
               />
             </Routes>
 
-            {/* Non-nested route that must live outside /app */}
+            {/* Non-nested route outside /app */}
             <Routes>
               <Route path="/redeem/:code" element={withSuspense(<RedeemEnrollment />)} />
             </Routes>

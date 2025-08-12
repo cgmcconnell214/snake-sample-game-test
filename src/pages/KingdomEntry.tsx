@@ -1,28 +1,79 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, UserCheck, Feather, Crown } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Users, UserCheck, Feather, Crown, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function KingdomEntry(): JSX.Element {
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [verified, setVerified] = useState(false);
+
+  useEffect(() => {
+    const verifyAccess = async () => {
+      if (!user) {
+        setVerified(false);
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (error || data?.role !== "premium") {
+        setVerified(false);
+      } else {
+        setVerified(true);
+      }
+      setLoading(false);
+    };
+
+    verifyAccess();
+  }, [user]);
 
   const handleRegisterSoul = () => {
-    navigate('/app/kyc');
+    navigate("/app/kyc");
   };
 
   const handleViewRegistry = () => {
-    navigate('/app/profile');
+    navigate("/app/profile");
   };
 
   const handleViewOaths = () => {
-    navigate('/app/sacred-law');
+    navigate("/app/sacred-law");
   };
 
   const handleManageWitnesses = () => {
-    navigate('/app/divine-trust');
+    navigate("/app/divine-trust");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!verified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-destructive mb-2">Access Denied</h2>
+          <p className="text-muted-foreground">
+            You do not have access to view this page.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
