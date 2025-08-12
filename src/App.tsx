@@ -29,7 +29,7 @@ import AITradingBots from "./pages/AITradingBots";
 import SmartContracts from "./pages/SmartContracts";
 import WorkflowAutomation from "./pages/WorkflowAutomation";
 import LearningPortal from "./pages/LearningPortal";
-import LearningPortalNew from "./pages/LearningPortalNew";
+
 import Certification from "./pages/Certification";
 import LiveClasses from "./pages/LiveClasses";
 import DivineTrust from "./pages/DivineTrust";
@@ -164,7 +164,7 @@ const App = () => (
 
                               {/* Learning */}
                               <Route path="learning" element={withSuspense(<LearningPortal />)} />
-                              <Route path="learning/courses" element={withSuspense(<LearningPortalNew />)} />
+                              <Route path="learning/courses" element={withSuspense(<LearningPortal />)} />
                               <Route path="learning/courses/:slug" element={withSuspense(<CourseDetail />)} />
                               <Route path="learning/creator" element={withSuspense(<CourseCreator />)} />
                               <Route path="learning/creator/:id" element={withSuspense(<CourseBuilder />)} />

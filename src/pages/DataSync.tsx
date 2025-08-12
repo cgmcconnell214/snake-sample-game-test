@@ -64,8 +64,7 @@ export default function DataSync(): JSX.Element {
             setProgress(100);
             toast({ title: 'Sync complete' });
           } else if (status === 'failed') {
-            setIsSyncing(false);
-            const err = (payload.new as any)?.error || 'Unknown error';
+            const err = ((payload.new as any)?.error as string) || 'Unknown error';
             setError(err);
             toast({ title: 'Sync failed', description: err, variant: 'destructive' });
           }
@@ -82,7 +81,7 @@ export default function DataSync(): JSX.Element {
     if (!isSyncing) return;
 
     const interval = setInterval(async () => {
-      const { data, error: statusError } = await supabase
+      const { data, error: statusError } = await (supabase as any)
         .from('sync_events')
         .select('status, progress, error')
         .order('created_at', { ascending: false })

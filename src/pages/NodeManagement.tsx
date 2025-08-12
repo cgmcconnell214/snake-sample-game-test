@@ -52,12 +52,12 @@ export default function NodeManagement(): JSX.Element {
           clearTimeout(timeout);
           const latency = Math.round(performance.now() - start);
           if (response.ok) {
-            return { ...node, status: "online", latency };
+            return { ...node, status: "online" as const, latency };
           }
-          return { ...node, status: "offline", latency: null };
+          return { ...node, status: "offline" as const, latency: null };
         } catch (error) {
           clearTimeout(timeout);
-          return { ...node, status: "offline", latency: null };
+          return { ...node, status: "offline" as const, latency: null };
         }
       })
     );

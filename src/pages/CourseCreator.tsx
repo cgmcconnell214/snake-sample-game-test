@@ -27,7 +27,7 @@ export default function CourseCreator(): JSX.Element {
       } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('course_creator_drafts')
         .select('selected_course_id,max_uses,expires_at')
         .eq('user_id', user.id)
@@ -53,7 +53,7 @@ export default function CourseCreator(): JSX.Element {
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    await supabase.from('course_creator_drafts').upsert({
+    await (supabase as any).from('course_creator_drafts').upsert({
       user_id: user.id,
       selected_course_id: selectedCourseId,
       max_uses: maxUses,

@@ -113,44 +113,33 @@ const KycCenter = (): JSX.Element => {
         throw new Error("User not authenticated");
       }
 
-      const uploadWithProgress = (
+      const uploadFile = (
         path: string,
-        file: File,
-        fileType: 'idFront' | 'idBack' | 'proofAddress'
+        file: File
       ) =>
         supabase.storage
           .from('kyc-documents')
-          .upload(path, file, {
-            onUploadProgress: (progress) => {
-              const percent = Math.round(
-                (progress.loaded / (progress.total ?? 1)) * 100
-              );
-              setUploadProgress((prev) => ({ ...prev, [fileType]: percent }));
-            },
-          });
+          .upload(path, file);
 
       // Upload files to Supabase Storage
       const uploads = await Promise.all([
-        uploadWithProgress(
+        uploadFile(
           `${user.id}/id-front-${Date.now()}.${
             idFront.name.split('.').pop()
           }`,
-          idFront,
-          'idFront'
+          idFront
         ),
-        uploadWithProgress(
+        uploadFile(
           `${user.id}/id-back-${Date.now()}.${
             idBack.name.split('.').pop()
           }`,
-          idBack,
-          'idBack'
+          idBack
         ),
-        uploadWithProgress(
+        uploadFile(
           `${user.id}/proof-address-${Date.now()}.${
             proofAddress.name.split('.').pop()
           }`,
-          proofAddress,
-          'proofAddress'
+          proofAddress
         ),
       ]);
 

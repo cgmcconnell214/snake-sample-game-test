@@ -651,6 +651,41 @@ export type Database = {
           },
         ]
       }
+      course_creator_drafts: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          max_uses: number
+          selected_course_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          max_uses?: number
+          selected_course_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          max_uses?: number
+          selected_course_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_creator_drafts_selected_course_id_fkey"
+            columns: ["selected_course_id"]
+            isOneToOne: false
+            referencedRelation: "educational_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_discussions: {
         Row: {
           content: string
@@ -1602,6 +1637,30 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_progress: {
+        Row: {
+          completed: boolean
+          created_at: string
+          step_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          step_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          step_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           asset_id: string
@@ -1744,6 +1803,7 @@ export type Database = {
           ip_whitelist: string[] | null
           jurisdiction: string | null
           kyc_status: Database["public"]["Enums"]["kyc_status"] | null
+          kyc_submitted_at: string | null
           last_login_at: string | null
           last_name: string | null
           role: Database["public"]["Enums"]["user_role"] | null
@@ -1751,7 +1811,6 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_tier"]
             | null
           two_factor_enabled: boolean | null
-          two_factor_secret: string | null
           updated_at: string | null
           user_id: string
         }
@@ -1768,6 +1827,7 @@ export type Database = {
           ip_whitelist?: string[] | null
           jurisdiction?: string | null
           kyc_status?: Database["public"]["Enums"]["kyc_status"] | null
+          kyc_submitted_at?: string | null
           last_login_at?: string | null
           last_name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
@@ -1775,7 +1835,6 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_tier"]
             | null
           two_factor_enabled?: boolean | null
-          two_factor_secret?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -1792,6 +1851,7 @@ export type Database = {
           ip_whitelist?: string[] | null
           jurisdiction?: string | null
           kyc_status?: Database["public"]["Enums"]["kyc_status"] | null
+          kyc_submitted_at?: string | null
           last_login_at?: string | null
           last_name?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
@@ -1799,7 +1859,6 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_tier"]
             | null
           two_factor_enabled?: boolean | null
-          two_factor_secret?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -2083,6 +2142,33 @@ export type Database = {
           tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      sync_events: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          progress: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          progress?: number
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          progress?: number
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2664,45 +2750,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
-      }
-      workflow_execution_audit: {
-        Row: {
-          id: string
-          execution_id: string | null
-          agent_id: string | null
-          user_id: string
-          executed_at: string
-        }
-        Insert: {
-          id?: string
-          execution_id?: string | null
-          agent_id?: string | null
-          user_id: string
-          executed_at?: string
-        }
-        Update: {
-          id?: string
-          execution_id?: string | null
-          agent_id?: string | null
-          user_id?: string
-          executed_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "workflow_execution_audit_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "ai_agents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "workflow_execution_audit_execution_id_fkey"
-            columns: ["execution_id"]
-            isOneToOne: false
-            referencedRelation: "ai_agent_executions"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       XRPL: {
         Row: {

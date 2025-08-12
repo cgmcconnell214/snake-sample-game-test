@@ -23,8 +23,8 @@ export default function LearningPortal(): JSX.Element {
 
   const fetchCourses = async () => {
     const { data, error } = await supabase
-      .from("courses" as any)
-      .select("*")
+      .from("educational_courses")
+      .select("id,title,description,slug")
       .eq("is_published", true)
       .order("created_at", { ascending: false });
 

@@ -23,7 +23,7 @@ export default function Onboarding(): JSX.Element {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('onboarding_progress')
         .select('step_key, completed')
         .eq('user_id', user.id);
@@ -63,7 +63,7 @@ export default function Onboarding(): JSX.Element {
       action: `onboarding_${steps[idx].key}_${newStatus ? 'done' : 'undone'}`,
     });
 
-    const { error } = await supabase.from('onboarding_progress').upsert({
+    const { error } = await (supabase as any).from('onboarding_progress').upsert({
       user_id: user.id,
       step_key: steps[idx].key,
       completed: newStatus,
