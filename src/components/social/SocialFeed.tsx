@@ -564,6 +564,8 @@ export default function SocialFeed() {
                       <img
                         src={url}
                         alt="Post media"
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-auto rounded-lg object-cover"
                       />
                     )}

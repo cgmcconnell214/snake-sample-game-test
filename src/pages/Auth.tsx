@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -247,13 +247,13 @@ const Auth = (): JSX.Element => {
                     className="text-sm text-muted-foreground"
                   >
                     I agree to the{" "}
-                    <a href="/terms" className="underline">
+                    <Link to="/terms" className="underline">
                       Terms
-                    </a>{" "}
+                    </Link>{" "}
                     and{" "}
-                    <a href="/privacy" className="underline">
+                    <Link to="/privacy" className="underline">
                       Privacy Policy
-                    </a>
+                    </Link>
                     .
                   </label>
                 </div>
@@ -369,13 +369,13 @@ const Auth = (): JSX.Element => {
                     className="text-sm text-muted-foreground"
                   >
                     I agree to the{" "}
-                    <a href="/terms" className="underline">
+                    <Link to="/terms" className="underline">
                       Terms
-                    </a>{" "}
+                    </Link>{" "}
                     and{" "}
-                    <a href="/privacy" className="underline">
+                    <Link to="/privacy" className="underline">
                       Privacy Policy
-                    </a>
+                    </Link>
                     .
                   </label>
                 </div>

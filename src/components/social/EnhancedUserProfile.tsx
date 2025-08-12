@@ -218,13 +218,15 @@ export default function EnhancedUserProfile() {
         <CardContent className="p-0">
           {/* Banner */}
           <div className="relative h-48 bg-gradient-to-r from-primary to-primary/80 rounded-t-lg overflow-hidden">
-            {profile.profile_banner_url && (
-              <img
-                src={profile.profile_banner_url}
-                alt="Profile banner"
-                className="w-full h-full object-cover"
-              />
-            )}
+              {profile.profile_banner_url && (
+                <img
+                  src={profile.profile_banner_url}
+                  alt="Profile banner"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              )}
             <div className="absolute bottom-4 right-4">
               <input
                 type="file"
