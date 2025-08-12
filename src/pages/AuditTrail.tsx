@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -17,8 +17,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Activity, Search, Download, Filter, Eye } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AuditDetailModal from "@/components/AuditDetailModal";
+import { useSearchParams } from "react-router-dom";
+import Papa from "papaparse";
 
 interface AuditLog {
   id: number;
@@ -37,75 +56,104 @@ const AuditTrail = () => {
   const [filterType, setFilterType] = useState("all");
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [searchParams] = useSearchParams();
 
-  // Mock audit trail data
-  const auditLogs: AuditLog[] = [
-    {
-      id: 1,
-      timestamp: "2024-01-20T10:30:00Z",
-      action: "Token Creation",
-      user: "john.doe@example.com",
-      details: "Created XRPL-GOLD token with 1000 total supply",
-      type: "tokenization",
-      status: "success",
-      ipAddress: "192.168.1.100",
-    },
-    {
-      id: 2,
-      timestamp: "2024-01-20T09:15:00Z",
-      action: "Trade Execution",
-      user: "jane.smith@example.com",
-      details: "Executed trade: 50 XRPL-USD for 2.1 XRPL-GOLD",
-      type: "trading",
-      status: "success",
-      ipAddress: "192.168.1.101",
-    },
-    {
-      id: 3,
-      timestamp: "2024-01-20T08:45:00Z",
-      action: "Login Attempt",
-      user: "admin@example.com",
-      details: "Successful login with 2FA",
-      type: "authentication",
-      status: "success",
-      ipAddress: "192.168.1.102",
-    },
-    {
-      id: 4,
-      timestamp: "2024-01-19T16:22:00Z",
-      action: "Failed Login",
-      user: "unknown@example.com",
-      details: "Failed login attempt - invalid credentials",
-      type: "authentication",
-      status: "failed",
-      ipAddress: "10.0.0.50",
-    },
-    {
-      id: 5,
-      timestamp: "2024-01-19T14:10:00Z",
-      action: "KYC Verification",
-      user: "new.user@example.com",
-      details: "KYC documents submitted for verification",
-      type: "compliance",
-      status: "pending",
-      ipAddress: "192.168.1.103",
-    },
-    {
-      id: 6,
-      timestamp: "2024-01-19T11:30:00Z",
-      action: "Settings Update",
-      user: "admin@example.com",
-      details: "Updated security settings - enabled IP whitelist",
-      type: "configuration",
-      status: "success",
-      ipAddress: "192.168.1.102",
-    },
-  ];
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const getActionType = (action: string) => {
+    const lower = action.toLowerCase();
+    if (lower.includes("token")) return "tokenization";
+    if (lower.includes("trade")) return "trading";
+    if (lower.includes("login")) return "authentication";
+    if (lower.includes("kyc")) return "compliance";
+    if (lower.includes("setting")) return "configuration";
+    return "other";
+  };
+
+  useEffect(() => {
+    const search = searchParams.get("search");
+    const type = searchParams.get("type");
+    if (search) setSearchTerm(search);
+    if (type) setFilterType(type);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const fetchAuditLogs = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("audit_event_details")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Error fetching audit logs:", error);
+          setAuditLogs([]);
+        } else {
+          const logs: AuditLog[] = (data || []).map((event: any) => {
+            const action = event?.request_data?.action || "Unknown";
+            return {
+              id: parseInt(event?.event_id, 10) || 0,
+              timestamp: event?.created_at,
+              action,
+              user: event?.security_context?.user || "Unknown",
+              details: JSON.stringify(event?.request_data?.parameters || {}),
+              type: getActionType(action),
+              status: event?.response_data?.status || "unknown",
+              ipAddress: event?.security_context?.ip_address || "N/A",
+            };
+          });
+          setAuditLogs(logs);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        setAuditLogs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAuditLogs();
+  }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType]);
+
+  const filteredLogs = auditLogs.filter((log) => {
+    const q = searchTerm.toLowerCase();
+    const matchesSearch =
+      log.action.toLowerCase().includes(q) ||
+      log.user.toLowerCase().includes(q) ||
+      log.details.toLowerCase().includes(q);
+    const matchesFilter = filterType === "all" || log.type === filterType;
+    return matchesSearch && matchesFilter;
+  });
+
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;
+  const paginatedLogs = filteredLogs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleExport = () => {
+    const csv = Papa.unparse(filteredLogs);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `audit-trail-${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
     toast({
-      title: "Export Started",
-      description: "Audit trail export has been initiated.",
+      title: "Export Successful",
+      description: "Audit trail exported to CSV.",
     });
   };
 
@@ -138,15 +186,6 @@ const AuditTrail = () => {
         return "bg-muted/10 text-muted-foreground border-muted/20";
     }
   };
-
-  const filteredLogs = auditLogs.filter((log) => {
-    const matchesSearch =
-      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.details.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === "all" || log.type === filterType;
-    return matchesSearch && matchesFilter;
-  });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -210,45 +249,102 @@ const AuditTrail = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredLogs.map((log) => (
-              <div
-                key={log.id}
-                className="flex items-start justify-between p-4 border rounded-lg hover:bg-muted/50"
-              >
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center space-x-3">
-                    <Badge variant="outline" className={getTypeColor(log.type)}>
-                      {log.type.toUpperCase()}
-                    </Badge>
-                    <h4 className="font-medium">{log.action}</h4>
-                    <Badge variant={getStatusColor(log.status)}>
-                      {log.status.toUpperCase()}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{log.details}</p>
-                  <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                    <span>User: {log.user}</span>
-                    <span>IP: {log.ipAddress}</span>
-                    <span>
-                      Time: {new Date(log.timestamp).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedAuditLog(log);
-                    setIsDetailModalOpen(true);
-                  }}
-                >
-                  <Eye className="w-4 h-4 mr-1" />
-                  Details
-                </Button>
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>IP</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedLogs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell>{log.id}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className={getTypeColor(log.type)}
+                          >
+                            {log.type.toUpperCase()}
+                          </Badge>
+                          {log.action}
+                        </div>
+                      </TableCell>
+                      <TableCell>{log.user}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusColor(log.status)}>
+                          {log.status.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{log.ipAddress}</TableCell>
+                      <TableCell>
+                        {new Date(log.timestamp).toLocaleString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedAuditLog(log);
+                            setIsDetailModalOpen(true);
+                          }}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage((p) => Math.max(p - 1, 1));
+                      }}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        href="#"
+                        isActive={currentPage === i + 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(i + 1);
+                        }}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage((p) => Math.min(p + 1, totalPages));
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -276,7 +372,7 @@ const AuditTrail = () => {
                 auditLogs.filter(
                   (log) =>
                     new Date(log.timestamp).toDateString() ===
-                    new Date().toDateString(),
+                    new Date().toDateString()
                 ).length
               }
             </div>

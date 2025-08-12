@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UserBadge {
@@ -17,6 +18,7 @@ interface UserBadge {
 
 export default function BadgeProgression(): JSX.Element {
   const { toast } = useToast();
+  const { profile } = useAuth();
   const [badges, setBadges] = useState<UserBadge[]>([]);
 
   useEffect(() => {
@@ -25,12 +27,11 @@ export default function BadgeProgression(): JSX.Element {
     if (metaDesc) metaDesc.setAttribute('content', 'View your earned badges and progress.');
 
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!profile?.user_id) return;
       const { data, error } = await supabase
         .from('user_badges')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', profile.user_id)
         .order('created_at', { ascending: false });
       if (error) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -39,7 +40,7 @@ export default function BadgeProgression(): JSX.Element {
       setBadges((data as any) || []);
     };
     load();
-  }, [toast]);
+  }, [toast, profile?.user_id]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -54,7 +55,16 @@ export default function BadgeProgression(): JSX.Element {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{b.badge_name}</span>
-                <Badge variant="secondary">{new Date(b.created_at || b.awarded_at || Date.now()).toLocaleDateString()}</Badge>
+                <Badge
+                  variant="secondary"
+                  aria-label={`${b.badge_name} earned on ${new Date(
+                    b.created_at || b.awarded_at || Date.now(),
+                  ).toLocaleDateString()}`}
+                >
+                  {new Date(
+                    b.created_at || b.awarded_at || Date.now(),
+                  ).toLocaleDateString()}
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>

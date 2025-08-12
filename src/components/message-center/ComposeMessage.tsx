@@ -55,14 +55,14 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
     setSending(true);
     try {
       // Look up recipient by username first, then by display_name as fallback
-      const { data: recipientData, error: recipientError } = await supabase
-        .from("user_profiles")
-        .select("user_id, username, display_name")
+      const { data: recipientData, error: recipientError } = await (supabase as any)
+        .from('public_user_profiles')
+        .select('user_id, username, display_name')
         .or(
           `username.eq.${newMessage.recipient.trim()},display_name.ilike.%${newMessage.recipient.trim()}%`,
         )
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (recipientError || !recipientData) {
         toast({

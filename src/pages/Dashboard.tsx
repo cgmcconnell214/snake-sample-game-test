@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { TradingChart } from "@/components/TradingChart";
 import { OrderBook } from "@/components/OrderBook";
 import { TradePanel } from "@/components/TradePanel";
@@ -14,75 +13,140 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const portfolioData = [
-  {
-    symbol: "GOLD-TOKEN",
-    quantity: 125,
-    value: 16400,
-    change: 2.4,
-    status: "verified",
-  },
-  {
-    symbol: "SILVER-TOKEN",
-    quantity: 850,
-    value: 8500,
-    change: -1.2,
-    status: "verified",
-  },
-  {
-    symbol: "OIL-FUTURE",
-    quantity: 50,
-    value: 4200,
-    change: 5.7,
-    status: "pending",
-  },
-  {
-    symbol: "REAL-ESTATE-A",
-    quantity: 10,
-    value: 25000,
-    change: 1.8,
-    status: "verified",
-  },
-];
+interface PortfolioAsset {
+  symbol: string;
+  quantity: number;
+  value: number;
+  change: number;
+  status: string;
+}
 
-const recentTrades = [
-  {
-    id: "TXN001",
-    symbol: "GOLD-TOKEN",
-    type: "BUY",
-    quantity: 25,
-    price: 131.2,
-    time: "14:23:15",
-    status: "completed",
-  },
-  {
-    id: "TXN002",
-    symbol: "SILVER-TOKEN",
-    type: "SELL",
-    quantity: 100,
-    price: 10.15,
-    time: "13:45:30",
-    status: "completed",
-  },
-  {
-    id: "TXN003",
-    symbol: "OIL-FUTURE",
-    type: "BUY",
-    quantity: 10,
-    price: 84.5,
-    time: "12:12:08",
-    status: "pending",
-  },
-];
+interface TradeRecord {
+  id: string;
+  symbol: string;
+  type: string;
+  quantity: number;
+  price: number;
+  time: string;
+  status: string;
+}
 
 export default function Dashboard(): JSX.Element {
-  const totalValue = portfolioData.reduce((sum, asset) => sum + asset.value, 0);
-  const totalGain = portfolioData.reduce(
-    (sum, asset) => sum + (asset.value * asset.change) / 100,
-    0,
+  const [portfolioData, setPortfolioData] = useState<PortfolioAsset[]>([]);
+  const [recentTrades, setRecentTrades] = useState<TradeRecord[]>([]);
+
+  const fetchPortfolio = async () => {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) return;
+    const userId = session.session.user.id;
+
+    const { data, error } = await supabase
+      .from("asset_holdings")
+      .select(
+        `balance, tokenized_assets ( asset_symbol, market_data ( current_price, price_change_24h ) )`
+      )
+      .eq("user_id", userId);
+
+    if (!error && data) {
+      const holdings: PortfolioAsset[] = (data as any[]).map((h) => {
+        const price = h.tokenized_assets?.market_data?.[0]?.current_price || 0;
+        const change =
+          h.tokenized_assets?.market_data?.[0]?.price_change_24h || 0;
+        const quantity = Number(h.balance || 0);
+        return {
+          symbol: h.tokenized_assets?.asset_symbol || "",
+          quantity,
+          value: quantity * price,
+          change,
+          status: "verified",
+        };
+      });
+      setPortfolioData(holdings);
+    }
+  };
+
+  const fetchTrades = async () => {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) return;
+    const userId = session.session.user.id;
+
+    const { data, error } = await supabase
+      .from("trade_executions")
+      .select(
+        "id, buyer_id, seller_id, asset_symbol, quantity, price, execution_time, settlement_status"
+      )
+      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+      .order("execution_time", { ascending: false })
+      .limit(5);
+
+    if (!error && data) {
+      const trades: TradeRecord[] = (data as any[]).map((t) => ({
+        id: t.id,
+        symbol: t.asset_symbol,
+        type: t.buyer_id === userId ? "BUY" : "SELL",
+        quantity: Number(t.quantity),
+        price: Number(t.price),
+        time: t.execution_time
+          ? new Date(t.execution_time).toLocaleTimeString()
+          : "",
+        status:
+          t.settlement_status === "settled"
+            ? "completed"
+            : t.settlement_status || "pending",
+      }));
+      setRecentTrades(trades);
+    }
+  };
+
+  useEffect(() => {
+    fetchPortfolio();
+    fetchTrades();
+
+    const holdingsChannel = supabase
+      .channel("portfolio-updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "asset_holdings" },
+        fetchPortfolio
+      )
+      .subscribe();
+
+    const tradesChannel = supabase
+      .channel("trade-updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "trade_executions" },
+        fetchTrades
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(holdingsChannel);
+      supabase.removeChannel(tradesChannel);
+    };
+  }, []);
+
+  const totalValue = useMemo(
+    () => portfolioData.reduce((sum, asset) => sum + asset.value, 0),
+    [portfolioData]
   );
-  const totalGainPercent = (totalGain / totalValue) * 100;
+
+  const totalGain = useMemo(
+    () =>
+      portfolioData.reduce(
+        (sum, asset) => sum + (asset.value * asset.change) / 100,
+        0
+      ),
+    [portfolioData]
+  );
+
+  const totalGainPercent = useMemo(
+    () => (totalValue ? (totalGain / totalValue) * 100 : 0),
+    [totalGain, totalValue]
+  );
 
   return (
     <div className="space-y-6 p-6">

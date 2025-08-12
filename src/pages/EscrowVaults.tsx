@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Plus,
   DollarSign,
+  Unlock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +31,11 @@ interface EscrowVault {
 export default function EscrowVaults(): JSX.Element {
   const [vaults, setVaults] = useState<EscrowVault[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+  const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
+  const [selectedVault, setSelectedVault] = useState<EscrowVault | null>(null);
+  const [depositAmount, setDepositAmount] = useState(0);
+  const [releaseAmount, setReleaseAmount] = useState(0);
   const [newVault, setNewVault] = useState({
     vault_name: "",
     description: "",
@@ -124,6 +130,66 @@ export default function EscrowVaults(): JSX.Element {
       unlock_conditions: {},
       beneficiaries: [""],
     });
+  };
+
+  const handleDeposit = async () => {
+    if (!selectedVault) return;
+    const { error } = await supabase.functions.invoke("xrpl-transaction", {
+      body: {
+        action: "escrow_deposit",
+        parameters: {
+          vault_id: selectedVault.id,
+          amount: depositAmount,
+        },
+      },
+    });
+
+    if (error) {
+      toast({
+        title: "Deposit Failed",
+        description: "Failed to deposit assets",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Assets Deposited",
+      description: "Assets deposited to escrow vault",
+    });
+    setIsDepositModalOpen(false);
+    setDepositAmount(0);
+    fetchVaults();
+  };
+
+  const handleRelease = async () => {
+    if (!selectedVault) return;
+    const { error } = await supabase.functions.invoke("xrpl-transaction", {
+      body: {
+        action: "escrow_release",
+        parameters: {
+          vault_id: selectedVault.id,
+          amount: releaseAmount,
+        },
+      },
+    });
+
+    if (error) {
+      toast({
+        title: "Release Failed",
+        description: "Failed to release funds",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Funds Released",
+      description: "Funds released from escrow vault",
+    });
+    setIsReleaseModalOpen(false);
+    setReleaseAmount(0);
+    fetchVaults();
   };
 
   const handleViewContracts = () => {
@@ -282,11 +348,30 @@ export default function EscrowVaults(): JSX.Element {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
-                    Manage
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => {
+                      setSelectedVault(vault);
+                      setDepositAmount(0);
+                      setIsDepositModalOpen(true);
+                    }}
+                  >
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Deposit
                   </Button>
-                  <Button variant="outline" size="sm">
-                    <DollarSign className="h-4 w-4" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedVault(vault);
+                      setReleaseAmount(0);
+                      setIsReleaseModalOpen(true);
+                    }}
+                  >
+                    <Unlock className="h-4 w-4 mr-2" />
+                    Release
                   </Button>
                 </div>
               </CardContent>
@@ -391,6 +476,78 @@ export default function EscrowVaults(): JSX.Element {
                 <Button
                   variant="outline"
                   onClick={() => setIsCreateModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {isDepositModalOpen && selectedVault && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Deposit Assets</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="deposit_amount">Amount</Label>
+                <Input
+                  id="deposit_amount"
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) =>
+                    setDepositAmount(parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button onClick={handleDeposit} className="flex-1">
+                  Deposit
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDepositModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {isReleaseModalOpen && selectedVault && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Release Funds</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="release_amount">Amount</Label>
+                <Input
+                  id="release_amount"
+                  type="number"
+                  value={releaseAmount}
+                  onChange={(e) =>
+                    setReleaseAmount(parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button onClick={handleRelease} className="flex-1">
+                  Release
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsReleaseModalOpen(false)}
                 >
                   Cancel
                 </Button>
