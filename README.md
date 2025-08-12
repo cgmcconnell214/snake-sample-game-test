@@ -83,6 +83,19 @@ npm run coverage
 This sample project does not include deployed smart contracts. Deployment scripts
 and logs will be added in the future.
 
+### Contract deployment
+
+Contracts can only be deployed from a predefined whitelist of templates. Run the
+deployment script with the template name, ensuring the required Supabase service
+credentials are available in the environment:
+
+```
+SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run deploy:contract -- marketplace
+```
+
+Only templates explicitly whitelisted in the script and server function will be
+accepted.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
