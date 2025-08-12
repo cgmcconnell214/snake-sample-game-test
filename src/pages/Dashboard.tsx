@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TradingChart } from "@/components/TradingChart";
@@ -17,81 +17,162 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-const recentTrades = [
-  {
-    id: "TXN001",
-    symbol: "GOLD-TOKEN",
-    type: "BUY",
-    quantity: 25,
-    price: 131.2,
-    time: "14:23:15",
-    status: "completed",
-  },
-  {
-    id: "TXN002",
-    symbol: "SILVER-TOKEN",
-    type: "SELL",
-    quantity: 100,
-    price: 10.15,
-    time: "13:45:30",
-    status: "completed",
-  },
-  {
-    id: "TXN003",
-    symbol: "OIL-FUTURE",
-    type: "BUY",
-    quantity: 10,
-    price: 84.5,
-    time: "12:12:08",
-    status: "pending",
-  },
-];
+interface PortfolioAsset {
+  symbol: string;
+  quantity: number;
+  value: number;
+  change: number;
+  status: "verified" | "pending" | "unknown";
+}
+
+interface TradeRecord {
+  id: string;
+  symbol: string;
+  type: "BUY" | "SELL";
+  quantity: number;
+  price: number;
+  time: string;
+  status: string;
+}
 
 export default function Dashboard(): JSX.Element {
   const { profile } = useAuth();
-  const [portfolioData, setPortfolioData] = useState<any[]>([]);
+
+  const [portfolioData, setPortfolioData] = useState<PortfolioAsset[]>([]);
+  const [recentTrades, setRecentTrades] = useState<TradeRecord[]>([]);
+
+  // Resolve user id from context or session
+  const getUserId = async (): Promise<string | null> => {
+    if (profile?.user_id) return profile.user_id as string;
+    const { data } = await supabase.auth.getSession();
+    return data.session?.user?.id ?? null;
+  };
+
+  const fetchPortfolio = async () => {
+    const userId = await getUserId();
+    if (!userId) return;
+
+    const { data, error } = await supabase
+      .from("asset_holdings")
+      .select(
+        "balance, tokenized_assets(asset_symbol, asset_name, is_active, market_data(current_price, price_change_24h))"
+      )
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error fetching portfolio:", error);
+      return;
+    }
+
+    const holdings: PortfolioAsset[] = (data || []).map((h: any) => {
+      const asset = h.tokenized_assets || {};
+      const market = Array.isArray(asset.market_data)
+        ? asset.market_data[0] || {}
+        : {};
+      const quantity = Number(h.balance || 0);
+      const price = Number(market.current_price || 0);
+      const change = Number(market.price_change_24h || 0);
+
+      return {
+        symbol: asset.asset_symbol || "UNKNOWN",
+        quantity,
+        value: quantity * price,
+        change,
+        status:
+          asset.is_active === true
+            ? "verified"
+            : asset.is_active === false
+            ? "pending"
+            : "unknown",
+      };
+    });
+
+    setPortfolioData(holdings);
+  };
+
+  const fetchTrades = async () => {
+    const userId = await getUserId();
+    if (!userId) return;
+
+    const { data, error } = await supabase
+      .from("trade_executions")
+      .select(
+        "id, buyer_id, seller_id, asset_symbol, quantity, price, execution_time, settlement_status"
+      )
+      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+      .order("execution_time", { ascending: false })
+      .limit(5);
+
+    if (error) {
+      console.error("Error fetching trades:", error);
+      return;
+    }
+
+    const trades: TradeRecord[] = (data || []).map((t: any) => ({
+      id: t.id,
+      symbol: t.asset_symbol,
+      type: t.buyer_id === userId ? "BUY" : "SELL",
+      quantity: Number(t.quantity),
+      price: Number(t.price),
+      time: t.execution_time
+        ? new Date(t.execution_time).toLocaleTimeString()
+        : "",
+      status:
+        t.settlement_status === "settled"
+          ? "completed"
+          : t.settlement_status || "pending",
+    }));
+
+    setRecentTrades(trades);
+  };
 
   useEffect(() => {
-    const fetchPortfolio = async () => {
-      if (!profile?.user_id) return;
-      const { data, error } = await supabase
-        .from("asset_holdings")
-        .select(
-          "balance, tokenized_assets(asset_symbol, asset_name, is_active, market_data(current_price, price_change_24h))",
-        )
-        .eq("user_id", profile.user_id);
-
-      if (error) {
-        console.error("Error fetching portfolio:", error);
-        return;
-      }
-
-      const holdings = (data || []).map((holding: any) => {
-        const asset = holding.tokenized_assets || {};
-        const market = asset.market_data?.[0] || {};
-        const quantity = holding.balance || 0;
-        const price = market.current_price || 0;
-        return {
-          symbol: asset.asset_symbol || "UNKNOWN",
-          quantity,
-          value: quantity * price,
-          change: market.price_change_24h || 0,
-          status: asset.is_active ? "verified" : "pending",
-        };
-      });
-
-      setPortfolioData(holdings);
-    };
-
     fetchPortfolio();
-  }, [profile]);
+    fetchTrades();
 
-  const totalValue = portfolioData.reduce((sum, asset) => sum + asset.value, 0);
-  const totalGain = portfolioData.reduce(
-    (sum, asset) => sum + (asset.value * asset.change) / 100,
-    0,
+    const holdingsChannel = supabase
+      .channel("portfolio-updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "asset_holdings" },
+        fetchPortfolio
+      )
+      .subscribe();
+
+    const tradesChannel = supabase
+      .channel("trade-updates")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "trade_executions" },
+        fetchTrades
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(holdingsChannel);
+      supabase.removeChannel(tradesChannel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const totalValue = useMemo(
+    () => portfolioData.reduce((sum, asset) => sum + asset.value, 0),
+    [portfolioData]
   );
-  const totalGainPercent = totalValue ? (totalGain / totalValue) * 100 : 0;
+
+  const totalGain = useMemo(
+    () =>
+      portfolioData.reduce(
+        (sum, asset) => sum + (asset.value * asset.change) / 100,
+        0
+      ),
+    [portfolioData]
+  );
+
+  const totalGainPercent = useMemo(
+    () => (totalValue ? (totalGain / totalValue) * 100 : 0),
+    [totalGain, totalValue]
+  );
 
   return (
     <div className="space-y-6 p-6">
@@ -129,7 +210,9 @@ export default function Dashboard(): JSX.Element {
               ${totalValue.toLocaleString()}
             </div>
             <div
-              className={`flex items-center gap-1 text-sm ${totalGainPercent >= 0 ? "text-buy" : "text-sell"}`}
+              className={`flex items-center gap-1 text-sm ${
+                totalGainPercent >= 0 ? "text-buy" : "text-sell"
+              }`}
             >
               {totalGainPercent >= 0 ? (
                 <TrendingUp className="h-3 w-3" />
@@ -226,7 +309,9 @@ export default function Dashboard(): JSX.Element {
                         ${asset.value.toLocaleString()}
                       </div>
                       <div
-                        className={`text-sm ${asset.change >= 0 ? "text-buy" : "text-sell"}`}
+                        className={`text-sm ${
+                          asset.change >= 0 ? "text-buy" : "text-sell"
+                        }`}
                       >
                         {asset.change >= 0 ? "+" : ""}
                         {asset.change}%
@@ -267,9 +352,7 @@ export default function Dashboard(): JSX.Element {
               >
                 <div className="text-primary">{trade.id}</div>
                 <div>{trade.symbol}</div>
-                <div
-                  className={trade.type === "BUY" ? "text-buy" : "text-sell"}
-                >
+                <div className={trade.type === "BUY" ? "text-buy" : "text-sell"}>
                   {trade.type}
                 </div>
                 <div>{trade.quantity}</div>

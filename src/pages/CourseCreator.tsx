@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Link as LinkIcon, Copy, Calendar, Edit3 } from "lucide-react";
+import { Plus, Link as LinkIcon, Copy } from "lucide-react";
 
 interface Course { id: string; title: string; slug: string | null; price_per_student: number; category: string; created_at: string; }
 interface LinkRow { id: string; code: string; max_uses: number; used_count: number; expires_at: string | null; is_active: boolean; course_id: string; }
@@ -18,6 +18,56 @@ export default function CourseCreator(): JSX.Element {
   const [links, setLinks] = useState<LinkRow[]>([]);
   const [maxUses, setMaxUses] = useState<number>(10);
   const [expiresAt, setExpiresAt] = useState<string>("");
+
+  // Restore any autosaved draft on mount
+  useEffect(() => {
+    const restoreDraft = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('course_creator_drafts')
+        .select('selected_course_id,max_uses,expires_at')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (error) return;
+      if (data) {
+        setSelectedCourseId(data.selected_course_id);
+        setMaxUses(data.max_uses ?? 10);
+        setExpiresAt(
+          data.expires_at
+            ? new Date(data.expires_at).toISOString().slice(0, 16)
+            : ''
+        );
+      }
+    };
+    restoreDraft();
+  }, []);
+
+  // Debounced save of draft progress to Supabase
+  const saveDraft = useCallback(async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from('course_creator_drafts').upsert({
+      user_id: user.id,
+      selected_course_id: selectedCourseId,
+      max_uses: maxUses,
+      expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
+      updated_at: new Date().toISOString(),
+    });
+  }, [selectedCourseId, maxUses, expiresAt]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      saveDraft();
+    }, 3000);
+    return () => clearTimeout(handler);
+  }, [selectedCourseId, maxUses, expiresAt, saveDraft]);
 
   useEffect(() => {
     document.title = "Course Creator Portal";
