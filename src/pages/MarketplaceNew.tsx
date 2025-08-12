@@ -9,11 +9,12 @@ import {
   Filter,
   Star,
   TrendingUp,
+  TrendingDown,
   Package,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { injectContractTemplate } from "@/lib/contractTemplates";
+import OrderModal from "@/components/OrderModal";
 
 interface MarketplaceAsset {
   id: string;
@@ -37,6 +38,9 @@ export default function Marketplace(): JSX.Element {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("volume");
   const { toast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<MarketplaceAsset | null>(null);
+  const [modalSide, setModalSide] = useState<"buy" | "sell">("buy");
 
   useEffect(() => {
     fetchMarketplaceAssets();
@@ -92,30 +96,22 @@ export default function Marketplace(): JSX.Element {
     });
   };
 
-  const handleBuyAsset = async (assetId: string) => {
-    const asset = assets.find((a) => a.id === assetId);
-    if (!asset) return;
-
+  const openTradeModal = async (asset: MarketplaceAsset, side: "buy" | "sell") => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication Required",
-        description: "Please sign in to purchase assets",
+        description: "Please sign in to trade assets",
         variant: "destructive",
       });
       return;
     }
 
-    await injectContractTemplate('buy')
-    toast({
-      title: "Purchase Initiated",
-      description: `Preparing to buy ${asset.asset_name} at $${asset.current_price.toFixed(2)}`,
-    });
-
-    // Redirect to trading page with pre-filled buy order
-    window.location.href = `/trading?asset=${assetId}&action=buy`;
+    setSelectedAsset(asset);
+    setModalSide(side);
+    setIsModalOpen(true);
   };
 
   const filteredAssets = assets.filter((asset) => {
@@ -141,6 +137,7 @@ export default function Marketplace(): JSX.Element {
   });
 
   return (
+    <>
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -294,12 +291,19 @@ export default function Marketplace(): JSX.Element {
               <div className="flex gap-2">
                 <Button
                   className="flex-1"
-                  onClick={() => handleBuyAsset(asset.id)}
+                  onClick={() => openTradeModal(asset, "buy")}
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Buy Now
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Buy
                 </Button>
-                <Button 
+                <Button
+                  className="flex-1 bg-sell hover:bg-sell/90"
+                  onClick={() => openTradeModal(asset, "sell")}
+                >
+                  <TrendingDown className="h-4 w-4 mr-2" />
+                  Sell
+                </Button>
+                <Button
                   variant="outline"
                   aria-label="Add to favorites"
                   onClick={(e) => {
@@ -329,5 +333,15 @@ export default function Marketplace(): JSX.Element {
         </div>
       )}
     </div>
+
+    {selectedAsset && (
+      <OrderModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        asset={selectedAsset}
+        side={modalSide}
+      />
+    )}
+    </>
   );
 }
