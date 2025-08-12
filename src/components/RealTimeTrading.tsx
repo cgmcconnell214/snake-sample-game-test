@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TradingChart } from "@/components/TradingChart";
 import { OrderBook } from "@/components/OrderBook";
 import { TradePanel } from "@/components/TradePanel";
-import { useTradingData } from "@/hooks/useTradingData";
 import { useMarketUpdates } from "@/hooks/useMarketUpdates";
+import type { AssetWithMarketData, Order } from "@/hooks/useTradingData";
 import {
   Search,
   Filter,
@@ -21,8 +21,19 @@ import {
   Loader2,
 } from "lucide-react";
 
-export default function RealTimeTrading(): JSX.Element {
-  const { assets, orders, loading, cancelOrder } = useTradingData();
+interface RealTimeTradingProps {
+  assets: AssetWithMarketData[];
+  orders: Order[];
+  loading: boolean;
+  cancelOrder: (orderId: string) => Promise<void> | void;
+}
+
+export default function RealTimeTrading({
+  assets,
+  orders,
+  loading,
+  cancelOrder,
+}: RealTimeTradingProps): JSX.Element {
   const [selectedSymbol, setSelectedSymbol] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");

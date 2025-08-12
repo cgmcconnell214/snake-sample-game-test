@@ -104,13 +104,14 @@ const TwoFactorManager: React.FC = () => {
 
       const { error } = await supabase
         .from("profiles")
-        .update({ two_factor_enabled: true })
+        .update({ two_factor_enabled: true, two_factor_secret: secret })
         .eq("user_id", user?.id);
 
       if (error) throw error;
 
       setIsEnabled(true);
       setShowSetup(false);
+      setSecret('');
 
       toast({
         title: "2FA Enabled",
@@ -133,7 +134,7 @@ const TwoFactorManager: React.FC = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ two_factor_enabled: false })
+        .update({ two_factor_enabled: false, two_factor_secret: null })
         .eq("user_id", user?.id);
 
       if (error) throw error;

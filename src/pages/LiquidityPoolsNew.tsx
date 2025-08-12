@@ -32,6 +32,7 @@ interface LiquidityPool {
 
 export default function LiquidityPools(): JSX.Element {
   const [pools, setPools] = useState<LiquidityPool[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isAddLiquidityOpen, setIsAddLiquidityOpen] = useState(false);
   const [selectedPool, setSelectedPool] = useState<string>("");
   const [liquidityAmount, setLiquidityAmount] = useState("");
@@ -42,48 +43,20 @@ export default function LiquidityPools(): JSX.Element {
   }, []);
 
   const fetchLiquidityPools = async () => {
-    // Mock data since we don't have the table yet
-    const mockPools: LiquidityPool[] = [
-      {
-        id: "1",
-        pool_name: "GOLD/USD Pool",
-        token_a: "GOLD",
-        token_b: "USD",
-        token_a_balance: 1250.5,
-        token_b_balance: 2500000.0,
-        total_liquidity: 3750000.0,
-        apy: 12.5,
-        pool_type: "commodity",
-        is_active: true,
-      },
-      {
-        id: "2",
-        pool_name: "SILVER/USD Pool",
-        token_a: "SILVER",
-        token_b: "USD",
-        token_a_balance: 50000.25,
-        token_b_balance: 1250000.0,
-        total_liquidity: 1875000.0,
-        apy: 8.3,
-        pool_type: "commodity",
-        is_active: true,
-      },
-      {
-        id: "3",
-        pool_name: "BTC/USD Bonded",
-        token_a: "BTC",
-        token_b: "USD",
-        token_a_balance: 25.5,
-        token_b_balance: 1500000.0,
-        total_liquidity: 2250000.0,
-        apy: 15.7,
-        pool_type: "bonded",
-        lock_period: 90,
-        is_active: true,
-      },
-    ];
-
-    setPools(mockPools);
+    try {
+      const response = await fetch("/pools.json");
+      const data: LiquidityPool[] = await response.json();
+      setPools(data);
+    } catch (error) {
+      console.error("Failed to load liquidity pools", error);
+      toast({
+        title: "Error",
+        description: "Unable to load liquidity pools",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAddLiquidity = () => {
@@ -225,6 +198,14 @@ export default function LiquidityPools(): JSX.Element {
       description: `Successfully removed liquidity from ${pool.pool_name}`,
     });
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center py-8">Loading pools...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">

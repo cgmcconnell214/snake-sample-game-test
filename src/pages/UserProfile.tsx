@@ -13,15 +13,12 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  User,
   Edit,
   Save,
   Camera,
   Trash2,
   Globe,
   MapPin,
-  Phone,
-  Mail,
   Calendar,
   Users,
   MessageSquare,
@@ -32,6 +29,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAvatar } from "@/hooks/use-avatar";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface UserProfile {
   id: string;
@@ -67,20 +67,35 @@ interface UserPost {
 const UserProfile: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<UserPost[]>([]);
-  const [activity, setActivity] = useState<{ id: string; action: string; created_at: string }[]>([])
-  const [badges, setBadges] = useState<Array<{ id: string; badge_name: string; description: string; badge_type: string; course_id: string | null; lesson_id: string | null; earned_at: string }>>([]);
+  const [activity, setActivity] = useState<
+    { id: string; action: string; created_at: string }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [newPost, setNewPost] = useState("");
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
+  const { uploadAvatar, removeAvatar, uploading } = useAvatar();
 
-  const [editForm, setEditForm] = useState({
-    display_name: "",
-    bio: "",
-    website: "",
-    location: "",
-    phone: "",
+  const profileSchema = z.object({
+    display_name: z.string().min(1, "Display name is required"),
+    bio: z.string().optional(),
+    website: z.union([z.string().url("Invalid URL"), z.literal("")]).optional(),
+    location: z.string().optional(),
+    phone: z.string().optional(),
+  });
+  type ProfileForm = z.infer<typeof profileSchema>;
+
+  const form = useForm<ProfileForm>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      display_name: "",
+      bio: "",
+      website: "",
+      location: "",
+      phone: "",
+    },
+    mode: "onChange",
   });
 
   const fetchUserProfile = async () => {
@@ -95,7 +110,7 @@ const UserProfile: React.FC = () => {
 
       if (data) {
         setUserProfile(data);
-        setEditForm({
+        form.reset({
           display_name: data.display_name || "",
           bio: data.bio || "",
           website: data.website || "",
@@ -125,44 +140,39 @@ const UserProfile: React.FC = () => {
     }
   };
 
+  const fetchUserActivity = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_behavior_log")
+        .select("id, action, created_at")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setActivity(data || []);
+    } catch (error) {
+      console.error("Error fetching activity:", error);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchUserProfile();
       fetchUserPosts();
       fetchUserActivity();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
-
-
-  const fetchUserActivity = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('user_behavior_log')
-        .select('id, action, created_at')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      setActivity(data || []);
-    } catch (error) {
-      console.error('Error fetching activity:', error);
-    }
-  };
-
-  const { uploadAvatar, removeAvatar, uploading } = useAvatar();
 
   const handleAvatarUpload = async (file: File) => {
     try {
       if (!user?.id) return;
-
       await uploadAvatar(file);
-
       toast({
         title: "Avatar Updated",
         description: "Your profile photo has been updated.",
       });
-
       await fetchUserProfile();
     } catch (error) {
       console.error("Error uploading avatar:", error);
@@ -177,12 +187,10 @@ const UserProfile: React.FC = () => {
   const handleAvatarRemove = async () => {
     try {
       await removeAvatar();
-
       toast({
         title: "Avatar Removed",
         description: "Your profile photo has been removed.",
       });
-
       await fetchUserProfile();
     } catch (error) {
       console.error("Error removing avatar:", error);
@@ -194,10 +202,10 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const saveProfile = async () => {
+  const saveProfile = async (values: ProfileForm) => {
     try {
-      // Generate username if not provided
-      let username = editForm.display_name
+      // Generate username if not provided on server
+      let username = values.display_name
         .toLowerCase()
         .replace(/\s+/g, ".")
         .replace(/[^a-z0-9.]/g, "");
@@ -205,15 +213,46 @@ const UserProfile: React.FC = () => {
         username = `user_${user?.id?.slice(0, 8)}`;
       }
 
-      const { error } = await supabase.from("user_profiles").upsert(
-        {
-          user_id: user?.id,
-          username: username,
-          ...editForm,
-        },
-        { onConflict: "user_id" },
-      );
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Not authenticated");
 
+      const payload: any = {
+        profile: {
+          user_id: user?.id,
+          username,
+          ...values,
+        },
+      };
+
+      if (profile?.two_factor_enabled) {
+        const mfaCode = prompt("Enter your 2FA code");
+        if (!mfaCode) {
+          toast({
+            title: "Verification required",
+            description: "2FA code is required to update your profile.",
+            variant: "destructive",
+          });
+          return;
+        }
+        payload.mfaCode = mfaCode;
+      } else {
+        const password = prompt("Please confirm your password");
+        if (!password) {
+          toast({
+            title: "Verification required",
+            description: "Password confirmation is required to update your profile.",
+            variant: "destructive",
+          });
+          return;
+        }
+        payload.password = password;
+      }
+
+      const { error } = await supabase.functions.invoke("update-user-profile", {
+        body: payload,
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       if (error) throw error;
 
       toast({
@@ -235,14 +274,12 @@ const UserProfile: React.FC = () => {
 
   const createPost = async () => {
     if (!newPost.trim()) return;
-
     try {
       const { error } = await supabase.from("user_posts").insert({
         user_id: user?.id,
         content: newPost,
         post_type: "text",
       });
-
       if (error) throw error;
 
       toast({
@@ -262,14 +299,13 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
+  const getInitials = (name: string) =>
+    name
       .split(" ")
       .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  };
 
   if (loading) {
     return <div className="p-6">Loading profile...</div>;
@@ -281,7 +317,10 @@ const UserProfile: React.FC = () => {
         <h1 className="text-3xl font-bold">Profile</h1>
         <Button
           variant={editing ? "default" : "outline"}
-          onClick={() => (editing ? saveProfile() : setEditing(true))}
+          onClick={() =>
+            editing ? form.handleSubmit(saveProfile)() : setEditing(true)
+          }
+          disabled={editing && !form.formState.isValid}
         >
           {editing ? (
             <>
@@ -306,12 +345,11 @@ const UserProfile: React.FC = () => {
                 <Avatar className="w-24 h-24">
                   <AvatarImage src={userProfile?.avatar_url} />
                   <AvatarFallback className="text-lg">
-                    {getInitials(
-                      userProfile?.display_name || user?.email || "U",
-                    )}
+                    {getInitials(userProfile?.display_name || user?.email || "U")}
                   </AvatarFallback>
                 </Avatar>
               </div>
+
               <div className="flex justify-center space-x-2 mb-4">
                 <input
                   type="file"
@@ -343,36 +381,43 @@ const UserProfile: React.FC = () => {
                   </Button>
                 )}
               </div>
+
               <CardTitle>
                 {editing ? (
-                  <Input
-                    value={editForm.display_name}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({
-                        ...prev,
-                        display_name: e.target.value,
-                      }))
-                    }
-                    placeholder="Display name"
-                  />
+                  <div className="space-y-1">
+                    <Input
+                      {...form.register("display_name")}
+                      placeholder="Display name"
+                    />
+                    {form.formState.errors.display_name && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.display_name.message}
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   userProfile?.display_name || "User"
                 )}
               </CardTitle>
               <CardDescription>@{userProfile?.username}</CardDescription>
             </CardHeader>
+
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium">Bio</label>
                 {editing ? (
-                  <Textarea
-                    value={editForm.bio}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, bio: e.target.value }))
-                    }
-                    placeholder="Tell us about yourself..."
-                    rows={3}
-                  />
+                  <div className="space-y-1">
+                    <Textarea
+                      {...form.register("bio")}
+                      placeholder="Tell us about yourself..."
+                      rows={3}
+                    />
+                    {form.formState.errors.bio && (
+                      <p className="text-sm text-destructive">
+                        {form.formState.errors.bio.message}
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground mt-1">
                     {userProfile?.bio || "No bio available"}
@@ -381,49 +426,47 @@ const UserProfile: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                {userProfile?.location && (
+                {(editing || userProfile?.location) && (
                   <div className="flex items-center space-x-2 text-sm">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     {editing ? (
-                      <Input
-                        value={editForm.location}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({
-                            ...prev,
-                            location: e.target.value,
-                          }))
-                        }
-                        placeholder="Location"
-                      />
+                      <div className="w-full space-y-1">
+                        <Input {...form.register("location")} placeholder="Location" />
+                        {form.formState.errors.location && (
+                          <p className="text-sm text-destructive">
+                            {form.formState.errors.location.message}
+                          </p>
+                        )}
+                      </div>
                     ) : (
-                      <span>{userProfile.location}</span>
+                      <span>{userProfile?.location}</span>
                     )}
                   </div>
                 )}
 
-                {userProfile?.website && (
+                {(editing || userProfile?.website) && (
                   <div className="flex items-center space-x-2 text-sm">
                     <Globe className="h-4 w-4 text-muted-foreground" />
                     {editing ? (
-                      <Input
-                        value={editForm.website}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({
-                            ...prev,
-                            website: e.target.value,
-                          }))
-                        }
-                        placeholder="Website"
-                      />
+                      <div className="w-full space-y-1">
+                        <Input {...form.register("website")} placeholder="Website" />
+                        {form.formState.errors.website && (
+                          <p className="text-sm text-destructive">
+                            {form.formState.errors.website.message}
+                          </p>
+                        )}
+                      </div>
                     ) : (
-                      <a
-                        href={userProfile.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {userProfile.website}
-                      </a>
+                      userProfile?.website && (
+                        <a
+                          href={userProfile.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {userProfile.website}
+                        </a>
+                      )
                     )}
                   </div>
                 )}
@@ -432,18 +475,14 @@ const UserProfile: React.FC = () => {
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span>
                     Joined{" "}
-                    {new Date(
-                      userProfile?.created_at || "",
-                    ).toLocaleDateString()}
+                    {new Date(userProfile?.created_at || "").toLocaleDateString()}
                   </span>
                 </div>
               </div>
 
               <div className="flex justify-around pt-4 border-t">
                 <div className="text-center">
-                  <div className="font-bold">
-                    {userProfile?.post_count || 0}
-                  </div>
+                  <div className="font-bold">{userProfile?.post_count || 0}</div>
                   <div className="text-xs text-muted-foreground">Posts</div>
                 </div>
                 <div className="text-center">
@@ -463,7 +502,7 @@ const UserProfile: React.FC = () => {
           </Card>
         </div>
 
-        {/* Posts Section */}
+        {/* Posts & Activity */}
         <div className="lg:col-span-2">
           <Tabs defaultValue="posts" className="w-full">
             <TabsList>
@@ -503,7 +542,7 @@ const UserProfile: React.FC = () => {
                           <AvatarImage src={userProfile?.avatar_url} />
                           <AvatarFallback>
                             {getInitials(
-                              userProfile?.display_name || user?.email || "U",
+                              userProfile?.display_name || user?.email || "U"
                             )}
                           </AvatarFallback>
                         </Avatar>

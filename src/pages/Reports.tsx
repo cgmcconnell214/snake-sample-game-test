@@ -18,22 +18,35 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   FileText,
-  Download,
+  FileSpreadsheet,
   Calendar,
   BarChart3,
   TrendingUp,
   Users,
   Shield,
 } from "lucide-react";
+import ReportDetailModal from "@/components/ReportDetailModal";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+
+interface Report {
+  id: number;
+  name: string;
+  type: string;
+  description: string;
+  lastGenerated: string;
+  status: string;
+  size: string;
+}
 
 const Reports = (): JSX.Element => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState("monthly");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // Mock reports data
   const availableReports = [
@@ -145,11 +158,16 @@ const Reports = (): JSX.Element => {
     }
   };
 
-  const handleDownload = (reportName: string) => {
+  const handleExport = (reportName: string, format: "csv" | "pdf") => {
     toast({
-      title: "Download Started",
-      description: `Downloading ${reportName}...`,
+      title: "Export Started",
+      description: `${reportName} exported as ${format.toUpperCase()}.`,
     });
+  };
+
+  const openReportDetail = (report: Report) => {
+    setSelectedReport(report);
+    setIsDetailOpen(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -292,7 +310,8 @@ const Reports = (): JSX.Element => {
                 {availableReports.map((report) => (
                   <div
                     key={report.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+                    onClick={() => openReportDetail(report)}
+                    className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted"
                   >
                     <div className="flex items-center space-x-4">
                       <div className="p-2 bg-muted rounded-lg">
@@ -321,18 +340,37 @@ const Reports = (): JSX.Element => {
                         {report.status.toUpperCase()}
                       </Badge>
                       {report.status === "ready" && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDownload(report.name)}
-                        >
-                          <Download className="w-4 h-4 mr-1" />
-                          Download
-                        </Button>
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleExport(report.name, "csv");
+                            }}
+                          >
+                            <FileSpreadsheet className="w-4 h-4 mr-1" />
+                            CSV
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleExport(report.name, "pdf");
+                            }}
+                          >
+                            <FileText className="w-4 h-4 mr-1" />
+                            PDF
+                          </Button>
+                        </>
                       )}
                       <Button
                         size="sm"
-                        onClick={() => handleGenerateReport(report.name)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleGenerateReport(report.name);
+                        }}
                         disabled={
                           isGenerating || report.status === "generating"
                         }
@@ -414,6 +452,12 @@ const Reports = (): JSX.Element => {
 
         {/* Add similar content for other tabs */}
       </Tabs>
+      <ReportDetailModal
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        report={selectedReport}
+        metrics={reportMetrics}
+      />
     </div>
   );
 };

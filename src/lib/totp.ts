@@ -38,7 +38,9 @@ export function generateSecret(length = 20): string {
 
 async function generateToken(secret: string, counter: number, digits = 6): Promise<string> {
   const keyBytes = base32Decode(secret);
-  const cryptoKey = await crypto.subtle.importKey('raw', keyBytes, {name:'HMAC', hash:'SHA-1'}, false, ['sign']);
+  const keyBuffer = new ArrayBuffer(keyBytes.length);
+  new Uint8Array(keyBuffer).set(keyBytes);
+  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, {name:'HMAC', hash:'SHA-1'}, false, ['sign']);
   const buffer = new ArrayBuffer(8);
   const view = new DataView(buffer);
   view.setUint32(4, counter);
