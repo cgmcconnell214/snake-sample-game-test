@@ -42,10 +42,10 @@ export default function LegalSafehouse(): JSX.Element {
             .getPublicUrl(item.name);
           return {
             name: item.name,
-
+            path: item.name,
             url: urlData.publicUrl,
             status: "Stored",
-          };
+          } as StoredDocument;
         }) ?? [];
       setDocuments(docs);
     } catch (error) {
