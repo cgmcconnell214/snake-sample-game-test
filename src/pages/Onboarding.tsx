@@ -18,19 +18,59 @@ export default function Onboarding(): JSX.Element {
     document.title = 'Onboarding Checklist';
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', 'Complete your onboarding steps.');
-  }, []);
+
+    const loadProgress = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('onboarding_progress')
+        .select('step_key, completed')
+        .eq('user_id', user.id);
+
+      if (error) {
+        toast({ variant: 'destructive', description: 'Failed to load progress.' });
+        return;
+      }
+
+      if (data) {
+        setSteps((prev) =>
+          prev.map((step) => {
+            const match = data.find((p) => p.step_key === step.key);
+            return match ? { ...step, done: match.completed } : step;
+          }),
+        );
+      }
+    };
+
+    void loadProgress();
+  }, [toast]);
 
   const toggleStep = async (idx: number) => {
+    const newStatus = !steps[idx].done;
+
     setSteps((prev) => {
       const copy = [...prev];
-      copy[idx].done = !copy[idx].done;
+      copy[idx].done = newStatus;
       return copy;
     });
 
-    // Log behavior for basic tracking
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from('user_behavior_log').insert({ user_id: user.id, action: `onboarding_${steps[idx].key}_${steps[idx].done ? 'undone' : 'done'}` });
+    if (!user) return;
+
+    await supabase.from('user_behavior_log').insert({
+      user_id: user.id,
+      action: `onboarding_${steps[idx].key}_${newStatus ? 'done' : 'undone'}`,
+    });
+
+    const { error } = await supabase.from('onboarding_progress').upsert({
+      user_id: user.id,
+      step_key: steps[idx].key,
+      completed: newStatus,
+    });
+
+    if (error) {
+      toast({ variant: 'destructive', description: 'Failed to save progress.' });
     }
   };
 
