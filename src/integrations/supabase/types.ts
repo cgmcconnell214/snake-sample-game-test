@@ -2665,6 +2665,45 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_execution_audit: {
+        Row: {
+          id: string
+          execution_id: string | null
+          agent_id: string | null
+          user_id: string
+          executed_at: string
+        }
+        Insert: {
+          id?: string
+          execution_id?: string | null
+          agent_id?: string | null
+          user_id: string
+          executed_at?: string
+        }
+        Update: {
+          id?: string
+          execution_id?: string | null
+          agent_id?: string | null
+          user_id?: string
+          executed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_execution_audit_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_execution_audit_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       XRPL: {
         Row: {
           created_at: string

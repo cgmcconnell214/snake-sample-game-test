@@ -30,7 +30,7 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
+
     if (!supabaseUrl || !supabaseKey) {
       console.error('Missing Supabase configuration');
       return new Response(
@@ -40,6 +40,24 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    const user = authData?.user;
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     console.log(`Executing AI agent: ${agentId}`);
 
@@ -65,6 +83,33 @@ serve(async (req) => {
       resolvedAgentId = agentLookup.id;
     }
 
+    // Permission check: user must own the agent or be admin
+    const { data: agentRecord, error: agentError } = await supabase
+      .from('ai_agents')
+      .select('creator_id')
+      .eq('id', resolvedAgentId)
+      .single();
+
+    if (agentError || !agentRecord) {
+      return new Response(
+        JSON.stringify({ error: 'Agent not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (agentRecord.creator_id !== user.id && profile?.role !== 'admin') {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Call the database function to execute the workflow
     const { data: executionResult, error: executionError } = await supabase
       .rpc('execute_ai_agent_workflow', {
@@ -79,6 +124,18 @@ serve(async (req) => {
         JSON.stringify({ error: 'Failed to execute agent workflow', details: executionError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Record audit of this execution
+    const { error: auditError } = await supabase
+      .from('workflow_execution_audit')
+      .insert({
+        execution_id: executionResult.execution_id,
+        agent_id: resolvedAgentId,
+        user_id: user.id
+      });
+    if (auditError) {
+      console.error('Failed to record workflow execution audit:', auditError);
     }
 
     // If workflow has steps, actually execute them
