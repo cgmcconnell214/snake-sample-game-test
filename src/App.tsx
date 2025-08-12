@@ -66,6 +66,7 @@ import SocialFeed from "./components/social/SocialFeed";
 import EnhancedUserProfile from "./components/social/EnhancedUserProfile";
 import FollowersPage from "./components/social/FollowersPage";
 import NotificationCenter from "./components/NotificationCenter";
+import SkipLink from "@/components/SkipLink";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -107,11 +108,12 @@ const App = () => (
                       <div className="flex min-h-screen w-full bg-background">
                         {withSuspense(<AppSidebar />)}
                         <div className="flex-1">
+                          <SkipLink />
                           <header className="h-12 flex items-center justify-between border-b border-border bg-card/50 backdrop-blur px-4">
                             <SidebarTrigger />
                             {withSuspense(<NotificationCenter />)}
                           </header>
-                          <main className="flex-1">
+                          <main id="main-content" role="main" className="flex-1">
                             <Routes>
                               <Route
                                 index
