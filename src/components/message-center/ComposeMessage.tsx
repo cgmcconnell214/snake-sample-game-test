@@ -40,6 +40,27 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
 
   const [typingChannel, setTypingChannel] = useState<any>(null);
   const [lastTypedAt, setLastTypedAt] = useState(0);
+  const [recipientId, setRecipientId] = useState<string | null>(null);
+
+  // Resolve recipient id based on input (debounced)
+  useEffect(() => {
+    if (!newMessage.recipient.trim()) {
+      setRecipientId(null);
+      return;
+    }
+    const t = setTimeout(async () => {
+      const { data } = await (supabase as any)
+        .from("public_user_profiles")
+        .select("user_id, username, display_name")
+        .or(
+          `username.eq.${newMessage.recipient.trim()},display_name.ilike.%${newMessage.recipient.trim()}%`,
+        )
+        .limit(1)
+        .maybeSingle();
+      setRecipientId(data?.user_id || null);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [newMessage.recipient]);
 
   useEffect(() => {
     const channel: any = supabase.channel("message-typing");
@@ -51,7 +72,7 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
   }, []);
 
   const broadcastTyping = () => {
-    if (!typingChannel || !user) return;
+    if (!typingChannel || !user || !recipientId) return;
     const now = Date.now();
     if (now - lastTypedAt < 1000) return; // throttle
     typingChannel.send({
@@ -61,6 +82,7 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
         from: user.id,
         fromName:
           (profile as any)?.display_name || (profile as any)?.first_name || user.email,
+        to: recipientId,
       },
     });
     setLastTypedAt(now);
@@ -172,9 +194,9 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
           <Input
             placeholder="Enter username (e.g., @john.doe)"
             value={newMessage.recipient}
-            onChange={(e) =>
-              setNewMessage((prev) => ({ ...prev, recipient: e.target.value }))
-            }
+            onChange={(e) => {
+              setNewMessage((prev) => ({ ...prev, recipient: e.target.value }));
+            }}
             disabled={sending}
           />
         </div>

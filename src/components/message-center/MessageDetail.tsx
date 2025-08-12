@@ -32,9 +32,11 @@ interface Message {
 
 interface MessageDetailProps {
   message: Message | null;
+  isTyping?: boolean;
+  typingName?: string;
 }
 
-const MessageDetail: React.FC<MessageDetailProps> = ({ message }) => {
+const MessageDetail: React.FC<MessageDetailProps> = ({ message, isTyping, typingName }) => {
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -110,6 +112,14 @@ const MessageDetail: React.FC<MessageDetailProps> = ({ message }) => {
                 </div>
               </div>
             </div>
+
+            {isTyping && (
+              <div className="mt-2">
+                <Badge variant="secondary" className="text-xs">
+                  {(typingName || "User")} is typing…
+                </Badge>
+              </div>
+            )}
 
             {/* Message Content */}
             <div className="prose prose-sm max-w-none">

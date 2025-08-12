@@ -40,15 +40,37 @@ export default function FollowersPage() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!user) return;
     fetchFollowData();
     fetchSuggestedUsers();
-    const cleanup = setupRealtimeSubscription();
-    return cleanup;
+    const cleanupSubs = setupRealtimeSubscription();
+    const cleanupPresence = setupPresence();
+    return () => {
+      cleanupSubs?.();
+      cleanupPresence?.();
+    };
   }, [user]);
 
+  const setupPresence = () => {
+    if (!user) return () => {};
+    const channel: any = supabase.channel("presence-global", {
+      config: { presence: { key: user.id } },
+    });
+    channel
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState() as Record<string, any[]>;
+        setOnlineIds(new Set(Object.keys(state)));
+      })
+      .subscribe(async (status: string) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({ user_id: user.id });
+        }
+      });
+    return () => supabase.removeChannel(channel);
+  };
   const setupRealtimeSubscription = () => {
     if (!user) return () => {};
 
@@ -426,6 +448,9 @@ export default function FollowersPage() {
                         <p className="text-sm text-muted-foreground truncate">
                           @{relation.follower_profile?.username}
                         </p>
+                        {relation.follower_id && onlineIds.has(relation.follower_id) && (
+                          <Badge variant="secondary" className="text-[10px] ml-1">Online</Badge>
+                        )}
                       </div>
                     </div>
 
@@ -502,6 +527,9 @@ export default function FollowersPage() {
                         <p className="text-sm text-muted-foreground truncate">
                           @{relation.following_profile?.username}
                         </p>
+                        {relation.following_id && onlineIds.has(relation.following_id) && (
+                          <Badge variant="secondary" className="text-[10px] ml-1">Online</Badge>
+                        )}
                       </div>
                     </div>
 

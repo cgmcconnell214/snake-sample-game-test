@@ -79,6 +79,7 @@ const MessageCenter: React.FC = () => {
     const typingChannel: any = supabase
       .channel("message-typing")
       .on("broadcast", { event: "typing" }, ({ payload }: any) => {
+        if (!user || payload?.to !== user.id) return;
         setTypingUsers((prev) => ({
           ...prev,
           [payload.from]: { name: payload.fromName, at: Date.now() },
@@ -181,7 +182,9 @@ const MessageCenter: React.FC = () => {
             {unreadCount} Unread
           </Badge>
           {Object.keys(typingUsers).length > 0 && (
-            <Badge variant="secondary" className="text-xs">Someone is typing…</Badge>
+            <Badge variant="secondary" className="text-xs">
+              {Object.values(typingUsers)[0]?.name || "Someone"} is typing…
+            </Badge>
           )}
         </div>
       </div>
@@ -213,7 +216,15 @@ const MessageCenter: React.FC = () => {
               onMarkAsRead={markAsRead}
               onlineUserIds={onlineUserIds}
             />
-            <MessageDetail message={selectedMessage} />
+            <MessageDetail message={selectedMessage} isTyping={
+              selectedMessage?.sender_id
+                ? Boolean(typingUsers[selectedMessage.sender_id])
+                : false
+            } typingName={
+              selectedMessage?.sender_id
+                ? typingUsers[selectedMessage.sender_id]?.name
+                : undefined
+            } />
           </div>
         </TabsContent>
 

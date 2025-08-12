@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Suspense, lazy, type ReactNode } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import FooterLinks from "@/components/FooterLinks";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -355,6 +356,7 @@ const App = () => (
                               />
                             </Routes>
                           </main>
+                          <FooterLinks />
                         </div>
                       </div>
                     </SidebarProvider>
@@ -371,7 +373,8 @@ const App = () => (
                 path="/redeem/:code"
                 element={withSuspense(<RedeemEnrollment />)}
               />
-            </Routes>
+              </Routes>
+              <FooterLinks />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
