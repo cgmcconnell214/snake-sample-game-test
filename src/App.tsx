@@ -44,6 +44,7 @@ import SystemDiagnostics from "./pages/SystemDiagnostics";
 import LegalSafehouse from "./pages/LegalSafehouse";
 import AssetProvenance from "./pages/AssetProvenance";
 import TokenomicsPage from "./pages/TokenomicsPage";
+import TokenSupply from "./pages/TokenSupply";
 import DevPlayground from "./pages/DevPlayground";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
@@ -192,6 +193,7 @@ const App = () => (
                               <Route path="liquidity/pools" element={withSuspense(<LiquidityPoolsNew />)} />
                               <Route path="escrow" element={withSuspense(<EscrowVaults />)} />
                               <Route path="tokenomics" element={withSuspense(<TokenomicsPage />)} />
+                              <Route path="token-supply" element={withSuspense(<TokenSupply />)} />
 
                               {/* Infra / Ops */}
                               <Route path="node-management" element={withSuspense(<NodeManagement />)} />
