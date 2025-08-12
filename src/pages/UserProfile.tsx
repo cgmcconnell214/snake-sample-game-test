@@ -16,6 +16,7 @@ import {
   Edit,
   Save,
   Camera,
+  Trash2,
   Globe,
   MapPin,
   Calendar,
@@ -74,7 +75,7 @@ const UserProfile: React.FC = () => {
   const [newPost, setNewPost] = useState("");
   const { user, profile } = useAuth();
   const { toast } = useToast();
-  const { uploadAvatar } = useAvatar();
+  const { uploadAvatar, removeAvatar, uploading } = useAvatar();
 
   const profileSchema = z.object({
     display_name: z.string().min(1, "Display name is required"),
@@ -178,6 +179,24 @@ const UserProfile: React.FC = () => {
       toast({
         title: "Upload Failed",
         description: "Failed to upload profile photo. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    try {
+      await removeAvatar();
+      toast({
+        title: "Avatar Removed",
+        description: "Your profile photo has been removed.",
+      });
+      await fetchUserProfile();
+    } catch (error) {
+      console.error("Error removing avatar:", error);
+      toast({
+        title: "Remove Failed",
+        description: "Failed to remove profile photo. Please try again.",
         variant: "destructive",
       });
     }
@@ -329,24 +348,40 @@ const UserProfile: React.FC = () => {
                     {getInitials(userProfile?.display_name || user?.email || "U")}
                   </AvatarFallback>
                 </Avatar>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute bottom-0 right-0 rounded-full p-1 h-8 w-8"
-                  onClick={() => {
-                    const input = document.createElement("input");
-                    input.type = "file";
-                    input.accept = "image/*";
-                    input.onchange = async (e) => {
-                      const file = (e.target as HTMLInputElement).files?.[0];
-                      if (file) await handleAvatarUpload(file);
-                    };
-                    input.click();
-                  }}
-                >
-                  <Camera className="h-4 w-4" />
-                </Button>
               </div>
+
+              <div className="flex justify-center space-x-2 mb-4">
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      handleAvatarUpload(file);
+                    }
+                  }}
+                />
+                <label htmlFor="avatar-upload">
+                  <Button size="sm" variant="outline" disabled={uploading}>
+                    <Camera className="h-4 w-4 mr-2" />
+                    Change
+                  </Button>
+                </label>
+                {userProfile?.avatar_url && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={uploading}
+                    onClick={handleAvatarRemove}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Remove
+                  </Button>
+                )}
+              </div>
+
               <CardTitle>
                 {editing ? (
                   <div className="space-y-1">
@@ -366,6 +401,7 @@ const UserProfile: React.FC = () => {
               </CardTitle>
               <CardDescription>@{userProfile?.username}</CardDescription>
             </CardHeader>
+
             <CardContent className="space-y-4">
               <div>
                 <label className="text-sm font-medium">Bio</label>

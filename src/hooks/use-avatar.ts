@@ -8,6 +8,7 @@ export interface AvatarUploadResult {
 
 export interface UseAvatarResult {
   uploadAvatar: (file: File) => Promise<AvatarUploadResult | null>;
+  removeAvatar: () => Promise<void>;
   uploading: boolean;
   progress: number;
   error: string | null;
@@ -73,8 +74,54 @@ export function useAvatar(): UseAvatarResult {
     }
   };
 
+  const removeAvatar = async (): Promise<void> => {
+    if (!user?.id) return;
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      // Get current avatar URL
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('avatar_url')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      const currentUrl = profile?.avatar_url;
+      if (currentUrl) {
+        // Extract storage path from public URL
+        const path = currentUrl.split('/avatars/')[1];
+        if (path) {
+          const { error: storageError } = await supabase.storage
+            .from('avatars')
+            .remove([path]);
+          if (storageError) throw storageError;
+        }
+      }
+
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({ avatar_url: null })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      await refreshProfile();
+    } catch (err: unknown) {
+      console.error('Avatar remove error:', err);
+      const message = (err as Error).message || 'Failed to remove avatar';
+      setError(message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return {
     uploadAvatar,
+    removeAvatar,
     uploading,
     progress,
     error,
