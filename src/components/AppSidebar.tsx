@@ -101,6 +101,7 @@ const socialItems = [
   { title: "Social Feed", url: "/app/social", icon: MessageSquare },
   { title: "My Profile", url: "/app/social/profile", icon: User },
   { title: "Followers", url: "/app/social/followers", icon: Users2 },
+  { title: "Messages", url: "/app/messages", icon: Mail },
 ];
 
 // Compliance & Security (Existing)
@@ -128,8 +129,6 @@ const bonusItems = [
 
 // System & User
 const systemItems = [
-  { title: "Profile", url: "/app/profile", icon: User },
-  { title: "Messages", url: "/app/messages", icon: Mail },
   { title: "IP Assets", url: "/app/ip-tokenization", icon: Coins },
   { title: "Settings", url: "/app/settings", icon: Settings },
 ];

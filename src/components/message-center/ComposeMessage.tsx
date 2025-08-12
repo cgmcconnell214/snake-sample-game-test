@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -29,7 +29,7 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
   });
   const [sending, setSending] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const {
     uploadFiles,
@@ -37,6 +37,34 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
     progress,
     error: uploadError,
   } = useFileUpload();
+
+  const [typingChannel, setTypingChannel] = useState<any>(null);
+  const [lastTypedAt, setLastTypedAt] = useState(0);
+
+  useEffect(() => {
+    const channel: any = supabase.channel("message-typing");
+    const sub = channel.subscribe();
+    setTypingChannel(channel);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const broadcastTyping = () => {
+    if (!typingChannel || !user) return;
+    const now = Date.now();
+    if (now - lastTypedAt < 1000) return; // throttle
+    typingChannel.send({
+      type: "broadcast",
+      event: "typing",
+      payload: {
+        from: user.id,
+        fromName:
+          (profile as any)?.display_name || (profile as any)?.first_name || user.email,
+      },
+    });
+    setLastTypedAt(now);
+  };
 
   const handleFileUpload = (files: FileList | null) => {
     if (!files) return;
@@ -155,9 +183,10 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
           <Input
             placeholder="Enter message subject"
             value={newMessage.subject}
-            onChange={(e) =>
-              setNewMessage((prev) => ({ ...prev, subject: e.target.value }))
-            }
+            onChange={(e) => {
+              setNewMessage((prev) => ({ ...prev, subject: e.target.value }));
+              broadcastTyping();
+            }}
             disabled={sending}
           />
         </div>
@@ -166,9 +195,10 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
           <Textarea
             placeholder="Enter your message"
             value={newMessage.content}
-            onChange={(e) =>
-              setNewMessage((prev) => ({ ...prev, content: e.target.value }))
-            }
+            onChange={(e) => {
+              setNewMessage((prev) => ({ ...prev, content: e.target.value }));
+              broadcastTyping();
+            }}
             rows={6}
             disabled={sending}
           />

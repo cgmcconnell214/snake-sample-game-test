@@ -80,7 +80,7 @@ const ProfileBanner: React.FC<ProfileBannerProps> = ({
             variant="secondary"
             size="sm"
             className="bg-white/20 hover:bg-white/30 border-white/20"
-            onClick={() => (window.location.href = "/settings")}
+            onClick={() => (window.location.href = "/app/settings")}
           >
             <Settings className="h-4 w-4" />
           </Button>

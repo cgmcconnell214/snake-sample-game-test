@@ -41,12 +41,14 @@ interface MessageListProps {
   messages: Message[];
   onMessageSelect: (message: Message) => void;
   onMarkAsRead: (messageId: string) => void;
+  onlineUserIds?: Set<string>;
 }
 
 const MessageList: React.FC<MessageListProps> = ({
   messages,
   onMessageSelect,
   onMarkAsRead,
+  onlineUserIds,
 }) => {
   const getMessageIcon = (type: string) => {
     switch (type) {
@@ -165,6 +167,9 @@ const MessageList: React.FC<MessageListProps> = ({
                               ? `${message.sender_profile?.first_name || "User"} ${message.sender_profile?.last_name || ""}`.trim()
                               : "System"}
                           </span>
+                          {message.sender_id && onlineUserIds?.has(message.sender_id) && (
+                            <Badge variant="secondary" className="text-[10px]">Online</Badge>
+                          )}
                           {hasAttachments && (
                             <span className="flex items-center">
                               <Paperclip className="h-3 w-3 mr-1" />

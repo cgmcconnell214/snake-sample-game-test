@@ -88,11 +88,33 @@ export default function EnhancedUserProfile() {
         .from("user_profiles")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
-      setProfile(data);
+      if (data) {
+        setProfile(data);
+      } else {
+        // Gracefully handle first-time users without a user_profiles row
+        setProfile({
+          user_id: user.id,
+          display_name: user.email?.split("@")[0] || "User",
+          username: null,
+          bio: null,
+          avatar_url: null,
+          profile_banner_url: null,
+          website: null,
+          location: null,
+          phone: null,
+          follower_count: 0,
+          following_count: 0,
+          post_count: 0,
+          theme_preferences: {},
+          privacy_settings: {},
+          notification_settings: {},
+          social_links: {},
+        } as any);
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
       toast({

@@ -52,6 +52,54 @@ const MessageCenter: React.FC = () => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
 
+  const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
+  const [typingUsers, setTypingUsers] = useState<Record<string, { name?: string; at: number }>>({});
+
+  useEffect(() => {
+    if (!user) return;
+
+    // Presence channel to track who is online
+    const presenceChannel: any = supabase.channel("message-presence", {
+      config: { presence: { key: user.id } },
+    });
+
+    presenceChannel
+      .on("presence", { event: "sync" }, () => {
+        const state = presenceChannel.presenceState() as Record<string, any[]>;
+        const ids = new Set(Object.keys(state));
+        setOnlineUserIds(ids);
+      })
+      .subscribe(async (status: string) => {
+        if (status === "SUBSCRIBED") {
+          await presenceChannel.track({ user_id: user.id });
+        }
+      });
+
+    // Typing indicator channel
+    const typingChannel: any = supabase
+      .channel("message-typing")
+      .on("broadcast", { event: "typing" }, ({ payload }: any) => {
+        setTypingUsers((prev) => ({
+          ...prev,
+          [payload.from]: { name: payload.fromName, at: Date.now() },
+        }));
+        // Auto-clear after 3s
+        setTimeout(() => {
+          setTypingUsers((prev) => {
+            const copy = { ...prev };
+            delete copy[payload.from];
+            return copy;
+          });
+        }, 3000);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(presenceChannel);
+      supabase.removeChannel(typingChannel);
+    };
+  }, [user]);
+
   useEffect(() => {
     if (user) {
       fetchMessages();
@@ -132,6 +180,9 @@ const MessageCenter: React.FC = () => {
             <Mail className="w-4 h-4 mr-1" />
             {unreadCount} Unread
           </Badge>
+          {Object.keys(typingUsers).length > 0 && (
+            <Badge variant="secondary" className="text-xs">Someone is typing…</Badge>
+          )}
         </div>
       </div>
 
@@ -160,6 +211,7 @@ const MessageCenter: React.FC = () => {
               messages={filteredMessages}
               onMessageSelect={setSelectedMessage}
               onMarkAsRead={markAsRead}
+              onlineUserIds={onlineUserIds}
             />
             <MessageDetail message={selectedMessage} />
           </div>
