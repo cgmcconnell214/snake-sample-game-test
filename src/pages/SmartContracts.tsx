@@ -46,6 +46,17 @@ export default function SmartContracts(): JSX.Element {
   });
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const { toast } = useToast();
+  const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
+  const [deployContractId, setDeployContractId] = useState<string | null>(null);
+  const [selectedDeployTemplate, setSelectedDeployTemplate] = useState("marketplace");
+  const DEPLOY_TEMPLATES = [
+    "marketplace",
+    "p2p-trading",
+    "escrow-vault",
+    "tokenized-asset",
+    "ip-licensing",
+    "token-distribution",
+  ];
 
   useEffect(() => {
     fetchContracts();
@@ -160,6 +171,32 @@ export default function SmartContracts(): JSX.Element {
       if (confirmDeploy) {
         await handleDeployContract(contractId);
       }
+    }
+  };
+
+  const handleOpenDeployModal = (contractId: string) => {
+    setDeployContractId(contractId);
+    setIsDeployModalOpen(true);
+  };
+
+  const handleConfirmDeploy = async () => {
+    if (!deployContractId) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("deploy-contract", {
+        body: { template: selectedDeployTemplate },
+      });
+      if ((error as any)) throw error;
+      await handleDeployContract(deployContractId);
+      toast({ title: "Deployed to XRPL", description: "Deployment recorded on-chain" });
+    } catch (e: any) {
+      toast({
+        title: "Deployment failed",
+        description: e?.message || "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeployModalOpen(false);
+      setDeployContractId(null);
     }
   };
 
@@ -312,7 +349,7 @@ export default function SmartContracts(): JSX.Element {
                   {contract.deployment_status !== "deployed" && (
                     <Button
                       className="flex-1"
-                      onClick={() => handleDeployContract(contract.id)}
+                      onClick={() => handleOpenDeployModal(contract.id)}
                     >
                       Deploy
                     </Button>
@@ -407,6 +444,48 @@ export default function SmartContracts(): JSX.Element {
                 <Button
                   variant="outline"
                   onClick={() => setIsCreateModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {isDeployModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Deploy Contract</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Template</Label>
+                <Select
+                  value={selectedDeployTemplate}
+                  onValueChange={setSelectedDeployTemplate}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEPLOY_TEMPLATES.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button className="flex-1" onClick={handleConfirmDeploy}>
+                  Deploy to XRPL
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeployModalOpen(false)}
                 >
                   Cancel
                 </Button>

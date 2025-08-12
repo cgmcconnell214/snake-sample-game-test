@@ -1,0 +1,9 @@
+{
+  "contract_name": "Escrow Vault",
+  "contract_type": "escrow_vault",
+  "ledger": "xrpl-testnet",
+  "initial_settings": {
+    "release_condition": "milestone",
+    "beneficiaries": []
+  }
+}

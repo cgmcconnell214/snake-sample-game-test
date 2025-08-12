@@ -1,0 +1,10 @@
+{
+  "contract_name": "Tokenized Asset",
+  "contract_type": "token",
+  "ledger": "xrpl-testnet",
+  "initial_settings": {
+    "currency_code": "USD",
+    "issuer": "",
+    "total_supply": "0"
+  }
+}

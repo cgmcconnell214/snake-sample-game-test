@@ -14,7 +14,7 @@ interface DeployRequest {
 }
 
 // Restrict deployments to known templates only
-const TEMPLATE_WHITELIST = ["marketplace", "p2p-trading"];
+const TEMPLATE_WHITELIST = ["marketplace", "p2p-trading", "escrow-vault", "tokenized-asset", "ip-licensing", "token-distribution"];
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";

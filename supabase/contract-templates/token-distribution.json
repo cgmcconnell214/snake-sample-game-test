@@ -1,0 +1,9 @@
+{
+  "contract_name": "Token Distribution",
+  "contract_type": "distribution",
+  "ledger": "xrpl-testnet",
+  "initial_settings": {
+    "vesting": true,
+    "cliff_days": 30
+  }
+}

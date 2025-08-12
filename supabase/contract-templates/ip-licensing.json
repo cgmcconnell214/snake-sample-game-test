@@ -1,0 +1,9 @@
+{
+  "contract_name": "IP Licensing",
+  "contract_type": "licensing",
+  "ledger": "xahau",
+  "initial_settings": {
+    "royalty_rate_bps": 500,
+    "reporting_required": true
+  }
+}
