@@ -36,6 +36,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AuditDetailModal from "@/components/AuditDetailModal";
+import { useSearchParams } from "react-router-dom";
 import Papa from "papaparse";
 
 interface AuditLog {
@@ -55,6 +56,8 @@ const AuditTrail = () => {
   const [filterType, setFilterType] = useState("all");
   const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,6 +74,13 @@ const AuditTrail = () => {
   };
 
   useEffect(() => {
+    const search = searchParams.get("search");
+    const type = searchParams.get("type");
+    if (search) setSearchTerm(search);
+    if (type) setFilterType(type);
+  }, [searchParams]);
+
+  useEffect(() => {
     const fetchAuditLogs = async () => {
       setLoading(true);
       try {
@@ -84,16 +94,16 @@ const AuditTrail = () => {
           setAuditLogs([]);
         } else {
           const logs: AuditLog[] = (data || []).map((event: any) => {
-            const action = event.request_data?.action || "Unknown";
+            const action = event?.request_data?.action || "Unknown";
             return {
-              id: parseInt(event.event_id, 10) || 0,
-              timestamp: event.created_at,
+              id: parseInt(event?.event_id, 10) || 0,
+              timestamp: event?.created_at,
               action,
-              user: event.security_context?.user || "Unknown",
-              details: JSON.stringify(event.request_data?.parameters || {}),
+              user: event?.security_context?.user || "Unknown",
+              details: JSON.stringify(event?.request_data?.parameters || {}),
               type: getActionType(action),
-              status: event.response_data?.status || "unknown",
-              ipAddress: event.security_context?.ip_address || "N/A",
+              status: event?.response_data?.status || "unknown",
+              ipAddress: event?.security_context?.ip_address || "N/A",
             };
           });
           setAuditLogs(logs);
@@ -113,6 +123,22 @@ const AuditTrail = () => {
     setCurrentPage(1);
   }, [searchTerm, filterType]);
 
+  const filteredLogs = auditLogs.filter((log) => {
+    const q = searchTerm.toLowerCase();
+    const matchesSearch =
+      log.action.toLowerCase().includes(q) ||
+      log.user.toLowerCase().includes(q) ||
+      log.details.toLowerCase().includes(q);
+    const matchesFilter = filterType === "all" || log.type === filterType;
+    return matchesSearch && matchesFilter;
+  });
+
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;
+  const paginatedLogs = filteredLogs.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const handleExport = () => {
     const csv = Papa.unparse(filteredLogs);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -124,6 +150,7 @@ const AuditTrail = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+
     toast({
       title: "Export Successful",
       description: "Audit trail exported to CSV.",
@@ -159,20 +186,6 @@ const AuditTrail = () => {
         return "bg-muted/10 text-muted-foreground border-muted/20";
     }
   };
-
-  const filteredLogs = auditLogs.filter((log) => {
-    const matchesSearch =
-      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.details.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === "all" || log.type === filterType;
-    return matchesSearch && matchesFilter;
-  });
-  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;
-  const paginatedLogs = filteredLogs.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -359,7 +372,7 @@ const AuditTrail = () => {
                 auditLogs.filter(
                   (log) =>
                     new Date(log.timestamp).toDateString() ===
-                    new Date().toDateString(),
+                    new Date().toDateString()
                 ).length
               }
             </div>
