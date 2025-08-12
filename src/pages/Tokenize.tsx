@@ -145,7 +145,7 @@ export default function Tokenize(): JSX.Element {
         throw new Error("No session found");
       }
 
-      const { data, error } = await supabase.functions.invoke(
+      const { error } = await supabase.functions.invoke(
         "tokenize-asset",
         {
           body: {
@@ -165,7 +165,22 @@ export default function Tokenize(): JSX.Element {
         },
       );
 
-      if (error) throw error;
+      if (error) {
+        let description =
+          error.message || "Failed to tokenize asset. Please try again.";
+        if ((error as any).status === 400) {
+          description = error.message;
+        } else if ((error as any).status === 429) {
+          description =
+            "Too many tokenization requests. Please wait and try again later.";
+        }
+        toast({
+          title: "Tokenization Failed",
+          description,
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
         title: "Tokenization Successful!",
