@@ -1,3 +1,4 @@
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TradingChart } from "@/components/TradingChart";
@@ -13,21 +14,21 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PortfolioAsset {
   symbol: string;
   quantity: number;
   value: number;
   change: number;
-  status: string;
+  status: "verified" | "pending" | "unknown";
 }
 
 interface TradeRecord {
   id: string;
   symbol: string;
-  type: string;
+  type: "BUY" | "SELL";
   quantity: number;
   price: number;
   time: string;
@@ -35,43 +36,63 @@ interface TradeRecord {
 }
 
 export default function Dashboard(): JSX.Element {
+  const { profile } = useAuth();
+
   const [portfolioData, setPortfolioData] = useState<PortfolioAsset[]>([]);
   const [recentTrades, setRecentTrades] = useState<TradeRecord[]>([]);
 
+  // Resolve user id from context or session
+  const getUserId = async (): Promise<string | null> => {
+    if (profile?.user_id) return profile.user_id as string;
+    const { data } = await supabase.auth.getSession();
+    return data.session?.user?.id ?? null;
+  };
+
   const fetchPortfolio = async () => {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) return;
-    const userId = session.session.user.id;
+    const userId = await getUserId();
+    if (!userId) return;
 
     const { data, error } = await supabase
       .from("asset_holdings")
       .select(
-        `balance, tokenized_assets ( asset_symbol, market_data ( current_price, price_change_24h ) )`
+        "balance, tokenized_assets(asset_symbol, asset_name, is_active, market_data(current_price, price_change_24h))"
       )
       .eq("user_id", userId);
 
-    if (!error && data) {
-      const holdings: PortfolioAsset[] = (data as any[]).map((h) => {
-        const price = h.tokenized_assets?.market_data?.[0]?.current_price || 0;
-        const change =
-          h.tokenized_assets?.market_data?.[0]?.price_change_24h || 0;
-        const quantity = Number(h.balance || 0);
-        return {
-          symbol: h.tokenized_assets?.asset_symbol || "",
-          quantity,
-          value: quantity * price,
-          change,
-          status: "verified",
-        };
-      });
-      setPortfolioData(holdings);
+    if (error) {
+      console.error("Error fetching portfolio:", error);
+      return;
     }
+
+    const holdings: PortfolioAsset[] = (data || []).map((h: any) => {
+      const asset = h.tokenized_assets || {};
+      const market = Array.isArray(asset.market_data)
+        ? asset.market_data[0] || {}
+        : {};
+      const quantity = Number(h.balance || 0);
+      const price = Number(market.current_price || 0);
+      const change = Number(market.price_change_24h || 0);
+
+      return {
+        symbol: asset.asset_symbol || "UNKNOWN",
+        quantity,
+        value: quantity * price,
+        change,
+        status:
+          asset.is_active === true
+            ? "verified"
+            : asset.is_active === false
+            ? "pending"
+            : "unknown",
+      };
+    });
+
+    setPortfolioData(holdings);
   };
 
   const fetchTrades = async () => {
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) return;
-    const userId = session.session.user.id;
+    const userId = await getUserId();
+    if (!userId) return;
 
     const { data, error } = await supabase
       .from("trade_executions")
@@ -82,23 +103,27 @@ export default function Dashboard(): JSX.Element {
       .order("execution_time", { ascending: false })
       .limit(5);
 
-    if (!error && data) {
-      const trades: TradeRecord[] = (data as any[]).map((t) => ({
-        id: t.id,
-        symbol: t.asset_symbol,
-        type: t.buyer_id === userId ? "BUY" : "SELL",
-        quantity: Number(t.quantity),
-        price: Number(t.price),
-        time: t.execution_time
-          ? new Date(t.execution_time).toLocaleTimeString()
-          : "",
-        status:
-          t.settlement_status === "settled"
-            ? "completed"
-            : t.settlement_status || "pending",
-      }));
-      setRecentTrades(trades);
+    if (error) {
+      console.error("Error fetching trades:", error);
+      return;
     }
+
+    const trades: TradeRecord[] = (data || []).map((t: any) => ({
+      id: t.id,
+      symbol: t.asset_symbol,
+      type: t.buyer_id === userId ? "BUY" : "SELL",
+      quantity: Number(t.quantity),
+      price: Number(t.price),
+      time: t.execution_time
+        ? new Date(t.execution_time).toLocaleTimeString()
+        : "",
+      status:
+        t.settlement_status === "settled"
+          ? "completed"
+          : t.settlement_status || "pending",
+    }));
+
+    setRecentTrades(trades);
   };
 
   useEffect(() => {
@@ -127,6 +152,7 @@ export default function Dashboard(): JSX.Element {
       supabase.removeChannel(holdingsChannel);
       supabase.removeChannel(tradesChannel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const totalValue = useMemo(
@@ -184,7 +210,9 @@ export default function Dashboard(): JSX.Element {
               ${totalValue.toLocaleString()}
             </div>
             <div
-              className={`flex items-center gap-1 text-sm ${totalGainPercent >= 0 ? "text-buy" : "text-sell"}`}
+              className={`flex items-center gap-1 text-sm ${
+                totalGainPercent >= 0 ? "text-buy" : "text-sell"
+              }`}
             >
               {totalGainPercent >= 0 ? (
                 <TrendingUp className="h-3 w-3" />
@@ -281,7 +309,9 @@ export default function Dashboard(): JSX.Element {
                         ${asset.value.toLocaleString()}
                       </div>
                       <div
-                        className={`text-sm ${asset.change >= 0 ? "text-buy" : "text-sell"}`}
+                        className={`text-sm ${
+                          asset.change >= 0 ? "text-buy" : "text-sell"
+                        }`}
                       >
                         {asset.change >= 0 ? "+" : ""}
                         {asset.change}%
@@ -322,9 +352,7 @@ export default function Dashboard(): JSX.Element {
               >
                 <div className="text-primary">{trade.id}</div>
                 <div>{trade.symbol}</div>
-                <div
-                  className={trade.type === "BUY" ? "text-buy" : "text-sell"}
-                >
+                <div className={trade.type === "BUY" ? "text-buy" : "text-sell"}>
                   {trade.type}
                 </div>
                 <div>{trade.quantity}</div>
