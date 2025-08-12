@@ -1,9 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TradingChart } from "@/components/TradingChart";
-import { OrderBook } from "@/components/OrderBook";
-import { TradePanel } from "@/components/TradePanel";
+import LoadingSpinner from "@/components/LoadingSpinner";
+const TradingChart = lazy(() =>
+  import("@/components/TradingChart").then((m) => ({ default: m.TradingChart })),
+);
+const OrderBook = lazy(() =>
+  import("@/components/OrderBook").then((m) => ({ default: m.OrderBook })),
+);
+const TradePanel = lazy(() =>
+  import("@/components/TradePanel").then((m) => ({ default: m.TradePanel })),
+);
 import {
   TrendingUp,
   TrendingDown,
@@ -275,7 +282,9 @@ export default function Dashboard(): JSX.Element {
       {/* Main Trading Interface */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <TradingChart symbol="GOLD-TOKEN" currentPrice={131.2} change={2.4} />
+          <Suspense fallback={<LoadingSpinner text="Loading chart..." />}> 
+            <TradingChart symbol="GOLD-TOKEN" currentPrice={131.2} change={2.4} />
+          </Suspense>
 
           {/* Portfolio Holdings */}
           <Card className="bg-card/50 backdrop-blur border-border/50">
@@ -331,8 +340,12 @@ export default function Dashboard(): JSX.Element {
         </div>
 
         <div className="space-y-6">
-          <TradePanel />
-          <OrderBook />
+          <Suspense fallback={<LoadingSpinner text="Loading trade tools..." />}> 
+            <TradePanel />
+          </Suspense>
+          <Suspense fallback={<LoadingSpinner text="Loading order book..." />}> 
+            <OrderBook />
+          </Suspense>
         </div>
       </div>
 
