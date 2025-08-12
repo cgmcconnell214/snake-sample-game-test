@@ -8,13 +8,13 @@ import { Award, CheckCircle, Clock, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
+import { Helmet } from "react-helmet";
 export default function Certification(): JSX.Element {
   const navigate = useNavigate();
   const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const { toast } = useToast();
-
+  const canonicalUrl = (typeof window !== "undefined" ? window.location.origin : "") + "/app/certification";
   const handleEnroll = async (certificationId: string) => {
     try {
       setEnrolling(true);
@@ -98,6 +98,11 @@ export default function Certification(): JSX.Element {
   ];
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <Helmet>
+        <title>Certification Paths | Sacred Commerce</title>
+        <meta name="description" content="Certification paths to master sacred commerce with badges and progress tracking." />
+        <link rel="canonical" href={canonicalUrl} />
+      </Helmet>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Certification Paths</h1>
@@ -121,70 +126,6 @@ export default function Certification(): JSX.Element {
       </div>
       <CertificationList certifications={certifications} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
-              <CardTitle>Onboarding Checklist</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Complete essential steps to get started
-            </p>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleViewChecklist}
-            >
-              View Checklist
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Star className="h-5 w-5" />
-              <CardTitle>Badge Progression</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Track your progress through skill levels
-            </p>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleViewProgress}
-            >
-              View Progress
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              <CardTitle>Access Gating by Level</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Unlock features based on certification level
-            </p>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={handleCheckAccess}
-            >
-              Check Access
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }
