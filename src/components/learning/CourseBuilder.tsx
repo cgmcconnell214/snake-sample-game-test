@@ -182,8 +182,8 @@ useEffect(() => {
 
     const ids = Array.from(new Set((data || []).map((e: any) => e.student_id))).filter(Boolean);
     if (ids.length) {
-      const { data: profiles } = await supabase
-        .from('user_profiles')
+      const { data: profiles } = await (supabase as any)
+        .from('public_user_profiles')
         .select('user_id, display_name, username, avatar_url')
         .in('user_id', ids);
       const map: Record<string, any> = {};

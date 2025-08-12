@@ -24,6 +24,9 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "application/pdf"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 const KycCenter = (): JSX.Element => {
   const { profile } = useAuth();
   const { toast } = useToast();
@@ -34,7 +37,30 @@ const KycCenter = (): JSX.Element => {
     proofAddress?: File;
   }>({});
 
+  const validateFile = (file: File): boolean => {
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      toast({
+        title: "Unsupported file type",
+        description: "Please upload a JPG, PNG, or PDF file",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        title: "File too large",
+        description: "Please upload files smaller than 5MB",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleFileUpload = (fileType: 'idFront' | 'idBack' | 'proofAddress', file: File) => {
+    if (!validateFile(file)) return;
     setUploadedFiles(prev => ({
       ...prev,
       [fileType]: file
@@ -63,6 +89,13 @@ const KycCenter = (): JSX.Element => {
         variant: "destructive",
       });
       return;
+    }
+
+    const files = [idFront, idBack, proofAddress];
+    for (const file of files) {
+      if (!validateFile(file)) {
+        return;
+      }
     }
 
     setIsSubmitting(true);

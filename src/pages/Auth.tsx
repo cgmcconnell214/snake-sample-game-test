@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Icons } from "@/components/ui/icons";
 import { supabase } from "@/integrations/supabase/client";
+import zxcvbn from "zxcvbn";
+import { Progress } from "@/components/ui/progress";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Auth = (): JSX.Element => {
   const { user, signIn, signUp } = useAuth();
@@ -32,6 +35,19 @@ const Auth = (): JSX.Element => {
   const location = useLocation();
   const [acceptedSignin, setAcceptedSignin] = useState(false);
   const [acceptedSignup, setAcceptedSignup] = useState(false);
+  const [passwordScore, setPasswordScore] = useState(0);
+  const strengthLabels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+  const strengthColors = [
+    "text-red-500",
+    "text-red-500",
+    "text-yellow-500",
+    "text-green-500",
+    "text-green-600",
+  ];
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const signInCaptchaRef = useRef<ReCAPTCHA>(null);
+  const signUpCaptchaRef = useRef<ReCAPTCHA>(null);
+  const recaptchaSiteKey = (import.meta as any).env?.VITE_RECAPTCHA_SITE_KEY as string | undefined;
   const initialTab = new URLSearchParams(location.search).get("mode") === "signup" ? "signup" : "signin";
   useEffect(() => {
     if (user) {
@@ -40,7 +56,12 @@ const Auth = (): JSX.Element => {
   }, [user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (name === "password") {
+      const { score } = zxcvbn(value);
+      setPasswordScore(score);
+    }
     setError(null);
   };
 
@@ -48,6 +69,10 @@ const Auth = (): JSX.Element => {
     e.preventDefault();
     if (!acceptedSignin) {
       setError("Please accept the Terms and Privacy Policy to continue.");
+      return;
+    }
+    if (recaptchaSiteKey && !captchaToken) {
+      setError("Please complete the captcha.");
       return;
     }
     setLoading(true);
@@ -62,6 +87,8 @@ const Auth = (): JSX.Element => {
       setError(err.message || "An error occurred during sign in");
     } finally {
       setLoading(false);
+      signInCaptchaRef.current?.reset();
+      setCaptchaToken(null);
     }
   };
 
@@ -69,6 +96,10 @@ const Auth = (): JSX.Element => {
     e.preventDefault();
     if (!acceptedSignup) {
       setError("Please accept the Terms and Privacy Policy to continue.");
+      return;
+    }
+    if (recaptchaSiteKey && !captchaToken) {
+      setError("Please complete the captcha.");
       return;
     }
     setLoading(true);
@@ -86,6 +117,12 @@ const Auth = (): JSX.Element => {
       return;
     }
 
+    if (passwordScore < 2) {
+      setError("Password is too weak");
+      setLoading(false);
+      return;
+    }
+
     try {
       const { error } = await signUp(formData.email, formData.password, {
         first_name: formData.firstName,
@@ -99,6 +136,8 @@ const Auth = (): JSX.Element => {
       setError(err.message || "An error occurred during sign up");
     } finally {
       setLoading(false);
+      signUpCaptchaRef.current?.reset();
+      setCaptchaToken(null);
     }
   };
 
@@ -136,7 +175,15 @@ const Auth = (): JSX.Element => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue={initialTab} className="w-full">
+          <Tabs
+            defaultValue={initialTab}
+            className="w-full"
+            onValueChange={() => {
+              setCaptchaToken(null);
+              signInCaptchaRef.current?.reset();
+              signUpCaptchaRef.current?.reset();
+            }}
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -169,6 +216,14 @@ const Auth = (): JSX.Element => {
                     disabled={loading}
                     required
                   />
+                  {formData.password && (
+                    <div className="space-y-1">
+                      <Progress value={(passwordScore / 4) * 100} className="h-2" />
+                      <p className={`text-xs ${strengthColors[passwordScore]}`}>
+                        Strength: {strengthLabels[passwordScore]}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-start gap-2">
                   <Checkbox
@@ -180,6 +235,13 @@ const Auth = (): JSX.Element => {
                     I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
                   </label>
                 </div>
+                {recaptchaSiteKey && (
+                  <ReCAPTCHA
+                    ref={signInCaptchaRef}
+                    sitekey={recaptchaSiteKey}
+                    onChange={(token) => setCaptchaToken(token)}
+                  />
+                )}
                 {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
@@ -246,6 +308,14 @@ const Auth = (): JSX.Element => {
                     disabled={loading}
                     required
                   />
+                  {formData.password && (
+                    <div className="space-y-1">
+                      <Progress value={(passwordScore / 4) * 100} className="h-2" />
+                      <p className={`text-xs ${strengthColors[passwordScore]}`}>
+                        Strength: {strengthLabels[passwordScore]}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
@@ -270,6 +340,13 @@ const Auth = (): JSX.Element => {
                     I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
                   </label>
                 </div>
+                {recaptchaSiteKey && (
+                  <ReCAPTCHA
+                    ref={signUpCaptchaRef}
+                    sitekey={recaptchaSiteKey}
+                    onChange={(token) => setCaptchaToken(token)}
+                  />
+                )}
                 {error && (
                   <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>

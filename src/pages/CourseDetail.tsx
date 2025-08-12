@@ -6,12 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Play, Share2 } from "lucide-react";
+import NotFound from "./NotFound";
 
 export default function CourseDetail(): JSX.Element {
   const { slug } = useParams();
-const [course, setCourse] = useState<any>(null);
+  const [course, setCourse] = useState<any>(null);
   const [isCreator, setIsCreator] = useState(false);
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const isValidSlug = useMemo(() => typeof slug === "string" && /^[a-z0-9-]+$/.test(slug), [slug]);
 
   useEffect(() => {
     document.title = course?.title ? `${course.title} – Course` : "Course";
@@ -21,6 +25,12 @@ const [course, setCourse] = useState<any>(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
+      if (!isValidSlug) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
       const { data, error } = await supabase
         .from("educational_courses")
         .select("*")
@@ -28,12 +38,17 @@ const [course, setCourse] = useState<any>(null);
         .maybeSingle();
       if (error) {
         toast({ title: "Error", description: "Failed to load course", variant: "destructive" });
-        return;
       }
-      setCourse(data);
+      if (!data || error) {
+        setNotFound(true);
+      } else {
+        setCourse(data);
+        setNotFound(false);
+      }
+      setLoading(false);
     };
-    if (slug) fetchCourse();
-  }, [slug, toast]);
+    fetchCourse();
+  }, [slug, isValidSlug, toast]);
 
   useEffect(() => {
     const checkCreator = async () => {
@@ -82,7 +97,8 @@ const [course, setCourse] = useState<any>(null);
     toast({ title: "Enrolled", description: `You are enrolled in ${course.title}` });
   };
 
-  if (!course) return <div className="p-6">Loading...</div>;
+  if (notFound) return <NotFound />;
+  if (loading) return <div className="p-6">Loading...</div>;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
