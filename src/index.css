@@ -32,7 +32,88 @@
 
 @layer base {
   :root {
-    /* Sacred Divine Theme Colors */
+    /* Light Theme Colors */
+    --background: 0 0% 100%;
+    --foreground: 220 25% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
+
+    --primary: 220 90% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 45 80% 90%;
+    --secondary-foreground: 220 25% 15%;
+
+    --muted: 220 10% 96%;
+    --muted-foreground: 220 25% 40%;
+
+    --accent: 220 15% 95%;
+    --accent-foreground: 220 25% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 220 90% 60%;
+
+    --radius: 0.5rem;
+
+    /* Divine Theme Specific Colors */
+    --divine-gold: 45 80% 50%;
+    --divine-gold-foreground: 220 25% 10%;
+    --ethereal-white: 0 0% 100%;
+    --deep-blue: 220 90% 60%;
+    --sacred-dark: 220 25% 8%;
+    --sacred-medium: 220 25% 30%;
+
+    /* Trading Specific Colors */
+    --success: 120 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --buy: 120 60% 45%;
+    --sell: 0 84% 55%;
+    --warning: 45 93% 50%;
+    --warning-foreground: 220 25% 15%;
+
+    /* Chart Colors */
+    --chart-1: 220 90% 60%;
+    --chart-2: 120 60% 45%;
+    --chart-3: 45 80% 55%;
+    --chart-4: 280 80% 50%;
+    --chart-5: 0 84% 55%;
+
+    /* Gradients */
+    --gradient-divine: linear-gradient(135deg, hsl(220 90% 60%) 0%, hsl(45 80% 60%) 100%);
+    --gradient-sacred: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(220 15% 90%) 100%);
+    --gradient-ethereal: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 90% 60% / 0.1) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(220 90% 60% / 0.2) 50%, hsl(45 80% 60% / 0.1) 100%);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 220 25% 30%;
+    --sidebar-primary: 220 90% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 10% 96%;
+    --sidebar-accent-foreground: 220 25% 20%;
+    --sidebar-border: 220 15% 90%;
+    --sidebar-ring: 220 90% 60%;
+
+    /* Shadows and Effects */
+    --shadow-divine: 0 10px 30px -10px hsl(45 80% 60% / 0.3);
+    --shadow-sacred: 0 0 40px hsl(220 90% 60% / 0.35);
+    --shadow-ethereal: 0 20px 60px -20px hsl(220 90% 60% / 0.15);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-divine: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .dark {
+    /* Sacred Divine Theme Colors (Dark) */
     --background: 220 25% 8%;
     --foreground: 45 100% 95%;
 
@@ -112,6 +193,7 @@
     --transition-divine: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
+
 
 @layer base {
   * {

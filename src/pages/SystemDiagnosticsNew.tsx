@@ -43,6 +43,7 @@ export default function SystemDiagnostics(): JSX.Element {
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const timeFormatter = new Intl.DateTimeFormat(undefined, { timeStyle: "medium" });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -115,56 +116,33 @@ export default function SystemDiagnostics(): JSX.Element {
 
   const fetchAuditEvents = async () => {
     try {
-      // Generate mock audit events
-      const mockEvents: AuditEvent[] = [
-        {
-          id: "1",
-          timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-          event_type: "user_login",
-          severity: "info",
-          source: "auth_service",
-          message: "User authentication successful",
-          metadata: { user_id: "user123", ip: "192.168.1.1" }
-        },
-        {
-          id: "2", 
-          timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-          event_type: "token_mint",
-          severity: "info",
-          source: "blockchain_service",
-          message: "New tokens minted successfully",
-          metadata: { asset_id: "asset456", amount: 1000 }
-        },
-        {
-          id: "3",
-          timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-          event_type: "high_memory_usage",
-          severity: "warning",
-          source: "system_monitor",
-          message: "Memory usage exceeded 80% threshold",
-          metadata: { usage: "85%", threshold: "80%" }
-        },
-        {
-          id: "4",
-          timestamp: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
-          event_type: "smart_contract_deploy",
-          severity: "info",
-          source: "contract_service",
-          message: "Smart contract deployed successfully",
-          metadata: { contract_id: "contract789", gas_used: 250000 }
-        },
-        {
-          id: "5",
-          timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-          event_type: "failed_transaction",
-          severity: "error",
-          source: "trading_engine",
-          message: "Transaction failed due to insufficient funds",
-          metadata: { transaction_id: "tx123", user_id: "user456" }
-        }
-      ];
+      const { data, error } = await supabase
+        .from("audit_event_details")
+        .select("id, created_at, request_data, response_data, security_context")
+        .order("created_at", { ascending: false })
+        .limit(25);
 
-      setAuditEvents(mockEvents);
+      if (error) {
+        console.error("Error fetching audit events:", error);
+        return;
+      }
+
+      const events: AuditEvent[] = (data || []).map((e) => ({
+        id: e.id,
+        timestamp: e.created_at,
+        event_type: (e.request_data as any)?.action ?? "unknown",
+        severity:
+          ((e.response_data as any)?.status === "success" ? "info" : "error") as
+            | "info"
+            | "warning"
+            | "error"
+            | "critical",
+        source: (e.security_context as any)?.ip_address || "system",
+        message: (e.response_data as any)?.status ?? "",
+        metadata: e,
+      }));
+
+      setAuditEvents(events);
     } catch (error) {
       console.error("Error fetching audit events:", error);
     }
@@ -256,7 +234,7 @@ export default function SystemDiagnostics(): JSX.Element {
         </div>
         <div className="flex items-center gap-4">
           <div className="text-sm text-muted-foreground">
-            Last updated: {lastUpdate.toLocaleTimeString()}
+            Last updated: {timeFormatter.format(lastUpdate)}
           </div>
           <Button 
             onClick={runDiagnostics} 
@@ -371,7 +349,7 @@ export default function SystemDiagnostics(): JSX.Element {
                         {event.severity}
                       </Badge>
                       <span className="text-xs text-muted-foreground mt-1">
-                        {new Date(event.timestamp).toLocaleTimeString()}
+                        {timeFormatter.format(new Date(event.timestamp))}
                       </span>
                     </div>
                     

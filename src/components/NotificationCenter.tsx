@@ -35,10 +35,10 @@ export default function NotificationCenter() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      fetchNotifications();
-      setupRealtimeSubscription();
-    }
+    if (!user) return;
+    fetchNotifications();
+    const cleanup = setupRealtimeSubscription();
+    return cleanup;
   }, [user]);
 
   const fetchNotifications = async () => {
@@ -65,8 +65,8 @@ export default function NotificationCenter() {
         let profiles: any[] = [];
         
         if (actorIds.length > 0) {
-          const { data: profilesData } = await supabase
-            .from('user_profiles')
+          const { data: profilesData } = await (supabase as any)
+            .from('public_user_profiles')
             .select('user_id, display_name, username, avatar_url')
             .in('user_id', actorIds);
           profiles = profilesData || [];
@@ -105,11 +105,11 @@ export default function NotificationCenter() {
           
           // Get actor profile if available
           if (newNotification.data?.actor_id) {
-            const { data: profile } = await supabase
-              .from('user_profiles')
+            const { data: profile } = await (supabase as any)
+              .from('public_user_profiles')
               .select('user_id, display_name, username, avatar_url')
               .eq('user_id', newNotification.data.actor_id)
-              .single();
+              .maybeSingle();
             
             newNotification.actor_profile = profile;
           }

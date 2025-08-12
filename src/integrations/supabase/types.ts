@@ -1751,6 +1751,7 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_tier"]
             | null
           two_factor_enabled: boolean | null
+          two_factor_secret: string | null
           updated_at: string | null
           user_id: string
         }
@@ -1774,6 +1775,7 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_tier"]
             | null
           two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -1797,6 +1799,7 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_tier"]
             | null
           two_factor_enabled?: boolean | null
+          two_factor_secret?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -2721,7 +2724,16 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          display_name: string | null
+          user_id: string | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_stuck_executions: {
@@ -2745,6 +2757,16 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_public_user_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          display_name: string
+          username: string
+          bio: string
+          avatar_url: string
+        }[]
       }
       get_user_notifications: {
         Args: { target_user_id: string }

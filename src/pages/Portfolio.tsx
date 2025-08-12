@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -8,45 +8,54 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Briefcase, DollarSign } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Portfolio = (): JSX.Element => {
-  const portfolioData = [
-    {
-      symbol: "XRPL-USD",
-      name: "XRPL USD Stable",
-      balance: 5000,
-      value: 5000,
-      change: 0.12,
-    },
-    {
-      symbol: "XRPL-GOLD",
-      name: "Tokenized Gold",
-      balance: 2.5,
-      value: 4750,
-      change: -1.24,
-    },
-    {
-      symbol: "XRPL-RE1",
-      name: "Real Estate Token 1",
-      balance: 100,
-      value: 12500,
-      change: 3.45,
-    },
-    {
-      symbol: "XRPL-CORP",
-      name: "Corporate Bond Token",
-      balance: 50,
-      value: 7800,
-      change: 0.89,
-    },
-  ];
+  const { profile } = useAuth();
+  const [portfolioData, setPortfolioData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      if (!profile?.user_id) return;
+      const { data, error } = await supabase
+        .from("asset_holdings")
+        .select(
+          "balance, tokenized_assets(asset_symbol, asset_name, is_active, market_data(current_price, price_change_24h))",
+        )
+        .eq("user_id", profile.user_id);
+
+      if (error) {
+        console.error("Error fetching portfolio:", error);
+        return;
+      }
+
+      const holdings = (data || []).map((holding: any) => {
+        const asset = holding.tokenized_assets || {};
+        const market = asset.market_data?.[0] || {};
+        const balance = holding.balance || 0;
+        const price = market.current_price || 0;
+        return {
+          symbol: asset.asset_symbol || "UNKNOWN",
+          name: asset.asset_name || asset.asset_symbol || "Unknown Asset",
+          balance,
+          value: balance * price,
+          change: market.price_change_24h || 0,
+        };
+      });
+
+      setPortfolioData(holdings);
+    };
+
+    fetchPortfolio();
+  }, [profile]);
 
   const totalValue = portfolioData.reduce((sum, asset) => sum + asset.value, 0);
   const totalGain = portfolioData.reduce(
     (sum, asset) => sum + (asset.value * asset.change) / 100,
     0,
   );
-  const totalGainPercent = (totalGain / totalValue) * 100;
+  const totalGainPercent = totalValue ? (totalGain / totalValue) * 100 : 0;
 
   return (
     <div className="container mx-auto p-6 space-y-6">

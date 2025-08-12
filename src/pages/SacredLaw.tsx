@@ -11,6 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Feather, Compass, Scale, Book, Plus, Edit, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -41,10 +47,14 @@ export default function SacredLaw(): JSX.Element {
     prerequisite_for: [],
   });
   const { toast } = useToast();
+  const [lawPdfs, setLawPdfs] = useState<{ name: string; url: string }[]>([]);
+  const [selectedPdf, setSelectedPdf] =
+    useState<{ name: string; url: string } | null>(null);
 
   useEffect(() => {
     fetchPrinciples();
     checkAdminStatus();
+    fetchLawPdfs();
   }, []);
 
   const checkAdminStatus = async () => {
@@ -78,6 +88,30 @@ export default function SacredLaw(): JSX.Element {
     }
 
     setPrinciples(data || []);
+  };
+
+  const fetchLawPdfs = async () => {
+    const { data, error } = await supabase.storage
+      .from("law-pdfs")
+      .list("", { limit: 100, sortBy: { column: "name", order: "asc" } });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch law documents",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const files =
+      data?.map((file) => ({
+        name: file.name,
+        url: supabase.storage
+          .from("law-pdfs")
+          .getPublicUrl(file.name).data.publicUrl,
+      })) || [];
+    setLawPdfs(files);
   };
 
   const handleCreatePrinciple = async () => {
@@ -239,6 +273,42 @@ export default function SacredLaw(): JSX.Element {
             </Button>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Law Reference Documents */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Law References</h2>
+        <div className="space-y-2">
+          {lawPdfs.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No law references found.
+            </p>
+          )}
+          {lawPdfs.map((pdf) => (
+            <div
+              key={pdf.name}
+              className="flex items-center justify-between p-3 border rounded-lg"
+            >
+              <span className="text-sm font-medium truncate">
+                {pdf.name}
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setSelectedPdf(pdf)}>
+                  Preview
+                </Button>
+                <Button asChild variant="outline">
+                  <a
+                    href={pdf.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Download
+                  </a>
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Sacred Principles List */}
@@ -480,6 +550,24 @@ export default function SacredLaw(): JSX.Element {
           </Card>
         </div>
       )}
+
+      <Dialog
+        open={!!selectedPdf}
+        onOpenChange={(open) => !open && setSelectedPdf(null)}
+      >
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>{selectedPdf?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedPdf && (
+            <embed
+              src={selectedPdf.url}
+              type="application/pdf"
+              className="w-full h-[80vh]"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
