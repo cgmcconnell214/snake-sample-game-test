@@ -62,8 +62,8 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/app/learning/courses`,
-      cancel_url: `${req.headers.get("origin")}/app/learning/courses`,
+      success_url: `${req.headers.get("origin")}/app/learning`,
+      cancel_url: `${req.headers.get("origin")}/app/learning`,
       metadata: {
         user_id: user.id,
         ...metadata,

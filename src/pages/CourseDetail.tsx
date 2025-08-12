@@ -143,7 +143,7 @@ export default function CourseDetail(): JSX.Element {
               </>
             )}
             <Button asChild variant="outline">
-              <Link to="/app/learning/courses">Back to Courses</Link>
+              <Link to="/app/learning">Back to Courses</Link>
             </Button>
           </div>
         </CardContent>

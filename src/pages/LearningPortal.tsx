@@ -1,25 +1,43 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Book, Play, Award } from "lucide-react";
-import { useState } from "react";
-import { injectContractTemplate } from "@/lib/contractTemplates";
+import { BookOpen, Play } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
-export default function LearningPortal() {
-  const [activeCourse, setActiveCourse] = useState<string | null>(null);
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  slug?: string;
+}
+
+export default function LearningPortal(): JSX.Element {
+  const [courses, setCourses] = useState<Course[]>([]);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  const handleLearn = async () => {
-    await injectContractTemplate('learn');
-  };
+  useEffect(() => {
+    document.title = "Learning Portal";
+    fetchCourses();
+  }, []);
 
-  const handleContinueLearning = () => {
-    toast({
-      title: "Continue Learning",
-      description: "Resuming your learning journey",
-    });
+  const fetchCourses = async () => {
+    const { data, error } = await supabase
+      .from("courses" as any)
+      .select("*")
+      .eq("is_published", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch courses",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCourses(data || []);
   };
 
   return (
@@ -28,95 +46,38 @@ export default function LearningPortal() {
         <div>
           <h1 className="text-3xl font-bold">Learning Portal</h1>
           <p className="text-muted-foreground">
-            Master tokenization and sacred commerce
+            Create and discover tokenized educational courses
           </p>
         </div>
-        <Button onClick={() => navigate('/app/learning/courses')}>
-          <Play className="h-4 w-4 mr-2" />
-          Browse All Courses
-        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Book className="h-5 w-5" />
-              Tokenization 101
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Fundamental concepts of asset tokenization
-            </p>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => navigate('/app/learning/courses')}
-            >
-              Start Course
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
-              Compliance Academy
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Regulatory compliance and legal frameworks
-            </p>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => navigate('/app/certification')}
-            >
-              View Certifications
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5" />
-              Ecclesiastical Trust Law
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Sacred law and divine jurisdiction principles
-            </p>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => navigate('/app/sacred-law')}
-            >
-              Explore Sacred Law
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {activeCourse && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="max-w-md w-full">
+        {courses.map((course) => (
+          <Card key={course.id}>
             <CardHeader>
-              <CardTitle>{activeCourse}</CardTitle>
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                <CardTitle className="text-lg">{course.title}</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Course launch placeholder. Full curriculum coming soon.
+                {course.description}
               </p>
-              <Button onClick={() => setActiveCourse(null)} className="w-full">
-                Close
+              <Button asChild>
+                <a href={`/app/learning/courses/${course.slug ?? course.id}`}>
+                  <Play className="h-4 w-4 mr-2" /> View
+                </a>
               </Button>
             </CardContent>
           </Card>
+        ))}
+      </div>
+
+      {courses.length === 0 && (
+        <div className="text-center py-12">
+          <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">No courses available.</p>
         </div>
       )}
     </div>

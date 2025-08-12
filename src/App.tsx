@@ -29,6 +29,7 @@ import AITradingBots from "./pages/AITradingBots";
 import SmartContracts from "./pages/SmartContracts";
 import WorkflowAutomation from "./pages/WorkflowAutomation";
 import LearningPortal from "./pages/LearningPortal";
+import LearningPortalNew from "./pages/LearningPortalNew";
 import Certification from "./pages/Certification";
 import LiveClasses from "./pages/LiveClasses";
 import DivineTrust from "./pages/DivineTrust";
@@ -48,7 +49,6 @@ import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import MarketplaceNew from "./pages/MarketplaceNew";
-import LearningPortalNew from "./pages/LearningPortalNew";
 import LiveClassesNew from "./pages/LiveClassesNew";
 import LiquidityPoolsNew from "./pages/LiquidityPoolsNew";
 import CourseDetail from "./pages/CourseDetail";
@@ -70,11 +70,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error: any) => {
-        // Don't retry on 4xx errors
         if (error?.status >= 400 && error?.status < 500) return false;
         return failureCount < 3;
       },
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     },
   },
 });

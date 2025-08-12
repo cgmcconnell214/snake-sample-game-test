@@ -27,7 +27,7 @@ export default function RedeemEnrollment(): JSX.Element {
       }
       setStatus('success');
       setMessage('Enrollment successful! Redirecting to course...');
-      setTimeout(() => navigate(`/app/learning/courses`), 1200);
+      setTimeout(() => navigate(`/app/learning`), 1200);
     };
     if (code) run();
   }, [code, navigate]);
