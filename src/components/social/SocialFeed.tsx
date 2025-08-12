@@ -19,6 +19,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import OnlineUsersBadge from "@/components/OnlineUsersBadge";
 
 interface Post {
   id: string;
@@ -433,6 +434,7 @@ export default function SocialFeed() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      <OnlineUsersBadge room="social_global" />
       {/* Create Post */}
       <Card>
         <CardHeader>

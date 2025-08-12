@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://example.com/</loc></url>
-  <url><loc>https://example.com/auth</loc></url>
-  <url><loc>https://example.com/app</loc></url>
-  <url><loc>https://example.com/app/trading</loc></url>
-  <url><loc>https://example.com/app/portfolio</loc></url>
-  <url><loc>https://example.com/app/marketplace</loc></url>
-  <url><loc>https://example.com/app/liquidity</loc></url>
-  <url><loc>https://example.com/app/learning</loc></url>
-  <url><loc>https://example.com/app/certification</loc></url>
-  <url><loc>https://example.com/app/social</loc></url>
-  <url><loc>https://example.com/app/profile</loc></url>
+  <url><loc>/</loc></url>
+  <url><loc>/auth</loc></url>
+  <url><loc>/app</loc></url>
+  <url><loc>/app/trading</loc></url>
+  <url><loc>/app/portfolio</loc></url>
+  <url><loc>/app/marketplace</loc></url>
+  <url><loc>/app/liquidity</loc></url>
+  <url><loc>/app/learning</loc></url>
+  <url><loc>/app/certification</loc></url>
+  <url><loc>/app/social</loc></url>
+  <url><loc>/app/profile</loc></url>
+  <url><loc>/terms</loc></url>
+  <url><loc>/privacy</loc></url>
 </urlset>

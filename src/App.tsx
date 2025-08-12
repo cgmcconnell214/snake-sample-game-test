@@ -57,6 +57,8 @@ const CourseCreator = lazy(() => import("./pages/CourseCreator"));
 const RedeemEnrollment = lazy(() => import("./pages/RedeemEnrollment"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const BadgeProgression = lazy(() => import("./pages/BadgeProgression"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
 
 // Lazy-loaded Components
 const AppSidebar = lazy(() =>
@@ -361,8 +363,10 @@ const App = () => (
               />
             </Routes>
 
-            {/* Non-nested route outside /app */}
+            {/* Public site routes */}
             <Routes>
+              <Route path="/terms" element={withSuspense(<Terms />)} />
+              <Route path="/privacy" element={withSuspense(<Privacy />)} />
               <Route
                 path="/redeem/:code"
                 element={withSuspense(<RedeemEnrollment />)}
