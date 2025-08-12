@@ -189,4 +189,14 @@ serve(async (req) => {
       },
     );
   } catch (error) {
-    const errorMessage =
+    const message = error instanceof Error ? error.message : String(error);
+    logStep("ERROR in tokenize-asset", { message });
+    return new Response(
+      JSON.stringify({ success: false, error: message }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
+  }
+});
