@@ -9,6 +9,7 @@ import { BookOpen, Filter, Play, Search, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 
 interface Course {
   id: string;
@@ -248,15 +249,15 @@ export default function LearningPortal(): JSX.Element {
                     <div className="flex gap-2">
                       {enrolled ? (
                         <Button asChild>
-                          <a href={`/app/learning/courses/${course.slug ?? course.id}`}>
+                          <Link to={`/app/learning/courses/${course.slug ?? course.id}`}>
                             <Play className="h-4 w-4 mr-2" /> Continue ({pct}%)
-                          </a>
+                          </Link>
                         </Button>
                       ) : (
                         <Button variant="secondary" asChild>
-                          <a href={`/app/learning/courses/${course.slug ?? course.id}`}>
+                          <Link to={`/app/learning/courses/${course.slug ?? course.id}`}>
                             <Sparkles className="h-4 w-4 mr-2" /> Enroll
-                          </a>
+                          </Link>
                         </Button>
                       )}
                     </div>

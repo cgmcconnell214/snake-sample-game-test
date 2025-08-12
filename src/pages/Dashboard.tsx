@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import Seo from "@/components/Seo";
 
 interface PortfolioAsset {
   symbol: string;
@@ -176,6 +177,11 @@ export default function Dashboard(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      <Seo
+        title="Dashboard | XRPL Asset Platform"
+        description="Overview of your portfolio, recent trades, and trading activity."
+        canonical={(typeof window !== "undefined" ? window.location.origin : "") + "/app"}
+      />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
