@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Card,
@@ -10,6 +10,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Shield,
   AlertTriangle,
@@ -20,13 +36,22 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+interface ComplianceAlert {
+  id: number;
+  type: string;
+  severity: string;
+  message: string;
+  status: string;
+  createdAt: string;
+}
+
 const Compliance = (): JSX.Element => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   // Mock compliance data
-  const complianceAlerts = [
+  const allAlerts: ComplianceAlert[] = [
     {
       id: 1,
       type: "Transaction Monitoring",
@@ -44,6 +69,37 @@ const Compliance = (): JSX.Element => {
       createdAt: "2024-01-19",
     },
   ];
+
+  const [alerts, setAlerts] = useState<ComplianceAlert[]>([]);
+  const [totalAlerts, setTotalAlerts] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [severityFilter, setSeverityFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("");
+  const [alertsLoading, setAlertsLoading] = useState(false);
+  const alertsPerPage = 5;
+
+  const fetchAlerts = () => {
+    setAlertsLoading(true);
+    setTimeout(() => {
+      let filtered = [...allAlerts];
+      if (severityFilter !== "all") {
+        filtered = filtered.filter((a) => a.severity === severityFilter);
+      }
+      if (dateFilter) {
+        filtered = filtered.filter(
+          (a) => new Date(a.createdAt) >= new Date(dateFilter)
+        );
+      }
+      setTotalAlerts(filtered.length);
+      const start = (currentPage - 1) * alertsPerPage;
+      setAlerts(filtered.slice(start, start + alertsPerPage));
+      setAlertsLoading(false);
+    }, 300);
+  };
+
+  useEffect(() => {
+    fetchAlerts();
+  }, [currentPage, severityFilter, dateFilter]);
 
   const complianceReports = [
     {
@@ -129,10 +185,7 @@ const Compliance = (): JSX.Element => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {
-                complianceAlerts.filter((alert) => alert.status === "pending")
-                  .length
-              }
+              {allAlerts.filter((alert) => alert.status === "pending").length}
             </div>
             <p className="text-xs text-muted-foreground">Requiring attention</p>
           </CardContent>
@@ -172,44 +225,119 @@ const Compliance = (): JSX.Element => {
 
         <TabsContent value="alerts" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Active Compliance Alerts</CardTitle>
-              <CardDescription>
-                Monitor and respond to compliance-related notifications
-              </CardDescription>
+            <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <CardTitle>Active Compliance Alerts</CardTitle>
+                <CardDescription>
+                  Monitor and respond to compliance-related notifications
+                </CardDescription>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Select
+                  value={severityFilter}
+                  onValueChange={(value) => {
+                    setSeverityFilter(value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue placeholder="Severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => {
+                    setDateFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {complianceAlerts.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="flex items-center space-x-4">
-                      {getStatusIcon(alert.status)}
-                      <div>
-                        <p className="font-medium">{alert.type}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {alert.message}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Created: {alert.createdAt}
-                        </p>
+              {alertsLoading ? (
+                <p className="text-sm text-center text-muted-foreground">
+                  Loading alerts...
+                </p>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {alerts.map((alert) => (
+                      <div
+                        key={alert.id}
+                        className="flex items-center justify-between p-4 border rounded-lg"
+                      >
+                        <div className="flex items-center space-x-4">
+                          {getStatusIcon(alert.status)}
+                          <div>
+                            <p className="font-medium">{alert.type}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {alert.message}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Created: {alert.createdAt}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={getSeverityColor(alert.severity)}>
+                            {alert.severity.toUpperCase()}
+                          </Badge>
+                          {alert.status === "pending" && (
+                            <Button size="sm" variant="outline">
+                              Review
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant={getSeverityColor(alert.severity)}>
-                        {alert.severity.toUpperCase()}
-                      </Badge>
-                      {alert.status === "pending" && (
-                        <Button size="sm" variant="outline">
-                          Review
-                        </Button>
-                      )}
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                  <Pagination className="pt-4">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={() =>
+                            setCurrentPage((p) => Math.max(p - 1, 1))
+                          }
+                        />
+                      </PaginationItem>
+                      {Array.from(
+                        { length: Math.max(1, Math.ceil(totalAlerts / alertsPerPage)) },
+                        (_, i) => (
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === i + 1}
+                              onClick={() => setCurrentPage(i + 1)}
+                            >
+                              {i + 1}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      )}
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={() =>
+                            setCurrentPage((p) =>
+                              p < Math.ceil(totalAlerts / alertsPerPage)
+                                ? p + 1
+                                : p
+                            )
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
