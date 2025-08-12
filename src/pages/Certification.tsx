@@ -8,7 +8,7 @@ import { Award, CheckCircle, Clock, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 export default function Certification(): JSX.Element {
   const navigate = useNavigate();
   const [enrolling, setEnrolling] = useState(false);

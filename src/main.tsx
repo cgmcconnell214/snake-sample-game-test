@@ -4,11 +4,14 @@ import App from "./App.tsx";
 import "./index.css";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { HelmetProvider } from "react-helmet-async";
 
 createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary>
-    <Suspense fallback={<LoadingSpinner />}>
-      <App />
-    </Suspense>
-  </ErrorBoundary>,
+  <HelmetProvider>
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingSpinner />}> 
+        <App />
+      </Suspense>
+    </ErrorBoundary>
+  </HelmetProvider>,
 );

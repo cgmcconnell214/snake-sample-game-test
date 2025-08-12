@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Filter, Play, Search, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 interface Course {
   id: string;
