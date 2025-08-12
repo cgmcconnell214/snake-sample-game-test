@@ -118,7 +118,7 @@ const KycCenter = (): JSX.Element => {
         throw new Error("User not authenticated");
       }
 
-      const uploadFile = () =>
+      const uploadFile = (path: string, file: File) =>
         supabase.storage.from("kyc-documents").upload(path, file);
 
       // Upload files to Supabase Storage
@@ -268,9 +268,7 @@ const KycCenter = (): JSX.Element => {
 
             {profile?.kyc_status === "rejected" && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <h4 className="font-medium text-red-800">
-                  Verification Failed
-                </h4>
+                <h4 className="font-medium text-red-800">Verification Failed</h4>
                 <p className="text-sm text-red-700 mt-1">
                   Your verification was unsuccessful. Please resubmit your
                   documents with the required information.

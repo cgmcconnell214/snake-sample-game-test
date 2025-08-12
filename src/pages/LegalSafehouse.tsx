@@ -16,7 +16,7 @@ export default function LegalSafehouse(): JSX.Element {
 
   interface StoredDocument {
     name: string;
-
+    path: string;
     url: string;
     status: string;
   }
