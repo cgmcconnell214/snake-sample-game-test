@@ -10,6 +10,8 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import { AppSidebar } from "@/components/AppSidebar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
+
+// Pages
 import Dashboard from "./pages/Dashboard";
 import Tokenize from "./pages/Tokenize";
 import Trading from "./pages/Trading";
@@ -20,8 +22,6 @@ import AuditTrail from "./pages/AuditTrail";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import UserProfile from "./pages/UserProfile";
-import MessageCenter from "./components/MessageCenter";
-import IPTokenization from "./components/IPTokenization";
 import Admin from "./pages/Admin";
 import Blockchain from "./pages/Blockchain";
 import AIAgents from "./pages/AIAgents";
@@ -47,20 +47,24 @@ import DevPlayground from "./pages/DevPlayground";
 import Auth from "./pages/Auth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import SocialFeed from "./components/social/SocialFeed";
-import EnhancedUserProfile from "./components/social/EnhancedUserProfile";
-import FollowersPage from "./components/social/FollowersPage";
-import NotificationCenter from "./components/NotificationCenter";
 import MarketplaceNew from "./pages/MarketplaceNew";
 import LearningPortalNew from "./pages/LearningPortalNew";
 import LiveClassesNew from "./pages/LiveClassesNew";
 import LiquidityPoolsNew from "./pages/LiquidityPoolsNew";
 import CourseDetail from "./pages/CourseDetail";
 import CourseCreator from "./pages/CourseCreator";
-import CourseBuilder from "@/components/learning/CourseBuilder";
 import RedeemEnrollment from "./pages/RedeemEnrollment";
 import Onboarding from "./pages/Onboarding";
 import BadgeProgression from "./pages/BadgeProgression";
+
+// Components
+import MessageCenter from "./components/MessageCenter";
+import IPTokenization from "./components/IPTokenization";
+import CourseBuilder from "@/components/learning/CourseBuilder";
+import SocialFeed from "./components/social/SocialFeed";
+import EnhancedUserProfile from "./components/social/EnhancedUserProfile";
+import FollowersPage from "./components/social/FollowersPage";
+import NotificationCenter from "./components/NotificationCenter";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -157,6 +161,8 @@ const App = () => (
                               <Route path="ai-trading-bots" element={withSuspense(<AITradingBots />)} />
                               <Route path="smart-contracts" element={withSuspense(<SmartContracts />)} />
                               <Route path="workflow-automation" element={withSuspense(<WorkflowAutomation />)} />
+
+                              {/* Learning */}
                               <Route path="learning" element={withSuspense(<LearningPortal />)} />
                               <Route path="learning/courses" element={withSuspense(<LearningPortalNew />)} />
                               <Route path="learning/courses/:slug" element={withSuspense(<CourseDetail />)} />
@@ -165,25 +171,38 @@ const App = () => (
                               <Route path="certification" element={withSuspense(<Certification />)} />
                               <Route path="onboarding" element={withSuspense(<Onboarding />)} />
                               <Route path="badges" element={withSuspense(<BadgeProgression />)} />
+
+                              {/* Live / Trust / Law */}
                               <Route path="live-classes" element={withSuspense(<LiveClasses />)} />
                               <Route path="live-classes/new" element={withSuspense(<LiveClassesNew />)} />
                               <Route path="divine-trust" element={withSuspense(<DivineTrust />)} />
-                              <Route path="kingdom-entry" element={withSuspense(<KingdomEntry />)} />
+                              <Route
+                                path="kingdom-entry"
+                                element={withSuspense(
+                                  <ProtectedRoute requiredRole="premium">
+                                    <KingdomEntry />
+                                  </ProtectedRoute>
+                                )}
+                              />
                               <Route path="sacred-law" element={withSuspense(<SacredLaw />)} />
+
+                              {/* Market / Liquidity / DeFi */}
                               <Route path="marketplace" element={withSuspense(<Marketplace />)} />
                               <Route path="marketplace/browse" element={withSuspense(<MarketplaceNew />)} />
                               <Route path="liquidity" element={withSuspense(<LiquidityPools />)} />
                               <Route path="liquidity/pools" element={withSuspense(<LiquidityPoolsNew />)} />
                               <Route path="escrow" element={withSuspense(<EscrowVaults />)} />
+                              <Route path="tokenomics" element={withSuspense(<TokenomicsPage />)} />
+
+                              {/* Infra / Ops */}
                               <Route path="node-management" element={withSuspense(<NodeManagement />)} />
                               <Route path="data-sync" element={withSuspense(<DataSync />)} />
                               <Route path="diagnostics" element={withSuspense(<SystemDiagnostics />)} />
                               <Route path="legal-safehouse" element={withSuspense(<LegalSafehouse />)} />
                               <Route path="asset-provenance" element={withSuspense(<AssetProvenance />)} />
-                              <Route path="tokenomics" element={withSuspense(<TokenomicsPage />)} />
                               <Route path="dev-playground" element={withSuspense(<DevPlayground />)} />
 
-                              {/* Social Media Routes */}
+                              {/* Social */}
                               <Route path="social" element={withSuspense(<SocialFeed />)} />
                               <Route path="social/profile" element={withSuspense(<EnhancedUserProfile />)} />
                               <Route path="social/followers" element={withSuspense(<FollowersPage />)} />
@@ -198,6 +217,8 @@ const App = () => (
                 )}
               />
             </Routes>
+
+            {/* Non-nested route outside /app */}
             <Routes>
               <Route path="/redeem/:code" element={withSuspense(<RedeemEnrollment />)} />
             </Routes>
