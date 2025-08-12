@@ -4,9 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, DollarSign, Loader2, AlertCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { injectContractTemplate } from "@/lib/contractTemplates";
@@ -19,6 +38,7 @@ export function TradePanel(): JSX.Element {
   const [price, setPrice] = useState("");
   const [selectedAsset, setSelectedAsset] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const { toast } = useToast();
 
   // Import real trading data
@@ -108,14 +128,15 @@ export function TradePanel(): JSX.Element {
   };
 
   return (
-    <Card className="bg-card/50 backdrop-blur border-border/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5" />
-          Trade Panel
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <>
+      <Card className="bg-card/50 backdrop-blur border-border/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5" />
+            Trade Panel
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
         <div>
           <Label>Select Asset</Label>
           <Select value={selectedAsset} onValueChange={setSelectedAsset}>
@@ -162,8 +183,39 @@ export function TradePanel(): JSX.Element {
             <OrderForm side="sell" />
           </TabsContent>
         </Tabs>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm {side === "buy" ? "Purchase" : "Sale"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2 text-sm">
+            <p>
+              Asset: <span className="font-mono">{asset?.symbol}</span>
+            </p>
+            <p>Quantity: {quantity}</p>
+            {orderType !== "market" && <p>Price: ${price || asset?.price}</p>}
+            <p>Total: ${calculateTotal()}</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                await handleCreateOrder();
+                setConfirmOpen(false);
+              }}
+              disabled={isLoading}
+            >
+              {isLoading ? "Processing..." : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 
   function OrderForm({ side }: { side: string }) {
@@ -241,7 +293,7 @@ export function TradePanel(): JSX.Element {
           <Button
             className={`w-full ${side === "buy" ? "bg-buy hover:bg-buy/90" : "bg-sell hover:bg-sell/90"}`}
             size="lg"
-            onClick={handleCreateOrder}
+            onClick={() => setConfirmOpen(true)}
             disabled={!selectedAsset || isLoading}
           >
             {isLoading ? (

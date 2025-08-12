@@ -1,0 +1,39 @@
+[
+  {
+    "id": "1",
+    "pool_name": "GOLD/USD Pool",
+    "token_a": "GOLD",
+    "token_b": "USD",
+    "token_a_balance": 1250.5,
+    "token_b_balance": 2500000.0,
+    "total_liquidity": 3750000.0,
+    "apy": 12.5,
+    "pool_type": "commodity",
+    "is_active": true
+  },
+  {
+    "id": "2",
+    "pool_name": "SILVER/USD Pool",
+    "token_a": "SILVER",
+    "token_b": "USD",
+    "token_a_balance": 50000.25,
+    "token_b_balance": 1250000.0,
+    "total_liquidity": 1875000.0,
+    "apy": 8.3,
+    "pool_type": "commodity",
+    "is_active": true
+  },
+  {
+    "id": "3",
+    "pool_name": "BTC/USD Bonded",
+    "token_a": "BTC",
+    "token_b": "USD",
+    "token_a_balance": 25.5,
+    "token_b_balance": 1500000.0,
+    "total_liquidity": 2250000.0,
+    "apy": 15.7,
+    "pool_type": "bonded",
+    "lock_period": 90,
+    "is_active": true
+  }
+]

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { Client, Wallet } from "npm:xrpl";
+import { rateLimit } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,12 @@ interface DeployRequest {
   template: string;
 }
 
+// Restrict deployments to known templates only
+const TEMPLATE_WHITELIST = [
+  'marketplace',
+  'p2p-trading',
+];
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[DEPLOY-CONTRACT] ${step}${detailsStr}`);
@@ -20,6 +27,9 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const rateLimitResponse = rateLimit(req);
+  if (rateLimitResponse) return rateLimitResponse;
 
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
@@ -55,11 +65,11 @@ serve(async (req) => {
     const requestData: DeployRequest = await req.json();
     logStep("Request data parsed", requestData);
 
-    if (!requestData.template) {
-      throw new Error("Template not specified");
+    if (!requestData.template || !TEMPLATE_WHITELIST.includes(requestData.template)) {
+      throw new Error(`Template must be one of: ${TEMPLATE_WHITELIST.join(', ')}`);
     }
 
-    const templatePath = new URL(`../templates/${requestData.template}.json`, import.meta.url);
+    const templatePath = new URL(`../../contract-templates/${requestData.template}.json`, import.meta.url);
     const templateText = await Deno.readTextFile(templatePath);
     const template = JSON.parse(templateText);
     logStep("Template loaded", { template: requestData.template });

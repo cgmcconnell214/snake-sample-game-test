@@ -13,14 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  User,
   Edit,
   Save,
   Camera,
   Globe,
   MapPin,
-  Phone,
-  Mail,
   Calendar,
   Users,
   MessageSquare,
@@ -69,13 +66,15 @@ interface UserPost {
 const UserProfile: React.FC = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<UserPost[]>([]);
-  const [activity, setActivity] = useState<{ id: string; action: string; created_at: string }[]>([])
-  const [badges, setBadges] = useState<Array<{ id: string; badge_name: string; description: string; badge_type: string; course_id: string | null; lesson_id: string | null; earned_at: string }>>([]);
+  const [activity, setActivity] = useState<
+    { id: string; action: string; created_at: string }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [newPost, setNewPost] = useState("");
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
+  const { uploadAvatar } = useAvatar();
 
   const profileSchema = z.object({
     display_name: z.string().min(1, "Display name is required"),
@@ -84,7 +83,6 @@ const UserProfile: React.FC = () => {
     location: z.string().optional(),
     phone: z.string().optional(),
   });
-
   type ProfileForm = z.infer<typeof profileSchema>;
 
   const form = useForm<ProfileForm>({
@@ -141,44 +139,39 @@ const UserProfile: React.FC = () => {
     }
   };
 
+  const fetchUserActivity = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_behavior_log")
+        .select("id, action, created_at")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setActivity(data || []);
+    } catch (error) {
+      console.error("Error fetching activity:", error);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchUserProfile();
       fetchUserPosts();
       fetchUserActivity();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
-
-
-  const fetchUserActivity = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('user_behavior_log')
-        .select('id, action, created_at')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      setActivity(data || []);
-    } catch (error) {
-      console.error('Error fetching activity:', error);
-    }
-  };
-
-  const { uploadAvatar, uploading } = useAvatar();
 
   const handleAvatarUpload = async (file: File) => {
     try {
       if (!user?.id) return;
-
       await uploadAvatar(file);
-
       toast({
         title: "Avatar Updated",
         description: "Your profile photo has been updated.",
       });
-
       await fetchUserProfile();
     } catch (error) {
       console.error("Error uploading avatar:", error);
@@ -192,7 +185,7 @@ const UserProfile: React.FC = () => {
 
   const saveProfile = async (values: ProfileForm) => {
     try {
-      // Generate username if not provided
+      // Generate username if not provided on server
       let username = values.display_name
         .toLowerCase()
         .replace(/\s+/g, ".")
@@ -201,15 +194,46 @@ const UserProfile: React.FC = () => {
         username = `user_${user?.id?.slice(0, 8)}`;
       }
 
-      const { error } = await supabase.from("user_profiles").upsert(
-        {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Not authenticated");
+
+      const payload: any = {
+        profile: {
           user_id: user?.id,
-          username: username,
+          username,
           ...values,
         },
-        { onConflict: "user_id" },
-      );
+      };
 
+      if (profile?.two_factor_enabled) {
+        const mfaCode = prompt("Enter your 2FA code");
+        if (!mfaCode) {
+          toast({
+            title: "Verification required",
+            description: "2FA code is required to update your profile.",
+            variant: "destructive",
+          });
+          return;
+        }
+        payload.mfaCode = mfaCode;
+      } else {
+        const password = prompt("Please confirm your password");
+        if (!password) {
+          toast({
+            title: "Verification required",
+            description: "Password confirmation is required to update your profile.",
+            variant: "destructive",
+          });
+          return;
+        }
+        payload.password = password;
+      }
+
+      const { error } = await supabase.functions.invoke("update-user-profile", {
+        body: payload,
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       if (error) throw error;
 
       toast({
@@ -231,14 +255,12 @@ const UserProfile: React.FC = () => {
 
   const createPost = async () => {
     if (!newPost.trim()) return;
-
     try {
       const { error } = await supabase.from("user_posts").insert({
         user_id: user?.id,
         content: newPost,
         post_type: "text",
       });
-
       if (error) throw error;
 
       toast({
@@ -258,14 +280,13 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
+  const getInitials = (name: string) =>
+    name
       .split(" ")
       .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  };
 
   if (loading) {
     return <div className="p-6">Loading profile...</div>;
@@ -305,9 +326,7 @@ const UserProfile: React.FC = () => {
                 <Avatar className="w-24 h-24">
                   <AvatarImage src={userProfile?.avatar_url} />
                   <AvatarFallback className="text-lg">
-                    {getInitials(
-                      userProfile?.display_name || user?.email || "U",
-                    )}
+                    {getInitials(userProfile?.display_name || user?.email || "U")}
                   </AvatarFallback>
                 </Avatar>
                 <Button
@@ -320,9 +339,7 @@ const UserProfile: React.FC = () => {
                     input.accept = "image/*";
                     input.onchange = async (e) => {
                       const file = (e.target as HTMLInputElement).files?.[0];
-                      if (file) {
-                        await uploadAvatar(file);
-                      }
+                      if (file) await handleAvatarUpload(file);
                     };
                     input.click();
                   }}
@@ -378,10 +395,7 @@ const UserProfile: React.FC = () => {
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     {editing ? (
                       <div className="w-full space-y-1">
-                        <Input
-                          {...form.register("location")}
-                          placeholder="Location"
-                        />
+                        <Input {...form.register("location")} placeholder="Location" />
                         {form.formState.errors.location && (
                           <p className="text-sm text-destructive">
                             {form.formState.errors.location.message}
@@ -399,10 +413,7 @@ const UserProfile: React.FC = () => {
                     <Globe className="h-4 w-4 text-muted-foreground" />
                     {editing ? (
                       <div className="w-full space-y-1">
-                        <Input
-                          {...form.register("website")}
-                          placeholder="Website"
-                        />
+                        <Input {...form.register("website")} placeholder="Website" />
                         {form.formState.errors.website && (
                           <p className="text-sm text-destructive">
                             {form.formState.errors.website.message}
@@ -428,18 +439,14 @@ const UserProfile: React.FC = () => {
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span>
                     Joined{" "}
-                    {new Date(
-                      userProfile?.created_at || "",
-                    ).toLocaleDateString()}
+                    {new Date(userProfile?.created_at || "").toLocaleDateString()}
                   </span>
                 </div>
               </div>
 
               <div className="flex justify-around pt-4 border-t">
                 <div className="text-center">
-                  <div className="font-bold">
-                    {userProfile?.post_count || 0}
-                  </div>
+                  <div className="font-bold">{userProfile?.post_count || 0}</div>
                   <div className="text-xs text-muted-foreground">Posts</div>
                 </div>
                 <div className="text-center">
@@ -459,7 +466,7 @@ const UserProfile: React.FC = () => {
           </Card>
         </div>
 
-        {/* Posts Section */}
+        {/* Posts & Activity */}
         <div className="lg:col-span-2">
           <Tabs defaultValue="posts" className="w-full">
             <TabsList>
@@ -499,7 +506,7 @@ const UserProfile: React.FC = () => {
                           <AvatarImage src={userProfile?.avatar_url} />
                           <AvatarFallback>
                             {getInitials(
-                              userProfile?.display_name || user?.email || "U",
+                              userProfile?.display_name || user?.email || "U"
                             )}
                           </AvatarFallback>
                         </Avatar>

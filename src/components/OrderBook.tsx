@@ -41,7 +41,7 @@ export function OrderBook({ assetId, symbol }: { assetId?: string; symbol?: stri
       .channel("orderbook-changes")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
+        { event: "*", schema: "public", table: "orders", filter: `asset_id=eq.${assetId}` },
         () => fetchOrders()
       )
       .subscribe();
