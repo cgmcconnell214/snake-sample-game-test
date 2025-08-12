@@ -9,15 +9,15 @@ export default function LiveClasses(): JSX.Element {
   const navigate = useNavigate();
 
   const handleScheduleSession = () => {
-    navigate('/app/live-classes/new');
+    navigate("/app/live-classes/new");
   };
 
   const handleViewCalendar = () => {
-    navigate('/app/live-classes/new');
+    navigate("/app/live-classes/new");
   };
 
   const handleBrowseEvents = () => {
-    navigate('/app/live-classes/new');
+    navigate("/app/live-classes/new");
   };
 
   const handleViewArchive = () => {
@@ -53,7 +53,11 @@ export default function LiveClasses(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               View upcoming classes and workshops
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewCalendar}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewCalendar}
+            >
               View Calendar
             </Button>
           </CardContent>
@@ -70,7 +74,11 @@ export default function LiveClasses(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Register for live sessions and get reminders
             </p>
-            <Button variant="outline" className="w-full" onClick={handleBrowseEvents}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleBrowseEvents}
+            >
               Browse Events
             </Button>
           </CardContent>
@@ -87,7 +95,11 @@ export default function LiveClasses(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Access recordings of past sessions
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewArchive}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewArchive}
+            >
               View Archive
             </Button>
           </CardContent>

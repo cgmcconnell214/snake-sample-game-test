@@ -59,7 +59,7 @@ export default function NodeManagement(): JSX.Element {
           clearTimeout(timeout);
           return { ...node, status: "offline" as const, latency: null };
         }
-      })
+      }),
     );
     setNodes(updated);
   };
@@ -78,15 +78,15 @@ export default function NodeManagement(): JSX.Element {
   };
 
   const handleViewPeers = () => {
-    navigate('/app/diagnostics');
+    navigate("/app/diagnostics");
   };
 
   const handleViewLogs = () => {
-    navigate('/app/audit');
+    navigate("/app/audit");
   };
 
   const handleConfigureTrust = () => {
-    navigate('/app/divine-trust');
+    navigate("/app/divine-trust");
   };
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -112,10 +112,16 @@ export default function NodeManagement(): JSX.Element {
               <div key={node.id} className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">{node.name}</div>
-                  <div className="text-sm text-muted-foreground">{node.url}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {node.url}
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Badge variant={node.status === "online" ? "default" : "destructive"}>
+                  <Badge
+                    variant={
+                      node.status === "online" ? "default" : "destructive"
+                    }
+                  >
                     {node.status}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
@@ -140,7 +146,11 @@ export default function NodeManagement(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor active peer connections and network health
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewPeers}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewPeers}
+            >
               View Peers
             </Button>
           </CardContent>
@@ -157,7 +167,11 @@ export default function NodeManagement(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track network performance and latency metrics
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewLogs}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewLogs}
+            >
               View Logs
             </Button>
           </CardContent>
@@ -174,7 +188,11 @@ export default function NodeManagement(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Manage trust levels for network relays
             </p>
-            <Button variant="outline" className="w-full" onClick={handleConfigureTrust}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleConfigureTrust}
+            >
               Configure Trust
             </Button>
           </CardContent>

@@ -15,14 +15,17 @@ export default function Marketplace() {
             Peer-to-peer asset trading and contracts
           </p>
         </div>
-        <Button onClick={() => navigate('/app/tokenize')}>
+        <Button onClick={() => navigate("/app/tokenize")}>
           <Plus className="h-4 w-4 mr-2" />
           List Asset
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card onClick={() => navigate('/app/tokenize')} className="cursor-pointer">
+        <Card
+          onClick={() => navigate("/app/tokenize")}
+          className="cursor-pointer"
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
@@ -33,13 +36,20 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Create new asset listings for trading
             </p>
-            <Button variant="outline" className="w-full" onClick={() => navigate('/app/tokenize')}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate("/app/tokenize")}
+            >
               Create Listing
             </Button>
           </CardContent>
         </Card>
 
-        <Card onClick={() => navigate('/app/marketplace/browse')} className="cursor-pointer">
+        <Card
+          onClick={() => navigate("/app/marketplace/browse")}
+          className="cursor-pointer"
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-5 w-5" />
@@ -50,13 +60,20 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               Explore available assets and opportunities
             </p>
-            <Button variant="outline" className="w-full" onClick={() => navigate('/app/marketplace/browse')}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate("/app/marketplace/browse")}
+            >
               Browse Market
             </Button>
           </CardContent>
         </Card>
 
-        <Card onClick={() => navigate('/app/smart-contracts')} className="cursor-pointer">
+        <Card
+          onClick={() => navigate("/app/smart-contracts")}
+          className="cursor-pointer"
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
@@ -67,7 +84,11 @@ export default function Marketplace() {
             <p className="text-sm text-muted-foreground mb-4">
               View pending and active trading contracts
             </p>
-            <Button variant="outline" className="w-full" onClick={() => navigate('/app/smart-contracts')}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate("/app/smart-contracts")}
+            >
               View Queue
             </Button>
           </CardContent>

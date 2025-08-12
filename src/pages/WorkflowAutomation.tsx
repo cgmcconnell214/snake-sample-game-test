@@ -246,8 +246,8 @@ export default function WorkflowAutomation(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Automated rules for token minting and distribution
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleConfigureRules}
             >
@@ -267,8 +267,8 @@ export default function WorkflowAutomation(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Automatic licensing and royalty distribution
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleSetTriggers}
             >
@@ -288,8 +288,8 @@ export default function WorkflowAutomation(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Conditional escrow release based on milestones
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleSetupLogic}
             >
@@ -344,25 +344,29 @@ export default function WorkflowAutomation(): JSX.Element {
                   >
                     {rule.is_active ? "Disable" : "Enable"}
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     aria-label="Configure rule settings"
-                    onClick={() => toast({
-                      title: "Rule Settings",
-                      description: `Configuring ${rule.rule_name}`,
-                    })}
+                    onClick={() =>
+                      toast({
+                        title: "Rule Settings",
+                        description: `Configuring ${rule.rule_name}`,
+                      })
+                    }
                   >
                     <Settings className="h-4 w-4" />
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     aria-label="Execute rule manually"
-                    onClick={() => toast({
-                      title: "Manual Execution",
-                      description: `Executing ${rule.rule_name} manually`,
-                    })}
+                    onClick={() =>
+                      toast({
+                        title: "Manual Execution",
+                        description: `Executing ${rule.rule_name} manually`,
+                      })
+                    }
                   >
                     <Play className="h-4 w-4" />
                   </Button>

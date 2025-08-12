@@ -6,7 +6,8 @@ import { rateLimit } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
@@ -25,13 +26,14 @@ serve(async (req) => {
   const service = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
+    { auth: { persistSession: false } },
   );
 
   try {
     const authHeader = req.headers.get("Authorization") ?? "";
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+    const { data: userData, error: userErr } =
+      await supabase.auth.getUser(token);
     if (userErr || !userData.user) {
       throw new Error("Not authenticated");
     }
@@ -42,7 +44,9 @@ serve(async (req) => {
     // Load link by code
     const { data: link, error: linkErr } = await service
       .from("course_enrollment_links")
-      .select("id, course_id, creator_id, max_uses, used_count, expires_at, is_active")
+      .select(
+        "id, course_id, creator_id, max_uses, used_count, expires_at, is_active",
+      )
       .eq("code", code)
       .maybeSingle();
 
@@ -52,7 +56,8 @@ serve(async (req) => {
     if (link.expires_at && new Date(link.expires_at) < new Date()) {
       throw new Error("Link expired");
     }
-    if (link.used_count >= link.max_uses) throw new Error("Usage limit reached");
+    if (link.used_count >= link.max_uses)
+      throw new Error("Usage limit reached");
 
     // Check if already enrolled
     const { data: existing, error: existingErr } = await service
@@ -70,8 +75,8 @@ serve(async (req) => {
           student_id: userData.user.id,
           course_id: link.course_id,
           payment_amount: 0,
-          payment_status: 'paid',
-          payment_provider: 'bypass',
+          payment_status: "paid",
+          payment_provider: "bypass",
         });
       if (enrollErr) throw new Error(enrollErr.message);
     }
@@ -81,14 +86,20 @@ serve(async (req) => {
     const reached = newCount >= link.max_uses;
     const { error: updErr } = await service
       .from("course_enrollment_links")
-      .update({ used_count: newCount, is_active: reached ? false : link.is_active })
+      .update({
+        used_count: newCount,
+        is_active: reached ? false : link.is_active,
+      })
       .eq("id", link.id);
     if (updErr) throw new Error(updErr.message);
 
-    return new Response(JSON.stringify({ success: true, course_id: link.course_id }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({ success: true, course_id: link.course_id }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      },
+    );
   } catch (e) {
     return new Response(JSON.stringify({ error: (e as Error).message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

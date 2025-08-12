@@ -15,19 +15,19 @@ export default function DataSync(): JSX.Element {
   const [error, setError] = useState<string | null>(null);
 
   const handleCreateWebhook = () => {
-    navigate('/app/workflow-automation');
+    navigate("/app/workflow-automation");
   };
 
   const handleViewLogs = () => {
-    navigate('/app/audit-trail');
+    navigate("/app/audit-trail");
   };
 
   const handleSetupFlows = () => {
-    navigate('/app/workflow-automation');
+    navigate("/app/workflow-automation");
   };
 
   const handleCheckStatus = () => {
-    navigate('/app/system-diagnostics');
+    navigate("/app/system-diagnostics");
   };
 
   const handleStartSync = async () => {
@@ -35,40 +35,46 @@ export default function DataSync(): JSX.Element {
     setIsSyncing(true);
     setProgress(0);
 
-    const { error: startError } = await supabase.functions.invoke('trigger-sync');
+    const { error: startError } =
+      await supabase.functions.invoke("trigger-sync");
 
     if (startError) {
       setIsSyncing(false);
       setError(startError.message);
       toast({
-        title: 'Failed to start sync',
+        title: "Failed to start sync",
         description: startError.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     }
   };
 
   useEffect(() => {
     const channel = supabase
-      .channel('sync_updates')
+      .channel("sync_updates")
       .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'sync_events' },
+        "postgres_changes",
+        { event: "*", schema: "public", table: "sync_events" },
         (payload) => {
           const status = (payload.new as any)?.status;
-          if (status === 'in_progress') {
+          if (status === "in_progress") {
             setIsSyncing(true);
             setProgress((payload.new as any)?.progress || 0);
-          } else if (status === 'completed') {
+          } else if (status === "completed") {
             setIsSyncing(false);
             setProgress(100);
-            toast({ title: 'Sync complete' });
-          } else if (status === 'failed') {
-            const err = ((payload.new as any)?.error as string) || 'Unknown error';
+            toast({ title: "Sync complete" });
+          } else if (status === "failed") {
+            const err =
+              ((payload.new as any)?.error as string) || "Unknown error";
             setError(err);
-            toast({ title: 'Sync failed', description: err, variant: 'destructive' });
+            toast({
+              title: "Sync failed",
+              description: err,
+              variant: "destructive",
+            });
           }
-        }
+        },
       )
       .subscribe();
 
@@ -82,9 +88,9 @@ export default function DataSync(): JSX.Element {
 
     const interval = setInterval(async () => {
       const { data, error: statusError } = await (supabase as any)
-        .from('sync_events')
-        .select('status, progress, error')
-        .order('created_at', { ascending: false })
+        .from("sync_events")
+        .select("status, progress, error")
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
@@ -92,9 +98,9 @@ export default function DataSync(): JSX.Element {
         setIsSyncing(false);
         setError(statusError.message);
         toast({
-          title: 'Sync status error',
+          title: "Sync status error",
           description: statusError.message,
-          variant: 'destructive',
+          variant: "destructive",
         });
         clearInterval(interval);
         return;
@@ -102,18 +108,22 @@ export default function DataSync(): JSX.Element {
 
       if (!data) return;
 
-      if (data.status === 'in_progress') {
+      if (data.status === "in_progress") {
         setProgress(data.progress || 0);
-      } else if (data.status === 'completed') {
+      } else if (data.status === "completed") {
         setIsSyncing(false);
         setProgress(100);
-        toast({ title: 'Sync complete' });
+        toast({ title: "Sync complete" });
         clearInterval(interval);
-      } else if (data.status === 'failed') {
+      } else if (data.status === "failed") {
         setIsSyncing(false);
-        const err = data.error || 'Unknown error';
+        const err = data.error || "Unknown error";
         setError(err);
-        toast({ title: 'Sync failed', description: err, variant: 'destructive' });
+        toast({
+          title: "Sync failed",
+          description: err,
+          variant: "destructive",
+        });
         clearInterval(interval);
       }
     }, 5000);
@@ -132,7 +142,7 @@ export default function DataSync(): JSX.Element {
         <div className="flex gap-2">
           <Button onClick={handleStartSync} disabled={isSyncing}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            {isSyncing ? 'Syncing...' : 'Sync Now'}
+            {isSyncing ? "Syncing..." : "Sync Now"}
           </Button>
           <Button onClick={handleCreateWebhook}>
             <RefreshCw className="h-4 w-4 mr-2" />
@@ -144,13 +154,13 @@ export default function DataSync(): JSX.Element {
       {isSyncing && (
         <div className="space-y-2">
           <Progress value={progress} />
-          <p className="text-sm text-muted-foreground">Syncing... {progress}%</p>
+          <p className="text-sm text-muted-foreground">
+            Syncing... {progress}%
+          </p>
         </div>
       )}
 
-      {error && (
-        <p className="text-sm text-red-500">Sync failed: {error}</p>
-      )}
+      {error && <p className="text-sm text-red-500">Sync failed: {error}</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
@@ -164,7 +174,11 @@ export default function DataSync(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor database operations and sync status
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewLogs}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewLogs}
+            >
               View Logs
             </Button>
           </CardContent>
@@ -181,7 +195,11 @@ export default function DataSync(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Configure automation workflows and integrations
             </p>
-            <Button variant="outline" className="w-full" onClick={handleSetupFlows}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleSetupFlows}
+            >
               Setup Flows
             </Button>
           </CardContent>
@@ -198,7 +216,11 @@ export default function DataSync(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track AI model synchronization and updates
             </p>
-            <Button variant="outline" className="w-full" onClick={handleCheckStatus}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleCheckStatus}
+            >
               Check Status
             </Button>
           </CardContent>

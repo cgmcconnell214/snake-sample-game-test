@@ -15,7 +15,13 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import WalletIntegration from "@/components/WalletIntegration";
 import TwoFactorManager from "@/components/TwoFactorManager";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { setTheme, getStoredTheme, type ThemePreference } from "@/lib/theme";
 
@@ -154,7 +160,10 @@ const Settings = () => {
   const handleThemeChange = (value: ThemePreference) => {
     setTheme(value);
     setThemePref(value);
-    toast({ title: "Theme updated", description: `Switched to ${value} mode.` });
+    toast({
+      title: "Theme updated",
+      description: `Switched to ${value} mode.`,
+    });
   };
 
   return (
@@ -386,7 +395,10 @@ const Settings = () => {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="theme-select">Theme</Label>
-            <Select value={themePref} onValueChange={(v) => handleThemeChange(v as ThemePreference)}>
+            <Select
+              value={themePref}
+              onValueChange={(v) => handleThemeChange(v as ThemePreference)}
+            >
               <SelectTrigger id="theme-select" className="w-[240px]">
                 <SelectValue placeholder="Select theme" />
               </SelectTrigger>
@@ -451,7 +463,8 @@ const Settings = () => {
                 // Navigate to security settings or open a security modal
                 toast({
                   title: "Security Settings",
-                  description: "Use the Two-Factor Authentication section below to enhance security.",
+                  description:
+                    "Use the Two-Factor Authentication section below to enhance security.",
                 });
               }}
             >

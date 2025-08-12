@@ -241,7 +241,8 @@ const UserProfile: React.FC = () => {
         if (!password) {
           toast({
             title: "Verification required",
-            description: "Password confirmation is required to update your profile.",
+            description:
+              "Password confirmation is required to update your profile.",
             variant: "destructive",
           });
           return;
@@ -345,7 +346,9 @@ const UserProfile: React.FC = () => {
                 <Avatar className="w-24 h-24">
                   <AvatarImage src={userProfile?.avatar_url} />
                   <AvatarFallback className="text-lg">
-                    {getInitials(userProfile?.display_name || user?.email || "U")}
+                    {getInitials(
+                      userProfile?.display_name || user?.email || "U",
+                    )}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -431,7 +434,10 @@ const UserProfile: React.FC = () => {
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     {editing ? (
                       <div className="w-full space-y-1">
-                        <Input {...form.register("location")} placeholder="Location" />
+                        <Input
+                          {...form.register("location")}
+                          placeholder="Location"
+                        />
                         {form.formState.errors.location && (
                           <p className="text-sm text-destructive">
                             {form.formState.errors.location.message}
@@ -449,7 +455,10 @@ const UserProfile: React.FC = () => {
                     <Globe className="h-4 w-4 text-muted-foreground" />
                     {editing ? (
                       <div className="w-full space-y-1">
-                        <Input {...form.register("website")} placeholder="Website" />
+                        <Input
+                          {...form.register("website")}
+                          placeholder="Website"
+                        />
                         {form.formState.errors.website && (
                           <p className="text-sm text-destructive">
                             {form.formState.errors.website.message}
@@ -475,14 +484,18 @@ const UserProfile: React.FC = () => {
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span>
                     Joined{" "}
-                    {new Date(userProfile?.created_at || "").toLocaleDateString()}
+                    {new Date(
+                      userProfile?.created_at || "",
+                    ).toLocaleDateString()}
                   </span>
                 </div>
               </div>
 
               <div className="flex justify-around pt-4 border-t">
                 <div className="text-center">
-                  <div className="font-bold">{userProfile?.post_count || 0}</div>
+                  <div className="font-bold">
+                    {userProfile?.post_count || 0}
+                  </div>
                   <div className="text-xs text-muted-foreground">Posts</div>
                 </div>
                 <div className="text-center">
@@ -542,7 +555,7 @@ const UserProfile: React.FC = () => {
                           <AvatarImage src={userProfile?.avatar_url} />
                           <AvatarFallback>
                             {getInitials(
-                              userProfile?.display_name || user?.email || "U"
+                              userProfile?.display_name || user?.email || "U",
                             )}
                           </AvatarFallback>
                         </Avatar>

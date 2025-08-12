@@ -25,7 +25,12 @@ interface OrderModalProps {
   side: "buy" | "sell";
 }
 
-export function OrderModal({ open, onOpenChange, asset, side }: OrderModalProps) {
+export function OrderModal({
+  open,
+  onOpenChange,
+  asset,
+  side,
+}: OrderModalProps) {
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState(asset.current_price.toFixed(2));
   const [loading, setLoading] = useState(false);
@@ -116,7 +121,11 @@ export function OrderModal({ open, onOpenChange, asset, side }: OrderModalProps)
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={loading}>
@@ -129,4 +138,3 @@ export function OrderModal({ open, onOpenChange, asset, side }: OrderModalProps)
 }
 
 export default OrderModal;
-

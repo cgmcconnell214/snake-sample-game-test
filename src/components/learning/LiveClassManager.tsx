@@ -4,16 +4,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
-import { 
-  Calendar as CalendarIcon, Users, Video, Archive, 
-  Plus, Edit, Trash2, Play, Clock, DollarSign,
-  UserCheck, BarChart, Download, Settings,
-  Mic, Camera, Monitor, MessageSquare
+import {
+  Calendar as CalendarIcon,
+  Users,
+  Video,
+  Archive,
+  Plus,
+  Edit,
+  Trash2,
+  Play,
+  Clock,
+  DollarSign,
+  UserCheck,
+  BarChart,
+  Download,
+  Settings,
+  Mic,
+  Camera,
+  Monitor,
+  MessageSquare,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +70,7 @@ interface ClassSession {
   recording_url?: string;
   session_notes?: string;
   attendance_count: number;
-  status: 'scheduled' | 'live' | 'completed' | 'cancelled';
+  status: "scheduled" | "live" | "completed" | "cancelled";
 }
 
 interface ClassAttendee {
@@ -63,7 +89,9 @@ export default function LiveClassManager() {
   const [selectedClass, setSelectedClass] = useState<LiveClass | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("upcoming");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date(),
+  );
   const { toast } = useToast();
 
   const [newClass, setNewClass] = useState({
@@ -91,7 +119,9 @@ export default function LiveClassManager() {
   }, [selectedClass]);
 
   const fetchUserClasses = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     const { data, error } = await supabase
@@ -133,7 +163,9 @@ export default function LiveClassManager() {
   };
 
   const handleCreateClass = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -162,13 +194,11 @@ export default function LiveClassManager() {
     }
 
     // Create initial session
-    await supabase
-      .from("class_sessions")
-      .insert({
-        class_id: data.id,
-        session_date: newClass.scheduled_at,
-        status: "scheduled",
-      });
+    await supabase.from("class_sessions").insert({
+      class_id: data.id,
+      session_date: newClass.scheduled_at,
+      status: "scheduled",
+    });
 
     toast({
       title: "Success",
@@ -192,7 +222,9 @@ export default function LiveClassManager() {
   };
 
   const handleStartClass = async (classId: string) => {
-    const session = sessions.find(s => s.class_id === classId && s.status === 'scheduled');
+    const session = sessions.find(
+      (s) => s.class_id === classId && s.status === "scheduled",
+    );
     if (!session) return;
 
     const { error } = await supabase
@@ -221,7 +253,9 @@ export default function LiveClassManager() {
   };
 
   const handleEndClass = async (classId: string) => {
-    const session = sessions.find(s => s.class_id === classId && s.status === 'live');
+    const session = sessions.find(
+      (s) => s.class_id === classId && s.status === "live",
+    );
     if (!session) return;
 
     const { error } = await supabase
@@ -251,8 +285,8 @@ export default function LiveClassManager() {
 
   const handleJoinClass = (liveClass: LiveClass) => {
     if (liveClass.zoom_meeting_id) {
-      const zoomUrl = `https://zoom.us/j/${liveClass.zoom_meeting_id}${liveClass.zoom_password ? `?pwd=${liveClass.zoom_password}` : ''}`;
-      window.open(zoomUrl, '_blank');
+      const zoomUrl = `https://zoom.us/j/${liveClass.zoom_meeting_id}${liveClass.zoom_password ? `?pwd=${liveClass.zoom_password}` : ""}`;
+      window.open(zoomUrl, "_blank");
     } else {
       toast({
         title: "No Meeting Link",
@@ -265,7 +299,9 @@ export default function LiveClassManager() {
   const getClassStatus = (liveClass: LiveClass) => {
     const now = new Date();
     const classTime = new Date(liveClass.scheduled_at);
-    const endTime = new Date(classTime.getTime() + liveClass.duration_minutes * 60000);
+    const endTime = new Date(
+      classTime.getTime() + liveClass.duration_minutes * 60000,
+    );
 
     if (now < classTime) return "upcoming";
     if (now >= classTime && now <= endTime) return "live";
@@ -274,15 +310,20 @@ export default function LiveClassManager() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "upcoming": return "bg-blue-500";
-      case "live": return "bg-green-500";
-      case "completed": return "bg-gray-500";
-      case "cancelled": return "bg-red-500";
-      default: return "bg-gray-500";
+      case "upcoming":
+        return "bg-blue-500";
+      case "live":
+        return "bg-green-500";
+      case "completed":
+        return "bg-gray-500";
+      case "cancelled":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
-  const filteredClasses = classes.filter(cls => {
+  const filteredClasses = classes.filter((cls) => {
     const status = getClassStatus(cls);
     if (activeTab === "upcoming") return status === "upcoming";
     if (activeTab === "live") return status === "live";
@@ -316,7 +357,9 @@ export default function LiveClassManager() {
                 <Input
                   id="title"
                   value={newClass.title}
-                  onChange={(e) => setNewClass({ ...newClass, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, title: e.target.value })
+                  }
                   placeholder="e.g., Blockchain Fundamentals Workshop"
                 />
               </div>
@@ -325,7 +368,9 @@ export default function LiveClassManager() {
                 <Textarea
                   id="description"
                   value={newClass.description}
-                  onChange={(e) => setNewClass({ ...newClass, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, description: e.target.value })
+                  }
                   placeholder="Describe what students will learn..."
                 />
               </div>
@@ -334,7 +379,9 @@ export default function LiveClassManager() {
                   <Label htmlFor="class_type">Class Type</Label>
                   <Select
                     value={newClass.class_type}
-                    onValueChange={(value) => setNewClass({ ...newClass, class_type: value })}
+                    onValueChange={(value) =>
+                      setNewClass({ ...newClass, class_type: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -354,10 +401,12 @@ export default function LiveClassManager() {
                     id="duration"
                     type="number"
                     value={newClass.duration_minutes}
-                    onChange={(e) => setNewClass({
-                      ...newClass,
-                      duration_minutes: parseInt(e.target.value) || 60,
-                    })}
+                    onChange={(e) =>
+                      setNewClass({
+                        ...newClass,
+                        duration_minutes: parseInt(e.target.value) || 60,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -368,7 +417,9 @@ export default function LiveClassManager() {
                     id="scheduled_at"
                     type="datetime-local"
                     value={newClass.scheduled_at}
-                    onChange={(e) => setNewClass({ ...newClass, scheduled_at: e.target.value })}
+                    onChange={(e) =>
+                      setNewClass({ ...newClass, scheduled_at: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -377,10 +428,12 @@ export default function LiveClassManager() {
                     id="max_attendees"
                     type="number"
                     value={newClass.max_attendees}
-                    onChange={(e) => setNewClass({
-                      ...newClass,
-                      max_attendees: parseInt(e.target.value) || 50,
-                    })}
+                    onChange={(e) =>
+                      setNewClass({
+                        ...newClass,
+                        max_attendees: parseInt(e.target.value) || 50,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -392,11 +445,13 @@ export default function LiveClassManager() {
                     type="number"
                     step="0.01"
                     value={newClass.price_per_attendee}
-                    onChange={(e) => setNewClass({
-                      ...newClass,
-                      price_per_attendee: parseFloat(e.target.value) || 0,
-                      is_monetized: parseFloat(e.target.value) > 0,
-                    })}
+                    onChange={(e) =>
+                      setNewClass({
+                        ...newClass,
+                        price_per_attendee: parseFloat(e.target.value) || 0,
+                        is_monetized: parseFloat(e.target.value) > 0,
+                      })
+                    }
                   />
                 </div>
                 <div className="flex items-center gap-2 pt-6">
@@ -404,7 +459,12 @@ export default function LiveClassManager() {
                     type="checkbox"
                     id="monetized"
                     checked={newClass.is_monetized}
-                    onChange={(e) => setNewClass({ ...newClass, is_monetized: e.target.checked })}
+                    onChange={(e) =>
+                      setNewClass({
+                        ...newClass,
+                        is_monetized: e.target.checked,
+                      })
+                    }
                   />
                   <Label htmlFor="monetized">Monetized Class</Label>
                 </div>
@@ -415,16 +475,28 @@ export default function LiveClassManager() {
                   <Input
                     id="zoom_id"
                     value={newClass.zoom_meeting_id}
-                    onChange={(e) => setNewClass({ ...newClass, zoom_meeting_id: e.target.value })}
+                    onChange={(e) =>
+                      setNewClass({
+                        ...newClass,
+                        zoom_meeting_id: e.target.value,
+                      })
+                    }
                     placeholder="123 456 7890"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="zoom_password">Zoom Password (optional)</Label>
+                  <Label htmlFor="zoom_password">
+                    Zoom Password (optional)
+                  </Label>
                   <Input
                     id="zoom_password"
                     value={newClass.zoom_password}
-                    onChange={(e) => setNewClass({ ...newClass, zoom_password: e.target.value })}
+                    onChange={(e) =>
+                      setNewClass({
+                        ...newClass,
+                        zoom_password: e.target.value,
+                      })
+                    }
                     placeholder="Meeting password"
                   />
                 </div>
@@ -434,7 +506,10 @@ export default function LiveClassManager() {
                   <CalendarIcon className="h-4 w-4 mr-2" />
                   Schedule Class
                 </Button>
-                <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateModalOpen(false)}
+                >
                   Cancel
                 </Button>
               </div>
@@ -472,7 +547,9 @@ export default function LiveClassManager() {
                       </Badge>
                     </div>
                     <CardHeader>
-                      <CardTitle className="text-lg pr-16">{cls.title}</CardTitle>
+                      <CardTitle className="text-lg pr-16">
+                        {cls.title}
+                      </CardTitle>
                       <Badge variant="outline">{cls.class_type}</Badge>
                     </CardHeader>
                     <CardContent>
@@ -482,7 +559,9 @@ export default function LiveClassManager() {
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2">
                           <CalendarIcon className="h-4 w-4" />
-                          <span>{format(new Date(cls.scheduled_at), "PPp")}</span>
+                          <span>
+                            {format(new Date(cls.scheduled_at), "PPp")}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4" />
@@ -500,8 +579,8 @@ export default function LiveClassManager() {
                         )}
                       </div>
                       <div className="flex gap-2 mt-4">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           className="flex-1"
                           onClick={() => handleStartClass(cls.id)}
                         >
@@ -551,24 +630,33 @@ export default function LiveClassManager() {
                         <div className="grid grid-cols-2 gap-4 text-center">
                           <div className="p-3 bg-muted rounded">
                             <p className="text-2xl font-bold">
-                              {attendees.filter(a => a.class_id === cls.id).length}
+                              {
+                                attendees.filter((a) => a.class_id === cls.id)
+                                  .length
+                              }
                             </p>
-                            <p className="text-sm text-muted-foreground">Attendees</p>
+                            <p className="text-sm text-muted-foreground">
+                              Attendees
+                            </p>
                           </div>
                           <div className="p-3 bg-muted rounded">
-                            <p className="text-2xl font-bold">{cls.duration_minutes}m</p>
-                            <p className="text-sm text-muted-foreground">Duration</p>
+                            <p className="text-2xl font-bold">
+                              {cls.duration_minutes}m
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Duration
+                            </p>
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button 
+                          <Button
                             className="flex-1"
                             onClick={() => handleJoinClass(cls)}
                           >
                             <Video className="h-4 w-4 mr-2" />
                             Join Class
                           </Button>
-                          <Button 
+                          <Button
                             variant="outline"
                             onClick={() => handleEndClass(cls.id)}
                           >
@@ -576,19 +664,35 @@ export default function LiveClassManager() {
                           </Button>
                         </div>
                         <div className="flex gap-2 text-sm">
-                          <Button variant="outline" size="sm" className="flex-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
                             <Mic className="h-4 w-4 mr-1" />
                             Audio
                           </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
                             <Camera className="h-4 w-4 mr-1" />
                             Video
                           </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
                             <Monitor className="h-4 w-4 mr-1" />
                             Screen
                           </Button>
-                          <Button variant="outline" size="sm" className="flex-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
                             <MessageSquare className="h-4 w-4 mr-1" />
                             Chat
                           </Button>
@@ -625,11 +729,18 @@ export default function LiveClassManager() {
                       <div className="space-y-2 text-sm mb-4">
                         <div className="flex justify-between">
                           <span>Date:</span>
-                          <span>{format(new Date(cls.scheduled_at), "PP")}</span>
+                          <span>
+                            {format(new Date(cls.scheduled_at), "PP")}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span>Attendees:</span>
-                          <span>{attendees.filter(a => a.class_id === cls.id).length}</span>
+                          <span>
+                            {
+                              attendees.filter((a) => a.class_id === cls.id)
+                                .length
+                            }
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span>Duration:</span>
@@ -672,7 +783,10 @@ export default function LiveClassManager() {
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>
-                  Classes for {selectedDate ? format(selectedDate, "PPPP") : "Selected Date"}
+                  Classes for{" "}
+                  {selectedDate
+                    ? format(selectedDate, "PPPP")
+                    : "Selected Date"}
                 </CardTitle>
               </CardHeader>
               <CardContent>

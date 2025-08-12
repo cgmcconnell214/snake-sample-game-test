@@ -44,19 +44,26 @@ export function useAssetChartData(assetId?: string) {
       .channel(`md-${assetId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "market_data", filter: `asset_id=eq.${assetId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "market_data",
+          filter: `asset_id=eq.${assetId}`,
+        },
         (payload: any) => {
           const row: any = payload.new || payload.old;
           if (!row) return;
-          setData((prev) => [
-            ...prev,
-            {
-              t: row.created_at,
-              price: Number(row.current_price) || 0,
-              volume: Number(row.volume_24h) || 0,
-            },
-          ].slice(-300));
-        }
+          setData((prev) =>
+            [
+              ...prev,
+              {
+                t: row.created_at,
+                price: Number(row.current_price) || 0,
+                volume: Number(row.volume_24h) || 0,
+              },
+            ].slice(-300),
+          );
+        },
       )
       .subscribe();
 

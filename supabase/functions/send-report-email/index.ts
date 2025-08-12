@@ -4,7 +4,8 @@ import { rateLimit } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 interface EmailRequest {
@@ -30,7 +31,7 @@ serve(async (req) => {
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
+      { auth: { persistSession: false } },
     );
 
     // Get user from request
@@ -38,32 +39,43 @@ serve(async (req) => {
     if (!authHeader) throw new Error("No authorization header");
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
+    const { data: userData, error: userError } =
+      await supabaseAdmin.auth.getUser(token);
     if (userError || !userData.user) throw new Error("Unauthorized");
 
-    const { recipientEmail, reportName, reportData, reportType }: EmailRequest = await req.json();
-    
-    console.log("[SEND-REPORT-EMAIL] Sending report email", { recipientEmail, reportName, reportType });
+    const { recipientEmail, reportName, reportData, reportType }: EmailRequest =
+      await req.json();
+
+    console.log("[SEND-REPORT-EMAIL] Sending report email", {
+      recipientEmail,
+      reportName,
+      reportType,
+    });
 
     // Create a message in the user_messages table
     const { error: messageError } = await supabaseAdmin
-      .from('user_messages')
+      .from("user_messages")
       .insert({
         sender_id: null, // System message
         recipient_id: userData.user.id,
         subject: `${reportName} - Generated Report`,
         content: `Your ${reportName} has been generated and is attached to this message.`,
-        message_type: 'report',
-        attachments: JSON.stringify([{
-          name: `${reportName}.pdf`,
-          type: 'application/pdf',
-          data: reportData,
-          generated_at: new Date().toISOString()
-        }])
+        message_type: "report",
+        attachments: JSON.stringify([
+          {
+            name: `${reportName}.pdf`,
+            type: "application/pdf",
+            data: reportData,
+            generated_at: new Date().toISOString(),
+          },
+        ]),
       });
 
     if (messageError) {
-      console.error("[SEND-REPORT-EMAIL] Error creating message:", messageError);
+      console.error(
+        "[SEND-REPORT-EMAIL] Error creating message:",
+        messageError,
+      );
       throw messageError;
     }
 
@@ -76,23 +88,20 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Report sent to message center successfully"
+        message: "Report sent to message center successfully",
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
-      }
+      },
     );
   } catch (error) {
     const execTime = Date.now() - startTime;
     console.error("[SEND-REPORT-EMAIL] Error:", error);
     console.log(`[SEND-REPORT-EMAIL] Execution time: ${execTime}ms`);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
   }
 });

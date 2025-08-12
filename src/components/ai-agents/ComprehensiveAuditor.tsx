@@ -1,19 +1,24 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { 
-  TestTube, 
-  Download, 
-  Play, 
-  CheckCircle, 
-  XCircle, 
+import {
+  TestTube,
+  Download,
+  Play,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   Clock,
-  FileText
+  FileText,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +26,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface TestResult {
   id: string;
   name: string;
-  status: 'pending' | 'running' | 'passed' | 'failed' | 'warning';
+  status: "pending" | "running" | "passed" | "failed" | "warning";
   duration?: number;
   details: string;
   error?: string;
@@ -35,56 +40,64 @@ interface ComprehensiveAuditorProps {
 export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [currentTest, setCurrentTest] = useState<string>('');
+  const [currentTest, setCurrentTest] = useState<string>("");
   const [testResults, setTestResults] = useState<TestResult[]>([]);
-  const [auditReport, setAuditReport] = useState<string>('');
+  const [auditReport, setAuditReport] = useState<string>("");
   const { toast } = useToast();
 
-  const updateTestResult = useCallback((id: string, updates: Partial<TestResult>) => {
-    setTestResults(prev => prev.map(test => 
-      test.id === id ? { ...test, ...updates } : test
-    ));
-  }, []);
+  const updateTestResult = useCallback(
+    (id: string, updates: Partial<TestResult>) => {
+      setTestResults((prev) =>
+        prev.map((test) => (test.id === id ? { ...test, ...updates } : test)),
+      );
+    },
+    [],
+  );
 
   const addTestResult = useCallback((test: TestResult) => {
-    setTestResults(prev => [...prev, test]);
+    setTestResults((prev) => [...prev, test]);
   }, []);
 
-  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
-  const runTest = async (testId: string, testName: string, testFn: () => Promise<any>) => {
+  const runTest = async (
+    testId: string,
+    testName: string,
+    testFn: () => Promise<any>,
+  ) => {
     const startTime = Date.now();
     setCurrentTest(testName);
-    
+
     addTestResult({
       id: testId,
       name: testName,
-      status: 'running',
-      details: 'Test in progress...'
+      status: "running",
+      details: "Test in progress...",
     });
 
     try {
       const result = await testFn();
       const duration = Date.now() - startTime;
-      
+
       updateTestResult(testId, {
-        status: 'passed',
+        status: "passed",
         duration,
-        details: 'Test completed successfully',
-        data: result
+        details: "Test completed successfully",
+        data: result,
       });
-      
+
       return { success: true, data: result };
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       updateTestResult(testId, {
-        status: 'failed',
+        status: "failed",
         duration,
-        details: 'Test failed',
-        error: error.message || 'Unknown error'
+        details: "Test failed",
+        error: error.message || "Unknown error",
       });
-      
+
       return { success: false, error: error.message };
     }
   };
@@ -98,25 +111,27 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
       price_per_use: 0.01,
       total_tokens: 10000,
       workflow_data: {
-        steps: [{
-          id: "test_step_1",
-          type: "trigger",
-          name: "Test Trigger",
-          description: "Test trigger step",
-          config: { event: "manual" },
-          position: 0
-        }],
+        steps: [
+          {
+            id: "test_step_1",
+            type: "trigger",
+            name: "Test Trigger",
+            description: "Test trigger step",
+            config: { event: "manual" },
+            position: 0,
+          },
+        ],
         metadata: {
           version: "1.0",
           created_at: new Date().toISOString(),
-          total_steps: 1
-        }
+          total_steps: 1,
+        },
       },
       configuration: {
         napier_integration: true,
         tokenomics_enabled: true,
-        revenue_sharing: true
-      }
+        revenue_sharing: true,
+      },
     };
 
     const { data: user } = await supabase.auth.getUser();
@@ -129,7 +144,7 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
       .single();
 
     if (error) throw error;
-    
+
     return { agentId: data.id, agent: data };
   };
 
@@ -143,28 +158,31 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
           name: "Test Trigger",
           description: "Test trigger step",
           config: { event: "manual" },
-          position: 0
+          position: 0,
         },
         {
           id: "test_step_2",
           type: "notification",
           name: "Test Notification",
           description: "Test notification step",
-          config: { message: "Test notification from audit", recipient: "system" },
-          position: 1
-        }
+          config: {
+            message: "Test notification from audit",
+            recipient: "system",
+          },
+          position: 1,
+        },
       ],
       metadata: {
         version: "1.1",
         updated_at: new Date().toISOString(),
-        total_steps: 2
-      }
+        total_steps: 2,
+      },
     };
 
     const { data, error } = await supabase
-      .from('ai_agents')
+      .from("ai_agents")
       .update({ workflow_data: updatedWorkflow })
-      .eq('id', agentId)
+      .eq("id", agentId)
       .select()
       .single();
 
@@ -172,9 +190,9 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
 
     // Verify the data was saved correctly
     const { data: verifyData, error: verifyError } = await supabase
-      .from('ai_agents')
-      .select('workflow_data')
-      .eq('id', agentId)
+      .from("ai_agents")
+      .select("workflow_data")
+      .eq("id", agentId)
       .single();
 
     if (verifyError) throw verifyError;
@@ -185,35 +203,53 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
       throw new Error(`Expected 2 steps, got ${savedSteps.length}`);
     }
 
-    return { 
-      updated: data, 
+    return {
+      updated: data,
       verified: verifyData,
-      stepsCount: savedSteps.length 
+      stepsCount: savedSteps.length,
     };
   };
 
   const testAgentExecution = async (agentId: string) => {
-    const { data, error } = await supabase.functions.invoke('execute-ai-agent', {
-      body: { 
-        agentId,
-        workflowData: {
-          steps: [
-            { id: "audit_trigger", type: "trigger", name: "Audit Trigger", config: { event: "audit_test" } },
-            { id: "audit_notification", type: "notification", name: "Audit Notification", config: { message: "Audit test notification", recipient: "system" } }
-          ]
+    const { data, error } = await supabase.functions.invoke(
+      "execute-ai-agent",
+      {
+        body: {
+          agentId,
+          workflowData: {
+            steps: [
+              {
+                id: "audit_trigger",
+                type: "trigger",
+                name: "Audit Trigger",
+                config: { event: "audit_test" },
+              },
+              {
+                id: "audit_notification",
+                type: "notification",
+                name: "Audit Notification",
+                config: {
+                  message: "Audit test notification",
+                  recipient: "system",
+                },
+              },
+            ],
+          },
+          inputData: {
+            test_mode: true,
+            audit_timestamp: new Date().toISOString(),
+          },
         },
-        inputData: {
-          test_mode: true,
-          audit_timestamp: new Date().toISOString()
-        }
-      }
-    });
+      },
+    );
 
     if (error) throw error;
-    
+
     const result = data?.result || {};
     if (!result.success) {
-      throw new Error('Agent execution failed: ' + (result.error || 'Unknown error'));
+      throw new Error(
+        "Agent execution failed: " + (result.error || "Unknown error"),
+      );
     }
 
     return result;
@@ -221,16 +257,16 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
 
   const testAPIKeyGeneration = async (agentId: string) => {
     const newApiKey = `ak_${agentId.substring(0, 8)}_${Date.now().toString(36)}_test`;
-    
+
     const { data, error } = await supabase
-      .from('ai_agents')
-      .update({ 
-        configuration: { 
+      .from("ai_agents")
+      .update({
+        configuration: {
           api_key: newApiKey,
-          api_key_created_at: new Date().toISOString()
-        } 
+          api_key_created_at: new Date().toISOString(),
+        },
       })
-      .eq('id', agentId)
+      .eq("id", agentId)
       .select()
       .single();
 
@@ -238,7 +274,7 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
 
     const configuration = data.configuration as any;
     if (!configuration?.api_key) {
-      throw new Error('API key was not saved');
+      throw new Error("API key was not saved");
     }
 
     return { apiKey: configuration.api_key };
@@ -255,7 +291,7 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
         agent_id: agentId,
         tokens_purchased: 100,
         total_amount: 1,
-        payment_status: "completed"
+        payment_status: "completed",
       })
       .select()
       .single();
@@ -280,7 +316,7 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
       .eq("id", agentId);
 
     if (error) throw error;
-    
+
     return { cleaned: true };
   };
 
@@ -288,16 +324,16 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
     setIsRunning(true);
     setProgress(0);
     setTestResults([]);
-    setCurrentTest('');
+    setCurrentTest("");
 
     const tests = [
-      { id: 'auth', name: 'Authentication Check', weight: 10 },
-      { id: 'create', name: 'Agent Creation', weight: 15 },
-      { id: 'workflow', name: 'Workflow Persistence', weight: 20 },
-      { id: 'execution', name: 'Agent Execution', weight: 20 },
-      { id: 'api', name: 'API Key Generation', weight: 15 },
-      { id: 'purchase', name: 'Purchase Flow', weight: 10 },
-      { id: 'cleanup', name: 'Cleanup', weight: 10 }
+      { id: "auth", name: "Authentication Check", weight: 10 },
+      { id: "create", name: "Agent Creation", weight: 15 },
+      { id: "workflow", name: "Workflow Persistence", weight: 20 },
+      { id: "execution", name: "Agent Execution", weight: 20 },
+      { id: "api", name: "API Key Generation", weight: 15 },
+      { id: "purchase", name: "Purchase Flow", weight: 10 },
+      { id: "cleanup", name: "Cleanup", weight: 10 },
     ];
 
     let currentProgress = 0;
@@ -305,7 +341,7 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
 
     try {
       // Authentication Check
-      await runTest('auth', 'Authentication Check', async () => {
+      await runTest("auth", "Authentication Check", async () => {
         const { data: user } = await supabase.auth.getUser();
         if (!user.user) throw new Error("Not authenticated");
         return { userId: user.user.id, email: user.user.email };
@@ -315,7 +351,11 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
       await sleep(500);
 
       // Agent Creation
-      const createResult = await runTest('create', 'Agent Creation', testAgentCreation);
+      const createResult = await runTest(
+        "create",
+        "Agent Creation",
+        testAgentCreation,
+      );
       if (createResult.success) {
         agentId = createResult.data.agentId;
       }
@@ -325,96 +365,121 @@ export function ComprehensiveAuditor({ onClose }: ComprehensiveAuditorProps) {
 
       if (agentId) {
         // Workflow Persistence
-        await runTest('workflow', 'Workflow Persistence', () => testWorkflowPersistence(agentId!));
+        await runTest("workflow", "Workflow Persistence", () =>
+          testWorkflowPersistence(agentId!),
+        );
         currentProgress += tests[2].weight;
         setProgress(currentProgress);
         await sleep(500);
 
         // Agent Execution
-        await runTest('execution', 'Agent Execution', () => testAgentExecution(agentId!));
+        await runTest("execution", "Agent Execution", () =>
+          testAgentExecution(agentId!),
+        );
         currentProgress += tests[3].weight;
         setProgress(currentProgress);
         await sleep(500);
 
         // API Key Generation
-        await runTest('api', 'API Key Generation', () => testAPIKeyGeneration(agentId!));
+        await runTest("api", "API Key Generation", () =>
+          testAPIKeyGeneration(agentId!),
+        );
         currentProgress += tests[4].weight;
         setProgress(currentProgress);
         await sleep(500);
 
         // Purchase Flow
-        await runTest('purchase', 'Purchase Flow', () => testPurchaseFlow(agentId!));
+        await runTest("purchase", "Purchase Flow", () =>
+          testPurchaseFlow(agentId!),
+        );
         currentProgress += tests[5].weight;
         setProgress(currentProgress);
         await sleep(500);
 
         // Cleanup
-        await runTest('cleanup', 'Cleanup', () => testCleanup(agentId!));
+        await runTest("cleanup", "Cleanup", () => testCleanup(agentId!));
         currentProgress += tests[6].weight;
         setProgress(currentProgress);
       }
 
       generateAuditReport();
-      
+
       toast({
         title: "Audit Completed",
         description: "Full functionality audit completed successfully",
       });
-
     } catch (error) {
       toast({
         title: "Audit Failed",
         description: error.message || "Unknown error during audit",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsRunning(false);
-      setCurrentTest('');
+      setCurrentTest("");
     }
   };
 
   const generateAuditReport = () => {
-    const passed = testResults.filter(t => t.status === 'passed').length;
-    const failed = testResults.filter(t => t.status === 'failed').length;
-    const warnings = testResults.filter(t => t.status === 'warning').length;
+    const passed = testResults.filter((t) => t.status === "passed").length;
+    const failed = testResults.filter((t) => t.status === "failed").length;
+    const warnings = testResults.filter((t) => t.status === "warning").length;
     const total = testResults.length;
 
     const report = `# AI Agents Page - Comprehensive Audit Report
 Generated: ${new Date().toISOString()}
 
 ## Summary
-- Total Tests: ${total}
-- Passed: ${passed}
-- Failed: ${failed}
-- Warnings: ${warnings}
-- Success Rate: ${((passed / total) * 100).toFixed(1)}%
+ Total Tests: ${total}
+ Passed: ${passed}
+ Failed: ${failed}
+ Warnings: ${warnings}
+ Success Rate: ${((passed / total) * 100).toFixed(1)}%
 
 ## Test Results
 
-${testResults.map(test => `
+${testResults
+  .map(
+    (test) => `
 ### ${test.name}
-- Status: ${test.status.toUpperCase()}
-- Duration: ${test.duration ? `${test.duration}ms` : 'N/A'}
-- Details: ${test.details}
-${test.error ? `- Error: ${test.error}` : ''}
-${test.data ? `- Data: ${JSON.stringify(test.data, null, 2)}` : ''}
-`).join('')}
+ Status: ${test.status.toUpperCase()}
+ Duration: ${test.duration ? `${test.duration}ms` : "N/A"}
+ Details: ${test.details}
+${test.error ? `- Error: ${test.error}` : ""}
+${test.data ? `- Data: ${JSON.stringify(test.data, null, 2)}` : ""}
+`,
+  )
+  .join("")}
 
 ## Recommendations
 
-${failed > 0 ? `
+${
+  failed > 0
+    ? `
 ### Critical Issues
 The following tests failed and require immediate attention:
-${testResults.filter(t => t.status === 'failed').map(t => `- ${t.name}: ${t.error}`).join('\n')}
-` : ''}
+${testResults
+  .filter((t) => t.status === "failed")
+  .map((t) => `- ${t.name}: ${t.error}`)
+  .join("\n")}
+`
+    : ""
+}
 
-${warnings > 0 ? `
+${
+  warnings > 0
+    ? `
 ### Warnings
 The following tests had warnings:
-${testResults.filter(t => t.status === 'warning').map(t => `- ${t.name}: ${t.details}`).join('\n')}
-` : ''}
+${testResults
+  .filter((t) => t.status === "warning")
+  .map((t) => `- ${t.name}: ${t.details}`)
+  .join("\n")}
+`
+    : ""
+}
 
-${passed === total ? '### All Tests Passed!\nThe AI Agents page is functioning correctly across all tested scenarios.' : ''}
+${passed === total ? "### All Tests Passed!\nThe AI Agents page is functioning correctly across all tested scenarios." : ""}
 
 ## Technical Details
 
@@ -426,29 +491,31 @@ Based on network traffic analysis, workflow data is being properly:
 4. Executed through the execute-ai-agent edge function
 
 ### Performance Metrics
-- Average test duration: ${testResults.reduce((acc, t) => acc + (t.duration || 0), 0) / testResults.length}ms
-- Database response time: Fast
-- Edge function response time: ~500ms average
+ Average test duration: ${testResults.reduce((acc, t) => acc + (t.duration || 0), 0) / testResults.length}ms
+ Database response time: Fast
+ Edge function response time: ~500ms average
 
 ### Security Assessment
-- RLS policies are active on ai_agents table
-- User authentication is properly enforced
-- API keys are generated securely
-- Purchase flow includes proper authorization
+ RLS policies are active on ai_agents table
+ User authentication is properly enforced
+ API keys are generated securely
+ Purchase flow includes proper authorization
 
 ## Conclusion
-${passed === total ? 
-  'The AI Agents page is production-ready with all core functionality working correctly.' : 
-  `${failed} critical issues need to be resolved before production deployment.`}
+${
+  passed === total
+    ? "The AI Agents page is production-ready with all core functionality working correctly."
+    : `${failed} critical issues need to be resolved before production deployment.`
+}
 `;
 
     setAuditReport(report);
   };
 
   const downloadAuditReport = () => {
-    const blob = new Blob([auditReport], { type: 'text/markdown' });
+    const blob = new Blob([auditReport], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `ai-agents-audit-report-${Date.now()}.md`;
     document.body.appendChild(a);
@@ -612,17 +679,17 @@ class AIAgentsTestingAgent {
 Generated: \${new Date().toISOString()}
 
 ## Summary
-- Total Tests: \${this.results.length}
-- Passed: \${passed}
-- Failed: \${failed}
-- Total Duration: \${totalTime}ms
-- Success Rate: \${((passed / this.results.length) * 100).toFixed(1)}%
+ Total Tests: \${this.results.length}
+ Passed: \${passed}
+ Failed: \${failed}
+ Total Duration: \${totalTime}ms
+ Success Rate: \${((passed / this.results.length) * 100).toFixed(1)}%
 
 ## Test Results
 \${this.results.map(r => \`
 ### \${r.name}
-- Status: \${r.status}
-- Duration: \${r.duration}ms
+ Status: \${r.status}
+ Duration: \${r.duration}ms
 \${r.error ? \`- Error: \${r.error}\` : ''}
 \${r.result ? \`- Result: \${JSON.stringify(r.result, null, 2)}\` : ''}
 \`).join('')}
@@ -735,11 +802,11 @@ console.log('\\n📦 Package.json content:');
 console.log(JSON.stringify(packageJson, null, 2));
 `;
 
-    const blob = new Blob([testingAgentCode], { type: 'text/javascript' });
+    const blob = new Blob([testingAgentCode], { type: "text/javascript" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'ai-agents-testing-agent.js';
+    a.download = "ai-agents-testing-agent.js";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -753,21 +820,31 @@ console.log(JSON.stringify(packageJson, null, 2));
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'passed': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'warning': return <AlertCircle className="h-4 w-4 text-yellow-500" />;
-      case 'running': return <Clock className="h-4 w-4 text-blue-500 animate-spin" />;
-      default: return <Clock className="h-4 w-4 text-gray-400" />;
+      case "passed":
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "failed":
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      case "warning":
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      case "running":
+        return <Clock className="h-4 w-4 text-blue-500 animate-spin" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-400" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'passed': return 'default';
-      case 'failed': return 'destructive';
-      case 'warning': return 'secondary';
-      case 'running': return 'outline';
-      default: return 'secondary';
+      case "passed":
+        return "default";
+      case "failed":
+        return "destructive";
+      case "warning":
+        return "secondary";
+      case "running":
+        return "outline";
+      default:
+        return "secondary";
     }
   };
 
@@ -789,17 +866,17 @@ console.log(JSON.stringify(packageJson, null, 2));
                 <CardTitle className="text-sm">Audit Controls</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  onClick={runFullAudit} 
+                <Button
+                  onClick={runFullAudit}
                   disabled={isRunning}
                   className="w-full"
                 >
                   <Play className="h-4 w-4 mr-2" />
-                  {isRunning ? 'Running Audit...' : 'Start Full Audit'}
+                  {isRunning ? "Running Audit..." : "Start Full Audit"}
                 </Button>
-                
-                <Button 
-                  variant="outline" 
+
+                <Button
+                  variant="outline"
                   onClick={downloadTestingAgent}
                   className="w-full"
                 >
@@ -808,8 +885,8 @@ console.log(JSON.stringify(packageJson, null, 2));
                 </Button>
 
                 {auditReport && (
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={downloadAuditReport}
                     className="w-full"
                   >
@@ -828,7 +905,7 @@ console.log(JSON.stringify(packageJson, null, 2));
                 <CardContent className="space-y-3">
                   <Progress value={progress} />
                   <p className="text-sm text-muted-foreground">
-                    {currentTest || 'Preparing...'}
+                    {currentTest || "Preparing..."}
                   </p>
                 </CardContent>
               </Card>
@@ -847,7 +924,9 @@ console.log(JSON.stringify(packageJson, null, 2));
                     {testResults.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <TestTube className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>No tests run yet. Click "Start Full Audit" to begin.</p>
+                        <p>
+                          No tests run yet. Click "Start Full Audit" to begin.
+                        </p>
                       </div>
                     ) : (
                       testResults.map((test) => (
@@ -863,14 +942,20 @@ console.log(JSON.stringify(packageJson, null, 2));
                                   {test.duration}ms
                                 </span>
                               )}
-                              <Badge variant={getStatusColor(test.status) as any}>
+                              <Badge
+                                variant={getStatusColor(test.status) as any}
+                              >
                                 {test.status}
                               </Badge>
                             </div>
                           </div>
-                          <p className="text-sm text-muted-foreground">{test.details}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {test.details}
+                          </p>
                           {test.error && (
-                            <p className="text-sm text-red-500 mt-1">Error: {test.error}</p>
+                            <p className="text-sm text-red-500 mt-1">
+                              Error: {test.error}
+                            </p>
                           )}
                           {test.data && (
                             <pre className="text-xs bg-muted p-2 mt-2 rounded overflow-x-auto">

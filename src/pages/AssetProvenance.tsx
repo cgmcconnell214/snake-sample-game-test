@@ -53,7 +53,8 @@ export default function AssetProvenance(): JSX.Element {
           {
             id: "ip-journey",
             title: "IP Asset Journey",
-            description: "Follow intellectual property from creation to tokenization",
+            description:
+              "Follow intellectual property from creation to tokenization",
             icon: "clock",
             actionLabel: "View Journey",
             action: "/app/ip-tokenization",
@@ -70,7 +71,10 @@ export default function AssetProvenance(): JSX.Element {
     fetchCards();
   }, [toast]);
 
-  const iconMap: Record<ProvenanceCard["icon"], React.ComponentType<{ className?: string }>> = {
+  const iconMap: Record<
+    ProvenanceCard["icon"],
+    React.ComponentType<{ className?: string }>
+  > = {
     history: History,
     eye: Eye,
     clock: Clock,
@@ -98,7 +102,7 @@ export default function AssetProvenance(): JSX.Element {
             Visual history and tracking of tokenized assets
           </p>
         </div>
-        <Button onClick={() => navigateTo("/app/tokenize")}> 
+        <Button onClick={() => navigateTo("/app/tokenize")}>
           <Search className="h-4 w-4 mr-2" />
           Track Asset
         </Button>

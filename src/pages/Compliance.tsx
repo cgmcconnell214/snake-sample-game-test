@@ -89,7 +89,7 @@ const Compliance = (): JSX.Element => {
       }
       if (dateFilter) {
         filtered = filtered.filter(
-          (a) => new Date(a.createdAt) >= new Date(dateFilter)
+          (a) => new Date(a.createdAt) >= new Date(dateFilter),
         );
       }
       setTotalAlerts(filtered.length);
@@ -297,8 +297,8 @@ const Compliance = (): JSX.Element => {
                             onClick={() =>
                               navigate(
                                 `/audit?search=${encodeURIComponent(
-                                  alert.type
-                                )}&type=compliance&alertId=${alert.id}`
+                                  alert.type,
+                                )}&type=compliance&alertId=${alert.id}`,
                               )
                             }
                           >
@@ -325,7 +325,12 @@ const Compliance = (): JSX.Element => {
                         />
                       </PaginationItem>
                       {Array.from(
-                        { length: Math.max(1, Math.ceil(totalAlerts / alertsPerPage)) },
+                        {
+                          length: Math.max(
+                            1,
+                            Math.ceil(totalAlerts / alertsPerPage),
+                          ),
+                        },
                         (_, i) => (
                           <PaginationItem key={i}>
                             <PaginationLink
@@ -336,7 +341,7 @@ const Compliance = (): JSX.Element => {
                               {i + 1}
                             </PaginationLink>
                           </PaginationItem>
-                        )
+                        ),
                       )}
                       <PaginationItem>
                         <PaginationNext
@@ -345,7 +350,7 @@ const Compliance = (): JSX.Element => {
                             setCurrentPage((p) =>
                               p < Math.ceil(totalAlerts / alertsPerPage)
                                 ? p + 1
-                                : p
+                                : p,
                             )
                           }
                         />

@@ -113,13 +113,16 @@ const App = () => (
                           </header>
                           <main className="flex-1">
                             <Routes>
-                              <Route index element={withSuspense(<Dashboard />)} />
+                              <Route
+                                index
+                                element={withSuspense(<Dashboard />)}
+                              />
                               <Route
                                 path="tokenize"
                                 element={withSuspense(
                                   <ProtectedRoute requiredTier="standard">
                                     <Tokenize />
-                                  </ProtectedRoute>
+                                  </ProtectedRoute>,
                                 )}
                               />
                               <Route
@@ -127,24 +130,51 @@ const App = () => (
                                 element={withSuspense(
                                   <ProtectedRoute requiredTier="standard">
                                     <Trading />
-                                  </ProtectedRoute>
+                                  </ProtectedRoute>,
                                 )}
                               />
-                              <Route path="portfolio" element={withSuspense(<Portfolio />)} />
-                              <Route path="kyc" element={withSuspense(<KycCenter />)} />
-                              <Route path="compliance" element={withSuspense(<Compliance />)} />
-                              <Route path="audit" element={withSuspense(<AuditTrail />)} />
-                              <Route path="reports" element={withSuspense(<Reports />)} />
-                              <Route path="profile" element={withSuspense(<UserProfile />)} />
-                              <Route path="messages" element={withSuspense(<MessageCenter />)} />
-                              <Route path="ip-tokenization" element={withSuspense(<IPTokenization />)} />
-                              <Route path="settings" element={withSuspense(<Settings />)} />
+                              <Route
+                                path="portfolio"
+                                element={withSuspense(<Portfolio />)}
+                              />
+                              <Route
+                                path="kyc"
+                                element={withSuspense(<KycCenter />)}
+                              />
+                              <Route
+                                path="compliance"
+                                element={withSuspense(<Compliance />)}
+                              />
+                              <Route
+                                path="audit"
+                                element={withSuspense(<AuditTrail />)}
+                              />
+                              <Route
+                                path="reports"
+                                element={withSuspense(<Reports />)}
+                              />
+                              <Route
+                                path="profile"
+                                element={withSuspense(<UserProfile />)}
+                              />
+                              <Route
+                                path="messages"
+                                element={withSuspense(<MessageCenter />)}
+                              />
+                              <Route
+                                path="ip-tokenization"
+                                element={withSuspense(<IPTokenization />)}
+                              />
+                              <Route
+                                path="settings"
+                                element={withSuspense(<Settings />)}
+                              />
                               <Route
                                 path="admin"
                                 element={withSuspense(
                                   <ProtectedRoute requiredRole="admin">
                                     <Admin />
-                                  </ProtectedRoute>
+                                  </ProtectedRoute>,
                                 )}
                               />
                               <Route
@@ -152,76 +182,178 @@ const App = () => (
                                 element={withSuspense(
                                   <ProtectedRoute requiredRole="admin">
                                     <Blockchain />
-                                  </ProtectedRoute>
+                                  </ProtectedRoute>,
                                 )}
                               />
 
                               {/* New 5-Layer Navigation */}
-                              <Route path="ai-agents" element={withSuspense(<AIAgents />)} />
-                              <Route path="ai-trading-bots" element={withSuspense(<AITradingBots />)} />
-                              <Route path="smart-contracts" element={withSuspense(<SmartContracts />)} />
-                              <Route path="workflow-automation" element={withSuspense(<WorkflowAutomation />)} />
+                              <Route
+                                path="ai-agents"
+                                element={withSuspense(<AIAgents />)}
+                              />
+                              <Route
+                                path="ai-trading-bots"
+                                element={withSuspense(<AITradingBots />)}
+                              />
+                              <Route
+                                path="smart-contracts"
+                                element={withSuspense(<SmartContracts />)}
+                              />
+                              <Route
+                                path="workflow-automation"
+                                element={withSuspense(<WorkflowAutomation />)}
+                              />
 
                               {/* Learning */}
-                              <Route path="learning" element={withSuspense(<LearningPortal />)} />
-                              <Route path="learning/courses" element={withSuspense(<LearningPortal />)} />
-                              <Route path="learning/courses/:slug" element={withSuspense(<CourseDetail />)} />
-                              <Route path="learning/creator" element={withSuspense(<CourseCreator />)} />
-                              <Route path="learning/creator/:id" element={withSuspense(<CourseBuilder />)} />
-                              <Route path="certification" element={withSuspense(<Certification />)} />
-                              <Route path="onboarding" element={withSuspense(<Onboarding />)} />
-                              <Route path="badges" element={withSuspense(<BadgeProgression />)} />
+                              <Route
+                                path="learning"
+                                element={withSuspense(<LearningPortal />)}
+                              />
+                              <Route
+                                path="learning/courses"
+                                element={withSuspense(<LearningPortal />)}
+                              />
+                              <Route
+                                path="learning/courses/:slug"
+                                element={withSuspense(<CourseDetail />)}
+                              />
+                              <Route
+                                path="learning/creator"
+                                element={withSuspense(<CourseCreator />)}
+                              />
+                              <Route
+                                path="learning/creator/:id"
+                                element={withSuspense(<CourseBuilder />)}
+                              />
+                              <Route
+                                path="certification"
+                                element={withSuspense(<Certification />)}
+                              />
+                              <Route
+                                path="onboarding"
+                                element={withSuspense(<Onboarding />)}
+                              />
+                              <Route
+                                path="badges"
+                                element={withSuspense(<BadgeProgression />)}
+                              />
 
                               {/* Live / Trust / Law */}
-                              <Route path="live-classes" element={withSuspense(<LiveClasses />)} />
-                              <Route path="live-classes/new" element={withSuspense(<LiveClassesNew />)} />
-                              <Route path="divine-trust" element={withSuspense(<DivineTrust />)} />
+                              <Route
+                                path="live-classes"
+                                element={withSuspense(<LiveClasses />)}
+                              />
+                              <Route
+                                path="live-classes/new"
+                                element={withSuspense(<LiveClassesNew />)}
+                              />
+                              <Route
+                                path="divine-trust"
+                                element={withSuspense(<DivineTrust />)}
+                              />
                               <Route
                                 path="kingdom-entry"
                                 element={withSuspense(
                                   <ProtectedRoute requiredRole="premium">
                                     <KingdomEntry />
-                                  </ProtectedRoute>
+                                  </ProtectedRoute>,
                                 )}
                               />
-                              <Route path="sacred-law" element={withSuspense(<SacredLaw />)} />
+                              <Route
+                                path="sacred-law"
+                                element={withSuspense(<SacredLaw />)}
+                              />
 
                               {/* Market / Liquidity / DeFi */}
-                              <Route path="marketplace" element={withSuspense(<Marketplace />)} />
-                              <Route path="marketplace/browse" element={withSuspense(<MarketplaceNew />)} />
-                              <Route path="liquidity" element={withSuspense(<LiquidityPools />)} />
-                              <Route path="liquidity/pools" element={withSuspense(<LiquidityPoolsNew />)} />
-                              <Route path="escrow" element={withSuspense(<EscrowVaults />)} />
-                              <Route path="tokenomics" element={withSuspense(<TokenomicsPage />)} />
-                              <Route path="token-supply" element={withSuspense(<TokenSupply />)} />
+                              <Route
+                                path="marketplace"
+                                element={withSuspense(<Marketplace />)}
+                              />
+                              <Route
+                                path="marketplace/browse"
+                                element={withSuspense(<MarketplaceNew />)}
+                              />
+                              <Route
+                                path="liquidity"
+                                element={withSuspense(<LiquidityPools />)}
+                              />
+                              <Route
+                                path="liquidity/pools"
+                                element={withSuspense(<LiquidityPoolsNew />)}
+                              />
+                              <Route
+                                path="escrow"
+                                element={withSuspense(<EscrowVaults />)}
+                              />
+                              <Route
+                                path="tokenomics"
+                                element={withSuspense(<TokenomicsPage />)}
+                              />
+                              <Route
+                                path="token-supply"
+                                element={withSuspense(<TokenSupply />)}
+                              />
 
                               {/* Infra / Ops */}
-                              <Route path="node-management" element={withSuspense(<NodeManagement />)} />
-                              <Route path="data-sync" element={withSuspense(<DataSync />)} />
-                              <Route path="diagnostics" element={withSuspense(<SystemDiagnostics />)} />
-                              <Route path="legal-safehouse" element={withSuspense(<LegalSafehouse />)} />
-                              <Route path="asset-provenance" element={withSuspense(<AssetProvenance />)} />
-                              <Route path="dev-playground" element={withSuspense(<DevPlayground />)} />
+                              <Route
+                                path="node-management"
+                                element={withSuspense(<NodeManagement />)}
+                              />
+                              <Route
+                                path="data-sync"
+                                element={withSuspense(<DataSync />)}
+                              />
+                              <Route
+                                path="diagnostics"
+                                element={withSuspense(<SystemDiagnostics />)}
+                              />
+                              <Route
+                                path="legal-safehouse"
+                                element={withSuspense(<LegalSafehouse />)}
+                              />
+                              <Route
+                                path="asset-provenance"
+                                element={withSuspense(<AssetProvenance />)}
+                              />
+                              <Route
+                                path="dev-playground"
+                                element={withSuspense(<DevPlayground />)}
+                              />
 
                               {/* Social */}
-                              <Route path="social" element={withSuspense(<SocialFeed />)} />
-                              <Route path="social/profile" element={withSuspense(<EnhancedUserProfile />)} />
-                              <Route path="social/followers" element={withSuspense(<FollowersPage />)} />
+                              <Route
+                                path="social"
+                                element={withSuspense(<SocialFeed />)}
+                              />
+                              <Route
+                                path="social/profile"
+                                element={withSuspense(<EnhancedUserProfile />)}
+                              />
+                              <Route
+                                path="social/followers"
+                                element={withSuspense(<FollowersPage />)}
+                              />
 
-                              <Route path="*" element={withSuspense(<NotFound />)} />
+                              <Route
+                                path="*"
+                                element={withSuspense(<NotFound />)}
+                              />
                             </Routes>
                           </main>
                         </div>
                       </div>
                     </SidebarProvider>
-                  </ProtectedRoute>
+                  </ProtectedRoute>,
                 )}
               />
             </Routes>
 
             {/* Non-nested route outside /app */}
             <Routes>
-              <Route path="/redeem/:code" element={withSuspense(<RedeemEnrollment />)} />
+              <Route
+                path="/redeem/:code"
+                element={withSuspense(<RedeemEnrollment />)}
+              />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

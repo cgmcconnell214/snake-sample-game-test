@@ -1,19 +1,30 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { 
-  Cloud, 
-  Download, 
-  Copy, 
+import {
+  Cloud,
+  Download,
+  Copy,
   ExternalLink,
   Server,
   Globe,
@@ -21,7 +32,7 @@ import {
   Settings,
   Activity,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +55,9 @@ export function AgentDeployment({ agent, onClose }: AgentDeploymentProps) {
     monitoring_enabled: true,
   });
   const [isDeploying, setIsDeploying] = useState(false);
-  const [deploymentStatus, setDeploymentStatus] = useState<"idle" | "deploying" | "success" | "error">("idle");
+  const [deploymentStatus, setDeploymentStatus] = useState<
+    "idle" | "deploying" | "success" | "error"
+  >("idle");
   const [deploymentUrl, setDeploymentUrl] = useState("");
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [generatingKey, setGeneratingKey] = useState(false);
@@ -56,12 +69,12 @@ export function AgentDeployment({ agent, onClose }: AgentDeploymentProps) {
 
     try {
       // Simulate deployment process
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
       const generatedUrl = `https://agent-${agent.id.slice(0, 8)}.agents.platform.com`;
       setDeploymentUrl(generatedUrl);
       setDeploymentStatus("success");
-      
+
       toast({
         title: "Deployment Successful",
         description: `Agent deployed to ${generatedUrl}`,
@@ -92,18 +105,18 @@ export function AgentDeployment({ agent, onClose }: AgentDeploymentProps) {
       // Generate a secure API key
       const newApiKey = `ak_${agent.id.substring(0, 8)}_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 15)}`;
       setApiKey(newApiKey);
-      
+
       // Store the API key in the database
       const { error } = await supabase
-        .from('ai_agents')
-        .update({ 
-          configuration: { 
-            ...agent.configuration, 
+        .from("ai_agents")
+        .update({
+          configuration: {
+            ...agent.configuration,
             api_key: newApiKey,
-            api_key_created_at: new Date().toISOString()
-          } 
+            api_key_created_at: new Date().toISOString(),
+          },
         })
-        .eq('id', agent.id);
+        .eq("id", agent.id);
 
       if (error) throw error;
 
@@ -133,12 +146,14 @@ export function AgentDeployment({ agent, onClose }: AgentDeploymentProps) {
       version: "1.0.0",
       dependencies: ["express", "axios", "dotenv"],
       startup_script: "start.sh",
-      readme: `# ${agent.name}\n\n${agent.description}\n\n## Quick Start\n\n1. Extract the package\n2. Run: ./start.sh\n3. Access API at http://localhost:3000\n\n## Configuration\n\nEdit config.json to customize settings.`
+      readme: `# ${agent.name}\n\n${agent.description}\n\n## Quick Start\n\n1. Extract the package\n2. Run: ./start.sh\n3. Access API at http://localhost:3000\n\n## Configuration\n\nEdit config.json to customize settings.`,
     };
 
-    const blob = new Blob([JSON.stringify(agentPackage, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(agentPackage, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `agent-${agent.id.slice(0, 8)}-package.json`;
     document.body.appendChild(a);
@@ -181,13 +196,13 @@ CMD ["npm", "start"]`;
       main: "index.js",
       scripts: {
         start: "node index.js",
-        dev: "node index.js"
+        dev: "node index.js",
       },
       dependencies: {
         express: "^4.18.0",
         axios: "^1.6.0",
-        dotenv: "^16.0.0"
-      }
+        dotenv: "^16.0.0",
+      },
     };
 
     const indexJs = `const express = require('express');
@@ -241,18 +256,18 @@ app.listen(port, () => {
 
     // Create zip-like structure
     const files = {
-      'Dockerfile': dockerfile,
-      'package.json': JSON.stringify(packageJson, null, 2),
-      'index.js': indexJs,
-      'config.json': JSON.stringify(agent, null, 2),
-      'README.md': `# ${agent.name} Docker Container\n\n## Build and Run\n\n\`\`\`bash\ndocker build -t agent-${agent.id.slice(0, 8)} .\ndocker run -p 3000:3000 agent-${agent.id.slice(0, 8)}\n\`\`\`\n\n## API Endpoints\n\n- POST /execute - Execute the agent workflow\n- GET /health - Health check`
+      Dockerfile: dockerfile,
+      "package.json": JSON.stringify(packageJson, null, 2),
+      "index.js": indexJs,
+      "config.json": JSON.stringify(agent, null, 2),
+      "README.md": `# ${agent.name} Docker Container\n\n## Build and Run\n\n\`\`\`bash\ndocker build -t agent-${agent.id.slice(0, 8)} .\ndocker run -p 3000:3000 agent-${agent.id.slice(0, 8)}\n\`\`\`\n\n## API Endpoints\n\n- POST /execute - Execute the agent workflow\n- GET /health - Health check`,
     };
 
     // Download as individual files (in a real implementation, you'd create a zip)
     Object.entries(files).forEach(([filename, content]) => {
-      const blob = new Blob([content], { type: 'text/plain' });
+      const blob = new Blob([content], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
@@ -400,9 +415,9 @@ if (require.main === module) {
 
 module.exports = Agent;`;
 
-    const blob = new Blob([sourceCode], { type: 'text/javascript' });
+    const blob = new Blob([sourceCode], { type: "text/javascript" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `agent-${agent.id.slice(0, 8)}.js`;
     document.body.appendChild(a);
@@ -417,7 +432,8 @@ module.exports = Agent;`;
   };
 
   const generateAPICode = () => {
-    const currentApiKey = apiKey || agent.configuration?.api_key || 'YOUR_API_KEY';
+    const currentApiKey =
+      apiKey || agent.configuration?.api_key || "YOUR_API_KEY";
     return `// Example API usage
 const response = await fetch('${deploymentUrl || `https://bkxbkaggxqcsiylwcopt.supabase.co/functions/v1/execute-ai-agent`}', {
   method: 'POST',
@@ -456,27 +472,37 @@ console.log(result);`;
             <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="config" className="space-y-4 h-[calc(100%-40px)] overflow-y-auto">
+          <TabsContent
+            value="config"
+            className="space-y-4 h-[calc(100%-40px)] overflow-y-auto"
+          >
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-sm">Environment Settings</CardTitle>
+                    <CardTitle className="text-sm">
+                      Environment Settings
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
                       <Label htmlFor="environment">Environment</Label>
                       <Select
                         value={deploymentConfig.environment}
-                        onValueChange={(value) => 
-                          setDeploymentConfig({ ...deploymentConfig, environment: value })
+                        onValueChange={(value) =>
+                          setDeploymentConfig({
+                            ...deploymentConfig,
+                            environment: value,
+                          })
                         }
                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="development">Development</SelectItem>
+                          <SelectItem value="development">
+                            Development
+                          </SelectItem>
                           <SelectItem value="staging">Staging</SelectItem>
                           <SelectItem value="production">Production</SelectItem>
                         </SelectContent>
@@ -487,8 +513,11 @@ console.log(result);`;
                       <Label htmlFor="scaling">Scaling Strategy</Label>
                       <Select
                         value={deploymentConfig.scaling}
-                        onValueChange={(value) => 
-                          setDeploymentConfig({ ...deploymentConfig, scaling: value })
+                        onValueChange={(value) =>
+                          setDeploymentConfig({
+                            ...deploymentConfig,
+                            scaling: value,
+                          })
                         }
                       >
                         <SelectTrigger>
@@ -508,10 +537,10 @@ console.log(result);`;
                         id="timeout"
                         type="number"
                         value={deploymentConfig.timeout}
-                        onChange={(e) => 
-                          setDeploymentConfig({ 
-                            ...deploymentConfig, 
-                            timeout: parseInt(e.target.value) || 30 
+                        onChange={(e) =>
+                          setDeploymentConfig({
+                            ...deploymentConfig,
+                            timeout: parseInt(e.target.value) || 30,
                           })
                         }
                       />
@@ -529,8 +558,11 @@ console.log(result);`;
                       <Switch
                         id="api-enabled"
                         checked={deploymentConfig.api_enabled}
-                        onCheckedChange={(checked) => 
-                          setDeploymentConfig({ ...deploymentConfig, api_enabled: checked })
+                        onCheckedChange={(checked) =>
+                          setDeploymentConfig({
+                            ...deploymentConfig,
+                            api_enabled: checked,
+                          })
                         }
                       />
                     </div>
@@ -540,8 +572,11 @@ console.log(result);`;
                       <Switch
                         id="monitoring-enabled"
                         checked={deploymentConfig.monitoring_enabled}
-                        onCheckedChange={(checked) => 
-                          setDeploymentConfig({ ...deploymentConfig, monitoring_enabled: checked })
+                        onCheckedChange={(checked) =>
+                          setDeploymentConfig({
+                            ...deploymentConfig,
+                            monitoring_enabled: checked,
+                          })
                         }
                       />
                     </div>
@@ -552,15 +587,20 @@ console.log(result);`;
               <div className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-sm">Resource Allocation</CardTitle>
+                    <CardTitle className="text-sm">
+                      Resource Allocation
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
                       <Label htmlFor="memory">Memory</Label>
                       <Select
                         value={deploymentConfig.memory}
-                        onValueChange={(value) => 
-                          setDeploymentConfig({ ...deploymentConfig, memory: value })
+                        onValueChange={(value) =>
+                          setDeploymentConfig({
+                            ...deploymentConfig,
+                            memory: value,
+                          })
                         }
                       >
                         <SelectTrigger>
@@ -580,8 +620,11 @@ console.log(result);`;
                       <Label htmlFor="cpu">CPU</Label>
                       <Select
                         value={deploymentConfig.cpu}
-                        onValueChange={(value) => 
-                          setDeploymentConfig({ ...deploymentConfig, cpu: value })
+                        onValueChange={(value) =>
+                          setDeploymentConfig({
+                            ...deploymentConfig,
+                            cpu: value,
+                          })
                         }
                       >
                         <SelectTrigger>
@@ -608,8 +651,11 @@ console.log(result);`;
                       <Input
                         id="webhook-url"
                         value={deploymentConfig.webhook_url}
-                        onChange={(e) => 
-                          setDeploymentConfig({ ...deploymentConfig, webhook_url: e.target.value })
+                        onChange={(e) =>
+                          setDeploymentConfig({
+                            ...deploymentConfig,
+                            webhook_url: e.target.value,
+                          })
                         }
                         placeholder="https://your-app.com/webhook"
                       />
@@ -620,7 +666,10 @@ console.log(result);`;
             </div>
           </TabsContent>
 
-          <TabsContent value="deploy" className="space-y-4 h-[calc(100%-40px)] overflow-y-auto">
+          <TabsContent
+            value="deploy"
+            className="space-y-4 h-[calc(100%-40px)] overflow-y-auto"
+          >
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 {/* Cloud Deployment */}
@@ -640,7 +689,9 @@ console.log(result);`;
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span>Environment:</span>
-                            <Badge variant="outline">{deploymentConfig.environment}</Badge>
+                            <Badge variant="outline">
+                              {deploymentConfig.environment}
+                            </Badge>
                           </div>
                           <div className="flex justify-between">
                             <span>Memory:</span>
@@ -651,7 +702,11 @@ console.log(result);`;
                             <span>{deploymentConfig.cpu}</span>
                           </div>
                         </div>
-                        <Button onClick={handleDeploy} disabled={isDeploying} className="w-full">
+                        <Button
+                          onClick={handleDeploy}
+                          disabled={isDeploying}
+                          className="w-full"
+                        >
                           <Cloud className="h-4 w-4 mr-2" />
                           Deploy to Cloud
                         </Button>
@@ -660,18 +715,30 @@ console.log(result);`;
                     {deploymentStatus === "deploying" && (
                       <div className="text-center">
                         <div className="animate-spin h-8 w-8 mx-auto border-2 border-primary border-t-transparent rounded-full mb-2"></div>
-                        <p className="text-sm text-muted-foreground">Deploying...</p>
+                        <p className="text-sm text-muted-foreground">
+                          Deploying...
+                        </p>
                       </div>
                     )}
                     {deploymentStatus === "success" && (
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-green-600">
                           <CheckCircle className="h-4 w-4" />
-                          <span className="text-sm font-medium">Deployed Successfully</span>
+                          <span className="text-sm font-medium">
+                            Deployed Successfully
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Input value={deploymentUrl} readOnly className="flex-1 text-xs" />
-                          <Button variant="outline" size="sm" onClick={() => copyToClipboard(deploymentUrl)}>
+                          <Input
+                            value={deploymentUrl}
+                            readOnly
+                            className="flex-1 text-xs"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => copyToClipboard(deploymentUrl)}
+                          >
                             <Copy className="h-3 w-3" />
                           </Button>
                         </div>
@@ -681,9 +748,15 @@ console.log(result);`;
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 text-red-600">
                           <AlertCircle className="h-4 w-4" />
-                          <span className="text-sm font-medium">Deployment Failed</span>
+                          <span className="text-sm font-medium">
+                            Deployment Failed
+                          </span>
                         </div>
-                        <Button onClick={handleDeploy} variant="outline" className="w-full">
+                        <Button
+                          onClick={handleDeploy}
+                          variant="outline"
+                          className="w-full"
+                        >
                           Retry Deployment
                         </Button>
                       </div>
@@ -701,18 +774,31 @@ console.log(result);`;
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <p className="text-sm text-muted-foreground">
-                      Download and run on your own infrastructure for complete control.
+                      Download and run on your own infrastructure for complete
+                      control.
                     </p>
                     <div className="space-y-3">
-                      <Button variant="outline" className="w-full" onClick={handleDownloadAgent}>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleDownloadAgent}
+                      >
                         <Download className="h-4 w-4 mr-2" />
                         Download Agent Package
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={handleDownloadDockerImage}>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleDownloadDockerImage}
+                      >
                         <Server className="h-4 w-4 mr-2" />
                         Download Docker Image
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={handleDownloadSourceCode}>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleDownloadSourceCode}
+                      >
                         <Code className="h-4 w-4 mr-2" />
                         Download Source Code
                       </Button>
@@ -732,7 +818,10 @@ cd agent-${agent.id.slice(0, 8)}
             </div>
           </TabsContent>
 
-          <TabsContent value="api" className="space-y-4 h-[calc(100%-40px)] overflow-y-auto">
+          <TabsContent
+            value="api"
+            className="space-y-4 h-[calc(100%-40px)] overflow-y-auto"
+          >
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -745,16 +834,22 @@ cd agent-${agent.id.slice(0, 8)}
                   <div>
                     <Label>API Endpoint</Label>
                     <div className="flex items-center gap-2 mt-1">
-                      <Input 
-                        value={deploymentUrl ? `${deploymentUrl}/api/execute` : "Deploy agent to get API URL"} 
-                        readOnly 
+                      <Input
+                        value={
+                          deploymentUrl
+                            ? `${deploymentUrl}/api/execute`
+                            : "Deploy agent to get API URL"
+                        }
+                        readOnly
                         className="flex-1"
                       />
                       {deploymentUrl && (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
-                          onClick={() => copyToClipboard(`${deploymentUrl}/api/execute`)}
+                          onClick={() =>
+                            copyToClipboard(`${deploymentUrl}/api/execute`)
+                          }
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -787,11 +882,12 @@ cd agent-${agent.id.slice(0, 8)}
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Use your agent's API key to authenticate requests. You can find your API key in the agent settings.
+                    Use your agent's API key to authenticate requests. You can
+                    find your API key in the agent settings.
                   </p>
                   <div className="space-y-3">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={generateAPIKey}
                       disabled={generatingKey}
                     >
@@ -802,10 +898,14 @@ cd agent-${agent.id.slice(0, 8)}
                         <p className="text-sm font-mono break-all">
                           {apiKey || agent.configuration?.api_key}
                         </p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => copyToClipboard(apiKey || agent.configuration?.api_key)}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            copyToClipboard(
+                              apiKey || agent.configuration?.api_key,
+                            )
+                          }
                           className="mt-2"
                         >
                           Copy API Key
@@ -818,7 +918,10 @@ cd agent-${agent.id.slice(0, 8)}
             </div>
           </TabsContent>
 
-          <TabsContent value="monitoring" className="space-y-4 h-[calc(100%-40px)] overflow-y-auto">
+          <TabsContent
+            value="monitoring"
+            className="space-y-4 h-[calc(100%-40px)] overflow-y-auto"
+          >
             <div className="grid grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -831,19 +934,27 @@ cd agent-${agent.id.slice(0, 8)}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold">0</div>
-                      <div className="text-sm text-muted-foreground">Executions</div>
+                      <div className="text-sm text-muted-foreground">
+                        Executions
+                      </div>
                     </div>
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold">0ms</div>
-                      <div className="text-sm text-muted-foreground">Avg Response</div>
+                      <div className="text-sm text-muted-foreground">
+                        Avg Response
+                      </div>
                     </div>
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold">99.9%</div>
-                      <div className="text-sm text-muted-foreground">Uptime</div>
+                      <div className="text-sm text-muted-foreground">
+                        Uptime
+                      </div>
                     </div>
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <div className="text-2xl font-bold">0</div>
-                      <div className="text-sm text-muted-foreground">Errors</div>
+                      <div className="text-sm text-muted-foreground">
+                        Errors
+                      </div>
                     </div>
                   </div>
                 </CardContent>

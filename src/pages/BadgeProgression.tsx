@@ -22,19 +22,24 @@ export default function BadgeProgression(): JSX.Element {
   const [badges, setBadges] = useState<UserBadge[]>([]);
 
   useEffect(() => {
-    document.title = 'Badge Progression';
+    document.title = "Badge Progression";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', 'View your earned badges and progress.');
+    if (metaDesc)
+      metaDesc.setAttribute("content", "View your earned badges and progress.");
 
     const load = async () => {
       if (!profile?.user_id) return;
       const { data, error } = await supabase
-        .from('user_badges')
-        .select('*')
-        .eq('user_id', profile.user_id)
-        .order('created_at', { ascending: false });
+        .from("user_badges")
+        .select("*")
+        .eq("user_id", profile.user_id)
+        .order("created_at", { ascending: false });
       if (error) {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
         return;
       }
       setBadges((data as any) || []);
@@ -46,7 +51,9 @@ export default function BadgeProgression(): JSX.Element {
     <div className="container mx-auto p-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Badge Progression</h1>
-        <p className="text-muted-foreground">Your earned badges and milestones</p>
+        <p className="text-muted-foreground">
+          Your earned badges and milestones
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -68,14 +75,18 @@ export default function BadgeProgression(): JSX.Element {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">{b.description || 'Achievement unlocked'}</p>
+              <p className="text-sm text-muted-foreground">
+                {b.description || "Achievement unlocked"}
+              </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {badges.length === 0 && (
-        <div className="text-muted-foreground">No badges yet. Complete assignments to earn badges.</div>
+        <div className="text-muted-foreground">
+          No badges yet. Complete assignments to earn badges.
+        </div>
       )}
     </div>
   );

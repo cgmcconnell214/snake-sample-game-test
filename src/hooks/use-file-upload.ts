@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface FileUploadResult {
   name: string;
@@ -12,11 +12,11 @@ export interface UseFileUploadResult {
   uploadFiles: (
     files: File[],
     bucketName?: string,
-    folderPath?: string
-  ) => Promise<FileUploadResult[]>
-  uploading: boolean
-  progress: number
-  error: string | null
+    folderPath?: string,
+  ) => Promise<FileUploadResult[]>;
+  uploading: boolean;
+  progress: number;
+  error: string | null;
 }
 
 export function useFileUpload(): UseFileUploadResult {
@@ -26,22 +26,24 @@ export function useFileUpload(): UseFileUploadResult {
 
   const uploadFiles = async (
     files: File[],
-    bucketName: string = 'message-attachments',
-    folderPath: string = ''
+    bucketName: string = "message-attachments",
+    folderPath: string = "",
   ): Promise<FileUploadResult[]> => {
     if (!files.length) return [];
-    
+
     setUploading(true);
     setProgress(0);
     setError(null);
-    
+
     try {
       // Create the storage bucket if it doesn't exist
       try {
         // Check if bucket exists
         const { data: buckets } = await supabase.storage.listBuckets();
-        const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
-        
+        const bucketExists = buckets?.some(
+          (bucket) => bucket.name === bucketName,
+        );
+
         if (!bucketExists) {
           // Create bucket silently fails if it already exists
           await supabase.storage.createBucket(bucketName, {
@@ -49,7 +51,7 @@ export function useFileUpload(): UseFileUploadResult {
           });
         }
       } catch (err) {
-        console.warn('Error checking/creating bucket:', err);
+        console.warn("Error checking/creating bucket:", err);
         // Continue anyway as the bucket might already exist
       }
 
@@ -57,20 +59,22 @@ export function useFileUpload(): UseFileUploadResult {
       let completedUploads = 0;
 
       const uploadPromises = files.map(async (file) => {
-        const fileExt = file.name.split('.').pop();
+        const fileExt = file.name.split(".").pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
         const filePath = folderPath ? `${folderPath}/${fileName}` : fileName;
 
         const { data, error: uploadError } = await supabase.storage
           .from(bucketName)
           .upload(filePath, file, {
-            cacheControl: '3600',
+            cacheControl: "3600",
             upsert: false,
           });
 
         if (uploadError) {
-          console.error('Error uploading file:', uploadError);
-          throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
+          console.error("Error uploading file:", uploadError);
+          throw new Error(
+            `Failed to upload ${file.name}: ${uploadError.message}`,
+          );
         }
 
         // Get the URL for the uploaded file
@@ -95,9 +99,9 @@ export function useFileUpload(): UseFileUploadResult {
 
       return results;
     } catch (err: unknown) {
-      console.error('Upload error:', err);
+      console.error("Upload error:", err);
       const error = err as Error;
-      setError(error.message || 'Failed to upload files');
+      setError(error.message || "Failed to upload files");
       throw error;
     } finally {
       setUploading(false);

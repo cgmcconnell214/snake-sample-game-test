@@ -10,5 +10,5 @@ createRoot(document.getElementById("root")!).render(
     <Suspense fallback={<LoadingSpinner />}>
       <App />
     </Suspense>
-  </ErrorBoundary>
+  </ErrorBoundary>,
 );

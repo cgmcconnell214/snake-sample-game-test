@@ -15,7 +15,6 @@
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "deploy:contract": "node scripts/deploy-contract.js",
-
     "scrub": "node scripts/scrub-codex.js",
     "fix": "npm run scrub && prettier --write . && eslint --fix .",
     "prepare": "husky"
@@ -103,7 +102,6 @@
     "vite": "^5.4.1",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^3.2.4",
-
     "husky": "^9.1.4",
     "lint-staged": "^15.2.8",
     "prettier": "^3.3.3"

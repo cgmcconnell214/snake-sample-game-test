@@ -15,12 +15,19 @@ export default function CourseDetail(): JSX.Element {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const isValidSlug = useMemo(() => typeof slug === "string" && /^[a-z0-9-]+$/.test(slug), [slug]);
+  const isValidSlug = useMemo(
+    () => typeof slug === "string" && /^[a-z0-9-]+$/.test(slug),
+    [slug],
+  );
 
   useEffect(() => {
     document.title = course?.title ? `${course.title} – Course` : "Course";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute("content", course?.description || "Explore course details and enroll.");
+    if (metaDesc)
+      metaDesc.setAttribute(
+        "content",
+        course?.description || "Explore course details and enroll.",
+      );
   }, [course]);
 
   useEffect(() => {
@@ -37,7 +44,11 @@ export default function CourseDetail(): JSX.Element {
         .eq("slug", slug)
         .maybeSingle();
       if (error) {
-        toast({ title: "Error", description: "Failed to load course", variant: "destructive" });
+        toast({
+          title: "Error",
+          description: "Failed to load course",
+          variant: "destructive",
+        });
       }
       if (!data || error) {
         setNotFound(true);
@@ -53,7 +64,9 @@ export default function CourseDetail(): JSX.Element {
   useEffect(() => {
     const checkCreator = async () => {
       if (!course) return setIsCreator(false);
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setIsCreator(!!user && user.id === course.creator_id);
     };
     checkCreator();
@@ -61,40 +74,79 @@ export default function CourseDetail(): JSX.Element {
 
   const handleEnrollStripe = async () => {
     if (!course) return;
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return toast({ title: "Sign in required", description: "Please log in to enroll", variant: "destructive" });
-    if (user.id === course.creator_id) return toast({ title: "Creator Access", description: "You already own this course." });
-    if (!course.price_per_student || course.price_per_student === 0) return handleEnrollFree();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return toast({
+        title: "Sign in required",
+        description: "Please log in to enroll",
+        variant: "destructive",
+      });
+    if (user.id === course.creator_id)
+      return toast({
+        title: "Creator Access",
+        description: "You already own this course.",
+      });
+    if (!course.price_per_student || course.price_per_student === 0)
+      return handleEnrollFree();
 
     const amount_cents = Math.round((course.price_per_student || 0) * 100);
-    const { data, error } = await supabase.functions.invoke('create-payment', {
+    const { data, error } = await supabase.functions.invoke("create-payment", {
       body: {
         amount_cents,
         product_name: `Course Enrollment: ${course.title}`,
-        metadata: { resource_type: 'course', course_id: course.id }
-      }
+        metadata: { resource_type: "course", course_id: course.id },
+      },
     });
-    if (error) return toast({ title: 'Payment Error', description: error.message || 'Failed to start payment', variant: 'destructive' });
-    if (data?.url) window.open(data.url, '_blank');
+    if (error)
+      return toast({
+        title: "Payment Error",
+        description: error.message || "Failed to start payment",
+        variant: "destructive",
+      });
+    if (data?.url) window.open(data.url, "_blank");
   };
 
   const handleEnrollXRPL = async () => {
-    toast({ title: 'XRPL Payment', description: 'XRPL wallet payment requires configuration.' });
+    toast({
+      title: "XRPL Payment",
+      description: "XRPL wallet payment requires configuration.",
+    });
   };
 
   const handleEnrollFree = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return toast({ title: "Sign in required", description: "Please log in to enroll", variant: "destructive" });
-    if (user.id === course.creator_id) return toast({ title: "Creator Access", description: "You already own this course." });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return toast({
+        title: "Sign in required",
+        description: "Please log in to enroll",
+        variant: "destructive",
+      });
+    if (user.id === course.creator_id)
+      return toast({
+        title: "Creator Access",
+        description: "You already own this course.",
+      });
     const { error } = await supabase.from("course_enrollments").insert({
       student_id: user.id,
       course_id: course.id,
       payment_amount: 0,
-      payment_status: 'paid',
-      payment_provider: 'free',
+      payment_status: "paid",
+      payment_provider: "free",
     });
-    if (error) return toast({ title: "Error", description: error.message, variant: "destructive" });
-    toast({ title: "Enrolled", description: `You are enrolled in ${course.title}` });
+    if (error)
+      return toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    toast({
+      title: "Enrolled",
+      description: `You are enrolled in ${course.title}`,
+    });
   };
 
   if (notFound) return <NotFound />;
@@ -115,14 +167,20 @@ export default function CourseDetail(): JSX.Element {
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">Price</span>
-            <span className="font-semibold">{course.price_per_student === 0 ? 'Free' : `$${course.price_per_student}`}</span>
+            <span className="font-semibold">
+              {course.price_per_student === 0
+                ? "Free"
+                : `$${course.price_per_student}`}
+            </span>
           </div>
 
           <div className="flex gap-2 flex-wrap">
             {isCreator ? (
               <>
                 <Button asChild>
-                  <Link to={`/app/learning/creator/${course.id}`}>Edit in Creator</Link>
+                  <Link to={`/app/learning/creator/${course.id}`}>
+                    Edit in Creator
+                  </Link>
                 </Button>
                 <Button variant="secondary" asChild>
                   <Link to="/app/learning/creator">Manage Links</Link>
@@ -136,8 +194,12 @@ export default function CourseDetail(): JSX.Element {
                   </Button>
                 ) : (
                   <>
-                    <Button onClick={handleEnrollStripe}>Pay with Stripe</Button>
-                    <Button variant="secondary" onClick={handleEnrollXRPL}>Pay with XRPL</Button>
+                    <Button onClick={handleEnrollStripe}>
+                      Pay with Stripe
+                    </Button>
+                    <Button variant="secondary" onClick={handleEnrollXRPL}>
+                      Pay with XRPL
+                    </Button>
                   </>
                 )}
               </>

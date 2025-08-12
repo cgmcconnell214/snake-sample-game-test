@@ -145,25 +145,22 @@ export default function Tokenize(): JSX.Element {
         throw new Error("No session found");
       }
 
-      const { error } = await supabase.functions.invoke(
-        "tokenize-asset",
-        {
-          body: {
-            asset_name: tokenName,
-            asset_symbol: tokenSymbol,
-            description,
-            total_supply: parseFloat(totalSupply),
-            metadata: {
-              asset_type: assetType,
-              estimated_value: parseFloat(totalValue),
-              created_via: "web_portal",
-            },
-          },
-          headers: {
-            Authorization: `Bearer ${session.session.access_token}`,
+      const { error } = await supabase.functions.invoke("tokenize-asset", {
+        body: {
+          asset_name: tokenName,
+          asset_symbol: tokenSymbol,
+          description,
+          total_supply: parseFloat(totalSupply),
+          metadata: {
+            asset_type: assetType,
+            estimated_value: parseFloat(totalValue),
+            created_via: "web_portal",
           },
         },
-      );
+        headers: {
+          Authorization: `Bearer ${session.session.access_token}`,
+        },
+      });
 
       if (error) {
         let description =
@@ -242,8 +239,12 @@ export default function Tokenize(): JSX.Element {
                 <Tabs defaultValue="details" className="space-y-6">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="details">Asset Details</TabsTrigger>
-                    <TabsTrigger value="documentation">Documentation</TabsTrigger>
-                    <TabsTrigger value="parameters">Token Parameters</TabsTrigger>
+                    <TabsTrigger value="documentation">
+                      Documentation
+                    </TabsTrigger>
+                    <TabsTrigger value="parameters">
+                      Token Parameters
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="details" className="space-y-4">
@@ -498,7 +499,9 @@ export default function Tokenize(): JSX.Element {
                           </Badge>
                           <Badge
                             variant={
-                              token.status === "active" ? "default" : "secondary"
+                              token.status === "active"
+                                ? "default"
+                                : "secondary"
                             }
                             className="text-xs"
                           >
@@ -542,7 +545,8 @@ export default function Tokenize(): JSX.Element {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Asset Type</span>
               <span className="font-medium">
-                {assetTypes.find((t) => t.value === assetType)?.label || assetType}
+                {assetTypes.find((t) => t.value === assetType)?.label ||
+                  assetType}
               </span>
             </div>
             <div className="flex justify-between">
@@ -556,14 +560,13 @@ export default function Tokenize(): JSX.Element {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total Value</span>
               <span className="font-mono font-medium">
-                ${
-                  totalValue
-                    ? parseFloat(totalValue).toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })
-                    : "0.00"
-                }
+                $
+                {totalValue
+                  ? parseFloat(totalValue).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
+                  : "0.00"}
               </span>
             </div>
             <div className="flex justify-between">

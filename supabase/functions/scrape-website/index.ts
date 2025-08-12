@@ -3,7 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 interface ScrapeRequestBody {
@@ -32,25 +33,37 @@ serve(async (req) => {
       console.error("FIRECRAWL_API_KEY is not set");
       return new Response(
         JSON.stringify({ error: "Server is missing Firecrawl API key" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
 
     if (!body?.url || typeof body.url !== "string") {
       return new Response(
         JSON.stringify({ error: "Valid 'url' is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
 
-    const limit = typeof body.limit === "number" ? Math.min(Math.max(body.limit, 1), 200) : 50;
-    const formats = Array.isArray(body.formats) && body.formats.length > 0 ? body.formats : ["markdown", "html"];
+    const limit =
+      typeof body.limit === "number"
+        ? Math.min(Math.max(body.limit, 1), 200)
+        : 50;
+    const formats =
+      Array.isArray(body.formats) && body.formats.length > 0
+        ? body.formats
+        : ["markdown", "html"];
 
     // Call Firecrawl REST API
     const firecrawlRes = await fetch("https://api.firecrawl.dev/v1/crawl", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -65,21 +78,27 @@ serve(async (req) => {
     if (!firecrawlRes.ok) {
       console.error("Firecrawl error:", firecrawlData);
       return new Response(
-        JSON.stringify({ error: "Failed to crawl site", details: firecrawlData?.error || firecrawlData }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          error: "Failed to crawl site",
+          details: firecrawlData?.error || firecrawlData,
+        }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
 
     return new Response(
       JSON.stringify({ success: true, data: firecrawlData }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
     console.error("scrape-website unexpected error", err);
     const message = err instanceof Error ? err.message : "Unknown error";
-    return new Response(
-      JSON.stringify({ error: "Internal error", message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal error", message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

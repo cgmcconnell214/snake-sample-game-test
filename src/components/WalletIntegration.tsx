@@ -301,7 +301,9 @@ const WalletIntegration: React.FC = () => {
                 <Button
                   variant="outline"
                   className="justify-start"
-                  onClick={() => window.open('https://xrpl.org/xrp-pay', '_blank')}
+                  onClick={() =>
+                    window.open("https://xrpl.org/xrp-pay", "_blank")
+                  }
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
                   XRP Pay
@@ -309,7 +311,7 @@ const WalletIntegration: React.FC = () => {
                 <Button
                   variant="outline"
                   className="justify-start"
-                  onClick={() => window.open('https://xumm.app', '_blank')}
+                  onClick={() => window.open("https://xumm.app", "_blank")}
                 >
                   <Wallet className="h-4 w-4 mr-2" />
                   Xumm

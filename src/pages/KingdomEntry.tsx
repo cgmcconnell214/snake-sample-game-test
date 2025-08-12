@@ -65,7 +65,9 @@ export default function KingdomEntry(): JSX.Element {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-destructive mb-2">Access Denied</h2>
+          <h2 className="text-2xl font-bold text-destructive mb-2">
+            Access Denied
+          </h2>
           <p className="text-muted-foreground">
             You do not have access to view this page.
           </p>
@@ -101,7 +103,11 @@ export default function KingdomEntry(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               View all souls registered in the kingdom
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewRegistry}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewRegistry}
+            >
               View Registry
             </Button>
           </CardContent>
@@ -118,7 +124,11 @@ export default function KingdomEntry(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Sacred oaths and commitments made
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewOaths}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewOaths}
+            >
               View Oaths
             </Button>
           </CardContent>
@@ -135,7 +145,11 @@ export default function KingdomEntry(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Cryptographic witness verification
             </p>
-            <Button variant="outline" className="w-full" onClick={handleManageWitnesses}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleManageWitnesses}
+            >
               Manage Witnesses
             </Button>
           </CardContent>

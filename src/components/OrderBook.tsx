@@ -15,7 +15,13 @@ interface OrderBookEntry {
   total: number;
 }
 
-export function OrderBook({ assetId, symbol }: { assetId?: string; symbol?: string }): JSX.Element {
+export function OrderBook({
+  assetId,
+  symbol,
+}: {
+  assetId?: string;
+  symbol?: string;
+}): JSX.Element {
   const [rawOrders, setRawOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -41,8 +47,13 @@ export function OrderBook({ assetId, symbol }: { assetId?: string; symbol?: stri
       .channel("orderbook-changes")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "orders", filter: `asset_id=eq.${assetId}` },
-        () => fetchOrders()
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+          filter: `asset_id=eq.${assetId}`,
+        },
+        () => fetchOrders(),
       )
       .subscribe();
 
@@ -69,7 +80,11 @@ export function OrderBook({ assetId, symbol }: { assetId?: string; symbol?: stri
 
     const toEntries = (m: Map<number, number>): OrderBookEntry[] =>
       Array.from(m.entries())
-        .map(([price, quantity]) => ({ price, quantity, total: price * quantity }))
+        .map(([price, quantity]) => ({
+          price,
+          quantity,
+          total: price * quantity,
+        }))
         .sort((a, b) => a.price - b.price);
 
     return {
@@ -79,7 +94,8 @@ export function OrderBook({ assetId, symbol }: { assetId?: string; symbol?: stri
   }, [rawOrders]);
 
   const spread = useMemo(() => {
-    if (!buyOrders.length || !sellOrders.length) return { value: 0, percent: 0 };
+    if (!buyOrders.length || !sellOrders.length)
+      return { value: 0, percent: 0 };
     const value = sellOrders[0].price - buyOrders[0].price;
     const percent = buyOrders[0].price ? (value / buyOrders[0].price) * 100 : 0;
     return { value, percent };
@@ -110,15 +126,23 @@ export function OrderBook({ assetId, symbol }: { assetId?: string; symbol?: stri
 
             {/* Sell Orders */}
             <div className="space-y-1">
-              <div className="text-xs text-muted-foreground mb-1">Sell Orders</div>
+              <div className="text-xs text-muted-foreground mb-1">
+                Sell Orders
+              </div>
               {(sellOrders || []).slice(0, 15).map((order, i) => (
                 <div
                   key={`ask-${order.price}-${i}`}
                   className="grid grid-cols-3 gap-2 text-xs font-mono hover:bg-sell/10 transition-colors p-1 rounded"
                 >
-                  <div className="text-right text-sell font-medium">${order.price.toFixed(2)}</div>
-                  <div className="text-right text-foreground">{order.quantity}</div>
-                  <div className="text-right text-muted-foreground">${order.total.toLocaleString()}</div>
+                  <div className="text-right text-sell font-medium">
+                    ${order.price.toFixed(2)}
+                  </div>
+                  <div className="text-right text-foreground">
+                    {order.quantity}
+                  </div>
+                  <div className="text-right text-muted-foreground">
+                    ${order.total.toLocaleString()}
+                  </div>
                 </div>
               ))}
             </div>
@@ -133,15 +157,23 @@ export function OrderBook({ assetId, symbol }: { assetId?: string; symbol?: stri
 
             {/* Buy Orders */}
             <div className="space-y-1">
-              <div className="text-xs text-muted-foreground mb-1">Buy Orders</div>
+              <div className="text-xs text-muted-foreground mb-1">
+                Buy Orders
+              </div>
               {(buyOrders || []).slice(0, 15).map((order, i) => (
                 <div
                   key={`bid-${order.price}-${i}`}
                   className="grid grid-cols-3 gap-2 text-xs font-mono hover:bg-buy/10 transition-colors p-1 rounded"
                 >
-                  <div className="text-right text-buy font-medium">${order.price.toFixed(2)}</div>
-                  <div className="text-right text-foreground">{order.quantity}</div>
-                  <div className="text-right text-muted-foreground">${order.total.toLocaleString()}</div>
+                  <div className="text-right text-buy font-medium">
+                    ${order.price.toFixed(2)}
+                  </div>
+                  <div className="text-right text-foreground">
+                    {order.quantity}
+                  </div>
+                  <div className="text-right text-muted-foreground">
+                    ${order.total.toLocaleString()}
+                  </div>
                 </div>
               ))}
             </div>

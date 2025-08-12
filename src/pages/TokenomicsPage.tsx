@@ -9,19 +9,19 @@ export default function TokenomicsPage(): JSX.Element {
   const navigate = useNavigate();
 
   const handleGenerateReport = () => {
-    navigate('/app/reports');
+    navigate("/app/reports");
   };
 
   const handleViewVelocity = () => {
-    navigate('/app/trading');
+    navigate("/app/trading");
   };
 
   const handleAnalyzeSupply = () => {
-    navigate('/app/token-supply');
+    navigate("/app/token-supply");
   };
 
   const handleViewFlows = () => {
-    navigate('/app/smart-contracts');
+    navigate("/app/smart-contracts");
   };
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -50,7 +50,11 @@ export default function TokenomicsPage(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track token velocity and circulation patterns
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewVelocity}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewVelocity}
+            >
               View Velocity
             </Button>
           </CardContent>
@@ -67,7 +71,11 @@ export default function TokenomicsPage(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor token supply distribution and inflation
             </p>
-            <Button variant="outline" className="w-full" onClick={handleAnalyzeSupply}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleAnalyzeSupply}
+            >
               Analyze Supply
             </Button>
           </CardContent>
@@ -84,7 +92,11 @@ export default function TokenomicsPage(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Visualize smart contract interactions and flows
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewFlows}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewFlows}
+            >
               View Flows
             </Button>
           </CardContent>

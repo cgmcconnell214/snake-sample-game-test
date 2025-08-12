@@ -4,11 +4,12 @@ import { rateLimit } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
   console.log(`[MARKET-SCHEDULER] ${step}${detailsStr}`);
 };
 
@@ -23,7 +24,7 @@ serve(async (req) => {
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
+    { auth: { persistSession: false } },
   );
 
   try {
@@ -35,57 +36,63 @@ serve(async (req) => {
 
     // Get market data that hasn't been updated in the last 30 seconds
     const { data: outdatedData, error: queryError } = await supabaseClient
-      .from('market_data')
-      .select('asset_id, last_updated')
-      .lt('last_updated', lastUpdate.toISOString());
+      .from("market_data")
+      .select("asset_id, last_updated")
+      .lt("last_updated", lastUpdate.toISOString());
 
     if (queryError) throw queryError;
 
     if (outdatedData.length === 0) {
-      return new Response(JSON.stringify({
-        message: "Market data is up to date",
-        timestamp: now.toISOString()
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+      return new Response(
+        JSON.stringify({
+          message: "Market data is up to date",
+          timestamp: now.toISOString(),
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        },
+      );
     }
 
     // Call the update-market-data function
-    const { data: updateResult, error: updateError } = await supabaseClient.functions.invoke(
-      'update-market-data',
-      {
-        body: { trigger: 'scheduler' }
-      }
-    );
+    const { data: updateResult, error: updateError } =
+      await supabaseClient.functions.invoke("update-market-data", {
+        body: { trigger: "scheduler" },
+      });
 
     if (updateError) throw updateError;
 
-    logStep("Market data update completed", { 
+    logStep("Market data update completed", {
       updatedAssets: outdatedData.length,
-      result: updateResult 
+      result: updateResult,
     });
 
-    return new Response(JSON.stringify({
-      success: true,
-      message: "Market data updated successfully",
-      updatedAssets: outdatedData.length,
-      timestamp: now.toISOString()
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Market data updated successfully",
+        updatedAssets: outdatedData.length,
+        timestamp: now.toISOString(),
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      },
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR in market scheduler", { message: errorMessage });
-    
-    return new Response(JSON.stringify({ 
-      error: errorMessage,
-      timestamp: new Date().toISOString()
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+
+    return new Response(
+      JSON.stringify({
+        error: errorMessage,
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   }
 });

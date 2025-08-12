@@ -19,16 +19,13 @@ export function rateLimit(req: Request, identifier?: string): Response | null {
   }
   if (entry.count >= MAX_REQUESTS) {
     const retryAfter = Math.ceil((entry.expires - now) / 1000);
-    return new Response(
-      JSON.stringify({ error: "Too many requests" }),
-      {
-        status: 429,
-        headers: {
-          "Content-Type": "application/json",
-          "Retry-After": retryAfter.toString(),
-        },
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json",
+        "Retry-After": retryAfter.toString(),
       },
-    );
+    });
   }
   entry.count++;
   requests.set(ip, entry);

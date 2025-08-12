@@ -50,19 +50,24 @@ export default function Certification(): JSX.Element {
         {
           id: "1",
           name: "Sacred Commerce Initiate",
-          description: "Learn the fundamentals of divine commerce and tokenization",
+          description:
+            "Learn the fundamentals of divine commerce and tokenization",
           level: 1,
           requirements: [
             "Complete KYC verification",
             "Read Sacred Law principles",
             "Tokenize first asset",
-            "Complete 3 trading transactions"
+            "Complete 3 trading transactions",
           ],
-          rewards: ["Initiate Badge", "Access to Level 2 content", "5% trading fee discount"],
+          rewards: [
+            "Initiate Badge",
+            "Access to Level 2 content",
+            "5% trading fee discount",
+          ],
           estimated_time: "1-2 weeks",
           is_completed: false,
           progress: 75,
-          badges_earned: ["KYC Verified", "First Asset"]
+          badges_earned: ["KYC Verified", "First Asset"],
         },
         {
           id: "2",
@@ -73,13 +78,17 @@ export default function Certification(): JSX.Element {
             "Complete Initiate certification",
             "Create 5 trust documents",
             "Manage escrow for 30 days",
-            "Verify 10 user profiles"
+            "Verify 10 user profiles",
           ],
-          rewards: ["Keeper Badge", "Trust creation privileges", "Escrow fee reduction"],
+          rewards: [
+            "Keeper Badge",
+            "Trust creation privileges",
+            "Escrow fee reduction",
+          ],
           estimated_time: "3-4 weeks",
           is_completed: false,
           progress: 25,
-          badges_earned: []
+          badges_earned: [],
         },
         {
           id: "3",
@@ -90,14 +99,18 @@ export default function Certification(): JSX.Element {
             "Complete Trust Keeper certification",
             "Design 3 token economies",
             "Deploy smart contracts",
-            "Manage liquidity pools"
+            "Manage liquidity pools",
           ],
-          rewards: ["Architect Badge", "Smart contract deployment", "Revenue sharing"],
+          rewards: [
+            "Architect Badge",
+            "Smart contract deployment",
+            "Revenue sharing",
+          ],
           estimated_time: "6-8 weeks",
           is_completed: false,
           progress: 0,
-          badges_earned: []
-        }
+          badges_earned: [],
+        },
       ];
 
       // Mock user badges
@@ -106,23 +119,29 @@ export default function Certification(): JSX.Element {
           id: "1",
           badge_name: "KYC Verified",
           badge_type: "verification",
-          earned_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          description: "Successfully completed KYC verification process"
+          earned_at: new Date(
+            Date.now() - 7 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          description: "Successfully completed KYC verification process",
         },
         {
           id: "2",
           badge_name: "First Asset",
           badge_type: "milestone",
-          earned_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          description: "Tokenized your first asset on the platform"
+          earned_at: new Date(
+            Date.now() - 5 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          description: "Tokenized your first asset on the platform",
         },
         {
           id: "3",
           badge_name: "Early Adopter",
           badge_type: "special",
-          earned_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          description: "One of the first 100 users on the platform"
-        }
+          earned_at: new Date(
+            Date.now() - 10 * 24 * 60 * 60 * 1000,
+          ).toISOString(),
+          description: "One of the first 100 users on the platform",
+        },
       ];
 
       setCertifications(mockCertifications);
@@ -140,7 +159,7 @@ export default function Certification(): JSX.Element {
   };
 
   const handleStartCertification = async (certificationId: string) => {
-    const certification = certifications.find(c => c.id === certificationId);
+    const certification = certifications.find((c) => c.id === certificationId);
     if (!certification) return;
 
     toast({
@@ -164,11 +183,11 @@ export default function Certification(): JSX.Element {
       badge_name: badgeName,
       badge_type: "earned",
       earned_at: new Date().toISOString(),
-      description: `Earned ${badgeName} badge through certification progress`
+      description: `Earned ${badgeName} badge through certification progress`,
     };
 
     setUserBadges([newBadge, ...userBadges]);
-    
+
     toast({
       title: "Badge Earned!",
       description: `You've earned the ${badgeName} badge`,
@@ -201,32 +220,38 @@ export default function Certification(): JSX.Element {
     }
   };
 
-  const overallProgress = certifications.reduce((acc, cert) => acc + cert.progress, 0) / certifications.length;
+  const overallProgress =
+    certifications.reduce((acc, cert) => acc + cert.progress, 0) /
+    certifications.length;
 
-  const certificationItems: CertificationItem[] = certifications.map((cert) => ({
-    id: cert.id,
-    name: cert.name,
-    description: cert.description,
-    level: cert.level,
-    levelVariant: getLevelColor(cert.level) as CertificationItem["levelVariant"],
-    progress: cert.progress,
-    requirements: cert.requirements,
-    rewards: cert.rewards,
-    estimatedTime: cert.estimated_time,
-    icon: Trophy,
-    isCompleted: cert.is_completed,
-    actionLabel:
-      cert.progress === 0
-        ? "Start Certification"
-        : cert.is_completed
-        ? undefined
-        : "Continue",
-    actionVariant: cert.progress === 0 ? "default" : "outline",
-    onAction:
-      cert.progress === 0 || !cert.is_completed
-        ? () => handleStartCertification(cert.id)
-        : undefined,
-  }));
+  const certificationItems: CertificationItem[] = certifications.map(
+    (cert) => ({
+      id: cert.id,
+      name: cert.name,
+      description: cert.description,
+      level: cert.level,
+      levelVariant: getLevelColor(
+        cert.level,
+      ) as CertificationItem["levelVariant"],
+      progress: cert.progress,
+      requirements: cert.requirements,
+      rewards: cert.rewards,
+      estimatedTime: cert.estimated_time,
+      icon: Trophy,
+      isCompleted: cert.is_completed,
+      actionLabel:
+        cert.progress === 0
+          ? "Start Certification"
+          : cert.is_completed
+            ? undefined
+            : "Continue",
+      actionVariant: cert.progress === 0 ? "default" : "outline",
+      onAction:
+        cert.progress === 0 || !cert.is_completed
+          ? () => handleStartCertification(cert.id)
+          : undefined,
+    }),
+  );
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -243,8 +268,12 @@ export default function Certification(): JSX.Element {
             <div className="text-sm text-muted-foreground">Badges Earned</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold">{Math.round(overallProgress)}%</div>
-            <div className="text-sm text-muted-foreground">Overall Progress</div>
+            <div className="text-2xl font-bold">
+              {Math.round(overallProgress)}%
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Overall Progress
+            </div>
           </div>
         </div>
       </div>
@@ -266,15 +295,25 @@ export default function Certification(): JSX.Element {
             <Progress value={overallProgress} className="h-3" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div className="text-center">
-                <div className="text-xl font-bold text-primary">{certifications.filter(c => c.is_completed).length}</div>
+                <div className="text-xl font-bold text-primary">
+                  {certifications.filter((c) => c.is_completed).length}
+                </div>
                 <div className="text-sm text-muted-foreground">Completed</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-secondary">{certifications.filter(c => c.progress > 0 && !c.is_completed).length}</div>
+                <div className="text-xl font-bold text-secondary">
+                  {
+                    certifications.filter(
+                      (c) => c.progress > 0 && !c.is_completed,
+                    ).length
+                  }
+                </div>
                 <div className="text-sm text-muted-foreground">In Progress</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-muted-foreground">{certifications.filter(c => c.progress === 0).length}</div>
+                <div className="text-xl font-bold text-muted-foreground">
+                  {certifications.filter((c) => c.progress === 0).length}
+                </div>
                 <div className="text-sm text-muted-foreground">Not Started</div>
               </div>
             </div>
@@ -308,31 +347,41 @@ export default function Certification(): JSX.Element {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">{cert.progress}%</div>
-                    <div className="text-xs text-muted-foreground">Complete</div>
+                    <div className="text-xs text-muted-foreground">
+                      Complete
+                    </div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Progress value={cert.progress} className="h-2" />
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-medium mb-2">Requirements</h4>
                     <ul className="space-y-1">
                       {cert.requirements.map((req, index) => (
-                        <li key={index} className="text-sm flex items-center gap-2">
-                          <CheckCircle className={`h-3 w-3 ${index < cert.requirements.length * (cert.progress / 100) ? 'text-green-500' : 'text-muted-foreground'}`} />
+                        <li
+                          key={index}
+                          className="text-sm flex items-center gap-2"
+                        >
+                          <CheckCircle
+                            className={`h-3 w-3 ${index < cert.requirements.length * (cert.progress / 100) ? "text-green-500" : "text-muted-foreground"}`}
+                          />
                           {req}
                         </li>
                       ))}
                     </ul>
                   </div>
-                  
+
                   <div>
                     <h4 className="font-medium mb-2">Rewards</h4>
                     <ul className="space-y-1">
                       {cert.rewards.map((reward, index) => (
-                        <li key={index} className="text-sm flex items-center gap-2">
+                        <li
+                          key={index}
+                          className="text-sm flex items-center gap-2"
+                        >
                           <Star className="h-3 w-3 text-yellow-500" />
                           {reward}
                         </li>
@@ -346,7 +395,7 @@ export default function Certification(): JSX.Element {
                     <Clock className="h-4 w-4" />
                     Estimated time: {cert.estimated_time}
                   </div>
-                  
+
                   {cert.progress === 0 ? (
                     <Button onClick={() => handleStartCertification(cert.id)}>
                       Start Certification
@@ -375,11 +424,15 @@ export default function Certification(): JSX.Element {
             <CardContent className="space-y-4">
               {userBadges.length === 0 ? (
                 <div className="text-center py-4 text-muted-foreground">
-                  No badges earned yet. Complete certification requirements to earn your first badge!
+                  No badges earned yet. Complete certification requirements to
+                  earn your first badge!
                 </div>
               ) : (
                 userBadges.map((badge) => (
-                  <div key={badge.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                  <div
+                    key={badge.id}
+                    className="flex items-center gap-3 p-3 border rounded-lg"
+                  >
                     <div className="p-2 bg-primary/10 rounded-full">
                       {getBadgeIcon(badge.badge_type)}
                     </div>
@@ -395,24 +448,27 @@ export default function Certification(): JSX.Element {
                   </div>
                 ))
               )}
-              
+
               {/* Available Badges to Claim */}
-              {certifications.some(c => c.badges_earned.length > 0) && (
+              {certifications.some((c) => c.badges_earned.length > 0) && (
                 <div className="pt-4 border-t">
                   <h4 className="font-medium mb-2">Available to Claim</h4>
-                  {certifications.map(cert => 
-                    cert.badges_earned.map(badge => (
-                      <div key={`${cert.id}-${badge}`} className="flex items-center justify-between p-2 border rounded">
+                  {certifications.map((cert) =>
+                    cert.badges_earned.map((badge) => (
+                      <div
+                        key={`${cert.id}-${badge}`}
+                        className="flex items-center justify-between p-2 border rounded"
+                      >
                         <span className="text-sm">{badge}</span>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => handleClaimBadge(badge)}
                         >
                           Claim
                         </Button>
                       </div>
-                    ))
+                    )),
                   )}
                 </div>
               )}

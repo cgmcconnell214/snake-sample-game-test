@@ -16,7 +16,7 @@ export default function LegalSafehouse(): JSX.Element {
 
   interface StoredDocument {
     name: string;
-    path: string;
+
     url: string;
     status: string;
   }
@@ -32,9 +32,7 @@ export default function LegalSafehouse(): JSX.Element {
 
   const fetchDocuments = async () => {
     try {
-      const { data, error } = await supabase.storage
-        .from(bucketName)
-        .list();
+      const { data, error } = await supabase.storage.from(bucketName).list();
       if (error) throw error;
 
       const docs =
@@ -44,7 +42,7 @@ export default function LegalSafehouse(): JSX.Element {
             .getPublicUrl(item.name);
           return {
             name: item.name,
-            path: item.name,
+
             url: urlData.publicUrl,
             status: "Stored",
           };
@@ -60,9 +58,7 @@ export default function LegalSafehouse(): JSX.Element {
     }
   };
 
-  const handleUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (!files.length) return;
     try {
@@ -113,19 +109,19 @@ export default function LegalSafehouse(): JSX.Element {
   };
 
   const handleCreateDocument = () => {
-    navigate('/app/divine-trust');
+    navigate("/app/divine-trust");
   };
 
   const handleCreateAffidavit = () => {
-    navigate('/app/kingdom-entry');
+    navigate("/app/kingdom-entry");
   };
 
   const handleMakeDeclaration = () => {
-    navigate('/app/sacred-law');
+    navigate("/app/sacred-law");
   };
 
   const handleFileExemption = () => {
-    navigate('/app/compliance');
+    navigate("/app/compliance");
   };
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -154,7 +150,11 @@ export default function LegalSafehouse(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Create and manage sworn statements and affidavits
             </p>
-            <Button variant="outline" className="w-full" onClick={handleCreateAffidavit}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleCreateAffidavit}
+            >
               Create Affidavit
             </Button>
           </CardContent>
@@ -171,7 +171,11 @@ export default function LegalSafehouse(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Formal declarations of rights and status
             </p>
-            <Button variant="outline" className="w-full" onClick={handleMakeDeclaration}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleMakeDeclaration}
+            >
               Make Declaration
             </Button>
           </CardContent>
@@ -188,7 +192,11 @@ export default function LegalSafehouse(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Religious and ecclesiastical exemption documents
             </p>
-            <Button variant="outline" className="w-full" onClick={handleFileExemption}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleFileExemption}
+            >
               File Exemption
             </Button>
           </CardContent>
@@ -211,7 +219,10 @@ export default function LegalSafehouse(): JSX.Element {
               ref={fileInputRef}
               onChange={handleUpload}
             />
-            <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+            >
               <Upload className="h-4 w-4 mr-2" />
               Upload Document
             </Button>

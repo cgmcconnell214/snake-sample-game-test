@@ -65,11 +65,14 @@ const KycCenter = (): JSX.Element => {
     return true;
   };
 
-  const handleFileUpload = (fileType: 'idFront' | 'idBack' | 'proofAddress', file: File) => {
+  const handleFileUpload = (
+    fileType: "idFront" | "idBack" | "proofAddress",
+    file: File,
+  ) => {
     if (!validateFile(file)) return;
-    setUploadedFiles(prev => ({
+    setUploadedFiles((prev) => ({
       ...prev,
-      [fileType]: file
+      [fileType]: file,
     }));
     toast({
       title: "File Selected",
@@ -77,8 +80,8 @@ const KycCenter = (): JSX.Element => {
     });
   };
 
-  const removeFile = (fileType: 'idFront' | 'idBack' | 'proofAddress') => {
-    setUploadedFiles(prev => {
+  const removeFile = (fileType: "idFront" | "idBack" | "proofAddress") => {
+    setUploadedFiles((prev) => {
       const newFiles = { ...prev };
       delete newFiles[fileType];
       return newFiles;
@@ -87,7 +90,7 @@ const KycCenter = (): JSX.Element => {
 
   const handleDocumentUpload = async () => {
     const { idFront, idBack, proofAddress } = uploadedFiles;
-    
+
     if (!idFront || !idBack || !proofAddress) {
       toast({
         title: "Missing Documents",
@@ -108,38 +111,31 @@ const KycCenter = (): JSX.Element => {
     setUploadProgress({ idFront: 0, idBack: 0, proofAddress: 0 });
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         throw new Error("User not authenticated");
       }
 
-      const uploadFile = (
-        path: string,
-        file: File
-      ) =>
-        supabase.storage
-          .from('kyc-documents')
-          .upload(path, file);
+      const uploadFile = () =>
+        supabase.storage.from("kyc-documents").upload(path, file);
 
       // Upload files to Supabase Storage
       const uploads = await Promise.all([
         uploadFile(
-          `${user.id}/id-front-${Date.now()}.${
-            idFront.name.split('.').pop()
-          }`,
-          idFront
+          `${user.id}/id-front-${Date.now()}.${idFront.name.split(".").pop()}`,
+          idFront,
         ),
         uploadFile(
-          `${user.id}/id-back-${Date.now()}.${
-            idBack.name.split('.').pop()
-          }`,
-          idBack
+          `${user.id}/id-back-${Date.now()}.${idBack.name.split(".").pop()}`,
+          idBack,
         ),
         uploadFile(
-          `${user.id}/proof-address-${Date.now()}.${
-            proofAddress.name.split('.').pop()
-          }`,
-          proofAddress
+          `${user.id}/proof-address-${Date.now()}.${proofAddress.name
+            .split(".")
+            .pop()}`,
+          proofAddress,
         ),
       ]);
 
@@ -150,12 +146,12 @@ const KycCenter = (): JSX.Element => {
 
       // Update profile with submitted documents status
       const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ 
-          kyc_status: 'pending',
-          kyc_submitted_at: new Date().toISOString()
+        .from("profiles")
+        .update({
+          kyc_status: "pending",
+          kyc_submitted_at: new Date().toISOString(),
         })
-        .eq('user_id', user.id);
+        .eq("user_id", user.id);
 
       if (updateError) {
         throw updateError;
@@ -163,18 +159,19 @@ const KycCenter = (): JSX.Element => {
 
       toast({
         title: "Documents Submitted Successfully",
-        description: "Your KYC documents have been uploaded and are under review",
+        description:
+          "Your KYC documents have been uploaded and are under review",
       });
-      
+
       // Clear uploaded files
       setUploadedFiles({});
       setUploadProgress({});
-      
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       toast({
         title: "Upload Failed",
-        description: "There was an error uploading your documents. Please try again.",
+        description:
+          "There was an error uploading your documents. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -304,17 +301,22 @@ const KycCenter = (): JSX.Element => {
                   {uploadedFiles.idFront ? (
                     <div>
                       <div className="flex items-center justify-between p-2 bg-muted rounded">
-                        <span className="text-sm">{uploadedFiles.idFront.name}</span>
+                        <span className="text-sm">
+                          {uploadedFiles.idFront.name}
+                        </span>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeFile('idFront')}
+                          onClick={() => removeFile("idFront")}
                         >
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
                       {typeof uploadProgress.idFront === "number" && (
-                        <Progress value={uploadProgress.idFront} className="mt-2" />
+                        <Progress
+                          value={uploadProgress.idFront}
+                          className="mt-2"
+                        />
                       )}
                     </div>
                   ) : (
@@ -330,7 +332,7 @@ const KycCenter = (): JSX.Element => {
                         className="mt-2"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) handleFileUpload('idFront', file);
+                          if (file) handleFileUpload("idFront", file);
                         }}
                       />
                     </>
@@ -344,17 +346,22 @@ const KycCenter = (): JSX.Element => {
                   {uploadedFiles.idBack ? (
                     <div>
                       <div className="flex items-center justify-between p-2 bg-muted rounded">
-                        <span className="text-sm">{uploadedFiles.idBack.name}</span>
+                        <span className="text-sm">
+                          {uploadedFiles.idBack.name}
+                        </span>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeFile('idBack')}
+                          onClick={() => removeFile("idBack")}
                         >
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
                       {typeof uploadProgress.idBack === "number" && (
-                        <Progress value={uploadProgress.idBack} className="mt-2" />
+                        <Progress
+                          value={uploadProgress.idBack}
+                          className="mt-2"
+                        />
                       )}
                     </div>
                   ) : (
@@ -370,7 +377,7 @@ const KycCenter = (): JSX.Element => {
                         className="mt-2"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) handleFileUpload('idBack', file);
+                          if (file) handleFileUpload("idBack", file);
                         }}
                       />
                     </>
@@ -387,25 +394,30 @@ const KycCenter = (): JSX.Element => {
                 {uploadedFiles.proofAddress ? (
                   <div>
                     <div className="flex items-center justify-between p-2 bg-muted rounded">
-                      <span className="text-sm">{uploadedFiles.proofAddress.name}</span>
+                      <span className="text-sm">
+                        {uploadedFiles.proofAddress.name}
+                      </span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => removeFile('proofAddress')}
+                        onClick={() => removeFile("proofAddress")}
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                     {typeof uploadProgress.proofAddress === "number" && (
-                      <Progress value={uploadProgress.proofAddress} className="mt-2" />
+                      <Progress
+                        value={uploadProgress.proofAddress}
+                        className="mt-2"
+                      />
                     )}
                   </div>
                 ) : (
                   <>
                     <FileText className="h-8 w-8 mx-auto text-muted-foreground" />
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Utility bill, bank statement, or lease agreement (less than 3
-                      months old)
+                      Utility bill, bank statement, or lease agreement (less
+                      than 3 months old)
                     </p>
                     <Input
                       id="proof-address"
@@ -414,7 +426,7 @@ const KycCenter = (): JSX.Element => {
                       className="mt-2"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (file) handleFileUpload('proofAddress', file);
+                        if (file) handleFileUpload("proofAddress", file);
                       }}
                     />
                   </>

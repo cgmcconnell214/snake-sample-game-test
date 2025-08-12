@@ -9,19 +9,19 @@ export default function SystemDiagnostics(): JSX.Element {
   const navigate = useNavigate();
 
   const handleRunDiagnostics = () => {
-    navigate('/app/audit-trail');
+    navigate("/app/audit-trail");
   };
 
   const handleViewEvents = () => {
-    navigate('/app/audit-trail');
+    navigate("/app/audit-trail");
   };
 
   const handleTrackMemory = () => {
-    navigate('/app/ai-agents');
+    navigate("/app/ai-agents");
   };
 
   const handleMonitorDrift = () => {
-    navigate('/app/admin');
+    navigate("/app/admin");
   };
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -50,7 +50,11 @@ export default function SystemDiagnostics(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Deep audit trail of all system events
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewEvents}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewEvents}
+            >
               View Events
             </Button>
           </CardContent>
@@ -67,7 +71,11 @@ export default function SystemDiagnostics(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Monitor AI agent memory usage and optimization
             </p>
-            <Button variant="outline" className="w-full" onClick={handleTrackMemory}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleTrackMemory}
+            >
               Track Memory
             </Button>
           </CardContent>
@@ -84,7 +92,11 @@ export default function SystemDiagnostics(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Detect and monitor system kernel drift
             </p>
-            <Button variant="outline" className="w-full" onClick={handleMonitorDrift}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleMonitorDrift}
+            >
               Monitor Drift
             </Button>
           </CardContent>

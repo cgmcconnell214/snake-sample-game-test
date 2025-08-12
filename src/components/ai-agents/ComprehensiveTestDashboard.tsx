@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  TestTube, 
+import {
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  TestTube,
   Database,
   Code,
   Zap,
@@ -20,7 +20,7 @@ import {
   Play,
   RefreshCw,
   Eye,
-  Activity
+  Activity,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +29,7 @@ import { PortfolioIntegrationTest } from "./PortfolioIntegrationTest";
 interface TestResult {
   id: string;
   name: string;
-  status: 'pass' | 'fail' | 'warning' | 'running';
+  status: "pass" | "fail" | "warning" | "running";
   duration?: number;
   details?: any;
   error?: string;
@@ -38,7 +38,7 @@ interface TestResult {
 
 interface ExecutionLog {
   timestamp: string;
-  level: 'info' | 'warn' | 'error' | 'debug';
+  level: "info" | "warn" | "error" | "debug";
   message: string;
   data?: any;
 }
@@ -47,7 +47,9 @@ interface ComprehensiveAuditProps {
   onClose: () => void;
 }
 
-export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps) {
+export function ComprehensiveTestDashboard({
+  onClose,
+}: ComprehensiveAuditProps) {
   const [isAuditRunning, setIsAuditRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentTest, setCurrentTest] = useState("");
@@ -57,48 +59,54 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
   const { toast } = useToast();
 
   const updateTestResult = (id: string, updates: Partial<TestResult>) => {
-    setTestResults(prev => prev.map(test => 
-      test.id === id ? { ...test, ...updates } : test
-    ));
+    setTestResults((prev) =>
+      prev.map((test) => (test.id === id ? { ...test, ...updates } : test)),
+    );
   };
 
   const addTestResult = (result: TestResult) => {
-    setTestResults(prev => [...prev, result]);
+    setTestResults((prev) => [...prev, result]);
   };
 
-  const addLog = (level: ExecutionLog['level'], message: string, data?: any) => {
+  const addLog = (
+    level: ExecutionLog["level"],
+    message: string,
+    data?: any,
+  ) => {
     const log: ExecutionLog = {
       timestamp: new Date().toISOString(),
       level,
       message,
-      data
+      data,
     };
-    setExecutionLogs(prev => [...prev, log]);
+    setExecutionLogs((prev) => [...prev, log]);
   };
 
   // Real functionality tests that actually verify system capabilities
   const testDatabaseIntegration = async (): Promise<TestResult> => {
     const start = Date.now();
-    addLog('info', 'Testing database integration...');
-    
+    addLog("info", "Testing database integration...");
+
     try {
       // Test database read
       const { data: agents, error: readError } = await supabase
-        .from('ai_agents')
-        .select('*')
+        .from("ai_agents")
+        .select("*")
         .limit(5);
-      
+
       if (readError) throw readError;
-      
+
       // Test database write - get current user first
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
       const testData = {
         name: `Test Agent ${Date.now()}`,
-        description: 'Integration test agent',
-        category: 'test',
-        agent_type: 'workflow',
+        description: "Integration test agent",
+        category: "test",
+        agent_type: "workflow",
         price_per_use: 0,
         total_tokens: 1000,
         creator_id: user.id,
@@ -106,112 +114,114 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
           test_mode: true,
           napier_integration: false,
           tokenomics_enabled: false,
-          revenue_sharing: false
+          revenue_sharing: false,
         },
         workflow_data: {
           steps: [
             {
-              id: 'test-step',
-              type: 'trigger',
-              name: 'Test Step',
-              config: { trigger_type: 'manual' }
-            }
-          ]
-        }
+              id: "test-step",
+              type: "trigger",
+              name: "Test Step",
+              config: { trigger_type: "manual" },
+            },
+          ],
+        },
       };
-      
+
       const { data: created, error: writeError } = await supabase
-        .from('ai_agents')
+        .from("ai_agents")
         .insert(testData)
         .select()
         .single();
-      
+
       if (writeError) throw writeError;
-      
+
       // Clean up test data
       await supabase
-        .from('ai_agents')
+        .from("ai_agents")
         .update({ is_active: false })
-        .eq('id', created.id);
-      
-      addLog('info', 'Database integration test passed');
+        .eq("id", created.id);
+
+      addLog("info", "Database integration test passed");
       return {
-        id: 'db-integration',
-        name: 'Database Integration',
-        status: 'pass',
+        id: "db-integration",
+        name: "Database Integration",
+        status: "pass",
         duration: Date.now() - start,
-        details: { agents: agents?.length, testAgentCreated: true }
+        details: { agents: agents?.length, testAgentCreated: true },
       };
     } catch (error) {
-      addLog('error', 'Database integration failed', error);
+      addLog("error", "Database integration failed", error);
       return {
-        id: 'db-integration',
-        name: 'Database Integration',
-        status: 'fail',
+        id: "db-integration",
+        name: "Database Integration",
+        status: "fail",
         duration: Date.now() - start,
-        error: error.message
+        error: error.message,
       };
     }
   };
 
   const testAgentWorkflowPersistence = async (): Promise<TestResult> => {
     const start = Date.now();
-    addLog('info', 'Testing agent workflow persistence...');
-    
+    addLog("info", "Testing agent workflow persistence...");
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
       // Create agent with complex workflow
       const complexWorkflow = {
         steps: [
           {
-            id: 'trigger-1',
-            type: 'trigger',
-            name: 'Manual Trigger',
-            config: { event: 'manual' }
+            id: "trigger-1",
+            type: "trigger",
+            name: "Manual Trigger",
+            config: { event: "manual" },
           },
           {
-            id: 'action-1',
-            type: 'action',
-            name: 'Data Processing',
-            config: { operation: 'process', target: 'portfolio' }
+            id: "action-1",
+            type: "action",
+            name: "Data Processing",
+            config: { operation: "process", target: "portfolio" },
           },
           {
-            id: 'condition-1',
-            type: 'condition',
-            name: 'Risk Check',
-            config: { threshold: 0.5, type: 'risk_assessment' }
+            id: "condition-1",
+            type: "condition",
+            name: "Risk Check",
+            config: { threshold: 0.5, type: "risk_assessment" },
           },
           {
-            id: 'notification-1',
-            type: 'notification',
-            name: 'Alert System',
-            config: { recipients: ['system'], priority: 'high' }
-          }
+            id: "notification-1",
+            type: "notification",
+            name: "Alert System",
+            config: { recipients: ["system"], priority: "high" },
+          },
         ],
         metadata: {
-          version: '2.0',
-          complexity: 'high',
-          estimated_runtime: 120
-        }
+          version: "2.0",
+          complexity: "high",
+          estimated_runtime: 120,
+        },
       };
 
       const { data: agent, error } = await supabase
-        .from('ai_agents')
+        .from("ai_agents")
         .insert({
           name: `Workflow Test ${Date.now()}`,
-          description: 'Complex workflow persistence test',
-          category: 'analytics',
-          agent_type: 'workflow',
+          description: "Complex workflow persistence test",
+          category: "analytics",
+          agent_type: "workflow",
           price_per_use: 0.01,
           total_tokens: 10000,
           creator_id: user.id,
           workflow_data: complexWorkflow,
           configuration: {
             persistence_test: true,
-            test_timestamp: Date.now()
-          }
+            test_timestamp: Date.now(),
+          },
         })
         .select()
         .single();
@@ -220,114 +230,133 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
 
       // Verify persistence by retrieving and comparing
       const { data: retrieved, error: retrieveError } = await supabase
-        .from('ai_agents')
-        .select('workflow_data, configuration')
-        .eq('id', agent.id)
+        .from("ai_agents")
+        .select("workflow_data, configuration")
+        .eq("id", agent.id)
         .single();
 
       if (retrieveError) throw retrieveError;
 
       const workflowData = retrieved.workflow_data as any;
       const configData = retrieved.configuration as any;
-      const isPersisted = 
+      const isPersisted =
         workflowData?.steps?.length === 4 &&
-        workflowData?.metadata?.version === '2.0' &&
+        workflowData?.metadata?.version === "2.0" &&
         configData?.persistence_test === true;
 
       // Clean up
       await supabase
-        .from('ai_agents')
+        .from("ai_agents")
         .update({ is_active: false })
-        .eq('id', agent.id);
+        .eq("id", agent.id);
 
-      addLog('info', `Workflow persistence test ${isPersisted ? 'passed' : 'failed'}`);
+      addLog(
+        "info",
+        `Workflow persistence test ${isPersisted ? "passed" : "failed"}`,
+      );
       return {
-        id: 'workflow-persistence',
-        name: 'Workflow Persistence',
-        status: isPersisted ? 'pass' : 'fail',
+        id: "workflow-persistence",
+        name: "Workflow Persistence",
+        status: isPersisted ? "pass" : "fail",
         duration: Date.now() - start,
-        details: { 
+        details: {
           workflowSteps: workflowData?.steps?.length,
           configPersisted: !!configData?.persistence_test,
-          retrievedWorkflow: retrieved.workflow_data
-        }
+          retrievedWorkflow: retrieved.workflow_data,
+        },
       };
     } catch (error) {
-      addLog('error', 'Workflow persistence test failed', error);
+      addLog("error", "Workflow persistence test failed", error);
       return {
-        id: 'workflow-persistence',
-        name: 'Workflow Persistence',
-        status: 'fail',
+        id: "workflow-persistence",
+        name: "Workflow Persistence",
+        status: "fail",
         duration: Date.now() - start,
-        error: error.message
+        error: error.message,
       };
     }
   };
 
   const testAgentExecution = async (): Promise<TestResult> => {
     const start = Date.now();
-    addLog('info', 'Testing agent execution capabilities...');
-    
+    addLog("info", "Testing agent execution capabilities...");
+
     try {
       // Create a comprehensive test agent
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
       const testWorkflow = {
         steps: [
           {
-            id: 'trigger-test',
-            type: 'trigger',
-            name: 'Execution Test Trigger',
-            config: { event: 'manual' }
+            id: "trigger-test",
+            type: "trigger",
+            name: "Execution Test Trigger",
+            config: { event: "manual" },
           },
           {
-            id: 'portfolio-check',
-            type: 'action',
-            name: 'Portfolio Verification',
-            config: { action_type: 'portfolio_audit', check_completeness: true }
+            id: "portfolio-check",
+            type: "action",
+            name: "Portfolio Verification",
+            config: {
+              action_type: "portfolio_audit",
+              check_completeness: true,
+            },
           },
           {
-            id: 'tokenization-test',
-            type: 'action',
-            name: 'Tokenization Capability',
-            config: { action_type: 'tokenization_test', verify_creation: true }
+            id: "tokenization-test",
+            type: "action",
+            name: "Tokenization Capability",
+            config: { action_type: "tokenization_test", verify_creation: true },
           },
           {
-            id: 'compliance-audit',
-            type: 'action', 
-            name: 'Compliance Verification',
-            config: { action_type: 'compliance_check', depth: 'full' }
+            id: "compliance-audit",
+            type: "action",
+            name: "Compliance Verification",
+            config: { action_type: "compliance_check", depth: "full" },
           },
           {
-            id: 'integration-test',
-            type: 'action',
-            name: 'System Integration',
-            config: { action_type: 'integration_test', systems: ['portfolio', 'tokenization', 'compliance'] }
+            id: "integration-test",
+            type: "action",
+            name: "System Integration",
+            config: {
+              action_type: "integration_test",
+              systems: ["portfolio", "tokenization", "compliance"],
+            },
           },
           {
-            id: 'report-generation',
-            type: 'data',
-            name: 'Comprehensive Report',
-            config: { format: 'json', include_metrics: true, include_recommendations: true }
-          }
-        ]
+            id: "report-generation",
+            type: "data",
+            name: "Comprehensive Report",
+            config: {
+              format: "json",
+              include_metrics: true,
+              include_recommendations: true,
+            },
+          },
+        ],
       };
 
       // user already fetched above
 
       const { data: createdAgent, error: createErr } = await supabase
-        .from('ai_agents')
+        .from("ai_agents")
         .insert({
           name: `Comprehensive Test Agent ${Date.now()}`,
-          description: 'Agent used for comprehensive execution tests',
-          category: 'analytics',
-          agent_type: 'workflow',
+          description: "Agent used for comprehensive execution tests",
+          category: "analytics",
+          agent_type: "workflow",
           price_per_use: 0,
           total_tokens: 10000,
           creator_id: user.id,
           workflow_data: testWorkflow,
-          configuration: { test_mode: true, comprehensive_audit: true, log_level: 'debug' }
+          configuration: {
+            test_mode: true,
+            comprehensive_audit: true,
+            log_level: "debug",
+          },
         })
         .select()
         .single();
@@ -335,71 +364,80 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
       if (createErr) throw createErr;
 
       // Execute the agent with its UUID so backend logging works
-      const { data: executionResult, error: execError } = await supabase.functions.invoke('execute-ai-agent', {
-        body: {
-          agentId: createdAgent.id,
-          workflowData: testWorkflow,
-          configuration: { test_mode: true, comprehensive_audit: true, log_level: 'debug' },
-          inputData: {
-            triggered_by: 'comprehensive_test',
-            test_timestamp: Date.now(),
-            user_id: user.id
-          }
-        }
-      });
+      const { data: executionResult, error: execError } =
+        await supabase.functions.invoke("execute-ai-agent", {
+          body: {
+            agentId: createdAgent.id,
+            workflowData: testWorkflow,
+            configuration: {
+              test_mode: true,
+              comprehensive_audit: true,
+              log_level: "debug",
+            },
+            inputData: {
+              triggered_by: "comprehensive_test",
+              test_timestamp: Date.now(),
+              user_id: user.id,
+            },
+          },
+        });
 
       if (execError) throw execError;
 
       const result = executionResult?.result || {};
       const stepResults = result.step_results || [];
       const hasDetailedResults = stepResults.length > 0;
-      const allStepsSuccessful = stepResults.every((step: any) => step.status === 'success');
+      const allStepsSuccessful = stepResults.every(
+        (step: any) => step.status === "success",
+      );
 
-      addLog('info', 'Agent execution completed', result);
-      
+      addLog("info", "Agent execution completed", result);
+
       return {
-        id: 'agent-execution',
-        name: 'Agent Execution',
-        status: hasDetailedResults && allStepsSuccessful ? 'pass' : 'warning',
+        id: "agent-execution",
+        name: "Agent Execution",
+        status: hasDetailedResults && allStepsSuccessful ? "pass" : "warning",
         duration: Date.now() - start,
         details: result,
-        data: stepResults
+        data: stepResults,
       };
     } catch (error) {
-      addLog('error', 'Agent execution test failed', error);
+      addLog("error", "Agent execution test failed", error);
       return {
-        id: 'agent-execution',
-        name: 'Agent Execution',
-        status: 'fail',
+        id: "agent-execution",
+        name: "Agent Execution",
+        status: "fail",
         duration: Date.now() - start,
-        error: error.message
+        error: error.message,
       };
     }
   };
 
   const testPortfolioIntegration = async (): Promise<TestResult> => {
     const start = Date.now();
-    addLog('info', 'Testing portfolio integration for AI agents...');
-    
+    addLog("info", "Testing portfolio integration for AI agents...");
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
       // Create an agent that should appear in portfolio
       const { data: agent, error: createError } = await supabase
-        .from('ai_agents')
+        .from("ai_agents")
         .insert({
           name: `Portfolio Test Agent ${Date.now()}`,
-          description: 'Agent to test portfolio integration',
-          category: 'trading',
-          agent_type: 'workflow',
+          description: "Agent to test portfolio integration",
+          category: "trading",
+          agent_type: "workflow",
           price_per_use: 0.05,
           total_tokens: 50000,
           creator_id: user.id,
           configuration: {
             portfolio_integration: true,
-            revenue_tracking: true
-          }
+            revenue_tracking: true,
+          },
         })
         .select()
         .single();
@@ -408,24 +446,24 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
 
       // Check if agent appears in user's created agents
       const { data: userAgents, error: fetchError } = await supabase
-        .from('ai_agents')
-        .select('*')
-        .eq('creator_id', user.id)
-        .eq('is_active', true);
+        .from("ai_agents")
+        .select("*")
+        .eq("creator_id", user.id)
+        .eq("is_active", true);
 
       if (fetchError) throw fetchError;
 
-      const agentInPortfolio = userAgents.some(a => a.id === agent.id);
+      const agentInPortfolio = userAgents.some((a) => a.id === agent.id);
 
       // Test agent purchase to simulate ownership
       const { data: purchase, error: purchaseError } = await supabase
-        .from('ai_agent_purchases')
+        .from("ai_agent_purchases")
         .insert({
           buyer_id: user.id,
           agent_id: agent.id,
           tokens_purchased: 1000,
-          total_amount: 50.00,
-          payment_status: 'completed'
+          total_amount: 50.0,
+          payment_status: "completed",
         })
         .select()
         .single();
@@ -434,63 +472,68 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
 
       // Check purchased agents
       const { data: purchases, error: purchaseFetchError } = await supabase
-        .from('ai_agent_purchases')
-        .select('*')
-        .eq('buyer_id', user.id);
+        .from("ai_agent_purchases")
+        .select("*")
+        .eq("buyer_id", user.id);
 
       if (purchaseFetchError) throw purchaseFetchError;
 
       const hasPortfolioVisibility = agentInPortfolio && purchases.length > 0;
 
-      addLog('info', `Portfolio integration: Created=${agentInPortfolio}, Purchased=${purchases.length > 0}`);
+      addLog(
+        "info",
+        `Portfolio integration: Created=${agentInPortfolio}, Purchased=${purchases.length > 0}`,
+      );
 
       return {
-        id: 'portfolio-integration',
-        name: 'Portfolio Integration',
-        status: hasPortfolioVisibility ? 'pass' : 'fail',
+        id: "portfolio-integration",
+        name: "Portfolio Integration",
+        status: hasPortfolioVisibility ? "pass" : "fail",
         duration: Date.now() - start,
         details: {
           agentCreated: agentInPortfolio,
           purchaseRecorded: purchases.length > 0,
-          agentId: agent.id
-        }
+          agentId: agent.id,
+        },
       };
     } catch (error) {
-      addLog('error', 'Portfolio integration test failed', error);
+      addLog("error", "Portfolio integration test failed", error);
       return {
-        id: 'portfolio-integration',
-        name: 'Portfolio Integration',
-        status: 'fail',
+        id: "portfolio-integration",
+        name: "Portfolio Integration",
+        status: "fail",
         duration: Date.now() - start,
-        error: error.message
+        error: error.message,
       };
     }
   };
 
   const testTokenizationCapability = async (): Promise<TestResult> => {
     const start = Date.now();
-    addLog('info', 'Testing agent tokenization capabilities...');
-    
+    addLog("info", "Testing agent tokenization capabilities...");
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
       // Create agent suitable for tokenization
       const { data: agent, error: createError } = await supabase
-        .from('ai_agents')
+        .from("ai_agents")
         .insert({
           name: `Tokenizable Agent ${Date.now()}`,
-          description: 'Agent designed for tokenization testing',
-          category: 'defi',
-          agent_type: 'workflow', 
-          price_per_use: 0.10,
+          description: "Agent designed for tokenization testing",
+          category: "defi",
+          agent_type: "workflow",
+          price_per_use: 0.1,
           total_tokens: 1000000,
           creator_id: user.id,
           configuration: {
             tokenization_enabled: true,
             revenue_sharing: true,
-            yield_percentage: 5.0
-          }
+            yield_percentage: 5.0,
+          },
         })
         .select()
         .single();
@@ -499,11 +542,11 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
 
       // Test creating IP asset for the agent
       const { data: ipAsset, error: ipError } = await supabase
-        .from('ip_assets')
+        .from("ip_assets")
         .insert({
           name: `${agent.name} Token`,
           description: `Tokenized AI agent: ${agent.description}`,
-          ip_type: 'ai_agent',
+          ip_type: "ai_agent",
           creator_id: user.id,
           total_tokens: agent.total_tokens,
           valuation: agent.total_tokens * agent.price_per_use,
@@ -511,8 +554,8 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
           metadata: {
             agent_id: agent.id,
             agent_type: agent.agent_type,
-            category: agent.category
-          }
+            category: agent.category,
+          },
         })
         .select()
         .single();
@@ -521,12 +564,12 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
 
       // Test token holdings creation
       const { data: holdings, error: holdingsError } = await supabase
-        .from('ip_token_holdings')
+        .from("ip_token_holdings")
         .insert({
           holder_id: user.id,
           ip_asset_id: ipAsset.id,
           tokens_held: 100000,
-          tokens_staked: 50000
+          tokens_staked: 50000,
         })
         .select()
         .single();
@@ -535,28 +578,31 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
 
       const tokenizationSuccessful = !!(ipAsset && holdings);
 
-      addLog('info', `Tokenization test: ${tokenizationSuccessful ? 'passed' : 'failed'}`);
+      addLog(
+        "info",
+        `Tokenization test: ${tokenizationSuccessful ? "passed" : "failed"}`,
+      );
 
       return {
-        id: 'tokenization',
-        name: 'Agent Tokenization',
-        status: tokenizationSuccessful ? 'pass' : 'fail',
+        id: "tokenization",
+        name: "Agent Tokenization",
+        status: tokenizationSuccessful ? "pass" : "fail",
         duration: Date.now() - start,
         details: {
           agentId: agent.id,
           ipAssetId: ipAsset?.id,
           holdingsId: holdings?.id,
-          tokenizationEnabled: true
-        }
+          tokenizationEnabled: true,
+        },
       };
     } catch (error) {
-      addLog('error', 'Tokenization test failed', error);
+      addLog("error", "Tokenization test failed", error);
       return {
-        id: 'tokenization',
-        name: 'Agent Tokenization',
-        status: 'fail',
+        id: "tokenization",
+        name: "Agent Tokenization",
+        status: "fail",
         duration: Date.now() - start,
-        error: error.message
+        error: error.message,
       };
     }
   };
@@ -566,46 +612,46 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
     setProgress(0);
     setTestResults([]);
     setExecutionLogs([]);
-    
-    addLog('info', 'Starting comprehensive AI agents audit...');
+
+    addLog("info", "Starting comprehensive AI agents audit...");
 
     const tests = [
-      { name: 'Database Integration', fn: testDatabaseIntegration },
-      { name: 'Workflow Persistence', fn: testAgentWorkflowPersistence },
-      { name: 'Agent Execution', fn: testAgentExecution },
-      { name: 'Portfolio Integration', fn: testPortfolioIntegration },
-      { name: 'Tokenization', fn: testTokenizationCapability }
+      { name: "Database Integration", fn: testDatabaseIntegration },
+      { name: "Workflow Persistence", fn: testAgentWorkflowPersistence },
+      { name: "Agent Execution", fn: testAgentExecution },
+      { name: "Portfolio Integration", fn: testPortfolioIntegration },
+      { name: "Tokenization", fn: testTokenizationCapability },
     ];
 
     try {
       for (let i = 0; i < tests.length; i++) {
         const test = tests[i];
         setCurrentTest(test.name);
-        
+
         addTestResult({
-          id: test.name.toLowerCase().replace(/\s+/g, '-'),
+          id: test.name.toLowerCase().replace(/\s+/g, "-"),
           name: test.name,
-          status: 'running'
+          status: "running",
         });
 
         const result = await test.fn();
         updateTestResult(result.id, result);
-        
+
         setProgress(((i + 1) / tests.length) * 100);
-        
+
         // Small delay between tests
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
       generateAuditReport();
-      addLog('info', 'Comprehensive audit completed');
-      
+      addLog("info", "Comprehensive audit completed");
+
       toast({
         title: "Audit Complete",
         description: "Comprehensive testing finished. Check results below.",
       });
     } catch (error) {
-      addLog('error', 'Audit failed', error);
+      addLog("error", "Audit failed", error);
       toast({
         title: "Audit Failed",
         description: `Error during audit: ${error.message}`,
@@ -619,36 +665,42 @@ export function ComprehensiveTestDashboard({ onClose }: ComprehensiveAuditProps)
 
   const generateAuditReport = () => {
     const timestamp = new Date().toISOString();
-    const passedTests = testResults.filter(t => t.status === 'pass').length;
-    const failedTests = testResults.filter(t => t.status === 'fail').length;
-    const warningTests = testResults.filter(t => t.status === 'warning').length;
-    
+    const passedTests = testResults.filter((t) => t.status === "pass").length;
+    const failedTests = testResults.filter((t) => t.status === "fail").length;
+    const warningTests = testResults.filter(
+      (t) => t.status === "warning",
+    ).length;
+
     const report = `# AI Agents Comprehensive Audit Report
 Generated: ${timestamp}
 
 ## Executive Summary
-- Total Tests: ${testResults.length}
-- Passed: ${passedTests}
-- Failed: ${failedTests}
-- Warnings: ${warningTests}
-- Success Rate: ${Math.round((passedTests / testResults.length) * 100)}%
+ Total Tests: ${testResults.length}
+ Passed: ${passedTests}
+ Failed: ${failedTests}
+ Warnings: ${warningTests}
+ Success Rate: ${Math.round((passedTests / testResults.length) * 100)}%
 
 ## Test Results Detail
 
-${testResults.map(test => `
+${testResults
+  .map(
+    (test) => `
 ### ${test.name}
-- Status: ${test.status.toUpperCase()}
-- Duration: ${test.duration}ms
-${test.error ? `- Error: ${test.error}` : ''}
-${test.details ? `- Details: ${JSON.stringify(test.details, null, 2)}` : ''}
-`).join('\n')}
+ Status: ${test.status.toUpperCase()}
+ Duration: ${test.duration}ms
+${test.error ? `- Error: ${test.error}` : ""}
+${test.details ? `- Details: ${JSON.stringify(test.details, null, 2)}` : ""}
+`,
+  )
+  .join("\n")}
 
 ## Execution Logs
-${executionLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()}: ${log.message}`).join('\n')}
+${executionLogs.map((log) => `[${log.timestamp}] ${log.level.toUpperCase()}: ${log.message}`).join("\n")}
 
 ## Recommendations
-${failedTests > 0 ? '⚠️ Critical issues found that need immediate attention' : '✅ All systems operational'}
-${warningTests > 0 ? '⚠️ Some components need optimization' : ''}
+${failedTests > 0 ? "⚠️ Critical issues found that need immediate attention" : "✅ All systems operational"}
+${warningTests > 0 ? "⚠️ Some components need optimization" : ""}
 
 ## Next Steps
 1. Address any failed tests immediately
@@ -661,9 +713,9 @@ ${warningTests > 0 ? '⚠️ Some components need optimization' : ''}
   };
 
   const downloadAuditReport = () => {
-    const blob = new Blob([auditReport], { type: 'text/markdown' });
+    const blob = new Blob([auditReport], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `ai-agents-audit-${Date.now()}.md`;
     document.body.appendChild(a);
@@ -821,13 +873,17 @@ class AIAgentsTestRunner:
 
 if __name__ == "__main__":
     # Configuration from audit dashboard
-    config = ${JSON.stringify({
-      base_url: window.location.origin,
-      test_timestamp: Date.now(),
-      comprehensive_mode: true,
-      tests_configured: testResults.length,
-      execution_logs: executionLogs.length
-    }, null, 2)}
+    config = ${JSON.stringify(
+      {
+        base_url: window.location.origin,
+        test_timestamp: Date.now(),
+        comprehensive_mode: true,
+        tests_configured: testResults.length,
+        execution_logs: executionLogs.length,
+      },
+      null,
+      2,
+    )}
     
     runner = AIAgentsTestRunner(
         config['base_url'], 
@@ -842,9 +898,9 @@ if __name__ == "__main__":
     print(f"Report saved: ai-agents-test-report-{int(time.time())}.json")
 `;
 
-    const blob = new Blob([testingAgentScript], { type: 'text/plain' });
+    const blob = new Blob([testingAgentScript], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `ai-agents-testing-agent-${Date.now()}.py`;
     document.body.appendChild(a);
@@ -853,28 +909,33 @@ if __name__ == "__main__":
     URL.revokeObjectURL(url);
   };
 
-  const getStatusIcon = (status: TestResult['status']) => {
+  const getStatusIcon = (status: TestResult["status"]) => {
     switch (status) {
-      case 'pass':
+      case "pass":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'fail':
+      case "fail":
         return <XCircle className="h-5 w-5 text-red-500" />;
-      case 'warning':
+      case "warning":
         return <AlertCircle className="h-5 w-5 text-yellow-500" />;
-      case 'running':
+      case "running":
         return <RefreshCw className="h-5 w-5 text-blue-500 animate-spin" />;
       default:
         return <Clock className="h-5 w-5 text-gray-500" />;
     }
   };
 
-  const getStatusColor = (status: TestResult['status']) => {
+  const getStatusColor = (status: TestResult["status"]) => {
     switch (status) {
-      case 'pass': return 'text-green-600 bg-green-50';
-      case 'fail': return 'text-red-600 bg-red-50';
-      case 'warning': return 'text-yellow-600 bg-yellow-50';
-      case 'running': return 'text-blue-600 bg-blue-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case "pass":
+        return "text-green-600 bg-green-50";
+      case "fail":
+        return "text-red-600 bg-red-50";
+      case "warning":
+        return "text-yellow-600 bg-yellow-50";
+      case "running":
+        return "text-blue-600 bg-blue-50";
+      default:
+        return "text-gray-600 bg-gray-50";
     }
   };
 
@@ -882,7 +943,9 @@ if __name__ == "__main__":
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Comprehensive AI Agents Testing</h1>
+          <h1 className="text-3xl font-bold">
+            Comprehensive AI Agents Testing
+          </h1>
           <p className="text-muted-foreground">
             Real functionality auditing with detailed logging and reporting
           </p>
@@ -904,7 +967,9 @@ if __name__ == "__main__":
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <RefreshCw className="h-5 w-5 animate-spin" />
-                <span className="font-medium">{currentTest || "Initializing..."}</span>
+                <span className="font-medium">
+                  {currentTest || "Initializing..."}
+                </span>
               </div>
               <Progress value={progress} className="w-full" />
               <p className="text-sm text-muted-foreground">
@@ -950,17 +1015,21 @@ if __name__ == "__main__":
                           )}
                         </div>
                       </div>
-                      <Badge variant={test.status === 'pass' ? 'default' : 'destructive'}>
+                      <Badge
+                        variant={
+                          test.status === "pass" ? "default" : "destructive"
+                        }
+                      >
                         {test.status}
                       </Badge>
                     </div>
-                    
+
                     {test.error && (
                       <div className="mt-3 p-2 bg-red-100 rounded text-sm text-red-700">
                         <strong>Error:</strong> {test.error}
                       </div>
                     )}
-                    
+
                     {test.details && (
                       <div className="mt-3 p-2 bg-gray-100 rounded text-sm">
                         <strong>Details:</strong>
@@ -971,7 +1040,7 @@ if __name__ == "__main__":
                     )}
                   </div>
                 ))}
-                
+
                 {testResults.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     No test results yet. Run an audit to see results.
@@ -998,8 +1067,10 @@ if __name__ == "__main__":
                       <span className="text-muted-foreground whitespace-nowrap">
                         {new Date(log.timestamp).toLocaleTimeString()}
                       </span>
-                      <Badge 
-                        variant={log.level === 'error' ? 'destructive' : 'secondary'}
+                      <Badge
+                        variant={
+                          log.level === "error" ? "destructive" : "secondary"
+                        }
                         className="text-xs"
                       >
                         {log.level}
@@ -1007,7 +1078,7 @@ if __name__ == "__main__":
                       <span className="flex-1">{log.message}</span>
                     </div>
                   ))}
-                  
+
                   {executionLogs.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
                       No execution logs yet. Run an audit to see logs.
@@ -1062,7 +1133,7 @@ if __name__ == "__main__":
                     <Download className="h-4 w-4 mr-2" />
                     Download Audit Report
                   </Button>
-                  
+
                   <Button
                     onClick={downloadTestingAgent}
                     variant="outline"
@@ -1072,20 +1143,21 @@ if __name__ == "__main__":
                     Download Testing Agent
                   </Button>
                 </div>
-                
+
                 <div className="text-sm text-muted-foreground space-y-2">
                   <p>
-                    <strong>Audit Report:</strong> Comprehensive markdown report with all test results, 
-                    execution logs, and recommendations.
+                    <strong>Audit Report:</strong> Comprehensive markdown report
+                    with all test results, execution logs, and recommendations.
                   </p>
                   <p>
-                    <strong>Testing Agent:</strong> Standalone Python script that replicates these tests 
-                    and can be run independently with real API calls and proper configuration.
+                    <strong>Testing Agent:</strong> Standalone Python script
+                    that replicates these tests and can be run independently
+                    with real API calls and proper configuration.
                   </p>
                 </div>
               </CardContent>
             </Card>
-            
+
             <PortfolioIntegrationTest />
           </div>
         </TabsContent>

@@ -1,19 +1,19 @@
 /**
  * AI Strategy Runner Module
  * Placeholder for future AI trading bot integration
- * 
+ *
  * This module will be the foundation for autonomous trading strategies
  * that can analyze market data and execute trades based on AI signals.
  */
 
 export interface StrategySignal {
-  action: 'buy' | 'sell' | 'hold';
+  action: "buy" | "sell" | "hold";
   confidence: number; // 0-1
   price_target?: number;
   quantity?: number;
   reasoning: string;
   risk_assessment: {
-    level: 'low' | 'medium' | 'high';
+    level: "low" | "medium" | "high";
     factors: string[];
   };
 }
@@ -25,7 +25,7 @@ export interface MarketData {
   price_change_24h: number;
   volatility: number;
   market_cap: number;
-  compliance_status: 'approved' | 'pending' | 'flagged';
+  compliance_status: "approved" | "pending" | "flagged";
 }
 
 export interface StrategyConfig {
@@ -74,53 +74,56 @@ export class StrategyRunner {
   async analyzeMarket(marketData: MarketData): Promise<StrategySignal> {
     const volatility = marketData.volatility;
     const priceChange = marketData.price_change_24h;
-    
-    let action: 'buy' | 'sell' | 'hold' = 'hold';
+
+    let action: "buy" | "sell" | "hold" = "hold";
     let confidence = 0.5;
-    let reasoning = 'Market analysis complete';
+    let reasoning = "Market analysis complete";
 
     // Technical analysis logic
     const isUptrend = priceChange > 0;
     const isStrongUptrend = priceChange > 5;
     const isDowntrend = priceChange < -5;
     const isHighVolatility = volatility > 0.3;
-    
+
     // Buy signals
     if (isStrongUptrend && volatility < 0.2) {
-      action = 'buy';
+      action = "buy";
       confidence = 0.75;
-      reasoning = 'Strong upward trend with low volatility';
+      reasoning = "Strong upward trend with low volatility";
     }
-    // Sell signals  
+    // Sell signals
     else if (isDowntrend && isHighVolatility) {
-      action = 'sell';
+      action = "sell";
       confidence = 0.7;
-      reasoning = 'Downward trend with high volatility detected';
+      reasoning = "Downward trend with high volatility detected";
     }
 
     // Compliance check
-    if (marketData.compliance_status !== 'approved') {
-      action = 'hold';
+    if (marketData.compliance_status !== "approved") {
+      action = "hold";
       confidence = 0.0;
-      reasoning = 'Asset compliance status prevents trading';
+      reasoning = "Asset compliance status prevents trading";
     }
 
     return {
       action,
       confidence,
-      price_target: action === 'buy' 
-        ? marketData.current_price * 1.05 
-        : marketData.current_price * 0.95,
-      quantity: Math.floor((this.config.max_position_size * confidence) / marketData.current_price),
+      price_target:
+        action === "buy"
+          ? marketData.current_price * 1.05
+          : marketData.current_price * 0.95,
+      quantity: Math.floor(
+        (this.config.max_position_size * confidence) / marketData.current_price,
+      ),
       reasoning,
       risk_assessment: {
-        level: volatility > 0.3 ? 'high' : volatility > 0.15 ? 'medium' : 'low',
+        level: volatility > 0.3 ? "high" : volatility > 0.15 ? "medium" : "low",
         factors: [
           `Volatility: ${(volatility * 100).toFixed(1)}%`,
           `24h Change: ${priceChange.toFixed(2)}%`,
-          `Compliance: ${marketData.compliance_status}`
-        ]
-      }
+          `Compliance: ${marketData.compliance_status}`,
+        ],
+      },
     };
   }
 
@@ -138,19 +141,22 @@ export class StrategyRunner {
     for (const data of marketData) {
       if (this.config.asset_symbols.includes(data.asset_symbol)) {
         const signal = await this.analyzeMarket(data);
-        
+
         // Apply risk management filters
         if (signal.confidence >= this.config.compliance_threshold) {
           signals.push(signal);
-          
+
           // Log strategy signal for compliance
-          console.log(`[STRATEGY-${this.config.strategy_id}] Signal generated:`, {
-            asset: data.asset_symbol,
-            action: signal.action,
-            confidence: signal.confidence,
-            reasoning: signal.reasoning,
-            timestamp: new Date().toISOString()
-          });
+          console.log(
+            `[STRATEGY-${this.config.strategy_id}] Signal generated:`,
+            {
+              asset: data.asset_symbol,
+              action: signal.action,
+              confidence: signal.confidence,
+              reasoning: signal.reasoning,
+              timestamp: new Date().toISOString(),
+            },
+          );
         }
       }
     }
@@ -193,7 +199,7 @@ export class StrategyRunner {
       total_pnl: 0,
       sharpe_ratio: 0,
       max_drawdown: 0,
-      last_updated: new Date().toISOString()
+      last_updated: new Date().toISOString(),
     };
   }
 }
@@ -208,15 +214,15 @@ export class StrategyFactory {
    */
   static createGoldConservativeStrategy(): StrategyConfig {
     return {
-      strategy_id: 'gold-conservative-001',
-      name: 'Gold Conservative Strategy',
-      asset_symbols: ['GOLD001', 'GOLD-TOKEN'],
+      strategy_id: "gold-conservative-001",
+      name: "Gold Conservative Strategy",
+      asset_symbols: ["GOLD001", "GOLD-TOKEN"],
       risk_tolerance: 0.3,
       max_position_size: 10000,
       stop_loss_threshold: 0.05, // 5%
-      take_profit_threshold: 0.10, // 10%
+      take_profit_threshold: 0.1, // 10%
       compliance_threshold: 0.7,
-      is_active: false
+      is_active: false,
     };
   }
 
@@ -225,15 +231,15 @@ export class StrategyFactory {
    */
   static createAggressiveMultiAssetStrategy(): StrategyConfig {
     return {
-      strategy_id: 'multi-aggressive-001',
-      name: 'Multi-Asset Aggressive Strategy',
-      asset_symbols: ['GOLD001', 'SILVER01', 'OIL-Q1'],
+      strategy_id: "multi-aggressive-001",
+      name: "Multi-Asset Aggressive Strategy",
+      asset_symbols: ["GOLD001", "SILVER01", "OIL-Q1"],
       risk_tolerance: 0.8,
       max_position_size: 50000,
-      stop_loss_threshold: 0.10, // 10%
-      take_profit_threshold: 0.20, // 20%
+      stop_loss_threshold: 0.1, // 10%
+      take_profit_threshold: 0.2, // 20%
       compliance_threshold: 0.6,
-      is_active: false
+      is_active: false,
     };
   }
 }

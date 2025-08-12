@@ -1,31 +1,33 @@
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 function toBits(bytes: Uint8Array): string {
-  return Array.from(bytes).map(b => b.toString(2).padStart(8,'0')).join('');
+  return Array.from(bytes)
+    .map((b) => b.toString(2).padStart(8, "0"))
+    .join("");
 }
 
 function base32Encode(bytes: Uint8Array): string {
   const bits = toBits(bytes);
-  let result = '';
-  for (let i=0; i<bits.length; i+=5) {
-    const chunk = bits.slice(i, i+5);
-    result += ALPHABET[parseInt(chunk.padEnd(5,'0'),2)];
+  let result = "";
+  for (let i = 0; i < bits.length; i += 5) {
+    const chunk = bits.slice(i, i + 5);
+    result += ALPHABET[parseInt(chunk.padEnd(5, "0"), 2)];
   }
   return result;
 }
 
 function base32Decode(str: string): Uint8Array {
-  const cleaned = str.replace(/=+$/,'').toUpperCase();
-  let bits = '';
+  const cleaned = str.replace(/=+$/, "").toUpperCase();
+  let bits = "";
   for (const char of cleaned) {
     const val = ALPHABET.indexOf(char);
-    if (val < 0) throw new Error('Invalid base32');
-    bits += val.toString(2).padStart(5,'0');
+    if (val < 0) throw new Error("Invalid base32");
+    bits += val.toString(2).padStart(5, "0");
   }
   const bytes = [] as number[];
-  for (let i=0; i<bits.length; i+=8) {
-    const byte = bits.slice(i, i+8);
-    if (byte.length === 8) bytes.push(parseInt(byte,2));
+  for (let i = 0; i < bits.length; i += 8) {
+    const byte = bits.slice(i, i + 8);
+    if (byte.length === 8) bytes.push(parseInt(byte, 2));
   }
   return new Uint8Array(bytes);
 }
@@ -36,26 +38,45 @@ export function generateSecret(length = 20): string {
   return base32Encode(bytes);
 }
 
-async function generateToken(secret: string, counter: number, digits = 6): Promise<string> {
+async function generateToken(
+  secret: string,
+  counter: number,
+  digits = 6,
+): Promise<string> {
   const keyBytes = base32Decode(secret);
   const keyBuffer = new ArrayBuffer(keyBytes.length);
   new Uint8Array(keyBuffer).set(keyBytes);
-  const cryptoKey = await crypto.subtle.importKey('raw', keyBuffer, {name:'HMAC', hash:'SHA-1'}, false, ['sign']);
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyBuffer,
+    { name: "HMAC", hash: "SHA-1" },
+    false,
+    ["sign"],
+  );
   const buffer = new ArrayBuffer(8);
   const view = new DataView(buffer);
   view.setUint32(4, counter);
-  const hmac = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, buffer));
-  const offset = hmac[hmac.length-1] & 0xf;
-  const binary = ((hmac[offset] & 0x7f) << 24) |
-                 ((hmac[offset+1] & 0xff) << 16) |
-                 ((hmac[offset+2] & 0xff) << 8) |
-                 (hmac[offset+3] & 0xff);
+  const hmac = new Uint8Array(
+    await crypto.subtle.sign("HMAC", cryptoKey, buffer),
+  );
+  const offset = hmac[hmac.length - 1] & 0xf;
+  const binary =
+    ((hmac[offset] & 0x7f) << 24) |
+    ((hmac[offset + 1] & 0xff) << 16) |
+    ((hmac[offset + 2] & 0xff) << 8) |
+    (hmac[offset + 3] & 0xff);
   const otp = binary % 10 ** digits;
-  return otp.toString().padStart(digits,'0');
+  return otp.toString().padStart(digits, "0");
 }
 
-export async function verifyToken(secret: string, token: string, window = 1, step = 30, digits = 6): Promise<boolean> {
-  const counter = Math.floor(Date.now()/1000/step);
+export async function verifyToken(
+  secret: string,
+  token: string,
+  window = 1,
+  step = 30,
+  digits = 6,
+): Promise<boolean> {
+  const counter = Math.floor(Date.now() / 1000 / step);
   for (let errorWin = -window; errorWin <= window; errorWin++) {
     const valid = await generateToken(secret, counter + errorWin, digits);
     if (token === valid) return true;
@@ -63,7 +84,11 @@ export async function verifyToken(secret: string, token: string, window = 1, ste
   return false;
 }
 
-export function generateOtpAuthURL(secret: string, email: string, issuer: string) {
+export function generateOtpAuthURL(
+  secret: string,
+  email: string,
+  issuer: string,
+) {
   const label = encodeURIComponent(`${issuer}:${email}`);
   const encIssuer = encodeURIComponent(issuer);
   return `otpauth://totp/${label}?secret=${secret}&issuer=${encIssuer}`;

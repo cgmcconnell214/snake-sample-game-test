@@ -3,7 +3,15 @@ import AssetProvenanceCard from "@/components/AssetProvenanceCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { History, Eye, Search, Clock, MapPin, Users, FileText } from "lucide-react";
+import {
+  History,
+  Eye,
+  Search,
+  Clock,
+  MapPin,
+  Users,
+  FileText,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -40,7 +48,7 @@ export default function AssetProvenance(): JSX.Element {
 
       // Create mock provenance records
       const mockRecords: AssetProvenanceRecord[] = [];
-      
+
       assets?.forEach((asset) => {
         mockRecords.push(
           {
@@ -53,7 +61,9 @@ export default function AssetProvenance(): JSX.Element {
             user_id: asset.creator_id,
             timestamp: asset.created_at,
             verification_status: "verified",
-            metadata: { initial_value: (asset.metadata as any)?.estimated_value || 0 }
+            metadata: {
+              initial_value: (asset.metadata as any)?.estimated_value || 0,
+            },
           },
           {
             id: `${asset.id}-2`,
@@ -63,9 +73,11 @@ export default function AssetProvenance(): JSX.Element {
             event_description: "KYC and compliance verification completed",
             location: "Compliance Center",
             user_id: asset.creator_id,
-            timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString(),
+            timestamp: new Date(
+              Date.now() - Math.random() * 86400000,
+            ).toISOString(),
             verification_status: "verified",
-            metadata: { compliance_score: 98 }
+            metadata: { compliance_score: 98 },
           },
           {
             id: `${asset.id}-3`,
@@ -75,14 +87,21 @@ export default function AssetProvenance(): JSX.Element {
             event_description: `${asset.total_supply} tokens minted`,
             location: "Blockchain Network",
             user_id: asset.creator_id,
-            timestamp: new Date(Date.now() - Math.random() * 43200000).toISOString(),
+            timestamp: new Date(
+              Date.now() - Math.random() * 43200000,
+            ).toISOString(),
             verification_status: "verified",
-            metadata: { tokens_minted: asset.total_supply }
-          }
+            metadata: { tokens_minted: asset.total_supply },
+          },
         );
       });
 
-      setRecords(mockRecords.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+      setRecords(
+        mockRecords.sort(
+          (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+        ),
+      );
     } catch (error) {
       console.error("Error fetching provenance records:", error);
       toast({
@@ -95,14 +114,17 @@ export default function AssetProvenance(): JSX.Element {
     }
   };
 
-  const filteredRecords = records.filter(record => 
-    record.asset_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    record.event_description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    record.event_type.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRecords = records.filter(
+    (record) =>
+      record.asset_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      record.event_description
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      record.event_type.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const displayedRecords = selectedAsset 
-    ? filteredRecords.filter(record => record.asset_id === selectedAsset)
+  const displayedRecords = selectedAsset
+    ? filteredRecords.filter((record) => record.asset_id === selectedAsset)
     : filteredRecords;
 
   const getEventIcon = (eventType: string) => {
@@ -133,8 +155,8 @@ export default function AssetProvenance(): JSX.Element {
     }
   };
 
-  const uniqueAssets = Array.from(new Set(records.map(r => r.asset_id)))
-    .map(assetId => records.find(r => r.asset_id === assetId)!)
+  const uniqueAssets = Array.from(new Set(records.map((r) => r.asset_id)))
+    .map((assetId) => records.find((r) => r.asset_id === assetId)!)
     .filter(Boolean);
 
   return (
@@ -186,14 +208,20 @@ export default function AssetProvenance(): JSX.Element {
               {uniqueAssets.map((record) => (
                 <Button
                   key={record.asset_id}
-                  variant={selectedAsset === record.asset_id ? "default" : "outline"}
+                  variant={
+                    selectedAsset === record.asset_id ? "default" : "outline"
+                  }
                   className="w-full justify-start text-left"
                   onClick={() => setSelectedAsset(record.asset_id)}
                 >
                   <div className="flex flex-col items-start">
                     <span className="truncate">{record.asset_name}</span>
                     <span className="text-xs text-muted-foreground">
-                      {records.filter(r => r.asset_id === record.asset_id).length} events
+                      {
+                        records.filter((r) => r.asset_id === record.asset_id)
+                          .length
+                      }{" "}
+                      events
                     </span>
                   </div>
                 </Button>
@@ -218,7 +246,9 @@ export default function AssetProvenance(): JSX.Element {
             }
           >
             {loading ? (
-              <div className="text-center py-8">Loading provenance records...</div>
+              <div className="text-center py-8">
+                Loading provenance records...
+              </div>
             ) : displayedRecords.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 No provenance records found
@@ -226,7 +256,10 @@ export default function AssetProvenance(): JSX.Element {
             ) : (
               <div className="space-y-4">
                 {displayedRecords.map((record, index) => (
-                  <div key={record.id} className="flex gap-4 p-4 border rounded-lg">
+                  <div
+                    key={record.id}
+                    className="flex gap-4 p-4 border rounded-lg"
+                  >
                     <div className="flex flex-col items-center">
                       <div className="p-2 bg-muted rounded-full">
                         {getEventIcon(record.event_type)}
@@ -242,7 +275,9 @@ export default function AssetProvenance(): JSX.Element {
                           <h4 className="font-medium capitalize">
                             {record.event_type.replace("_", " ")}
                           </h4>
-                          <Badge variant={getStatusColor(record.verification_status)}>
+                          <Badge
+                            variant={getStatusColor(record.verification_status)}
+                          >
                             {record.verification_status}
                           </Badge>
                         </div>
@@ -264,7 +299,8 @@ export default function AssetProvenance(): JSX.Element {
 
                       {record.metadata && (
                         <div className="text-xs bg-muted p-2 rounded">
-                          <strong>Metadata:</strong> {JSON.stringify(record.metadata, null, 2)}
+                          <strong>Metadata:</strong>{" "}
+                          {JSON.stringify(record.metadata, null, 2)}
                         </div>
                       )}
                     </div>

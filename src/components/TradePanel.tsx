@@ -43,8 +43,8 @@ export function TradePanel(): JSX.Element {
 
   // Import real trading data
   const { assets } = useTradingData();
-  
-  const availableAssets = assets.map(asset => ({
+
+  const availableAssets = assets.map((asset) => ({
     id: asset.id,
     symbol: asset.asset_symbol,
     name: asset.asset_name,
@@ -67,7 +67,7 @@ export function TradePanel(): JSX.Element {
 
     setIsLoading(true);
     try {
-      await injectContractTemplate(side === 'buy' ? 'buy' : 'sell');
+      await injectContractTemplate(side === "buy" ? "buy" : "sell");
       const { data: session } = await supabase.auth.getSession();
       if (!session.session?.access_token) {
         throw new Error("No session found");
@@ -103,7 +103,7 @@ export function TradePanel(): JSX.Element {
       setQuantity("");
       setPrice("");
     } catch (error: unknown) {
-      console.error('Order creation error:', error);
+      console.error("Order creation error:", error);
       const err = error as Error;
       toast({
         title: "Order Failed",
@@ -137,59 +137,61 @@ export function TradePanel(): JSX.Element {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-        <div>
-          <Label>Select Asset</Label>
-          <Select value={selectedAsset} onValueChange={setSelectedAsset}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose asset to trade" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableAssets.map((asset) => (
-                <SelectItem key={asset.id} value={asset.id}>
-                  <div className="flex items-center justify-between w-full">
-                    <span>{asset.symbol}</span>
-                    <span className="text-muted-foreground ml-2">
-                      ${asset.price}
-                    </span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <div>
+            <Label>Select Asset</Label>
+            <Select value={selectedAsset} onValueChange={setSelectedAsset}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose asset to trade" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableAssets.map((asset) => (
+                  <SelectItem key={asset.id} value={asset.id}>
+                    <div className="flex items-center justify-between w-full">
+                      <span>{asset.symbol}</span>
+                      <span className="text-muted-foreground ml-2">
+                        ${asset.price}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Tabs value={side} onValueChange={setSide} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger
-              value="buy"
-              className="text-buy data-[state=active]:bg-buy/20"
-            >
-              <TrendingUp className="h-4 w-4 mr-1" />
-              Buy
-            </TabsTrigger>
-            <TabsTrigger
-              value="sell"
-              className="text-sell data-[state=active]:bg-sell/20"
-            >
-              <TrendingDown className="h-4 w-4 mr-1" />
-              Sell
-            </TabsTrigger>
-          </TabsList>
+          <Tabs value={side} onValueChange={setSide} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger
+                value="buy"
+                className="text-buy data-[state=active]:bg-buy/20"
+              >
+                <TrendingUp className="h-4 w-4 mr-1" />
+                Buy
+              </TabsTrigger>
+              <TabsTrigger
+                value="sell"
+                className="text-sell data-[state=active]:bg-sell/20"
+              >
+                <TrendingDown className="h-4 w-4 mr-1" />
+                Sell
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="buy" className="space-y-4 mt-4">
-            <OrderForm side="buy" />
-          </TabsContent>
-          <TabsContent value="sell" className="space-y-4 mt-4">
-            <OrderForm side="sell" />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="buy" className="space-y-4 mt-4">
+              <OrderForm side="buy" />
+            </TabsContent>
+            <TabsContent value="sell" className="space-y-4 mt-4">
+              <OrderForm side="sell" />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm {side === "buy" ? "Purchase" : "Sale"}</DialogTitle>
+            <DialogTitle>
+              Confirm {side === "buy" ? "Purchase" : "Sale"}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 py-2 text-sm">
             <p>

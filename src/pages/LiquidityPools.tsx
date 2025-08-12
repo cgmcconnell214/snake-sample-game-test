@@ -19,8 +19,9 @@ export default function LiquidityPools(): JSX.Element {
         const data = await response.json();
         setTotalPools(data.length);
         const liquidity = data.reduce(
-          (sum: number, pool: { total_liquidity: number }) => sum + pool.total_liquidity,
-          0
+          (sum: number, pool: { total_liquidity: number }) =>
+            sum + pool.total_liquidity,
+          0,
         );
         setTotalLiquidity(liquidity);
       } catch (error) {
@@ -39,19 +40,19 @@ export default function LiquidityPools(): JSX.Element {
   }, [toast]);
 
   const handleAddLiquidity = () => {
-    navigate('/app/liquidity/pools');
+    navigate("/app/liquidity/pools");
   };
 
   const handleViewPools = () => {
-    navigate('/app/liquidity/pools');
+    navigate("/app/liquidity/pools");
   };
 
   const handleBondLiquidity = () => {
-    navigate('/app/liquidity/pools');
+    navigate("/app/liquidity/pools");
   };
 
   const handleViewTimers = () => {
-    navigate('/app/liquidity/pools');
+    navigate("/app/liquidity/pools");
   };
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -93,7 +94,11 @@ export default function LiquidityPools(): JSX.Element {
                 <p className="text-sm text-muted-foreground mb-4">
                   Pools backed by physical commodities
                 </p>
-                <Button variant="outline" className="w-full" onClick={handleViewPools}>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleViewPools}
+                >
                   View Pools
                 </Button>
               </CardContent>
@@ -110,7 +115,11 @@ export default function LiquidityPools(): JSX.Element {
                 <p className="text-sm text-muted-foreground mb-4">
                   Long-term locked liquidity with higher rewards
                 </p>
-                <Button variant="outline" className="w-full" onClick={handleBondLiquidity}>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleBondLiquidity}
+                >
                   Bond Liquidity
                 </Button>
               </CardContent>
@@ -127,7 +136,11 @@ export default function LiquidityPools(): JSX.Element {
                 <p className="text-sm text-muted-foreground mb-4">
                   Track time-based interest accumulation
                 </p>
-                <Button variant="outline" className="w-full" onClick={handleViewTimers}>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleViewTimers}
+                >
                   View Timers
                 </Button>
               </CardContent>

@@ -4,17 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { 
-  BarChart3, 
-  TrendingUp, 
-  PieChart, 
+import {
+  BarChart3,
+  TrendingUp,
+  PieChart,
   Activity,
   DollarSign,
   Users,
   Zap,
   Target,
   ArrowUpDown,
-  Coins
+  Coins,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,8 +67,16 @@ export default function TokenomicsDashboard(): JSX.Element {
         .eq("is_active", true);
 
       const totalAssets = assets?.length || 0;
-      const totalSupply = assets?.reduce((sum, asset) => sum + parseFloat(asset.total_supply.toString()), 0) || 0;
-      const circulatingSupply = assets?.reduce((sum, asset) => sum + parseFloat(asset.circulating_supply.toString()), 0) || 0;
+      const totalSupply =
+        assets?.reduce(
+          (sum, asset) => sum + parseFloat(asset.total_supply.toString()),
+          0,
+        ) || 0;
+      const circulatingSupply =
+        assets?.reduce(
+          (sum, asset) => sum + parseFloat(asset.circulating_supply.toString()),
+          0,
+        ) || 0;
 
       // Generate realistic metrics based on actual data
       const mockMetrics: TokenMetrics = {
@@ -79,7 +87,7 @@ export default function TokenomicsDashboard(): JSX.Element {
         holders: Math.floor(Math.random() * 500) + totalAssets * 10,
         transactions24h: Math.floor(Math.random() * 200) + 150,
         avgTransactionSize: Math.floor(Math.random() * 1000) + 500,
-        velocity: (Math.random() * 2) + 0.5 // Token velocity between 0.5-2.5
+        velocity: Math.random() * 2 + 0.5, // Token velocity between 0.5-2.5
       };
 
       const mockFlowData: TokenFlowData = {
@@ -88,7 +96,7 @@ export default function TokenomicsDashboard(): JSX.Element {
         netFlow: 0, // Will be calculated
         stakingRewards: Math.floor(Math.random() * 5000) + 2000,
         liquidityProvision: Math.floor(Math.random() * 10000) + 8000,
-        tradingFees: Math.floor(Math.random() * 2000) + 1000
+        tradingFees: Math.floor(Math.random() * 2000) + 1000,
       };
       mockFlowData.netFlow = mockFlowData.inflow - mockFlowData.outflow;
 
@@ -99,7 +107,12 @@ export default function TokenomicsDashboard(): JSX.Element {
         { period: "4d ago", velocity: 1.3, volume: 105000, avgHoldTime: 14 },
         { period: "3d ago", velocity: 2.1, volume: 115000, avgHoldTime: 8 },
         { period: "2d ago", velocity: 1.7, volume: 88000, avgHoldTime: 16 },
-        { period: "1d ago", velocity: mockMetrics.velocity, volume: mockMetrics.volume24h, avgHoldTime: 11 }
+        {
+          period: "1d ago",
+          velocity: mockMetrics.velocity,
+          volume: mockMetrics.volume24h,
+          avgHoldTime: 11,
+        },
       ];
 
       setMetrics(mockMetrics);
@@ -126,13 +139,14 @@ export default function TokenomicsDashboard(): JSX.Element {
         metrics: metrics,
         flows: flowData,
         velocity: velocityData,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
       };
 
       // Simulate report generation
       toast({
         title: "Report Generated",
-        description: "Tokenomics report has been generated and sent to your message center",
+        description:
+          "Tokenomics report has been generated and sent to your message center",
       });
     } catch (error) {
       toast({
@@ -144,16 +158,16 @@ export default function TokenomicsDashboard(): JSX.Element {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
   };
 
   const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('en-US').format(value);
+    return new Intl.NumberFormat("en-US").format(value);
   };
 
   if (loading) {
@@ -172,7 +186,8 @@ export default function TokenomicsDashboard(): JSX.Element {
     );
   }
 
-  const supplyUtilization = (metrics.circulatingSupply / metrics.totalSupply) * 100;
+  const supplyUtilization =
+    (metrics.circulatingSupply / metrics.totalSupply) * 100;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -208,7 +223,9 @@ export default function TokenomicsDashboard(): JSX.Element {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(metrics.marketCap)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(metrics.marketCap)}
+            </div>
             <p className="text-xs text-muted-foreground">
               +12.5% from last period
             </p>
@@ -221,7 +238,9 @@ export default function TokenomicsDashboard(): JSX.Element {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(metrics.volume24h)}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(metrics.volume24h)}
+            </div>
             <p className="text-xs text-muted-foreground">
               {formatNumber(metrics.transactions24h)} transactions
             </p>
@@ -234,23 +253,25 @@ export default function TokenomicsDashboard(): JSX.Element {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(metrics.holders)}</div>
-            <p className="text-xs text-muted-foreground">
-              +8.3% growth rate
-            </p>
+            <div className="text-2xl font-bold">
+              {formatNumber(metrics.holders)}
+            </div>
+            <p className="text-xs text-muted-foreground">+8.3% growth rate</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Token Velocity</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Token Velocity
+            </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.velocity.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              Circulation rate
-            </p>
+            <div className="text-2xl font-bold">
+              {metrics.velocity.toFixed(2)}
+            </div>
+            <p className="text-xs text-muted-foreground">Circulation rate</p>
           </CardContent>
         </Card>
       </div>
@@ -276,18 +297,26 @@ export default function TokenomicsDashboard(): JSX.Element {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-sm">Total Supply</span>
-                    <span className="font-medium">{formatNumber(metrics.totalSupply)}</span>
+                    <span className="font-medium">
+                      {formatNumber(metrics.totalSupply)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Circulating Supply</span>
-                    <span className="font-medium">{formatNumber(metrics.circulatingSupply)}</span>
+                    <span className="font-medium">
+                      {formatNumber(metrics.circulatingSupply)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Locked/Reserved</span>
-                    <span className="font-medium">{formatNumber(metrics.totalSupply - metrics.circulatingSupply)}</span>
+                    <span className="font-medium">
+                      {formatNumber(
+                        metrics.totalSupply - metrics.circulatingSupply,
+                      )}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Supply Utilization</span>
@@ -308,18 +337,26 @@ export default function TokenomicsDashboard(): JSX.Element {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-500">+2.1%</div>
-                    <div className="text-sm text-muted-foreground">Minting Rate</div>
+                    <div className="text-2xl font-bold text-green-500">
+                      +2.1%
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Minting Rate
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-red-500">-0.8%</div>
-                    <div className="text-sm text-muted-foreground">Burn Rate</div>
+                    <div className="text-sm text-muted-foreground">
+                      Burn Rate
+                    </div>
                   </div>
                 </div>
-                
+
                 <div className="text-center pt-4 border-t">
                   <div className="text-xl font-bold text-blue-500">+1.3%</div>
-                  <div className="text-sm text-muted-foreground">Net Inflation Rate</div>
+                  <div className="text-sm text-muted-foreground">
+                    Net Inflation Rate
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -337,16 +374,26 @@ export default function TokenomicsDashboard(): JSX.Element {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold">{metrics.velocity.toFixed(2)}</div>
-                  <div className="text-sm text-muted-foreground">Current Velocity</div>
+                  <div className="text-3xl font-bold">
+                    {metrics.velocity.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Current Velocity
+                  </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold">{formatCurrency(metrics.avgTransactionSize)}</div>
-                  <div className="text-sm text-muted-foreground">Avg Transaction Size</div>
+                  <div className="text-3xl font-bold">
+                    {formatCurrency(metrics.avgTransactionSize)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Avg Transaction Size
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold">11.5</div>
-                  <div className="text-sm text-muted-foreground">Avg Hold Time (days)</div>
+                  <div className="text-sm text-muted-foreground">
+                    Avg Hold Time (days)
+                  </div>
                 </div>
               </div>
 
@@ -354,12 +401,21 @@ export default function TokenomicsDashboard(): JSX.Element {
                 <h4 className="font-medium">7-Day Velocity Trend</h4>
                 <div className="space-y-2">
                   {velocityData.map((data, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 border rounded"
+                    >
                       <div className="flex items-center gap-4">
-                        <span className="text-sm font-medium w-16">{data.period}</span>
+                        <span className="text-sm font-medium w-16">
+                          {data.period}
+                        </span>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm">Velocity: {data.velocity.toFixed(2)}</span>
-                          <Badge variant="outline">{formatCurrency(data.volume)}</Badge>
+                          <span className="text-sm">
+                            Velocity: {data.velocity.toFixed(2)}
+                          </span>
+                          <Badge variant="outline">
+                            {formatCurrency(data.volume)}
+                          </Badge>
                         </div>
                       </div>
                       <span className="text-sm text-muted-foreground">
@@ -386,16 +442,23 @@ export default function TokenomicsDashboard(): JSX.Element {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Inflow (24h)</span>
-                    <span className="font-medium text-green-500">+{formatCurrency(flowData.inflow)}</span>
+                    <span className="font-medium text-green-500">
+                      +{formatCurrency(flowData.inflow)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Outflow (24h)</span>
-                    <span className="font-medium text-red-500">-{formatCurrency(flowData.outflow)}</span>
+                    <span className="font-medium text-red-500">
+                      -{formatCurrency(flowData.outflow)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="font-medium">Net Flow</span>
-                    <span className={`font-bold ${flowData.netFlow > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {flowData.netFlow > 0 ? '+' : ''}{formatCurrency(flowData.netFlow)}
+                    <span
+                      className={`font-bold ${flowData.netFlow > 0 ? "text-green-500" : "text-red-500"}`}
+                    >
+                      {flowData.netFlow > 0 ? "+" : ""}
+                      {formatCurrency(flowData.netFlow)}
                     </span>
                   </div>
                 </div>
@@ -413,20 +476,30 @@ export default function TokenomicsDashboard(): JSX.Element {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Staking Rewards</span>
-                    <span className="font-medium">{formatCurrency(flowData.stakingRewards)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(flowData.stakingRewards)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Liquidity Provision</span>
-                    <span className="font-medium">{formatCurrency(flowData.liquidityProvision)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(flowData.liquidityProvision)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm">Trading Fees</span>
-                    <span className="font-medium">{formatCurrency(flowData.tradingFees)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(flowData.tradingFees)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="font-medium">Total Revenue</span>
                     <span className="font-bold">
-                      {formatCurrency(flowData.stakingRewards + flowData.liquidityProvision + flowData.tradingFees)}
+                      {formatCurrency(
+                        flowData.stakingRewards +
+                          flowData.liquidityProvision +
+                          flowData.tradingFees,
+                      )}
                     </span>
                   </div>
                 </div>
@@ -449,7 +522,9 @@ export default function TokenomicsDashboard(): JSX.Element {
                   <h4 className="font-medium">Holder Distribution</h4>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm">Large Holders (&gt;10k tokens)</span>
+                      <span className="text-sm">
+                        Large Holders (&gt;10k tokens)
+                      </span>
                       <div className="flex items-center gap-2">
                         <Progress value={15} className="w-20" />
                         <span className="text-sm">15%</span>

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export interface AssetWithMarketData {
   id: string;
@@ -40,8 +40,9 @@ export function useTradingData() {
   const fetchAssets = async () => {
     try {
       const { data, error } = await supabase
-        .from('tokenized_assets')
-        .select(`
+        .from("tokenized_assets")
+        .select(
+          `
           id,
           asset_symbol,
           asset_name,
@@ -56,12 +57,13 @@ export function useTradingData() {
             high_24h,
             low_24h
           )
-        `)
-        .eq('is_active', true);
+        `,
+        )
+        .eq("is_active", true);
 
       if (error) throw error;
 
-      const assetsWithMarketData = data.map(asset => ({
+      const assetsWithMarketData = data.map((asset) => ({
         ...asset,
         current_price: asset.market_data?.[0]?.current_price || 0,
         price_change_24h: asset.market_data?.[0]?.price_change_24h || 0,
@@ -73,7 +75,7 @@ export function useTradingData() {
 
       setAssets(assetsWithMarketData);
     } catch (error) {
-      console.error('Error fetching assets:', error);
+      console.error("Error fetching assets:", error);
       toast({
         title: "Error",
         description: "Failed to fetch market data",
@@ -88,15 +90,15 @@ export function useTradingData() {
       if (!session.session) return;
 
       const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('user_id', session.session.user.id)
-        .order('created_at', { ascending: false });
+        .from("orders")
+        .select("*")
+        .eq("user_id", session.session.user.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setOrders(data || []);
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error("Error fetching orders:", error);
     }
   };
 
@@ -115,10 +117,12 @@ export function useTradingData() {
 
       // Market data updates can be frequent; listen only for UPDATEs
       assetsChannel = supabase
-        .channel('assets-changes')
-        .on('postgres_changes', 
-            { event: 'UPDATE', schema: 'public', table: 'market_data' }, 
-            () => fetchAssets())
+        .channel("assets-changes")
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "market_data" },
+          () => fetchAssets(),
+        )
         .subscribe();
 
       // Scope orders realtime to current user to reduce DB load
@@ -126,12 +130,19 @@ export function useTradingData() {
       const userId = session.session?.user?.id;
 
       ordersChannel = supabase
-        .channel('orders-changes')
-        .on('postgres_changes', 
-            userId
-              ? { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` }
-              : { event: '*', schema: 'public', table: 'orders' },
-            () => fetchOrders())
+        .channel("orders-changes")
+        .on(
+          "postgres_changes",
+          userId
+            ? {
+                event: "*",
+                schema: "public",
+                table: "orders",
+                filter: `user_id=eq.${userId}`,
+              }
+            : { event: "*", schema: "public", table: "orders" },
+          () => fetchOrders(),
+        )
         .subscribe();
     };
 
@@ -146,9 +157,9 @@ export function useTradingData() {
   const cancelOrder = async (orderId: string) => {
     try {
       const { error } = await supabase
-        .from('orders')
-        .update({ status: 'cancelled' })
-        .eq('id', orderId);
+        .from("orders")
+        .update({ status: "cancelled" })
+        .eq("id", orderId);
 
       if (error) throw error;
 
@@ -159,7 +170,7 @@ export function useTradingData() {
 
       fetchOrders();
     } catch (error) {
-      console.error('Error cancelling order:', error);
+      console.error("Error cancelling order:", error);
       toast({
         title: "Error",
         description: "Failed to cancel order",

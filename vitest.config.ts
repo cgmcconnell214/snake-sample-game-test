@@ -1,20 +1,20 @@
-import { defineConfig } from 'vitest/config'
-import tsconfigPaths from 'vite-tsconfig-paths'
+import { defineConfig } from "vitest/config";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
   esbuild: {
-    jsx: 'automatic',
+    jsx: "automatic",
     jsxDev: true,
-    jsxImportSource: 'react',
+    jsxImportSource: "react",
   },
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    setupFiles: './tests/setup.ts',
+    setupFiles: "./tests/setup.ts",
     coverage: {
-      reporter: ['text', 'html', 'json'],
-      provider: 'v8',
+      reporter: ["text", "html", "json"],
+      provider: "v8",
     },
   },
-})
+});

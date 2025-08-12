@@ -3,15 +3,37 @@
 import fs from "node:fs";
 import path from "node:path";
 
-
 const exts = new Set([
-  ".ts",".tsx",".js",".jsx",".mjs",".cjs",
-  ".css",".scss",".sass",".less",".html",
-  ".json",".yml",".yaml",".env",".txt",
-  ".md",".mdx"
+  ".ts",
+  ".tsx",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".cjs",
+  ".css",
+  ".scss",
+  ".sass",
+  ".less",
+  ".html",
+  ".json",
+  ".yml",
+  ".yaml",
+  ".env",
+  ".txt",
+  ".md",
+  ".mdx",
 ]);
 
-const SKIP_DIRS = new Set([".git","node_modules",".next","dist","build",".vercel",".cache",".turbo"]);
+const SKIP_DIRS = new Set([
+  ".git",
+  "node_modules",
+  ".next",
+  "dist",
+  "build",
+  ".vercel",
+  ".cache",
+  ".turbo",
+]);
 
 function* walk(dir) {
   for (const name of fs.readdirSync(dir)) {
@@ -23,7 +45,9 @@ function* walk(dir) {
   }
 }
 
-function isCodeLike(p){ return exts.has(path.extname(p).toLowerCase()); }
+function isCodeLike(p) {
+  return exts.has(path.extname(p).toLowerCase());
+}
 
 function scrubText(text, filePath) {
   const isMarkdown = filePath.endsWith(".md") || filePath.endsWith(".mdx");
@@ -36,16 +60,19 @@ function scrubText(text, filePath) {
 
   // 2) Remove common chat/diff artifacts
   out = out
-    .replace(/^\s*main,?\s*$/gmi, "")
-    .replace(/^[ \t]*(?:code|src|app|pages|public|components|lib|server)\/[^\n]*$/gmi, "")
-    .replace(/^[ \t]*(?:File|Filename|Path)\s*:\s*.*$/gmi, "")
-    .replace(/^diff --git.*$/gmi, "")
-    .replace(/^index [0-9a-f]+\.\.[0-9a-f]+.*$/gmi, "")
-    .replace(/^--- a\/.*$/gmi, "")
-    .replace(/^\+\+\+ b\/.*$/gmi, "")
-    .replace(/^@@ .* @@.*$/gmi, "")
+    .replace(/^\s*main,?\s*$/gim, "")
+    .replace(
+      /^[ \t]*(?:code|src|app|pages|public|components|lib|server)\/[^\n]*$/gim,
+      "",
+    )
+    .replace(/^[ \t]*(?:File|Filename|Path)\s*:\s*.*$/gim, "")
+    .replace(/^diff --git.*$/gim, "")
+    .replace(/^index [0-9a-f]+\.\.[0-9a-f]+.*$/gim, "")
+    .replace(/^--- a\/.*$/gim, "")
+    .replace(/^\+\+\+ b\/.*$/gim, "")
+    .replace(/^@@ .* @@.*$/gim, "")
     // drop leading + / - from pasted diffs (best‑effort)
-    .replace(/^[+-](?=[^+\-*/=].*)/gmi, "");
+    .replace(/^[+-](?=[^+\-*/=].*)/gim, "");
 
   // 3) Collapse accidental multiple blank lines
   out = out.replace(/\n{3,}/g, "\n\n");

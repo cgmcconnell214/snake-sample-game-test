@@ -5,12 +5,13 @@ import { rateLimit } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 // Helper logging function for enhanced debugging
 const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
   console.log(`[CHECK-SUBSCRIPTION] ${step}${detailsStr}`);
 };
 
@@ -26,7 +27,7 @@ serve(async (req) => {
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
+    { auth: { persistSession: false } },
   );
 
   try {
@@ -43,46 +44,61 @@ serve(async (req) => {
 
     const token = authHeader.replace("Bearer ", "");
     logStep("Authenticating user with token");
-    
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+
+    const { data: userData, error: userError } =
+      await supabaseClient.auth.getUser(token);
+    if (userError)
+      throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
+    if (!user?.email)
+      throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    
+    const customers = await stripe.customers.list({
+      email: user.email,
+      limit: 1,
+    });
+
     if (customers.data.length === 0) {
       logStep("No customer found, updating unsubscribed state");
-      await supabaseClient.from("subscriptions").upsert({
-        user_id: user.id,
-        stripe_customer_id: null,
-        stripe_subscription_id: null,
-        status: "inactive",
-        tier: "free",
-        current_period_start: null,
-        current_period_end: null,
-        cancel_at_period_end: false,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
-      
+      await supabaseClient.from("subscriptions").upsert(
+        {
+          user_id: user.id,
+          stripe_customer_id: null,
+          stripe_subscription_id: null,
+          status: "inactive",
+          tier: "free",
+          current_period_start: null,
+          current_period_end: null,
+          cancel_at_period_end: false,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" },
+      );
+
       // Also update profile
-      await supabaseClient.from("profiles").update({
-        subscription_tier: "free",
-        updated_at: new Date().toISOString(),
-      }).eq('user_id', user.id);
-      
+      await supabaseClient
+        .from("profiles")
+        .update({
+          subscription_tier: "free",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", user.id);
+
       const execTime = Date.now() - startTime;
       logStep(`Execution time: ${execTime}ms`);
-      return new Response(JSON.stringify({
-        subscribed: false,
-        subscription_tier: "free",
-        subscription_end: null
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+      return new Response(
+        JSON.stringify({
+          subscribed: false,
+          subscription_tier: "free",
+          subscription_end: null,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        },
+      );
     }
 
     const customerId = customers.data[0].id;
@@ -99,17 +115,24 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
-      
+      subscriptionEnd = new Date(
+        subscription.current_period_end * 1000,
+      ).toISOString();
+      logStep("Active subscription found", {
+        subscriptionId: subscription.id,
+        endDate: subscriptionEnd,
+      });
+
       // Determine subscription tier from price
       if (subscription.items.data.length > 0) {
         const price = subscription.items.data[0].price;
         const amount = price.unit_amount || 0;
-        
-        if (amount === 3900) { // $39.00
+
+        if (amount === 3900) {
+          // $39.00
           subscriptionTier = "standard";
-        } else if (amount === 399900) { // $3,999.00
+        } else if (amount === 399900) {
+          // $3,999.00
           subscriptionTier = "enterprise";
         }
       }
@@ -119,35 +142,53 @@ serve(async (req) => {
     }
 
     // Update subscription record
-    await supabaseClient.from("subscriptions").upsert({
-      user_id: user.id,
-      stripe_customer_id: customerId,
-      stripe_subscription_id: hasActiveSub ? subscriptions.data[0].id : null,
-      status: hasActiveSub ? "active" : "inactive",
-      tier: subscriptionTier,
-      current_period_start: hasActiveSub ? new Date(subscriptions.data[0].current_period_start * 1000).toISOString() : null,
-      current_period_end: subscriptionEnd,
-      cancel_at_period_end: hasActiveSub ? subscriptions.data[0].cancel_at_period_end : false,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' });
+    await supabaseClient.from("subscriptions").upsert(
+      {
+        user_id: user.id,
+        stripe_customer_id: customerId,
+        stripe_subscription_id: hasActiveSub ? subscriptions.data[0].id : null,
+        status: hasActiveSub ? "active" : "inactive",
+        tier: subscriptionTier,
+        current_period_start: hasActiveSub
+          ? new Date(
+              subscriptions.data[0].current_period_start * 1000,
+            ).toISOString()
+          : null,
+        current_period_end: subscriptionEnd,
+        cancel_at_period_end: hasActiveSub
+          ? subscriptions.data[0].cancel_at_period_end
+          : false,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
 
     // Update profile tier
-    await supabaseClient.from("profiles").update({
-      subscription_tier: subscriptionTier,
-      updated_at: new Date().toISOString(),
-    }).eq('user_id', user.id);
+    await supabaseClient
+      .from("profiles")
+      .update({
+        subscription_tier: subscriptionTier,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", user.id);
 
-    logStep("Updated database with subscription info", { subscribed: hasActiveSub, subscriptionTier });
+    logStep("Updated database with subscription info", {
+      subscribed: hasActiveSub,
+      subscriptionTier,
+    });
     const execTime = Date.now() - startTime;
     logStep(`Execution time: ${execTime}ms`);
-    return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
-      subscription_tier: subscriptionTier,
-      subscription_end: subscriptionEnd
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({
+        subscribed: hasActiveSub,
+        subscription_tier: subscriptionTier,
+        subscription_end: subscriptionEnd,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      },
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const execTime = Date.now() - startTime;

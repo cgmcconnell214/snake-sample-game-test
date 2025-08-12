@@ -3,7 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TradingChart } from "@/components/TradingChart";
 import { OrderBook } from "@/components/OrderBook";
 import { TradePanel } from "@/components/TradePanel";
@@ -37,7 +43,7 @@ export default function RealTimeTrading({
   const [selectedSymbol, setSelectedSymbol] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  
+
   // Enable real-time market updates
   useMarketUpdates();
 
@@ -45,13 +51,14 @@ export default function RealTimeTrading({
     const matchesSearch =
       asset.asset_symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
       asset.asset_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = 
-      filterType === "all" || 
-      asset.metadata?.asset_type === filterType;
+    const matchesFilter =
+      filterType === "all" || asset.metadata?.asset_type === filterType;
     return matchesSearch && matchesFilter;
   });
 
-  const selectedAsset = assets.find((asset) => asset.asset_symbol === selectedSymbol);
+  const selectedAsset = assets.find(
+    (asset) => asset.asset_symbol === selectedSymbol,
+  );
 
   if (loading) {
     return (
@@ -138,7 +145,9 @@ export default function RealTimeTrading({
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <div className="font-medium text-sm">{asset.asset_symbol}</div>
+                      <div className="font-medium text-sm">
+                        {asset.asset_symbol}
+                      </div>
                       <div className="text-xs text-muted-foreground truncate">
                         {asset.asset_name}
                       </div>
@@ -233,25 +242,30 @@ export default function RealTimeTrading({
                         {order.id.slice(0, 8)}...
                       </div>
                       <div className="font-medium">
-                        {assets.find(a => a.id === order.asset_id)?.asset_symbol || 'Unknown'}
+                        {assets.find((a) => a.id === order.asset_id)
+                          ?.asset_symbol || "Unknown"}
                       </div>
                       <div
                         className={`text-xs ${
                           order.side === "buy" ? "text-buy" : "text-sell"
                         }`}
                       >
-                        {order.order_type.toUpperCase()} {order.side.toUpperCase()}
+                        {order.order_type.toUpperCase()}{" "}
+                        {order.side.toUpperCase()}
                       </div>
                       <div className="font-mono">{order.quantity}</div>
-                      <div className="font-mono">${order.price?.toFixed(2) || 'Market'}</div>
+                      <div className="font-mono">
+                        ${order.price?.toFixed(2) || "Market"}
+                      </div>
                       <div>
                         <Badge
                           variant={
-                            order.status === "pending" || order.status === "open" 
-                              ? "default" 
+                            order.status === "pending" ||
+                            order.status === "open"
+                              ? "default"
                               : order.status === "filled"
-                              ? "secondary"
-                              : "destructive"
+                                ? "secondary"
+                                : "destructive"
                           }
                           className="text-xs"
                         >
@@ -259,7 +273,8 @@ export default function RealTimeTrading({
                         </Badge>
                       </div>
                       <div>
-                        {(order.status === "pending" || order.status === "open") && (
+                        {(order.status === "pending" ||
+                          order.status === "open") && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -281,7 +296,10 @@ export default function RealTimeTrading({
         {/* Trading Panel & Order Book */}
         <div className="space-y-6">
           <TradePanel />
-          <OrderBook assetId={selectedAsset?.id} symbol={selectedAsset?.asset_symbol} />
+          <OrderBook
+            assetId={selectedAsset?.id}
+            symbol={selectedAsset?.asset_symbol}
+          />
 
           {/* Market Statistics */}
           {selectedAsset && (
@@ -317,7 +335,7 @@ export default function RealTimeTrading({
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Asset Type:</span>
                   <Badge variant="outline" className="text-xs">
-                    {selectedAsset.metadata?.asset_type || 'Unknown'}
+                    {selectedAsset.metadata?.asset_type || "Unknown"}
                   </Badge>
                 </div>
               </CardContent>

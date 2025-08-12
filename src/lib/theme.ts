@@ -14,7 +14,9 @@ export function applyTheme(pref?: ThemePreference) {
     const root = document.documentElement;
     const isDark =
       choice === "dark" ||
-      (choice === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      (choice === "system" &&
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
 
     root.classList.toggle("dark", isDark);
   } catch (e) {

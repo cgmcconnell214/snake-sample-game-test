@@ -235,8 +235,8 @@ export default function LiquidityPools(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Pools backed by physical commodities like gold and silver
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleViewCommodityPools}
             >
@@ -256,8 +256,8 @@ export default function LiquidityPools(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Lock liquidity for higher yields with time commitments
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleBondLiquidity}
             >
@@ -277,8 +277,8 @@ export default function LiquidityPools(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track time-locked positions and upcoming reward distributions
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleViewTimers}
             >

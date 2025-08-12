@@ -5,12 +5,19 @@ import { rateLimit } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 interface XRPLTransactionRequest {
   action?: string; // Smart contract function name
-  transaction_type?: 'token_transfer' | 'token_mint' | 'token_burn' | 'create_token' | 'freeze_account' | 'execute_trade';
+  transaction_type?:
+    | "token_transfer"
+    | "token_mint"
+    | "token_burn"
+    | "create_token"
+    | "freeze_account"
+    | "execute_trade";
   asset_id?: string;
   amount?: number;
   destination?: string; // For transfers
@@ -20,7 +27,7 @@ interface XRPLTransactionRequest {
 
 // Helper logging function
 const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
   console.log(`[XRPL-TRANSACTION] ${step}${detailsStr}`);
 };
 
@@ -34,7 +41,8 @@ const XRPL_NETWORKS = {
 const XRPL_BURN_ADDRESS = "rrrrrrrrrrrrrrrrrrrrrhoLvTp";
 
 const getNetworkUrl = () => {
-  const name = (Deno.env.get("XRPL_NETWORK") || "XRPL_TESTNET") as keyof typeof XRPL_NETWORKS;
+  const name = (Deno.env.get("XRPL_NETWORK") ||
+    "XRPL_TESTNET") as keyof typeof XRPL_NETWORKS;
   return XRPL_NETWORKS[name] ?? XRPL_NETWORKS.XRPL_TESTNET;
 };
 
@@ -88,7 +96,7 @@ serve(async (req) => {
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } }
+    { auth: { persistSession: false } },
   );
 
   try {
@@ -99,22 +107,24 @@ serve(async (req) => {
     if (!authHeader) throw new Error("No authorization header provided");
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    
+    const { data: userData, error: userError } =
+      await supabaseClient.auth.getUser(token);
+    if (userError)
+      throw new Error(`Authentication error: ${userError.message}`);
+
     const user = userData.user;
     if (!user?.id) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     // Check if user has admin role for blockchain operations
     const { data: profile, error: profileError } = await supabaseClient
-      .from('profiles')
-      .select('role')
-      .eq('user_id', user.id)
+      .from("profiles")
+      .select("role")
+      .eq("user_id", user.id)
       .single();
 
     if (profileError) throw new Error(`Profile error: ${profileError.message}`);
-    if (profile.role !== 'admin') {
+    if (profile.role !== "admin") {
       throw new Error("Insufficient permissions for blockchain operations");
     }
 
@@ -127,7 +137,7 @@ serve(async (req) => {
         requestData.action,
         requestData.parameters,
         user.id,
-        supabaseClient
+        supabaseClient,
       );
       const execTime = Date.now() - startTime;
       logStep(`Execution time: ${execTime}ms`);
@@ -136,9 +146,9 @@ serve(async (req) => {
 
     // Get asset details
     const { data: asset, error: assetError } = await supabaseClient
-      .from('tokenized_assets')
-      .select('*')
-      .eq('id', requestData.asset_id)
+      .from("tokenized_assets")
+      .select("*")
+      .eq("id", requestData.asset_id)
       .single();
 
     if (assetError || !asset) {
@@ -147,7 +157,7 @@ serve(async (req) => {
 
     // Execute XRPL transaction against selected network
     const xrplResult = await submitPayment(
-      requestData.transaction_type === 'token_burn'
+      requestData.transaction_type === "token_burn"
         ? XRPL_BURN_ADDRESS
         : requestData.destination || getWallet().classicAddress,
       String(requestData.amount || 0),
@@ -165,133 +175,143 @@ serve(async (req) => {
     });
 
     // Update asset holdings based on transaction type
-    if (requestData.transaction_type === 'token_transfer' && requestData.destination) {
+    if (
+      requestData.transaction_type === "token_transfer" &&
+      requestData.destination
+    ) {
       // Handle transfer between users
       const { data: recipientProfile } = await supabaseClient
-        .from('profiles')
-        .select('user_id')
-        .eq('user_id', requestData.destination)
+        .from("profiles")
+        .select("user_id")
+        .eq("user_id", requestData.destination)
         .single();
 
       if (recipientProfile) {
         // Deduct from sender
         await supabaseClient
-          .from('asset_holdings')
+          .from("asset_holdings")
           .update({
             balance: supabaseClient.raw(`balance - ${requestData.amount}`),
             last_updated: new Date().toISOString(),
           })
-          .eq('user_id', user.id)
-          .eq('asset_id', requestData.asset_id);
+          .eq("user_id", user.id)
+          .eq("asset_id", requestData.asset_id);
 
         // Add to recipient
-        await supabaseClient
-          .from('asset_holdings')
-          .upsert({
-            user_id: requestData.destination,
-            asset_id: requestData.asset_id,
-            balance: supabaseClient.raw(`COALESCE(balance, 0) + ${requestData.amount}`),
-            last_updated: new Date().toISOString(),
-          });
+        await supabaseClient.from("asset_holdings").upsert({
+          user_id: requestData.destination,
+          asset_id: requestData.asset_id,
+          balance: supabaseClient.raw(
+            `COALESCE(balance, 0) + ${requestData.amount}`,
+          ),
+          last_updated: new Date().toISOString(),
+        });
       }
-    } else if (requestData.transaction_type === 'token_mint') {
+    } else if (requestData.transaction_type === "token_mint") {
       // Mint new tokens (only for asset creator)
       if (asset.creator_id !== user.id) {
         throw new Error("Only asset creator can mint tokens");
       }
 
       await supabaseClient
-        .from('tokenized_assets')
+        .from("tokenized_assets")
         .update({
-          circulating_supply: supabaseClient.raw(`circulating_supply + ${requestData.amount}`),
+          circulating_supply: supabaseClient.raw(
+            `circulating_supply + ${requestData.amount}`,
+          ),
           updated_at: new Date().toISOString(),
         })
-        .eq('id', requestData.asset_id);
+        .eq("id", requestData.asset_id);
 
-      await supabaseClient
-        .from('asset_holdings')
-        .upsert({
-          user_id: user.id,
-          asset_id: requestData.asset_id,
-          balance: supabaseClient.raw(`COALESCE(balance, 0) + ${requestData.amount}`),
-          last_updated: new Date().toISOString(),
-        });
-    } else if (requestData.transaction_type === 'token_burn') {
+      await supabaseClient.from("asset_holdings").upsert({
+        user_id: user.id,
+        asset_id: requestData.asset_id,
+        balance: supabaseClient.raw(
+          `COALESCE(balance, 0) + ${requestData.amount}`,
+        ),
+        last_updated: new Date().toISOString(),
+      });
+    } else if (requestData.transaction_type === "token_burn") {
       // Burn tokens
       await supabaseClient
-        .from('asset_holdings')
+        .from("asset_holdings")
         .update({
           balance: supabaseClient.raw(`balance - ${requestData.amount}`),
           last_updated: new Date().toISOString(),
         })
-        .eq('user_id', user.id)
-        .eq('asset_id', requestData.asset_id);
+        .eq("user_id", user.id)
+        .eq("asset_id", requestData.asset_id);
 
       await supabaseClient
-        .from('tokenized_assets')
+        .from("tokenized_assets")
         .update({
-          circulating_supply: supabaseClient.raw(`circulating_supply - ${requestData.amount}`),
+          circulating_supply: supabaseClient.raw(
+            `circulating_supply - ${requestData.amount}`,
+          ),
           updated_at: new Date().toISOString(),
         })
-        .eq('id', requestData.asset_id);
+        .eq("id", requestData.asset_id);
     }
 
     // Log tokenization event
-    await supabaseClient
-      .from('tokenization_events')
-      .insert({
-        user_id: user.id,
-        asset_symbol: asset.asset_symbol,
-        amount: requestData.amount,
-        event_type: requestData.transaction_type,
-        asset_issuer: asset.xrpl_issuer_address,
-        xrpl_transaction_hash: xrplResult.transactionHash,
-        xrpl_ledger_index: xrplResult.ledgerIndex,
-        transaction_status: xrplResult.status,
-        compliance_metadata: {
-          transaction_memo: requestData.memo,
-          user_verified: true,
-          timestamp: new Date().toISOString(),
-        },
-        iso20022_data: {
-          message_type: 'pacs.008.001.02', // ISO 20022 payment instruction
-          instructing_agent: asset.xrpl_issuer_address,
-          debtor_account: user.id,
-          creditor_account: requestData.destination || user.id,
-          remittance_information: `${requestData.transaction_type}: ${asset.asset_name}`,
-        },
-      });
+    await supabaseClient.from("tokenization_events").insert({
+      user_id: user.id,
+      asset_symbol: asset.asset_symbol,
+      amount: requestData.amount,
+      event_type: requestData.transaction_type,
+      asset_issuer: asset.xrpl_issuer_address,
+      xrpl_transaction_hash: xrplResult.transactionHash,
+      xrpl_ledger_index: xrplResult.ledgerIndex,
+      transaction_status: xrplResult.status,
+      compliance_metadata: {
+        transaction_memo: requestData.memo,
+        user_verified: true,
+        timestamp: new Date().toISOString(),
+      },
+      iso20022_data: {
+        message_type: "pacs.008.001.02", // ISO 20022 payment instruction
+        instructing_agent: asset.xrpl_issuer_address,
+        debtor_account: user.id,
+        creditor_account: requestData.destination || user.id,
+        remittance_information: `${requestData.transaction_type}: ${asset.asset_name}`,
+      },
+    });
 
     logStep("Transaction logged and processed");
     const execTime = Date.now() - startTime;
     logStep(`Execution time: ${execTime}ms`);
-    return new Response(JSON.stringify({
-      success: true,
-      transaction: {
-        hash: xrplResult.transactionHash,
-        ledger_index: xrplResult.ledgerIndex,
-        type: requestData.transaction_type,
-        asset_symbol: asset.asset_symbol,
-        amount: requestData.amount,
-        timestamp: new Date().toISOString(),
-      }
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-
+    return new Response(
+      JSON.stringify({
+        success: true,
+        transaction: {
+          hash: xrplResult.transactionHash,
+          ledger_index: xrplResult.ledgerIndex,
+          type: requestData.transaction_type,
+          asset_symbol: asset.asset_symbol,
+          amount: requestData.amount,
+          timestamp: new Date().toISOString(),
+        },
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      },
+    );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const execTime = Date.now() - startTime;
     logStep("ERROR in xrpl-transaction", { message: errorMessage });
     logStep(`Execution time: ${execTime}ms`);
-    return new Response(JSON.stringify({
-      error: errorMessage,
-      success: false
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({
+        error: errorMessage,
+        success: false,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      },
+    );
   }
 });
 
@@ -300,34 +320,38 @@ async function handleSmartContractExecution(
   action: string,
   parameters: any,
   userId: string,
-  supabase: any
+  supabase: any,
 ) {
   logStep("Handling smart contract execution", { action, parameters });
 
   // Get the smart contract function configuration
   const { data: contractFunction, error: contractError } = await supabase
-    .from('smart_contract_functions')
-    .select('*')
-    .eq('function_name', action)
-    .eq('deployment_status', 'deployed')
+    .from("smart_contract_functions")
+    .select("*")
+    .eq("function_name", action)
+    .eq("deployment_status", "deployed")
     .single();
 
   if (contractError) {
-    throw new Error(`Smart contract function not found or not deployed: ${action}`);
+    throw new Error(
+      `Smart contract function not found or not deployed: ${action}`,
+    );
   }
 
-  logStep("Smart contract function found", { 
+  logStep("Smart contract function found", {
     functionName: contractFunction.function_name,
-    transactionType: contractFunction.xrpl_transaction_type 
+    transactionType: contractFunction.xrpl_transaction_type,
   });
 
   // Validate parameters against contract schema
   const requiredParams = Object.keys(contractFunction.parameters);
   const providedParams = Object.keys(parameters);
-  const missingParams = requiredParams.filter(param => !providedParams.includes(param));
-  
+  const missingParams = requiredParams.filter(
+    (param) => !providedParams.includes(param),
+  );
+
   if (missingParams.length > 0) {
-    throw new Error(`Missing required parameters: ${missingParams.join(', ')}`);
+    throw new Error(`Missing required parameters: ${missingParams.join(", ")}`);
   }
 
   // Validate compliance rules
@@ -336,7 +360,7 @@ async function handleSmartContractExecution(
     action,
     parameters,
     contractFunction.compliance_rules,
-    supabase
+    supabase,
   );
 
   logStep("Compliance checks completed", { complianceChecks });
@@ -347,14 +371,14 @@ async function handleSmartContractExecution(
 
   // Create transaction queue entry
   const { data: transactionData, error: transactionError } = await supabase
-    .from('blockchain_transaction_queue')
+    .from("blockchain_transaction_queue")
     .insert({
       user_id: userId,
       function_name: action,
       transaction_type: contractFunction.xrpl_transaction_type,
       parameters: parameters,
-      status: 'pending',
-      compliance_check_status: complianceChecks
+      status: "pending",
+      compliance_check_status: complianceChecks,
     })
     .select()
     .single();
@@ -367,47 +391,44 @@ async function handleSmartContractExecution(
   const xrplResult = await simulateXRPLTransaction(
     contractFunction.xrpl_transaction_type,
     parameters,
-    supabase
+    supabase,
   );
 
   // Update transaction with result
   const { error: updateError } = await supabase
-    .from('blockchain_transaction_queue')
+    .from("blockchain_transaction_queue")
     .update({
-      status: xrplResult.success ? 'completed' : 'failed',
+      status: xrplResult.success ? "completed" : "failed",
       xrpl_transaction_hash: xrplResult.transactionHash,
       xrpl_ledger_index: xrplResult.ledgerIndex,
       error_message: xrplResult.error,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
-    .eq('id', transactionData.id);
+    .eq("id", transactionData.id);
 
   if (updateError) throw updateError;
 
-  logStep("Transaction updated", { 
+  logStep("Transaction updated", {
     success: xrplResult.success,
-    hash: xrplResult.transactionHash 
+    hash: xrplResult.transactionHash,
   });
 
   // Create audit log entry
-  await createAuditLog(
-    userId,
-    action,
-    parameters,
-    xrplResult,
-    supabase
-  );
+  await createAuditLog(userId, action, parameters, xrplResult, supabase);
 
-  return new Response(JSON.stringify({
-    success: xrplResult.success,
-    transactionId: transactionData.id,
-    transactionHash: xrplResult.transactionHash,
-    ledgerIndex: xrplResult.ledgerIndex,
-    complianceStatus: complianceChecks
-  }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-    status: xrplResult.success ? 200 : 400,
-  });
+  return new Response(
+    JSON.stringify({
+      success: xrplResult.success,
+      transactionId: transactionData.id,
+      transactionHash: xrplResult.transactionHash,
+      ledgerIndex: xrplResult.ledgerIndex,
+      complianceStatus: complianceChecks,
+    }),
+    {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: xrplResult.success ? 200 : 400,
+    },
+  );
 }
 
 // Compliance validation function
@@ -416,44 +437,45 @@ async function validateCompliance(
   action: string,
   parameters: any,
   complianceRules: any,
-  supabase: any
+  supabase: any,
 ) {
   const checks = {
     passed: true,
-    reason: '',
-    details: {}
+    reason: "",
+    details: {},
   };
 
   // Check KYC requirements
   if (complianceRules.kyc_required || complianceRules.kyc_verified) {
     const { data: kyc } = await supabase
-      .from('kyc_verification')
-      .select('verification_status')
-      .eq('user_id', userId)
-      .eq('verification_status', 'approved')
+      .from("kyc_verification")
+      .select("verification_status")
+      .eq("user_id", userId)
+      .eq("verification_status", "approved")
       .single();
 
     if (!kyc) {
       checks.passed = false;
-      checks.reason = 'KYC verification required';
+      checks.reason = "KYC verification required";
       return checks;
     }
-    checks.details.kyc_status = 'verified';
+    checks.details.kyc_status = "verified";
   }
 
   // Check daily limits
   if (complianceRules.daily_limit && parameters.amount) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const { data: todaysTransactions } = await supabase
-      .from('blockchain_transaction_queue')
-      .select('parameters')
-      .eq('user_id', userId)
-      .gte('created_at', `${today}T00:00:00.000Z`)
-      .eq('status', 'completed');
+      .from("blockchain_transaction_queue")
+      .select("parameters")
+      .eq("user_id", userId)
+      .gte("created_at", `${today}T00:00:00.000Z`)
+      .eq("status", "completed");
 
-    const todaysTotal = todaysTransactions?.reduce((total: number, tx: any) => {
-      return total + (tx.parameters?.amount || 0);
-    }, 0) || 0;
+    const todaysTotal =
+      todaysTransactions?.reduce((total: number, tx: any) => {
+        return total + (tx.parameters?.amount || 0);
+      }, 0) || 0;
 
     if (todaysTotal + parameters.amount > complianceRules.daily_limit) {
       checks.passed = false;
@@ -464,11 +486,11 @@ async function validateCompliance(
   }
 
   // Check admin approval requirements
-  if (complianceRules.admin_approval && action === 'freeze_account') {
-    checks.details.admin_approval = 'auto_approved_for_admin';
+  if (complianceRules.admin_approval && action === "freeze_account") {
+    checks.details.admin_approval = "auto_approved_for_admin";
   }
 
-  checks.details.compliance_framework = 'US_SEC_CFTC_COMPLIANT';
+  checks.details.compliance_framework = "US_SEC_CFTC_COMPLIANT";
   return checks;
 }
 
@@ -476,46 +498,49 @@ async function validateCompliance(
 async function simulateXRPLTransaction(
   transactionType: string,
   parameters: any,
-  supabase: any
+  supabase: any,
 ) {
   // In a real implementation, this would use the XRPL library
   const simulatedResults = {
-    'TrustSet': {
+    TrustSet: {
       success: true,
       transactionHash: `TS${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
       ledgerIndex: Math.floor(Math.random() * 1000000) + 80000000,
-      fee: '12'
+      fee: "12",
     },
-    'Payment': {
+    Payment: {
       success: true,
       transactionHash: `PAY${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
       ledgerIndex: Math.floor(Math.random() * 1000000) + 80000000,
-      fee: '12'
+      fee: "12",
     },
-    'OfferCreate': {
+    OfferCreate: {
       success: true,
       transactionHash: `OFF${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
       ledgerIndex: Math.floor(Math.random() * 1000000) + 80000000,
-      fee: '12'
+      fee: "12",
     },
-    'AccountSet': {
+    AccountSet: {
       success: true,
       transactionHash: `AS${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
       ledgerIndex: Math.floor(Math.random() * 1000000) + 80000000,
-      fee: '12'
-    }
+      fee: "12",
+    },
   };
 
   // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 500));
+  await new Promise((resolve) =>
+    setTimeout(resolve, Math.random() * 2000 + 500),
+  );
 
-  const result = simulatedResults[transactionType as keyof typeof simulatedResults];
+  const result =
+    simulatedResults[transactionType as keyof typeof simulatedResults];
   if (!result) {
     return {
       success: false,
       error: `Unsupported transaction type: ${transactionType}`,
       transactionHash: null,
-      ledgerIndex: null
+      ledgerIndex: null,
     };
   }
 
@@ -528,22 +553,20 @@ async function createAuditLog(
   action: string,
   parameters: any,
   xrplResult: any,
-  supabase: any
+  supabase: any,
 ) {
   try {
-    await supabase
-      .from('user_behavior_log')
-      .insert({
-        user_id: userId,
-        action: `blockchain_${action}`,
-        location_data: { source: 'xrpl_transaction_function' },
-        risk_indicators: { 
-          transaction_type: action,
-          success: xrplResult.success,
-          amount: parameters.amount || 0
-        }
-      });
+    await supabase.from("user_behavior_log").insert({
+      user_id: userId,
+      action: `blockchain_${action}`,
+      location_data: { source: "xrpl_transaction_function" },
+      risk_indicators: {
+        transaction_type: action,
+        success: xrplResult.success,
+        amount: parameters.amount || 0,
+      },
+    });
   } catch (error) {
-    console.error('Failed to create audit log:', error);
+    console.error("Failed to create audit log:", error);
   }
 }

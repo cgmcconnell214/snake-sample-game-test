@@ -102,11 +102,13 @@ const Admin = () => {
     // Load recent trades with proper joins
     const { data: tradesData } = await supabase
       .from("trade_executions")
-      .select(`
+      .select(
+        `
           *,
           buyer:profiles!buyer_id(email),
           seller:profiles!seller_id(email)
-        `)
+        `,
+      )
       .order("execution_time", { ascending: false })
       .range(tradeOffset, tradeOffset + TRADES_PER_PAGE - 1);
 
@@ -118,13 +120,15 @@ const Admin = () => {
   };
 
   const fetchAdminStats = async () => {
-    const [{ count: totalUsers }, { count: pendingAlerts }] = await Promise.all([
-      supabase.from("profiles").select("*", { count: "exact", head: true }),
-      supabase
-        .from("compliance_alerts")
-        .select("*", { count: "exact", head: true })
-        .eq("resolved", false),
-    ]);
+    const [{ count: totalUsers }, { count: pendingAlerts }] = await Promise.all(
+      [
+        supabase.from("profiles").select("*", { count: "exact", head: true }),
+        supabase
+          .from("compliance_alerts")
+          .select("*", { count: "exact", head: true })
+          .eq("resolved", false),
+      ],
+    );
 
     return {
       totalUsers: totalUsers || 0,
@@ -159,7 +163,6 @@ const Admin = () => {
     }
   };
 
-
   // loadAdminData defined above
 
   useEffect(() => {
@@ -168,7 +171,6 @@ const Admin = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.role, userOffset, alertOffset, tradeOffset]);
-
 
   const resolveAlert = async (alertId: string) => {
     try {
@@ -363,8 +365,8 @@ const Admin = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => {
                             toast({
@@ -456,7 +458,9 @@ const Admin = () => {
                 <Button
                   variant="outline"
                   onClick={() =>
-                    setAlertOffset((prev) => Math.max(0, prev - ALERTS_PER_PAGE))
+                    setAlertOffset((prev) =>
+                      Math.max(0, prev - ALERTS_PER_PAGE),
+                    )
                   }
                   disabled={alertOffset === 0}
                 >
@@ -464,7 +468,9 @@ const Admin = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setAlertOffset((prev) => prev + ALERTS_PER_PAGE)}
+                  onClick={() =>
+                    setAlertOffset((prev) => prev + ALERTS_PER_PAGE)
+                  }
                   disabled={alerts.length < ALERTS_PER_PAGE}
                 >
                   Next
@@ -525,7 +531,9 @@ const Admin = () => {
                 <Button
                   variant="outline"
                   onClick={() =>
-                    setTradeOffset((prev) => Math.max(0, prev - TRADES_PER_PAGE))
+                    setTradeOffset((prev) =>
+                      Math.max(0, prev - TRADES_PER_PAGE),
+                    )
                   }
                   disabled={tradeOffset === 0}
                 >
@@ -533,7 +541,9 @@ const Admin = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setTradeOffset((prev) => prev + TRADES_PER_PAGE)}
+                  onClick={() =>
+                    setTradeOffset((prev) => prev + TRADES_PER_PAGE)
+                  }
                   disabled={trades.length < TRADES_PER_PAGE}
                 >
                   Next

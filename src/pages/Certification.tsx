@@ -18,7 +18,9 @@ export default function Certification(): JSX.Element {
   const handleEnroll = async (certificationId: string) => {
     try {
       setEnrolling(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Authentication Required",
@@ -28,12 +30,10 @@ export default function Certification(): JSX.Element {
         return;
       }
 
-      const { error } = await supabase
-        .from("user_certifications")
-        .insert({
-          user_id: user.id,
-          certification_id: certificationId,
-        });
+      const { error } = await supabase.from("user_certifications").insert({
+        user_id: user.id,
+        certification_id: certificationId,
+      });
 
       if (error) throw error;
 
@@ -133,7 +133,11 @@ export default function Certification(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Complete essential steps to get started
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewChecklist}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewChecklist}
+            >
               View Checklist
             </Button>
           </CardContent>
@@ -150,7 +154,11 @@ export default function Certification(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Track your progress through skill levels
             </p>
-            <Button variant="outline" className="w-full" onClick={handleViewProgress}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleViewProgress}
+            >
               View Progress
             </Button>
           </CardContent>
@@ -167,7 +175,11 @@ export default function Certification(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Unlock features based on certification level
             </p>
-            <Button variant="outline" className="w-full" onClick={handleCheckAccess}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleCheckAccess}
+            >
               Check Access
             </Button>
           </CardContent>

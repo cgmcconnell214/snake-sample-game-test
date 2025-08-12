@@ -175,38 +175,64 @@ export default function LiveClasses(): JSX.Element {
         class_id: classId,
         attendee_id: user.id,
         payment_amount: 0,
-        attendance_status: 'registered',
+        attendance_status: "registered",
       });
       if (error) {
-        toast({ title: 'Error', description: error.message || 'Failed to register', variant: 'destructive' });
+        toast({
+          title: "Error",
+          description: error.message || "Failed to register",
+          variant: "destructive",
+        });
         return;
       }
-      toast({ title: 'Registered Successfully', description: `You're registered for ${classItem.title}.` });
+      toast({
+        title: "Registered Successfully",
+        description: `You're registered for ${classItem.title}.`,
+      });
       return;
     }
 
-    const provider = window.prompt("Choose payment provider: type 'stripe' or 'xrpl'", 'stripe')?.toLowerCase();
-    if (provider === 'stripe') {
-      const amount_cents = Math.round((classItem.price_per_attendee || 0) * 100);
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          amount_cents,
-          product_name: `Live Class Registration: ${classItem.title}`,
-          metadata: { resource_type: 'live_class', class_id: classId }
-        }
-      });
+    const provider = window
+      .prompt("Choose payment provider: type 'stripe' or 'xrpl'", "stripe")
+      ?.toLowerCase();
+    if (provider === "stripe") {
+      const amount_cents = Math.round(
+        (classItem.price_per_attendee || 0) * 100,
+      );
+      const { data, error } = await supabase.functions.invoke(
+        "create-payment",
+        {
+          body: {
+            amount_cents,
+            product_name: `Live Class Registration: ${classItem.title}`,
+            metadata: { resource_type: "live_class", class_id: classId },
+          },
+        },
+      );
       if (error) {
-        toast({ title: 'Payment Error', description: error.message || 'Failed to start payment', variant: 'destructive' });
+        toast({
+          title: "Payment Error",
+          description: error.message || "Failed to start payment",
+          variant: "destructive",
+        });
         return;
       }
       if (data?.url) {
-        window.open(data.url, '_blank');
-        toast({ title: 'Complete Payment', description: 'Stripe Checkout opened in a new tab. You will be registered upon successful payment.' });
+        window.open(data.url, "_blank");
+        toast({
+          title: "Complete Payment",
+          description:
+            "Stripe Checkout opened in a new tab. You will be registered upon successful payment.",
+        });
       }
-    } else if (provider === 'xrpl') {
-      toast({ title: 'XRPL Payment', description: 'XRPL wallet payment requires platform wallet configuration. Please configure XRPL_WALLET_SEED.' });
+    } else if (provider === "xrpl") {
+      toast({
+        title: "XRPL Payment",
+        description:
+          "XRPL wallet payment requires platform wallet configuration. Please configure XRPL_WALLET_SEED.",
+      });
     } else {
-      toast({ title: 'Cancelled', description: 'Registration not started.' });
+      toast({ title: "Cancelled", description: "Registration not started." });
     }
   };
 
@@ -226,7 +252,8 @@ export default function LiveClasses(): JSX.Element {
     // Navigate to a replay archive or show recorded sessions
     toast({
       title: "Archive Feature",
-      description: "Session recordings will be available after classes complete",
+      description:
+        "Session recordings will be available after classes complete",
     });
   };
 
@@ -243,64 +270,87 @@ export default function LiveClasses(): JSX.Element {
           <Plus className="h-4 w-4 mr-2" />
           Schedule Session
         </Button>
-        </div>
+      </div>
 
-        {showCalendar && (
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" /> Calendar
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Lightweight calendar: group classes by date */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(classes.reduce((acc: Record<string, LiveClass[]>, c) => {
+      {showCalendar && (
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" /> Calendar
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Lightweight calendar: group classes by date */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(
+                classes.reduce((acc: Record<string, LiveClass[]>, c) => {
                   const d = new Date(c.scheduled_at).toDateString();
                   acc[d] = acc[d] || [];
                   acc[d].push(c);
                   return acc;
-                }, {})).map(([date, items]) => (
-                  <div key={date} className="border rounded-md p-3">
-                    <div className="font-semibold mb-2">{date}</div>
-                    <ul className="space-y-2">
-                      {items.map((ci) => (
-                        <li key={ci.id} className="flex items-center justify-between text-sm">
-                          <span>{ci.title}</span>
-                          <Button size="sm" variant="outline" onClick={() => handleJoinClass(ci.id)}>RSVP</Button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-                {classes.length === 0 && <div className="text-muted-foreground">No scheduled classes.</div>}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                }, {}),
+              ).map(([date, items]) => (
+                <div key={date} className="border rounded-md p-3">
+                  <div className="font-semibold mb-2">{date}</div>
+                  <ul className="space-y-2">
+                    {items.map((ci) => (
+                      <li
+                        key={ci.id}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span>{ci.title}</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleJoinClass(ci.id)}
+                        >
+                          RSVP
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              {classes.length === 0 && (
+                <div className="text-muted-foreground">
+                  No scheduled classes.
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {showRSVP && (
-          <Card>
-            <CardHeader>
-              <CardTitle>RSVP Events</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {classes.map((c) => (
-                  <div key={c.id} className="flex items-center justify-between border rounded-md p-3">
-                    <div>
-                      <div className="font-medium">{c.title}</div>
-                      <div className="text-xs text-muted-foreground">{new Date(c.scheduled_at).toLocaleString()}</div>
+      {showRSVP && (
+        <Card>
+          <CardHeader>
+            <CardTitle>RSVP Events</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {classes.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex items-center justify-between border rounded-md p-3"
+                >
+                  <div>
+                    <div className="font-medium">{c.title}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(c.scheduled_at).toLocaleString()}
                     </div>
-                    <Button size="sm" onClick={() => handleJoinClass(c.id)}>RSVP</Button>
                   </div>
-                ))}
-                {classes.length === 0 && <div className="text-muted-foreground">No upcoming events.</div>}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
+                  <Button size="sm" onClick={() => handleJoinClass(c.id)}>
+                    RSVP
+                  </Button>
+                </div>
+              ))}
+              {classes.length === 0 && (
+                <div className="text-muted-foreground">No upcoming events.</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Upcoming Classes */}
       <div className="space-y-4">

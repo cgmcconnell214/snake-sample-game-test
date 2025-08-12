@@ -5,17 +5,17 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
+import {
+  BarChart3,
+  TrendingUp,
+  Clock,
+  CheckCircle,
   XCircle,
   AlertTriangle,
   RefreshCw,
   Download,
   Activity,
-  Database
+  Database,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -63,56 +63,81 @@ export function AgentExecutionAnalyzer() {
 
       // Fetch execution data
       const { data: executions, error } = await supabase
-        .from('ai_agent_executions')
-        .select(`
+        .from("ai_agent_executions")
+        .select(
+          `
           *,
           ai_agents (
             name
           )
-        `)
-        .gte('started_at', startDate.toISOString())
-        .lte('started_at', endDate.toISOString())
-        .order('started_at', { ascending: false });
+        `,
+        )
+        .gte("started_at", startDate.toISOString())
+        .lte("started_at", endDate.toISOString())
+        .order("started_at", { ascending: false });
 
       if (error) throw error;
 
-      const executionsWithAgentNames = executions.map(exec => ({
+      const executionsWithAgentNames = executions.map((exec) => ({
         ...exec,
-        agent_name: (exec.ai_agents as any)?.name || 'Unknown Agent'
+        agent_name: (exec.ai_agents as any)?.name || "Unknown Agent",
       }));
 
       // Calculate metrics
       const totalExecutions = executionsWithAgentNames.length;
-      const completedExecutions = executionsWithAgentNames.filter(e => e.status === 'completed');
-      const failedExecutions = executionsWithAgentNames.filter(e => e.status === 'failed');
-      const runningExecutions = executionsWithAgentNames.filter(e => e.status === 'running');
+      const completedExecutions = executionsWithAgentNames.filter(
+        (e) => e.status === "completed",
+      );
+      const failedExecutions = executionsWithAgentNames.filter(
+        (e) => e.status === "failed",
+      );
+      const runningExecutions = executionsWithAgentNames.filter(
+        (e) => e.status === "running",
+      );
 
-      const successRate = totalExecutions > 0 ? (completedExecutions.length / totalExecutions) * 100 : 0;
-      const failureRate = totalExecutions > 0 ? (failedExecutions.length / totalExecutions) * 100 : 0;
+      const successRate =
+        totalExecutions > 0
+          ? (completedExecutions.length / totalExecutions) * 100
+          : 0;
+      const failureRate =
+        totalExecutions > 0
+          ? (failedExecutions.length / totalExecutions) * 100
+          : 0;
 
       // Calculate average execution time
-      const completedWithTime = completedExecutions.filter(e => e.execution_time_ms);
-      const averageExecutionTime = completedWithTime.length > 0 
-        ? completedWithTime.reduce((sum, e) => sum + (e.execution_time_ms || 0), 0) / completedWithTime.length 
-        : 0;
+      const completedWithTime = completedExecutions.filter(
+        (e) => e.execution_time_ms,
+      );
+      const averageExecutionTime =
+        completedWithTime.length > 0
+          ? completedWithTime.reduce(
+              (sum, e) => sum + (e.execution_time_ms || 0),
+              0,
+            ) / completedWithTime.length
+          : 0;
 
       // Group by agent
-      const agentGroups = executionsWithAgentNames.reduce((acc, exec) => {
-        const key = exec.agent_id;
-        if (!acc[key]) {
-          acc[key] = {
-            agent_id: exec.agent_id,
-            agent_name: exec.agent_name,
-            executions: [],
-          };
-        }
-        acc[key].executions.push(exec);
-        return acc;
-      }, {} as Record<string, any>);
+      const agentGroups = executionsWithAgentNames.reduce(
+        (acc, exec) => {
+          const key = exec.agent_id;
+          if (!acc[key]) {
+            acc[key] = {
+              agent_id: exec.agent_id,
+              agent_name: exec.agent_name,
+              executions: [],
+            };
+          }
+          acc[key].executions.push(exec);
+          return acc;
+        },
+        {} as Record<string, any>,
+      );
 
       const executionsByAgent = Object.values(agentGroups).map((group: any) => {
         const total = group.executions.length;
-        const successful = group.executions.filter((e: any) => e.status === 'completed').length;
+        const successful = group.executions.filter(
+          (e: any) => e.status === "completed",
+        ).length;
         return {
           agent_id: group.agent_id,
           agent_name: group.agent_name,
@@ -122,26 +147,39 @@ export function AgentExecutionAnalyzer() {
       });
 
       // Performance trend by day
-      const dayGroups = executionsWithAgentNames.reduce((acc, exec) => {
-        const date = new Date(exec.started_at).toDateString();
-        if (!acc[date]) {
-          acc[date] = [];
-        }
-        acc[date].push(exec);
-        return acc;
-      }, {} as Record<string, any[]>);
+      const dayGroups = executionsWithAgentNames.reduce(
+        (acc, exec) => {
+          const date = new Date(exec.started_at).toDateString();
+          if (!acc[date]) {
+            acc[date] = [];
+          }
+          acc[date].push(exec);
+          return acc;
+        },
+        {} as Record<string, any[]>,
+      );
 
-      const performanceTrend = Object.entries(dayGroups).map(([date, execs]) => {
-        const completedExecs = execs.filter(e => e.status === 'completed' && e.execution_time_ms);
-        const avgTime = completedExecs.length > 0 
-          ? completedExecs.reduce((sum, e) => sum + (e.execution_time_ms || 0), 0) / completedExecs.length 
-          : 0;
-        return {
-          date,
-          executions: execs.length,
-          avg_time: avgTime,
-        };
-      }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const performanceTrend = Object.entries(dayGroups)
+        .map(([date, execs]) => {
+          const completedExecs = execs.filter(
+            (e) => e.status === "completed" && e.execution_time_ms,
+          );
+          const avgTime =
+            completedExecs.length > 0
+              ? completedExecs.reduce(
+                  (sum, e) => sum + (e.execution_time_ms || 0),
+                  0,
+                ) / completedExecs.length
+              : 0;
+          return {
+            date,
+            executions: execs.length,
+            avg_time: avgTime,
+          };
+        })
+        .sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        );
 
       setMetrics({
         totalExecutions,
@@ -156,9 +194,8 @@ export function AgentExecutionAnalyzer() {
         executionsByAgent,
         performanceTrend,
       });
-
     } catch (error) {
-      console.error('Error analyzing executions:', error);
+      console.error("Error analyzing executions:", error);
       toast({
         title: "Analysis Failed",
         description: "Failed to analyze execution data",
@@ -187,9 +224,11 @@ export function AgentExecutionAnalyzer() {
       recommendations: generateRecommendations(metrics),
     };
 
-    const blob = new Blob([JSON.stringify(analysisData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(analysisData, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `execution-analysis-${Date.now()}.json`;
     document.body.appendChild(a);
@@ -202,24 +241,36 @@ export function AgentExecutionAnalyzer() {
     const recommendations = [];
 
     if (metrics.successRate < 80) {
-      recommendations.push("Success rate is below 80%. Review failed executions for common patterns.");
+      recommendations.push(
+        "Success rate is below 80%. Review failed executions for common patterns.",
+      );
     }
 
     if (metrics.averageExecutionTime > 30000) {
-      recommendations.push("Average execution time is high (>30s). Consider optimizing workflow steps.");
+      recommendations.push(
+        "Average execution time is high (>30s). Consider optimizing workflow steps.",
+      );
     }
 
     if (metrics.executionsByStatus.running > metrics.totalExecutions * 0.1) {
-      recommendations.push("High number of stuck executions. Consider implementing auto-cleanup.");
+      recommendations.push(
+        "High number of stuck executions. Consider implementing auto-cleanup.",
+      );
     }
 
-    const lowPerformingAgents = metrics.executionsByAgent.filter(a => a.success_rate < 70);
+    const lowPerformingAgents = metrics.executionsByAgent.filter(
+      (a) => a.success_rate < 70,
+    );
     if (lowPerformingAgents.length > 0) {
-      recommendations.push(`${lowPerformingAgents.length} agents have success rates below 70%. Review their configurations.`);
+      recommendations.push(
+        `${lowPerformingAgents.length} agents have success rates below 70%. Review their configurations.`,
+      );
     }
 
     if (recommendations.length === 0) {
-      recommendations.push("All metrics look healthy. Continue monitoring for trends.");
+      recommendations.push(
+        "All metrics look healthy. Continue monitoring for trends.",
+      );
     }
 
     return recommendations;
@@ -233,10 +284,14 @@ export function AgentExecutionAnalyzer() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'text-green-600';
-      case 'failed': return 'text-red-600';
-      case 'running': return 'text-blue-600';
-      default: return 'text-gray-600';
+      case "completed":
+        return "text-green-600";
+      case "failed":
+        return "text-red-600";
+      case "running":
+        return "text-blue-600";
+      default:
+        return "text-gray-600";
     }
   };
 
@@ -250,8 +305,8 @@ export function AgentExecutionAnalyzer() {
           </p>
         </div>
         <div className="flex gap-2">
-          <select 
-            value={dateRange} 
+          <select
+            value={dateRange}
             onChange={(e) => setDateRange(Number(e.target.value))}
             className="px-3 py-1 border rounded"
           >
@@ -260,12 +315,24 @@ export function AgentExecutionAnalyzer() {
             <option value={30}>Last 30 days</option>
             <option value={90}>Last 90 days</option>
           </select>
-          <Button onClick={exportAnalysis} variant="outline" size="sm" disabled={!metrics}>
+          <Button
+            onClick={exportAnalysis}
+            variant="outline"
+            size="sm"
+            disabled={!metrics}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button onClick={analyzeExecutions} variant="outline" size="sm" disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          <Button
+            onClick={analyzeExecutions}
+            variant="outline"
+            size="sm"
+            disabled={isLoading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
         </div>
@@ -295,7 +362,9 @@ export function AgentExecutionAnalyzer() {
                   <Activity className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{metrics.totalExecutions}</div>
+                  <div className="text-2xl font-bold">
+                    {metrics.totalExecutions}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     Last {dateRange} days
                   </p>
@@ -354,24 +423,37 @@ export function AgentExecutionAnalyzer() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.entries(metrics.executionsByStatus).map(([status, count]) => (
-                    <div key={status} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${
-                          status === 'completed' ? 'bg-green-500' :
-                          status === 'failed' ? 'bg-red-500' :
-                          'bg-blue-500'
-                        }`} />
-                        <span className="capitalize">{status}</span>
+                  {Object.entries(metrics.executionsByStatus).map(
+                    ([status, count]) => (
+                      <div
+                        key={status}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-3 h-3 rounded-full ${
+                              status === "completed"
+                                ? "bg-green-500"
+                                : status === "failed"
+                                  ? "bg-red-500"
+                                  : "bg-blue-500"
+                            }`}
+                          />
+                          <span className="capitalize">{status}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono">{count}</span>
+                          <span className="text-xs text-muted-foreground">
+                            (
+                            {((count / metrics.totalExecutions) * 100).toFixed(
+                              1,
+                            )}
+                            %)
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono">{count}</span>
-                        <span className="text-xs text-muted-foreground">
-                          ({((count / metrics.totalExecutions) * 100).toFixed(1)}%)
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -388,7 +470,11 @@ export function AgentExecutionAnalyzer() {
                     <div key={agent.agent_id} className="p-3 border rounded">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-medium">{agent.agent_name}</h4>
-                        <Badge variant={agent.success_rate >= 80 ? 'default' : 'destructive'}>
+                        <Badge
+                          variant={
+                            agent.success_rate >= 80 ? "default" : "destructive"
+                          }
+                        >
                           {agent.success_rate.toFixed(1)}% success
                         </Badge>
                       </div>
@@ -411,7 +497,10 @@ export function AgentExecutionAnalyzer() {
               <CardContent>
                 <div className="space-y-3">
                   {metrics.performanceTrend.map((day) => (
-                    <div key={day.date} className="flex items-center justify-between p-2 border rounded">
+                    <div
+                      key={day.date}
+                      className="flex items-center justify-between p-2 border rounded"
+                    >
                       <span className="text-sm font-medium">{day.date}</span>
                       <div className="flex items-center gap-4 text-sm">
                         <span>{day.executions} executions</span>
@@ -435,7 +524,10 @@ export function AgentExecutionAnalyzer() {
               <CardContent>
                 <div className="space-y-3">
                   {generateRecommendations(metrics).map((rec, index) => (
-                    <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+                    <div
+                      key={index}
+                      className="p-3 bg-yellow-50 border border-yellow-200 rounded"
+                    >
                       <p className="text-sm text-yellow-800">{rec}</p>
                     </div>
                   ))}
@@ -448,7 +540,9 @@ export function AgentExecutionAnalyzer() {
         <Card>
           <CardContent className="text-center py-8">
             <Database className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No execution data available for analysis</p>
+            <p className="text-muted-foreground">
+              No execution data available for analysis
+            </p>
           </CardContent>
         </Card>
       )}

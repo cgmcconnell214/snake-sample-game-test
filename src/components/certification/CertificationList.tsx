@@ -63,7 +63,9 @@ export default function CertificationList({
                 {typeof cert.progress === "number" && (
                   <div className="text-center">
                     <div className="text-2xl font-bold">{cert.progress}%</div>
-                    <div className="text-xs text-muted-foreground">Complete</div>
+                    <div className="text-xs text-muted-foreground">
+                      Complete
+                    </div>
                   </div>
                 )}
               </div>
@@ -140,4 +142,3 @@ export default function CertificationList({
     </div>
   );
 }
-

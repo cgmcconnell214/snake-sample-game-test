@@ -10,19 +10,19 @@ export default function DevPlayground(): JSX.Element {
   const navigate = useNavigate();
 
   const handleNewProject = () => {
-    navigate('/app/smart-contracts');
+    navigate("/app/smart-contracts");
   };
 
   const handleStartTesting = () => {
-    navigate('/app/smart-contracts');
+    navigate("/app/smart-contracts");
   };
 
   const handleBrowseForks = () => {
-    navigate('/app/smart-contracts');
+    navigate("/app/smart-contracts");
   };
 
   const handleDeploy = () => {
-    navigate('/app/smart-contracts');
+    navigate("/app/smart-contracts");
   };
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -51,7 +51,11 @@ export default function DevPlayground(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Safe testing environment for smart contracts
             </p>
-            <Button variant="outline" className="w-full" onClick={handleStartTesting}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleStartTesting}
+            >
               Start Testing
             </Button>
           </CardContent>
@@ -68,7 +72,11 @@ export default function DevPlayground(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               Fork existing contracts and customize for your needs
             </p>
-            <Button variant="outline" className="w-full" onClick={handleBrowseForks}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleBrowseForks}
+            >
               Browse Forks
             </Button>
           </CardContent>

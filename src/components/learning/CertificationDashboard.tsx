@@ -4,9 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Award, Star, Trophy, CheckCircle, Clock, Target, 
-  Download, Share, Eye, Lock, Users, BarChart 
+import {
+  Award,
+  Star,
+  Trophy,
+  CheckCircle,
+  Clock,
+  Target,
+  Download,
+  Share,
+  Eye,
+  Lock,
+  Users,
+  BarChart,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +25,7 @@ interface Certification {
   id: string;
   name: string;
   description: string;
-  skill_level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  skill_level: "beginner" | "intermediate" | "advanced" | "expert";
   points_required: number;
   badge_image_url?: string;
   requirements: any[];
@@ -45,8 +55,12 @@ interface UserSkill {
 }
 
 export default function CertificationDashboard() {
-  const [userCertifications, setUserCertifications] = useState<UserCertification[]>([]);
-  const [availableCertifications, setAvailableCertifications] = useState<Certification[]>([]);
+  const [userCertifications, setUserCertifications] = useState<
+    UserCertification[]
+  >([]);
+  const [availableCertifications, setAvailableCertifications] = useState<
+    Certification[]
+  >([]);
   const [userSkills, setUserSkills] = useState<UserSkill[]>([]);
   const [totalPoints, setTotalPoints] = useState(0);
   const [activeTab, setActiveTab] = useState("earned");
@@ -59,15 +73,19 @@ export default function CertificationDashboard() {
   }, []);
 
   const fetchUserCertifications = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     const { data, error } = await supabase
       .from("user_certifications")
-      .select(`
+      .select(
+        `
         *,
         certifications (*)
-      `)
+      `,
+      )
       .eq("user_id", user.id)
       .order("earned_at", { ascending: false });
 
@@ -89,43 +107,50 @@ export default function CertificationDashboard() {
   };
 
   const fetchUserSkills = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     const { data, error } = await supabase
       .from("user_skills")
-      .select(`
+      .select(
+        `
         *,
         skills (*)
-      `)
+      `,
+      )
       .eq("user_id", user.id)
       .order("experience_points", { ascending: false });
 
     if (data) {
       setUserSkills(data);
-      const total = data.reduce((sum, skill) => sum + skill.experience_points, 0);
+      const total = data.reduce(
+        (sum, skill) => sum + skill.experience_points,
+        0,
+      );
       setTotalPoints(total);
     }
   };
 
   const getSkillLevelName = (level: string) => {
     const levels = {
-      'beginner': 'Novice',
-      'intermediate': 'Practitioner',
-      'advanced': 'Expert',
-      'expert': 'Master'
+      beginner: "Novice",
+      intermediate: "Practitioner",
+      advanced: "Expert",
+      expert: "Master",
     };
     return levels[level] || level;
   };
 
   const getSkillLevelColor = (level: string) => {
     const colors = {
-      'beginner': 'bg-green-500',
-      'intermediate': 'bg-blue-500',
-      'advanced': 'bg-purple-500',
-      'expert': 'bg-gold-500'
+      beginner: "bg-green-500",
+      intermediate: "bg-blue-500",
+      advanced: "bg-purple-500",
+      expert: "bg-gold-500",
     };
-    return colors[level] || 'bg-gray-500';
+    return colors[level] || "bg-gray-500";
   };
 
   const canEarnCertification = (cert: Certification) => {
@@ -133,11 +158,15 @@ export default function CertificationDashboard() {
   };
 
   const earnCertification = async (certificationId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
     // Check if user already has this certification
-    const existing = userCertifications.find(uc => uc.certification_id === certificationId);
+    const existing = userCertifications.find(
+      (uc) => uc.certification_id === certificationId,
+    );
     if (existing) {
       toast({
         title: "Already Earned",
@@ -156,10 +185,12 @@ export default function CertificationDashboard() {
         certification_id: certificationId,
         verification_code,
       })
-      .select(`
+      .select(
+        `
         *,
         certifications (*)
-      `)
+      `,
+      )
       .single();
 
     if (error) {
@@ -197,7 +228,9 @@ export default function CertificationDashboard() {
         });
       } catch (error) {
         // Fallback to clipboard
-        navigator.clipboard.writeText(`I earned the ${certification.certifications.name} certification! Verification code: ${certification.verification_code}`);
+        navigator.clipboard.writeText(
+          `I earned the ${certification.certifications.name} certification! Verification code: ${certification.verification_code}`,
+        );
         toast({
           title: "Copied to clipboard",
           description: "Certification details copied to clipboard",
@@ -227,7 +260,9 @@ export default function CertificationDashboard() {
           <CardContent className="text-center p-4">
             <Trophy className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
             <p className="text-2xl font-bold">{userCertifications.length}</p>
-            <p className="text-sm text-muted-foreground">Certifications Earned</p>
+            <p className="text-sm text-muted-foreground">
+              Certifications Earned
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -248,7 +283,7 @@ export default function CertificationDashboard() {
           <CardContent className="text-center p-4">
             <BarChart className="h-8 w-8 mx-auto mb-2 text-purple-500" />
             <p className="text-2xl font-bold">
-              {userSkills.filter(s => s.current_level >= 5).length}
+              {userSkills.filter((s) => s.current_level >= 5).length}
             </p>
             <p className="text-sm text-muted-foreground">Advanced Skills</p>
           </CardContent>
@@ -270,7 +305,8 @@ export default function CertificationDashboard() {
                 <CardContent className="text-center py-12">
                   <Award className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">
-                    You haven't earned any certifications yet. Start learning to earn your first one!
+                    You haven't earned any certifications yet. Start learning to
+                    earn your first one!
                   </p>
                 </CardContent>
               </Card>
@@ -286,11 +322,15 @@ export default function CertificationDashboard() {
                     </div>
                     <CardHeader>
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${getSkillLevelColor(cert.certifications.skill_level)}`}>
+                        <div
+                          className={`p-2 rounded-full ${getSkillLevelColor(cert.certifications.skill_level)}`}
+                        >
                           <Award className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                          <CardTitle className="text-lg">{cert.certifications.name}</CardTitle>
+                          <CardTitle className="text-lg">
+                            {cert.certifications.name}
+                          </CardTitle>
                           <Badge variant="outline">
                             {getSkillLevelName(cert.certifications.skill_level)}
                           </Badge>
@@ -304,26 +344,32 @@ export default function CertificationDashboard() {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Earned:</span>
-                          <span>{new Date(cert.earned_at).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(cert.earned_at).toLocaleDateString()}
+                          </span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span>Verification:</span>
-                          <span className="font-mono text-xs">{cert.verification_code}</span>
+                          <span className="font-mono text-xs">
+                            {cert.verification_code}
+                          </span>
                         </div>
                       </div>
                       <div className="flex gap-2 mt-4">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           className="flex-1"
-                          onClick={() => generateCertificate(cert.certification_id)}
+                          onClick={() =>
+                            generateCertificate(cert.certification_id)
+                          }
                         >
                           <Download className="h-4 w-4 mr-1" />
                           Download
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           className="flex-1"
                           onClick={() => shareCertification(cert)}
                         >
@@ -342,11 +388,16 @@ export default function CertificationDashboard() {
         <TabsContent value="available">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {availableCertifications.map((cert) => {
-              const isEarned = userCertifications.some(uc => uc.certification_id === cert.id);
+              const isEarned = userCertifications.some(
+                (uc) => uc.certification_id === cert.id,
+              );
               const canEarn = canEarnCertification(cert);
-              
+
               return (
-                <Card key={cert.id} className={`relative ${isEarned ? 'opacity-50' : ''}`}>
+                <Card
+                  key={cert.id}
+                  className={`relative ${isEarned ? "opacity-50" : ""}`}
+                >
                   {isEarned && (
                     <div className="absolute top-4 right-4">
                       <Badge variant="default">
@@ -357,7 +408,9 @@ export default function CertificationDashboard() {
                   )}
                   <CardHeader>
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${getSkillLevelColor(cert.skill_level)}`}>
+                      <div
+                        className={`p-2 rounded-full ${getSkillLevelColor(cert.skill_level)}`}
+                      >
                         {isEarned ? (
                           <Award className="h-6 w-6 text-white" />
                         ) : canEarn ? (
@@ -381,21 +434,32 @@ export default function CertificationDashboard() {
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between text-sm">
                         <span>Points Required:</span>
-                        <span className="font-semibold">{cert.points_required}</span>
+                        <span className="font-semibold">
+                          {cert.points_required}
+                        </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Your Points:</span>
-                        <span className={totalPoints >= cert.points_required ? "text-green-600 font-semibold" : "text-muted-foreground"}>
+                        <span
+                          className={
+                            totalPoints >= cert.points_required
+                              ? "text-green-600 font-semibold"
+                              : "text-muted-foreground"
+                          }
+                        >
                           {totalPoints}
                         </span>
                       </div>
-                      <Progress 
-                        value={Math.min((totalPoints / cert.points_required) * 100, 100)} 
+                      <Progress
+                        value={Math.min(
+                          (totalPoints / cert.points_required) * 100,
+                          100,
+                        )}
                         className="h-2"
                       />
                     </div>
                     {!isEarned && (
-                      <Button 
+                      <Button
                         onClick={() => earnCertification(cert.id)}
                         disabled={!canEarn}
                         className="w-full"
@@ -408,7 +472,8 @@ export default function CertificationDashboard() {
                         ) : (
                           <>
                             <Lock className="h-4 w-4 mr-2" />
-                            Points Required: {cert.points_required - totalPoints}
+                            Points Required:{" "}
+                            {cert.points_required - totalPoints}
                           </>
                         )}
                       </Button>
@@ -438,8 +503,12 @@ export default function CertificationDashboard() {
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div>
-                          <CardTitle className="text-lg">{skill.skills.name}</CardTitle>
-                          <p className="text-sm text-muted-foreground">{skill.skills.category}</p>
+                          <CardTitle className="text-lg">
+                            {skill.skills.name}
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            {skill.skills.category}
+                          </p>
                         </div>
                         <Badge variant="outline">
                           Level {skill.current_level}
@@ -453,16 +522,23 @@ export default function CertificationDashboard() {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Experience Points:</span>
-                          <span className="font-semibold">{skill.experience_points}</span>
+                          <span className="font-semibold">
+                            {skill.experience_points}
+                          </span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span>Next Level:</span>
                           <span className="text-muted-foreground">
-                            {Math.max(0, (skill.current_level + 1) * 100 - skill.experience_points)} XP needed
+                            {Math.max(
+                              0,
+                              (skill.current_level + 1) * 100 -
+                                skill.experience_points,
+                            )}{" "}
+                            XP needed
                           </span>
                         </div>
-                        <Progress 
-                          value={(skill.experience_points % 100)} 
+                        <Progress
+                          value={skill.experience_points % 100}
                           className="h-2"
                         />
                       </div>

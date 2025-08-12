@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Heart, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Heart,
+  AlertTriangle,
+  CheckCircle,
   XCircle,
   Wrench,
   RefreshCw,
@@ -16,7 +16,7 @@ import {
   Clock,
   Shield,
   Database,
-  Server
+  Server,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +25,7 @@ interface HealthCheck {
   id: string;
   name: string;
   description: string;
-  status: 'healthy' | 'warning' | 'critical' | 'unknown';
+  status: "healthy" | "warning" | "critical" | "unknown";
   score: number;
   message: string;
   details?: any;
@@ -35,7 +35,7 @@ interface HealthCheck {
 
 interface SystemHealth {
   overall_score: number;
-  status: 'healthy' | 'degraded' | 'critical';
+  status: "healthy" | "degraded" | "critical";
   checks: HealthCheck[];
   recommendations: string[];
   auto_fixes_applied: number;
@@ -50,10 +50,10 @@ export function SmartHealthMonitor() {
 
   useEffect(() => {
     performHealthCheck();
-    
+
     // Schedule periodic health checks
     const interval = setInterval(performHealthCheck, 60000); // Every minute
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -90,8 +90,12 @@ export function SmartHealthMonitor() {
       const totalScore = checks.reduce((sum, check) => sum + check.score, 0);
       const overallScore = totalScore / checks.length;
 
-      const status = overallScore >= 90 ? 'healthy' : 
-                   overallScore >= 70 ? 'degraded' : 'critical';
+      const status =
+        overallScore >= 90
+          ? "healthy"
+          : overallScore >= 70
+            ? "degraded"
+            : "critical";
 
       // Generate recommendations
       const recommendations = generateRecommendations(checks);
@@ -107,11 +111,10 @@ export function SmartHealthMonitor() {
         status,
         checks,
         recommendations,
-        auto_fixes_applied: autoFixesApplied
+        auto_fixes_applied: autoFixesApplied,
       });
-
     } catch (error) {
-      console.error('Health check failed:', error);
+      console.error("Health check failed:", error);
       toast({
         title: "Health Check Failed",
         description: "Unable to complete system health assessment",
@@ -125,40 +128,44 @@ export function SmartHealthMonitor() {
   const checkStuckExecutions = async (): Promise<HealthCheck> => {
     try {
       const { data, error } = await supabase
-        .from('ai_agent_executions')
-        .select('id, started_at')
-        .eq('status', 'running')
-        .lt('started_at', new Date(Date.now() - 30 * 60 * 1000).toISOString()); // 30 minutes ago
+        .from("ai_agent_executions")
+        .select("id, started_at")
+        .eq("status", "running")
+        .lt("started_at", new Date(Date.now() - 30 * 60 * 1000).toISOString()); // 30 minutes ago
 
       if (error) throw error;
 
       const stuckCount = data?.length || 0;
-      const score = stuckCount === 0 ? 100 : Math.max(0, 100 - (stuckCount * 10));
-      const status = stuckCount === 0 ? 'healthy' : 
-                    stuckCount <= 2 ? 'warning' : 'critical';
+      const score = stuckCount === 0 ? 100 : Math.max(0, 100 - stuckCount * 10);
+      const status =
+        stuckCount === 0 ? "healthy" : stuckCount <= 2 ? "warning" : "critical";
 
       return {
-        id: 'stuck-executions',
-        name: 'Stuck Executions',
-        description: 'Detects agent executions that are stuck in running state',
+        id: "stuck-executions",
+        name: "Stuck Executions",
+        description: "Detects agent executions that are stuck in running state",
         status,
         score,
-        message: stuckCount === 0 
-          ? 'No stuck executions detected' 
-          : `${stuckCount} executions stuck for over 30 minutes`,
-        details: { stuck_count: stuckCount, execution_ids: data?.map(d => d.id) },
+        message:
+          stuckCount === 0
+            ? "No stuck executions detected"
+            : `${stuckCount} executions stuck for over 30 minutes`,
+        details: {
+          stuck_count: stuckCount,
+          execution_ids: data?.map((d) => d.id),
+        },
         fixAvailable: stuckCount > 0,
-        lastChecked: new Date().toISOString()
+        lastChecked: new Date().toISOString(),
       };
     } catch (error) {
       return {
-        id: 'stuck-executions',
-        name: 'Stuck Executions',
-        description: 'Detects agent executions that are stuck in running state',
-        status: 'unknown',
+        id: "stuck-executions",
+        name: "Stuck Executions",
+        description: "Detects agent executions that are stuck in running state",
+        status: "unknown",
         score: 0,
-        message: 'Failed to check stuck executions',
-        lastChecked: new Date().toISOString()
+        message: "Failed to check stuck executions",
+        lastChecked: new Date().toISOString(),
       };
     }
   };
@@ -167,40 +174,45 @@ export function SmartHealthMonitor() {
     try {
       const start = Date.now();
       const { data, error } = await supabase
-        .from('ai_agents')
-        .select('id')
+        .from("ai_agents")
+        .select("id")
         .limit(1);
 
       if (error) throw error;
 
       const responseTime = Date.now() - start;
-      const score = responseTime < 100 ? 100 : 
-                    responseTime < 500 ? 80 : 
-                    responseTime < 1000 ? 60 : 30;
-      
-      const status = score >= 80 ? 'healthy' : 
-                     score >= 60 ? 'warning' : 'critical';
+      const score =
+        responseTime < 100
+          ? 100
+          : responseTime < 500
+            ? 80
+            : responseTime < 1000
+              ? 60
+              : 30;
+
+      const status =
+        score >= 80 ? "healthy" : score >= 60 ? "warning" : "critical";
 
       return {
-        id: 'database-performance',
-        name: 'Database Performance',
-        description: 'Monitors database query response times',
+        id: "database-performance",
+        name: "Database Performance",
+        description: "Monitors database query response times",
         status,
         score,
         message: `Database response time: ${responseTime}ms`,
         details: { response_time_ms: responseTime },
         fixAvailable: false,
-        lastChecked: new Date().toISOString()
+        lastChecked: new Date().toISOString(),
       };
     } catch (error) {
       return {
-        id: 'database-performance',
-        name: 'Database Performance',
-        description: 'Monitors database query response times',
-        status: 'critical',
+        id: "database-performance",
+        name: "Database Performance",
+        description: "Monitors database query response times",
+        status: "critical",
         score: 0,
-        message: 'Database connection failed',
-        lastChecked: new Date().toISOString()
+        message: "Database connection failed",
+        lastChecked: new Date().toISOString(),
       };
     }
   };
@@ -208,97 +220,120 @@ export function SmartHealthMonitor() {
   const checkAgentConfigurations = async (): Promise<HealthCheck> => {
     try {
       const { data, error } = await supabase
-        .from('ai_agents')
-        .select('id, name, configuration, workflow_data')
-        .eq('is_active', true);
+        .from("ai_agents")
+        .select("id, name, configuration, workflow_data")
+        .eq("is_active", true);
 
       if (error) throw error;
 
       let issueCount = 0;
       const issues: string[] = [];
 
-      data?.forEach(agent => {
-        if (!agent.configuration || Object.keys(agent.configuration).length === 0) {
+      data?.forEach((agent) => {
+        if (
+          !agent.configuration ||
+          Object.keys(agent.configuration).length === 0
+        ) {
           issueCount++;
           issues.push(`${agent.name}: Missing configuration`);
         }
-        
-        if (!agent.workflow_data || typeof agent.workflow_data !== 'object' || !(agent.workflow_data as any)?.steps || (agent.workflow_data as any).steps.length === 0) {
+
+        if (
+          !agent.workflow_data ||
+          typeof agent.workflow_data !== "object" ||
+          !(agent.workflow_data as any)?.steps ||
+          (agent.workflow_data as any).steps.length === 0
+        ) {
           issueCount++;
           issues.push(`${agent.name}: No workflow steps defined`);
         }
       });
 
       const totalAgents = data?.length || 0;
-      const score = totalAgents === 0 ? 100 : Math.max(0, 100 - ((issueCount / totalAgents) * 100));
-      const status = issueCount === 0 ? 'healthy' : 
-                     issueCount / totalAgents <= 0.1 ? 'warning' : 'critical';
+      const score =
+        totalAgents === 0
+          ? 100
+          : Math.max(0, 100 - (issueCount / totalAgents) * 100);
+      const status =
+        issueCount === 0
+          ? "healthy"
+          : issueCount / totalAgents <= 0.1
+            ? "warning"
+            : "critical";
 
       return {
-        id: 'agent-configurations',
-        name: 'Agent Configurations',
-        description: 'Validates agent configuration completeness',
+        id: "agent-configurations",
+        name: "Agent Configurations",
+        description: "Validates agent configuration completeness",
         status,
         score,
-        message: issueCount === 0 
-          ? 'All agent configurations are valid' 
-          : `${issueCount} configuration issues found`,
+        message:
+          issueCount === 0
+            ? "All agent configurations are valid"
+            : `${issueCount} configuration issues found`,
         details: { total_agents: totalAgents, issues },
         fixAvailable: false,
-        lastChecked: new Date().toISOString()
+        lastChecked: new Date().toISOString(),
       };
     } catch (error) {
       return {
-        id: 'agent-configurations',
-        name: 'Agent Configurations',
-        description: 'Validates agent configuration completeness',
-        status: 'unknown',
+        id: "agent-configurations",
+        name: "Agent Configurations",
+        description: "Validates agent configuration completeness",
+        status: "unknown",
         score: 0,
-        message: 'Failed to check agent configurations',
-        lastChecked: new Date().toISOString()
+        message: "Failed to check agent configurations",
+        lastChecked: new Date().toISOString(),
       };
     }
   };
 
   const checkExecutionSuccessRate = async (): Promise<HealthCheck> => {
     try {
-      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      
+      const yesterday = new Date(
+        Date.now() - 24 * 60 * 60 * 1000,
+      ).toISOString();
+
       const { data, error } = await supabase
-        .from('ai_agent_executions')
-        .select('status')
-        .gte('started_at', yesterday);
+        .from("ai_agent_executions")
+        .select("status")
+        .gte("started_at", yesterday);
 
       if (error) throw error;
 
       const total = data?.length || 0;
-      const successful = data?.filter(e => e.status === 'completed').length || 0;
+      const successful =
+        data?.filter((e) => e.status === "completed").length || 0;
       const successRate = total === 0 ? 100 : (successful / total) * 100;
 
       const score = successRate;
-      const status = successRate >= 90 ? 'healthy' : 
-                     successRate >= 70 ? 'warning' : 'critical';
+      const status =
+        successRate >= 90
+          ? "healthy"
+          : successRate >= 70
+            ? "warning"
+            : "critical";
 
       return {
-        id: 'execution-success-rate',
-        name: 'Execution Success Rate',
-        description: 'Monitors execution success rate over last 24 hours',
+        id: "execution-success-rate",
+        name: "Execution Success Rate",
+        description: "Monitors execution success rate over last 24 hours",
         status,
         score,
         message: `${successRate.toFixed(1)}% success rate (${successful}/${total})`,
         details: { success_rate: successRate, successful, total },
         fixAvailable: false,
-        lastChecked: new Date().toISOString()
+        lastChecked: new Date().toISOString(),
       };
     } catch (error) {
       return {
-        id: 'execution-success-rate',
-        name: 'Execution Success Rate',
-        description: 'Monitors execution success rate over last 24 hours',
-        status: 'unknown',
+        id: "execution-success-rate",
+        name: "Execution Success Rate",
+        description: "Monitors execution success rate over last 24 hours",
+        status: "unknown",
         score: 0,
-        message: 'Failed to calculate success rate',
-        lastChecked: new Date().toISOString()
+        message: "Failed to calculate success rate",
+        lastChecked: new Date().toISOString(),
       };
     }
   };
@@ -310,23 +345,22 @@ export function SmartHealthMonitor() {
     const memoryUsage = Math.random() * 100;
     const maxUsage = Math.max(cpuUsage, memoryUsage);
 
-    const score = maxUsage < 70 ? 100 : 
-                  maxUsage < 85 ? 80 : 
-                  maxUsage < 95 ? 60 : 30;
+    const score =
+      maxUsage < 70 ? 100 : maxUsage < 85 ? 80 : maxUsage < 95 ? 60 : 30;
 
-    const status = score >= 80 ? 'healthy' : 
-                   score >= 60 ? 'warning' : 'critical';
+    const status =
+      score >= 80 ? "healthy" : score >= 60 ? "warning" : "critical";
 
     return {
-      id: 'system-resources',
-      name: 'System Resources',
-      description: 'Monitors CPU and memory usage',
+      id: "system-resources",
+      name: "System Resources",
+      description: "Monitors CPU and memory usage",
       status,
       score,
       message: `CPU: ${cpuUsage.toFixed(1)}%, Memory: ${memoryUsage.toFixed(1)}%`,
       details: { cpu_usage: cpuUsage, memory_usage: memoryUsage },
       fixAvailable: false,
-      lastChecked: new Date().toISOString()
+      lastChecked: new Date().toISOString(),
     };
   };
 
@@ -334,41 +368,49 @@ export function SmartHealthMonitor() {
     try {
       // Check for orphaned execution logs
       const { data: orphanedLogs, error: logsError } = await supabase
-        .from('ai_agent_execution_logs')
-        .select('execution_id')
-        .not('execution_id', 'in', 
-          '(SELECT id FROM ai_agent_executions WHERE id IS NOT NULL)'
+        .from("ai_agent_execution_logs")
+        .select("execution_id")
+        .not(
+          "execution_id",
+          "in",
+          "(SELECT id FROM ai_agent_executions WHERE id IS NOT NULL)",
         );
 
       if (logsError) throw logsError;
 
       const orphanedCount = orphanedLogs?.length || 0;
-      const score = orphanedCount === 0 ? 100 : Math.max(0, 100 - orphanedCount);
-      const status = orphanedCount === 0 ? 'healthy' : 
-                     orphanedCount <= 10 ? 'warning' : 'critical';
+      const score =
+        orphanedCount === 0 ? 100 : Math.max(0, 100 - orphanedCount);
+      const status =
+        orphanedCount === 0
+          ? "healthy"
+          : orphanedCount <= 10
+            ? "warning"
+            : "critical";
 
       return {
-        id: 'data-consistency',
-        name: 'Data Consistency',
-        description: 'Checks for data integrity issues',
+        id: "data-consistency",
+        name: "Data Consistency",
+        description: "Checks for data integrity issues",
         status,
         score,
-        message: orphanedCount === 0 
-          ? 'No data consistency issues found' 
-          : `${orphanedCount} orphaned log entries detected`,
+        message:
+          orphanedCount === 0
+            ? "No data consistency issues found"
+            : `${orphanedCount} orphaned log entries detected`,
         details: { orphaned_logs: orphanedCount },
         fixAvailable: orphanedCount > 0,
-        lastChecked: new Date().toISOString()
+        lastChecked: new Date().toISOString(),
       };
     } catch (error) {
       return {
-        id: 'data-consistency',
-        name: 'Data Consistency',
-        description: 'Checks for data integrity issues',
-        status: 'unknown',
+        id: "data-consistency",
+        name: "Data Consistency",
+        description: "Checks for data integrity issues",
+        status: "unknown",
         score: 0,
-        message: 'Failed to check data consistency',
-        lastChecked: new Date().toISOString()
+        message: "Failed to check data consistency",
+        lastChecked: new Date().toISOString(),
       };
     }
   };
@@ -376,33 +418,41 @@ export function SmartHealthMonitor() {
   const generateRecommendations = (checks: HealthCheck[]): string[] => {
     const recommendations: string[] = [];
 
-    checks.forEach(check => {
-      if (check.status === 'critical') {
+    checks.forEach((check) => {
+      if (check.status === "critical") {
         switch (check.id) {
-          case 'stuck-executions':
-            recommendations.push('Enable auto-cleanup for stuck executions');
+          case "stuck-executions":
+            recommendations.push("Enable auto-cleanup for stuck executions");
             break;
-          case 'database-performance':
-            recommendations.push('Consider database optimization or scaling');
+          case "database-performance":
+            recommendations.push("Consider database optimization or scaling");
             break;
-          case 'execution-success-rate':
-            recommendations.push('Review failed executions for common patterns');
+          case "execution-success-rate":
+            recommendations.push(
+              "Review failed executions for common patterns",
+            );
             break;
         }
-      } else if (check.status === 'warning') {
+      } else if (check.status === "warning") {
         switch (check.id) {
-          case 'agent-configurations':
-            recommendations.push('Review and update incomplete agent configurations');
+          case "agent-configurations":
+            recommendations.push(
+              "Review and update incomplete agent configurations",
+            );
             break;
-          case 'system-resources':
-            recommendations.push('Monitor system resources and consider scaling');
+          case "system-resources":
+            recommendations.push(
+              "Monitor system resources and consider scaling",
+            );
             break;
         }
       }
     });
 
     if (recommendations.length === 0) {
-      recommendations.push('System is healthy. Continue monitoring for optimal performance.');
+      recommendations.push(
+        "System is healthy. Continue monitoring for optimal performance.",
+      );
     }
 
     return recommendations;
@@ -412,21 +462,23 @@ export function SmartHealthMonitor() {
     let fixesApplied = 0;
 
     for (const check of checks) {
-      if (check.fixAvailable && check.status !== 'healthy') {
+      if (check.fixAvailable && check.status !== "healthy") {
         try {
           switch (check.id) {
-            case 'stuck-executions':
+            case "stuck-executions":
               // Auto-fix stuck executions
-              await supabase.rpc('cleanup_stuck_executions');
+              await supabase.rpc("cleanup_stuck_executions");
               fixesApplied++;
               break;
-            case 'data-consistency':
+            case "data-consistency":
               // Clean up orphaned logs
               await supabase
-                .from('ai_agent_execution_logs')
+                .from("ai_agent_execution_logs")
                 .delete()
-                .not('execution_id', 'in', 
-                  '(SELECT id FROM ai_agent_executions WHERE id IS NOT NULL)'
+                .not(
+                  "execution_id",
+                  "in",
+                  "(SELECT id FROM ai_agent_executions WHERE id IS NOT NULL)",
                 );
               fixesApplied++;
               break;
@@ -443,7 +495,7 @@ export function SmartHealthMonitor() {
   const manualFix = async (checkId: string) => {
     setIsFixing(true);
     try {
-      await performAutoFixes([health!.checks.find(c => c.id === checkId)!]);
+      await performAutoFixes([health!.checks.find((c) => c.id === checkId)!]);
       toast({
         title: "Fix Applied",
         description: "Issue has been resolved",
@@ -462,11 +514,11 @@ export function SmartHealthMonitor() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'healthy':
+      case "healthy":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'warning':
+      case "warning":
         return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'critical':
+      case "critical":
         return <XCircle className="h-4 w-4 text-red-500" />;
       default:
         return <Activity className="h-4 w-4 text-gray-500" />;
@@ -475,10 +527,14 @@ export function SmartHealthMonitor() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy': return 'text-green-600 bg-green-50';
-      case 'warning': return 'text-yellow-600 bg-yellow-50';
-      case 'critical': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case "healthy":
+        return "text-green-600 bg-green-50";
+      case "warning":
+        return "text-yellow-600 bg-yellow-50";
+      case "critical":
+        return "text-red-600 bg-red-50";
+      default:
+        return "text-gray-600 bg-gray-50";
     }
   };
 
@@ -501,10 +557,17 @@ export function SmartHealthMonitor() {
             size="sm"
           >
             <Shield className="h-4 w-4 mr-2" />
-            Auto-Fix {autoFixEnabled ? 'ON' : 'OFF'}
+            Auto-Fix {autoFixEnabled ? "ON" : "OFF"}
           </Button>
-          <Button onClick={performHealthCheck} variant="outline" size="sm" disabled={isScanning}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isScanning ? 'animate-spin' : ''}`} />
+          <Button
+            onClick={performHealthCheck}
+            variant="outline"
+            size="sm"
+            disabled={isScanning}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isScanning ? "animate-spin" : ""}`}
+            />
             Scan Now
           </Button>
         </div>
@@ -526,7 +589,9 @@ export function SmartHealthMonitor() {
                   {getStatusIcon(health.status)}
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{health.overall_score.toFixed(0)}%</div>
+                  <div className="text-2xl font-bold">
+                    {health.overall_score.toFixed(0)}%
+                  </div>
                   <Progress value={health.overall_score} className="mt-2" />
                   <Badge className={`mt-2 ${getStatusColor(health.status)}`}>
                     {health.status.toUpperCase()}
@@ -540,19 +605,30 @@ export function SmartHealthMonitor() {
                   <Activity className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{health.checks.length}</div>
+                  <div className="text-2xl font-bold">
+                    {health.checks.length}
+                  </div>
                   <div className="flex gap-2 mt-2">
                     <div className="flex items-center gap-1 text-xs">
                       <CheckCircle className="h-3 w-3 text-green-500" />
-                      {health.checks.filter(c => c.status === 'healthy').length}
+                      {
+                        health.checks.filter((c) => c.status === "healthy")
+                          .length
+                      }
                     </div>
                     <div className="flex items-center gap-1 text-xs">
                       <AlertTriangle className="h-3 w-3 text-yellow-500" />
-                      {health.checks.filter(c => c.status === 'warning').length}
+                      {
+                        health.checks.filter((c) => c.status === "warning")
+                          .length
+                      }
                     </div>
                     <div className="flex items-center gap-1 text-xs">
                       <XCircle className="h-3 w-3 text-red-500" />
-                      {health.checks.filter(c => c.status === 'critical').length}
+                      {
+                        health.checks.filter((c) => c.status === "critical")
+                          .length
+                      }
                     </div>
                   </div>
                 </CardContent>
@@ -564,7 +640,9 @@ export function SmartHealthMonitor() {
                   <Zap className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{health.auto_fixes_applied}</div>
+                  <div className="text-2xl font-bold">
+                    {health.auto_fixes_applied}
+                  </div>
                   <p className="text-xs text-muted-foreground mt-2">
                     Last scan: {new Date().toLocaleTimeString()}
                   </p>
@@ -575,7 +653,7 @@ export function SmartHealthMonitor() {
 
           <TabsContent value="checks" className="space-y-4">
             <div className="grid gap-4">
-              {health.checks.map(check => (
+              {health.checks.map((check) => (
                 <Card key={check.id}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -583,14 +661,16 @@ export function SmartHealthMonitor() {
                         {getStatusIcon(check.status)}
                         <div>
                           <h4 className="font-medium">{check.name}</h4>
-                          <p className="text-sm text-muted-foreground">{check.description}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {check.description}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(check.status)}>
                           {check.score.toFixed(0)}%
                         </Badge>
-                        {check.fixAvailable && check.status !== 'healthy' && (
+                        {check.fixAvailable && check.status !== "healthy" && (
                           <Button
                             onClick={() => manualFix(check.id)}
                             variant="outline"
@@ -617,7 +697,8 @@ export function SmartHealthMonitor() {
                       </details>
                     )}
                     <p className="text-xs text-muted-foreground mt-2">
-                      Last checked: {new Date(check.lastChecked).toLocaleString()}
+                      Last checked:{" "}
+                      {new Date(check.lastChecked).toLocaleString()}
                     </p>
                   </CardContent>
                 </Card>
@@ -636,7 +717,10 @@ export function SmartHealthMonitor() {
               <CardContent>
                 <div className="space-y-3">
                   {health.recommendations.map((rec, index) => (
-                    <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+                    <div
+                      key={index}
+                      className="p-3 bg-yellow-50 border border-yellow-200 rounded"
+                    >
                       <p className="text-sm text-yellow-800">{rec}</p>
                     </div>
                   ))}

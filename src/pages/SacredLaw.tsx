@@ -48,8 +48,10 @@ export default function SacredLaw(): JSX.Element {
   });
   const { toast } = useToast();
   const [lawPdfs, setLawPdfs] = useState<{ name: string; url: string }[]>([]);
-  const [selectedPdf, setSelectedPdf] =
-    useState<{ name: string; url: string } | null>(null);
+  const [selectedPdf, setSelectedPdf] = useState<{
+    name: string;
+    url: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchPrinciples();
@@ -107,9 +109,8 @@ export default function SacredLaw(): JSX.Element {
     const files =
       data?.map((file) => ({
         name: file.name,
-        url: supabase.storage
-          .from("law-pdfs")
-          .getPublicUrl(file.name).data.publicUrl,
+        url: supabase.storage.from("law-pdfs").getPublicUrl(file.name).data
+          .publicUrl,
       })) || [];
     setLawPdfs(files);
   };
@@ -162,8 +163,12 @@ export default function SacredLaw(): JSX.Element {
     });
   };
 
-  const [studyPrinciple, setStudyPrinciple] = useState<SacredPrinciple | null>(null);
-  const [editPrinciple, setEditPrinciple] = useState<SacredPrinciple | null>(null);
+  const [studyPrinciple, setStudyPrinciple] = useState<SacredPrinciple | null>(
+    null,
+  );
+  const [editPrinciple, setEditPrinciple] = useState<SacredPrinciple | null>(
+    null,
+  );
 
   const handleLearnPrinciple = (principleId: string) => {
     const principle = principles.find((p) => p.id === principleId) || null;
@@ -222,8 +227,8 @@ export default function SacredLaw(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               The unchanging divine principle guiding all commerce
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={() => handleLearnPrinciple("gods-constant")}
             >
@@ -243,8 +248,8 @@ export default function SacredLaw(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               The foundational pillars of sacred governance
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleViewPillars}
             >
@@ -264,8 +269,8 @@ export default function SacredLaw(): JSX.Element {
             <p className="text-sm text-muted-foreground mb-4">
               As above, so below - the law of correspondence
             </p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={handleStudyFramework}
             >
@@ -289,19 +294,13 @@ export default function SacredLaw(): JSX.Element {
               key={pdf.name}
               className="flex items-center justify-between p-3 border rounded-lg"
             >
-              <span className="text-sm font-medium truncate">
-                {pdf.name}
-              </span>
+              <span className="text-sm font-medium truncate">{pdf.name}</span>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setSelectedPdf(pdf)}>
                   Preview
                 </Button>
                 <Button asChild variant="outline">
-                  <a
-                    href={pdf.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href={pdf.url} target="_blank" rel="noopener noreferrer">
                     Download
                   </a>
                 </Button>
@@ -359,16 +358,16 @@ export default function SacredLaw(): JSX.Element {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="flex-1"
                     onClick={() => handleLearnPrinciple(principle.id)}
                   >
                     Study
                   </Button>
                   {isAdmin && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="icon"
                       aria-label="Edit principle"
                       onClick={(e) => {
@@ -387,13 +386,21 @@ export default function SacredLaw(): JSX.Element {
       </div>
 
       {studyPrinciple && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setStudyPrinciple(null)}>
-          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => setStudyPrinciple(null)}
+        >
+          <Card
+            className="w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <CardHeader>
               <CardTitle>{studyPrinciple.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-sm text-foreground/90">{studyPrinciple.content}</p>
+              <p className="whitespace-pre-wrap text-sm text-foreground/90">
+                {studyPrinciple.content}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -490,8 +497,14 @@ export default function SacredLaw(): JSX.Element {
       )}
 
       {editPrinciple && isAdmin && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setEditPrinciple(null)}>
-          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => setEditPrinciple(null)}
+        >
+          <Card
+            className="w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <CardHeader>
               <CardTitle>Edit Sacred Principle</CardTitle>
             </CardHeader>
@@ -501,7 +514,12 @@ export default function SacredLaw(): JSX.Element {
                 <Input
                   id="title_edit"
                   value={editPrinciple.title}
-                  onChange={(e) => setEditPrinciple({ ...editPrinciple, title: e.target.value })}
+                  onChange={(e) =>
+                    setEditPrinciple({
+                      ...editPrinciple,
+                      title: e.target.value,
+                    })
+                  }
                 />
               </div>
               <div>
@@ -510,7 +528,12 @@ export default function SacredLaw(): JSX.Element {
                   id="order_edit"
                   type="number"
                   value={editPrinciple.principle_order}
-                  onChange={(e) => setEditPrinciple({ ...editPrinciple, principle_order: parseInt(e.target.value) || 1 })}
+                  onChange={(e) =>
+                    setEditPrinciple({
+                      ...editPrinciple,
+                      principle_order: parseInt(e.target.value) || 1,
+                    })
+                  }
                 />
               </div>
               <div>
@@ -518,7 +541,12 @@ export default function SacredLaw(): JSX.Element {
                 <Textarea
                   id="content_edit"
                   value={editPrinciple.content}
-                  onChange={(e) => setEditPrinciple({ ...editPrinciple, content: e.target.value })}
+                  onChange={(e) =>
+                    setEditPrinciple({
+                      ...editPrinciple,
+                      content: e.target.value,
+                    })
+                  }
                   className="min-h-[200px]"
                 />
               </div>
@@ -526,25 +554,37 @@ export default function SacredLaw(): JSX.Element {
                 <Button
                   onClick={async () => {
                     const { error } = await supabase
-                      .from('sacred_law_principles')
+                      .from("sacred_law_principles")
                       .update({
                         title: editPrinciple.title,
                         content: editPrinciple.content,
                         principle_order: editPrinciple.principle_order,
                       })
-                      .eq('id', editPrinciple.id);
+                      .eq("id", editPrinciple.id);
                     if (error) {
-                      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+                      toast({
+                        title: "Error",
+                        description: error.message,
+                        variant: "destructive",
+                      });
                       return;
                     }
-                    toast({ title: 'Updated', description: 'Principle updated successfully' });
+                    toast({
+                      title: "Updated",
+                      description: "Principle updated successfully",
+                    });
                     setEditPrinciple(null);
                     fetchPrinciples();
                   }}
                 >
                   Save Changes
                 </Button>
-                <Button variant="outline" onClick={() => setEditPrinciple(null)}>Cancel</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditPrinciple(null)}
+                >
+                  Cancel
+                </Button>
               </div>
             </CardContent>
           </Card>

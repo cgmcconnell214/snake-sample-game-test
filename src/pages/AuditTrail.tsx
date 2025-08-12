@@ -54,7 +54,9 @@ const AuditTrail = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(null);
+  const [selectedAuditLog, setSelectedAuditLog] = useState<AuditLog | null>(
+    null,
+  );
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [searchParams] = useSearchParams();
 
@@ -144,7 +146,7 @@ const AuditTrail = () => {
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage) || 1;
   const paginatedLogs = filteredLogs.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const handleExport = () => {
@@ -380,7 +382,7 @@ const AuditTrail = () => {
                 auditLogs.filter(
                   (log) =>
                     new Date(log.timestamp).toDateString() ===
-                    new Date().toDateString()
+                    new Date().toDateString(),
                 ).length
               }
             </div>

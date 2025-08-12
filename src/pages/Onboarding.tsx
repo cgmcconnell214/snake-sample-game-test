@@ -8,28 +8,54 @@ import { supabase } from "@/integrations/supabase/client";
 export default function Onboarding(): JSX.Element {
   const { toast } = useToast();
   const [steps, setSteps] = useState([
-    { key: 'kyc', label: 'Complete KYC Verification', done: false, link: '/app/kyc' },
-    { key: 'profile', label: 'Complete Profile Details', done: false, link: '/app/profile' },
-    { key: 'first-course', label: 'Enroll in Your First Course', done: false, link: '/app/learning' },
-    { key: 'join-class', label: 'Join a Live Class', done: false, link: '/app/live-classes/new' },
+    {
+      key: "kyc",
+      label: "Complete KYC Verification",
+      done: false,
+      link: "/app/kyc",
+    },
+    {
+      key: "profile",
+      label: "Complete Profile Details",
+      done: false,
+      link: "/app/profile",
+    },
+    {
+      key: "first-course",
+      label: "Enroll in Your First Course",
+      done: false,
+      link: "/app/learning",
+    },
+    {
+      key: "join-class",
+      label: "Join a Live Class",
+      done: false,
+      link: "/app/live-classes/new",
+    },
   ]);
 
   useEffect(() => {
-    document.title = 'Onboarding Checklist';
+    document.title = "Onboarding Checklist";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', 'Complete your onboarding steps.');
+    if (metaDesc)
+      metaDesc.setAttribute("content", "Complete your onboarding steps.");
 
     const loadProgress = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data, error } = await (supabase as any)
-        .from('onboarding_progress')
-        .select('step_key, completed')
-        .eq('user_id', user.id);
+        .from("onboarding_progress")
+        .select("step_key, completed")
+        .eq("user_id", user.id);
 
       if (error) {
-        toast({ variant: 'destructive', description: 'Failed to load progress.' });
+        toast({
+          variant: "destructive",
+          description: "Failed to load progress.",
+        });
         return;
       }
 
@@ -55,22 +81,29 @@ export default function Onboarding(): JSX.Element {
       return copy;
     });
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
 
-    await supabase.from('user_behavior_log').insert({
+    await supabase.from("user_behavior_log").insert({
       user_id: user.id,
-      action: `onboarding_${steps[idx].key}_${newStatus ? 'done' : 'undone'}`,
+      action: `onboarding_${steps[idx].key}_${newStatus ? "done" : "undone"}`,
     });
 
-    const { error } = await (supabase as any).from('onboarding_progress').upsert({
-      user_id: user.id,
-      step_key: steps[idx].key,
-      completed: newStatus,
-    });
+    const { error } = await (supabase as any)
+      .from("onboarding_progress")
+      .upsert({
+        user_id: user.id,
+        step_key: steps[idx].key,
+        completed: newStatus,
+      });
 
     if (error) {
-      toast({ variant: 'destructive', description: 'Failed to save progress.' });
+      toast({
+        variant: "destructive",
+        description: "Failed to save progress.",
+      });
     }
   };
 
@@ -79,7 +112,9 @@ export default function Onboarding(): JSX.Element {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Onboarding Checklist</h1>
-          <p className="text-muted-foreground">Track and complete your getting-started steps</p>
+          <p className="text-muted-foreground">
+            Track and complete your getting-started steps
+          </p>
         </div>
       </div>
 
@@ -91,10 +126,17 @@ export default function Onboarding(): JSX.Element {
             </CardHeader>
             <CardContent className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Checkbox checked={s.done} onCheckedChange={() => toggleStep(idx)} />
-                <span className="text-sm text-muted-foreground">Mark complete</span>
+                <Checkbox
+                  checked={s.done}
+                  onCheckedChange={() => toggleStep(idx)}
+                />
+                <span className="text-sm text-muted-foreground">
+                  Mark complete
+                </span>
               </div>
-              <Button asChild variant="outline"><a href={s.link}>Go</a></Button>
+              <Button asChild variant="outline">
+                <a href={s.link}>Go</a>
+              </Button>
             </CardContent>
           </Card>
         ))}

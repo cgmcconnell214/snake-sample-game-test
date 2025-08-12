@@ -4,18 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Monitor, 
-  AlertTriangle, 
-  Brain, 
-  Gauge, 
+import {
+  Monitor,
+  AlertTriangle,
+  Brain,
+  Gauge,
   Activity,
   Database,
   Server,
   Cpu,
   HardDrive,
   Network,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,13 +43,15 @@ export default function SystemDiagnostics(): JSX.Element {
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const timeFormatter = new Intl.DateTimeFormat(undefined, { timeStyle: "medium" });
+  const timeFormatter = new Intl.DateTimeFormat(undefined, {
+    timeStyle: "medium",
+  });
   const { toast } = useToast();
 
   useEffect(() => {
     fetchSystemMetrics();
     fetchAuditEvents();
-    
+
     // Auto-refresh every 30 seconds
     const interval = setInterval(() => {
       fetchSystemMetrics();
@@ -68,43 +70,43 @@ export default function SystemDiagnostics(): JSX.Element {
           value: Math.floor(Math.random() * 30) + 15,
           unit: "%",
           status: "healthy",
-          trend: "stable"
+          trend: "stable",
         },
         {
           name: "Memory Usage",
           value: Math.floor(Math.random() * 25) + 45,
           unit: "%",
           status: "healthy",
-          trend: "up"
+          trend: "up",
         },
         {
           name: "Database Connections",
           value: Math.floor(Math.random() * 20) + 85,
           unit: "connections",
           status: "warning",
-          trend: "stable"
+          trend: "stable",
         },
         {
           name: "API Response Time",
           value: Math.floor(Math.random() * 100) + 120,
           unit: "ms",
           status: "healthy",
-          trend: "down"
+          trend: "down",
         },
         {
           name: "Storage Usage",
           value: Math.floor(Math.random() * 15) + 65,
           unit: "%",
           status: "healthy",
-          trend: "up"
+          trend: "up",
         },
         {
           name: "Network Throughput",
           value: Math.floor(Math.random() * 50) + 200,
           unit: "MB/s",
           status: "healthy",
-          trend: "stable"
-        }
+          trend: "stable",
+        },
       ];
 
       setMetrics(mockMetrics);
@@ -131,12 +133,9 @@ export default function SystemDiagnostics(): JSX.Element {
         id: e.id,
         timestamp: e.created_at,
         event_type: (e.request_data as any)?.action ?? "unknown",
-        severity:
-          ((e.response_data as any)?.status === "success" ? "info" : "error") as
-            | "info"
-            | "warning"
-            | "error"
-            | "critical",
+        severity: ((e.response_data as any)?.status === "success"
+          ? "info"
+          : "error") as "info" | "warning" | "error" | "critical",
         source: (e.security_context as any)?.ip_address || "system",
         message: (e.response_data as any)?.status ?? "",
         metadata: e,
@@ -150,14 +149,14 @@ export default function SystemDiagnostics(): JSX.Element {
 
   const runDiagnostics = async () => {
     setIsRunningDiagnostics(true);
-    
+
     try {
       // Simulate diagnostic run
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
       await fetchSystemMetrics();
       await fetchAuditEvents();
-      
+
       toast({
         title: "Diagnostics Complete",
         description: "System health check completed successfully",
@@ -218,9 +217,9 @@ export default function SystemDiagnostics(): JSX.Element {
     }
   };
 
-  const healthyMetrics = metrics.filter(m => m.status === "healthy").length;
-  const warningMetrics = metrics.filter(m => m.status === "warning").length;
-  const criticalMetrics = metrics.filter(m => m.status === "critical").length;
+  const healthyMetrics = metrics.filter((m) => m.status === "healthy").length;
+  const warningMetrics = metrics.filter((m) => m.status === "warning").length;
+  const criticalMetrics = metrics.filter((m) => m.status === "critical").length;
   const overallHealth = (healthyMetrics / metrics.length) * 100;
 
   return (
@@ -236,11 +235,10 @@ export default function SystemDiagnostics(): JSX.Element {
           <div className="text-sm text-muted-foreground">
             Last updated: {timeFormatter.format(lastUpdate)}
           </div>
-          <Button 
-            onClick={runDiagnostics} 
-            disabled={isRunningDiagnostics}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRunningDiagnostics ? 'animate-spin' : ''}`} />
+          <Button onClick={runDiagnostics} disabled={isRunningDiagnostics}>
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isRunningDiagnostics ? "animate-spin" : ""}`}
+            />
             {isRunningDiagnostics ? "Running..." : "Run Diagnostics"}
           </Button>
         </div>
@@ -250,22 +248,30 @@ export default function SystemDiagnostics(): JSX.Element {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overall Health</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Overall Health
+            </CardTitle>
             <Gauge className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{Math.round(overallHealth)}%</div>
+            <div className="text-2xl font-bold">
+              {Math.round(overallHealth)}%
+            </div>
             <Progress value={overallHealth} className="mt-2" />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Healthy Systems</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Healthy Systems
+            </CardTitle>
             <Monitor className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">{healthyMetrics}</div>
+            <div className="text-2xl font-bold text-green-500">
+              {healthyMetrics}
+            </div>
             <p className="text-xs text-muted-foreground">Operating normally</p>
           </CardContent>
         </Card>
@@ -276,19 +282,27 @@ export default function SystemDiagnostics(): JSX.Element {
             <AlertTriangle className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-500">{warningMetrics}</div>
+            <div className="text-2xl font-bold text-yellow-500">
+              {warningMetrics}
+            </div>
             <p className="text-xs text-muted-foreground">Need attention</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Critical Issues</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Critical Issues
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-500">{criticalMetrics}</div>
-            <p className="text-xs text-muted-foreground">Immediate action required</p>
+            <div className="text-2xl font-bold text-red-500">
+              {criticalMetrics}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Immediate action required
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -343,7 +357,10 @@ export default function SystemDiagnostics(): JSX.Element {
             <CardContent>
               <div className="space-y-4">
                 {auditEvents.map((event) => (
-                  <div key={event.id} className="flex items-start gap-4 p-4 border rounded-lg">
+                  <div
+                    key={event.id}
+                    className="flex items-start gap-4 p-4 border rounded-lg"
+                  >
                     <div className="flex flex-col items-center">
                       <Badge variant={getSeverityColor(event.severity)}>
                         {event.severity}
@@ -352,16 +369,24 @@ export default function SystemDiagnostics(): JSX.Element {
                         {timeFormatter.format(new Date(event.timestamp))}
                       </span>
                     </div>
-                    
+
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{event.event_type.replace(/_/g, ' ')}</h4>
-                        <span className="text-xs text-muted-foreground">from {event.source}</span>
+                        <h4 className="font-medium">
+                          {event.event_type.replace(/_/g, " ")}
+                        </h4>
+                        <span className="text-xs text-muted-foreground">
+                          from {event.source}
+                        </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{event.message}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {event.message}
+                      </p>
                       {event.metadata && (
                         <details className="mt-2">
-                          <summary className="text-xs cursor-pointer">View metadata</summary>
+                          <summary className="text-xs cursor-pointer">
+                            View metadata
+                          </summary>
                           <pre className="text-xs bg-muted p-2 rounded mt-1 overflow-auto">
                             {JSON.stringify(event.metadata, null, 2)}
                           </pre>
@@ -411,7 +436,7 @@ export default function SystemDiagnostics(): JSX.Element {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <h4 className="font-medium">Optimization Recommendations</h4>
                   <ul className="space-y-2 text-sm">
@@ -446,27 +471,43 @@ export default function SystemDiagnostics(): JSX.Element {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-green-500">0.02%</div>
-                  <div className="text-sm text-muted-foreground">Current Drift</div>
-                  <Badge variant="default" className="mt-2">Stable</Badge>
+                  <div className="text-sm text-muted-foreground">
+                    Current Drift
+                  </div>
+                  <Badge variant="default" className="mt-2">
+                    Stable
+                  </Badge>
                 </div>
-                
+
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-500">0.15%</div>
-                  <div className="text-sm text-muted-foreground">Average Drift</div>
-                  <Badge variant="secondary" className="mt-2">Normal</Badge>
+                  <div className="text-sm text-muted-foreground">
+                    Average Drift
+                  </div>
+                  <Badge variant="secondary" className="mt-2">
+                    Normal
+                  </Badge>
                 </div>
-                
+
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-orange-500">0.45%</div>
-                  <div className="text-sm text-muted-foreground">Max Threshold</div>
-                  <Badge variant="outline" className="mt-2">Safe</Badge>
+                  <div className="text-3xl font-bold text-orange-500">
+                    0.45%
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Max Threshold
+                  </div>
+                  <Badge variant="outline" className="mt-2">
+                    Safe
+                  </Badge>
                 </div>
               </div>
-              
+
               <div className="mt-6">
                 <h4 className="font-medium mb-3">Drift History (Last 24h)</h4>
                 <div className="h-32 bg-muted rounded flex items-end justify-center">
-                  <div className="text-sm text-muted-foreground">Drift monitoring chart placeholder</div>
+                  <div className="text-sm text-muted-foreground">
+                    Drift monitoring chart placeholder
+                  </div>
                 </div>
               </div>
             </CardContent>

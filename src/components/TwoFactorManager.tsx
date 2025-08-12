@@ -56,7 +56,7 @@ const TwoFactorManager: React.FC = () => {
     return codes;
   };
 
-  const [secret, setSecret] = useState<string>('');
+  const [secret, setSecret] = useState<string>("");
 
   const enable2FA = async () => {
     setLoading(true);
@@ -65,7 +65,9 @@ const TwoFactorManager: React.FC = () => {
       const codes = generateBackupCodes();
 
       setSecret(newSecret);
-      setQrCodeUrl(generateOtpAuthURL(newSecret, user?.email || 'user', "God's Realm"));
+      setQrCodeUrl(
+        generateOtpAuthURL(newSecret, user?.email || "user", "God's Realm"),
+      );
       setBackupCodes(codes);
       setShowSetup(true);
     } catch (error) {
@@ -111,7 +113,7 @@ const TwoFactorManager: React.FC = () => {
 
       setIsEnabled(true);
       setShowSetup(false);
-      setSecret('');
+      setSecret("");
 
       toast({
         title: "2FA Enabled",

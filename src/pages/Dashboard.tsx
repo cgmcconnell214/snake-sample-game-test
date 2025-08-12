@@ -55,7 +55,7 @@ export default function Dashboard(): JSX.Element {
     const { data, error } = await supabase
       .from("asset_holdings")
       .select(
-        "balance, tokenized_assets(asset_symbol, asset_name, is_active, market_data(current_price, price_change_24h))"
+        "balance, tokenized_assets(asset_symbol, asset_name, is_active, market_data(current_price, price_change_24h))",
       )
       .eq("user_id", userId);
 
@@ -82,8 +82,8 @@ export default function Dashboard(): JSX.Element {
           asset.is_active === true
             ? "verified"
             : asset.is_active === false
-            ? "pending"
-            : "unknown",
+              ? "pending"
+              : "unknown",
       };
     });
 
@@ -97,7 +97,7 @@ export default function Dashboard(): JSX.Element {
     const { data, error } = await supabase
       .from("trade_executions")
       .select(
-        "id, buyer_id, seller_id, asset_symbol, quantity, price, execution_time, settlement_status"
+        "id, buyer_id, seller_id, asset_symbol, quantity, price, execution_time, settlement_status",
       )
       .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
       .order("execution_time", { ascending: false })
@@ -135,7 +135,7 @@ export default function Dashboard(): JSX.Element {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "asset_holdings" },
-        fetchPortfolio
+        fetchPortfolio,
       )
       .subscribe();
 
@@ -144,7 +144,7 @@ export default function Dashboard(): JSX.Element {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "trade_executions" },
-        fetchTrades
+        fetchTrades,
       )
       .subscribe();
 
@@ -157,21 +157,21 @@ export default function Dashboard(): JSX.Element {
 
   const totalValue = useMemo(
     () => portfolioData.reduce((sum, asset) => sum + asset.value, 0),
-    [portfolioData]
+    [portfolioData],
   );
 
   const totalGain = useMemo(
     () =>
       portfolioData.reduce(
         (sum, asset) => sum + (asset.value * asset.change) / 100,
-        0
+        0,
       ),
-    [portfolioData]
+    [portfolioData],
   );
 
   const totalGainPercent = useMemo(
     () => (totalValue ? (totalGain / totalValue) * 100 : 0),
-    [totalGain, totalValue]
+    [totalGain, totalValue],
   );
 
   return (
@@ -352,7 +352,9 @@ export default function Dashboard(): JSX.Element {
               >
                 <div className="text-primary">{trade.id}</div>
                 <div>{trade.symbol}</div>
-                <div className={trade.type === "BUY" ? "text-buy" : "text-sell"}>
+                <div
+                  className={trade.type === "BUY" ? "text-buy" : "text-sell"}
+                >
                   {trade.type}
                 </div>
                 <div>{trade.quantity}</div>

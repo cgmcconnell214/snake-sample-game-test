@@ -28,29 +28,47 @@ export default function ScrapeBot() {
     setResult(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke<CrawlResponse>("scrape-website", {
-        body: { url, limit: 100, formats: ["markdown", "html"] },
-      });
+      const { data, error } = await supabase.functions.invoke<CrawlResponse>(
+        "scrape-website",
+        {
+          body: { url, limit: 100, formats: ["markdown", "html"] },
+        },
+      );
 
       setProgress(80);
 
       if (error) {
         console.error("Scrape error", error);
-        toast({ title: "Scrape failed", description: error.message, variant: "destructive" });
+        toast({
+          title: "Scrape failed",
+          description: error.message,
+          variant: "destructive",
+        });
         return;
       }
 
       if (!data?.success) {
         console.error("Scrape failed", data);
-        toast({ title: "Scrape failed", description: data?.error || "Unknown error", variant: "destructive" });
+        toast({
+          title: "Scrape failed",
+          description: data?.error || "Unknown error",
+          variant: "destructive",
+        });
         return;
       }
 
       setResult(data.data);
-      toast({ title: "Scrape complete", description: "Website crawled successfully" });
+      toast({
+        title: "Scrape complete",
+        description: "Website crawled successfully",
+      });
     } catch (err) {
       console.error(err);
-      toast({ title: "Unexpected error", description: String((err as any)?.message || err), variant: "destructive" });
+      toast({
+        title: "Unexpected error",
+        description: String((err as any)?.message || err),
+        variant: "destructive",
+      });
     } finally {
       setProgress(100);
       setLoading(false);
@@ -62,7 +80,12 @@ export default function ScrapeBot() {
       <CardContent className="pt-6 space-y-4">
         <form onSubmit={onSubmit} className="space-y-3">
           <div className="space-y-2">
-            <label htmlFor="scrape-url" className="text-sm font-medium text-foreground">Website URL</label>
+            <label
+              htmlFor="scrape-url"
+              className="text-sm font-medium text-foreground"
+            >
+              Website URL
+            </label>
             <Input
               id="scrape-url"
               type="url"

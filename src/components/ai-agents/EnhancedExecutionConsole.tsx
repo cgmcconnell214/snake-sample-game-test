@@ -5,9 +5,15 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Terminal, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Terminal,
   RefreshCw,
   Download,
   Search,
@@ -17,7 +23,7 @@ import {
   Activity,
   Database,
   Code,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -26,7 +32,7 @@ interface ExecutionLog {
   id: string;
   agent_id: string;
   agent_name?: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: "pending" | "running" | "completed" | "failed";
   started_at: string;
   completed_at?: string;
   execution_time_ms?: number;
@@ -39,7 +45,7 @@ interface BackendLog {
   id: string;
   execution_id: string;
   agent_id: string;
-  log_level: 'debug' | 'info' | 'warn' | 'error';
+  log_level: "debug" | "info" | "warn" | "error";
   message: string;
   step_id?: string;
   step_name?: string;
@@ -51,8 +57,11 @@ export function EnhancedExecutionConsole() {
   const [executionLogs, setExecutionLogs] = useState<ExecutionLog[]>([]);
   const [backendLogs, setBackendLogs] = useState<BackendLog[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<ExecutionLog[]>([]);
-  const [filteredBackendLogs, setFilteredBackendLogs] = useState<BackendLog[]>([]);
-  const [selectedExecution, setSelectedExecution] = useState<ExecutionLog | null>(null);
+  const [filteredBackendLogs, setFilteredBackendLogs] = useState<BackendLog[]>(
+    [],
+  );
+  const [selectedExecution, setSelectedExecution] =
+    useState<ExecutionLog | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [logLevelFilter, setLogLevelFilter] = useState("all");
@@ -62,22 +71,24 @@ export function EnhancedExecutionConsole() {
   useEffect(() => {
     fetchExecutionLogs();
     fetchBackendLogs();
-    
+
     // Set up real-time subscription for executions
     const executionSubscription = supabase
-      .channel('execution_logs')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'ai_agent_executions' },
-        handleExecutionUpdate
+      .channel("execution_logs")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ai_agent_executions" },
+        handleExecutionUpdate,
       )
       .subscribe();
 
     // Set up real-time subscription for backend logs
     const backendSubscription = supabase
-      .channel('backend_logs')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'ai_agent_execution_logs' },
-        handleBackendLogUpdate
+      .channel("backend_logs")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "ai_agent_execution_logs" },
+        handleBackendLogUpdate,
       )
       .subscribe();
 
@@ -99,27 +110,29 @@ export function EnhancedExecutionConsole() {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('ai_agent_executions')
-        .select(`
+        .from("ai_agent_executions")
+        .select(
+          `
           *,
           ai_agents (
             name
           )
-        `)
-        .order('started_at', { ascending: false })
+        `,
+        )
+        .order("started_at", { ascending: false })
         .limit(100);
 
       if (error) throw error;
 
-      const logsWithAgentNames = data.map(log => ({
+      const logsWithAgentNames = data.map((log) => ({
         ...log,
-        agent_name: (log.ai_agents as any)?.name || 'Unknown Agent',
-        status: log.status as ExecutionLog['status']
+        agent_name: (log.ai_agents as any)?.name || "Unknown Agent",
+        status: log.status as ExecutionLog["status"],
       }));
 
       setExecutionLogs(logsWithAgentNames);
     } catch (error) {
-      console.error('Error fetching execution logs:', error);
+      console.error("Error fetching execution logs:", error);
       toast({
         title: "Error",
         description: "Failed to fetch execution logs",
@@ -133,18 +146,20 @@ export function EnhancedExecutionConsole() {
   const fetchBackendLogs = async () => {
     try {
       const { data, error } = await supabase
-        .from('ai_agent_execution_logs')
-        .select('*')
-        .order('timestamp', { ascending: false })
+        .from("ai_agent_execution_logs")
+        .select("*")
+        .order("timestamp", { ascending: false })
         .limit(500);
 
       if (error) throw error;
-      setBackendLogs((data || []).map(log => ({
-        ...log,
-        log_level: log.log_level as BackendLog['log_level']
-      })));
+      setBackendLogs(
+        (data || []).map((log) => ({
+          ...log,
+          log_level: log.log_level as BackendLog["log_level"],
+        })),
+      );
     } catch (error) {
-      console.error('Error fetching backend logs:', error);
+      console.error("Error fetching backend logs:", error);
     }
   };
 
@@ -160,14 +175,15 @@ export function EnhancedExecutionConsole() {
     let filtered = executionLogs;
 
     if (searchTerm) {
-      filtered = filtered.filter(log => 
-        log.agent_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.id.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (log) =>
+          log.agent_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          log.id.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
     if (statusFilter !== "all") {
-      filtered = filtered.filter(log => log.status === statusFilter);
+      filtered = filtered.filter((log) => log.status === statusFilter);
     }
 
     setFilteredLogs(filtered);
@@ -177,18 +193,21 @@ export function EnhancedExecutionConsole() {
     let filtered = backendLogs;
 
     if (selectedExecution) {
-      filtered = filtered.filter(log => log.execution_id === selectedExecution.id);
+      filtered = filtered.filter(
+        (log) => log.execution_id === selectedExecution.id,
+      );
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(log => 
-        log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.step_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (log) =>
+          log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          log.step_name?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
     if (logLevelFilter !== "all") {
-      filtered = filtered.filter(log => log.log_level === logLevelFilter);
+      filtered = filtered.filter((log) => log.log_level === logLevelFilter);
     }
 
     setFilteredBackendLogs(filtered);
@@ -196,11 +215,11 @@ export function EnhancedExecutionConsole() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'failed':
+      case "failed":
         return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'running':
+      case "running":
         return <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />;
       default:
         return <Clock className="h-4 w-4 text-yellow-500" />;
@@ -209,13 +228,13 @@ export function EnhancedExecutionConsole() {
 
   const getLogLevelIcon = (level: string) => {
     switch (level) {
-      case 'error':
+      case "error":
         return <XCircle className="h-3 w-3 text-red-500" />;
-      case 'warn':
+      case "warn":
         return <AlertTriangle className="h-3 w-3 text-yellow-500" />;
-      case 'info':
+      case "info":
         return <CheckCircle className="h-3 w-3 text-blue-500" />;
-      case 'debug':
+      case "debug":
         return <Code className="h-3 w-3 text-gray-500" />;
       default:
         return <Activity className="h-3 w-3 text-gray-500" />;
@@ -224,25 +243,34 @@ export function EnhancedExecutionConsole() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'text-green-600 bg-green-50';
-      case 'failed': return 'text-red-600 bg-red-50';
-      case 'running': return 'text-blue-600 bg-blue-50';
-      default: return 'text-yellow-600 bg-yellow-50';
+      case "completed":
+        return "text-green-600 bg-green-50";
+      case "failed":
+        return "text-red-600 bg-red-50";
+      case "running":
+        return "text-blue-600 bg-blue-50";
+      default:
+        return "text-yellow-600 bg-yellow-50";
     }
   };
 
   const getLogLevelColor = (level: string) => {
     switch (level) {
-      case 'error': return 'text-red-600 bg-red-50';
-      case 'warn': return 'text-yellow-600 bg-yellow-50';
-      case 'info': return 'text-blue-600 bg-blue-50';
-      case 'debug': return 'text-gray-600 bg-gray-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case "error":
+        return "text-red-600 bg-red-50";
+      case "warn":
+        return "text-yellow-600 bg-yellow-50";
+      case "info":
+        return "text-blue-600 bg-blue-50";
+      case "debug":
+        return "text-gray-600 bg-gray-50";
+      default:
+        return "text-gray-600 bg-gray-50";
     }
   };
 
   const formatDuration = (ms?: number) => {
-    if (!ms) return 'N/A';
+    if (!ms) return "N/A";
     if (ms < 1000) return `${ms}ms`;
     return `${(ms / 1000).toFixed(2)}s`;
   };
@@ -251,12 +279,14 @@ export function EnhancedExecutionConsole() {
     const exportData = {
       timestamp: new Date().toISOString(),
       executions: filteredLogs,
-      backend_logs: filteredBackendLogs
+      backend_logs: filteredBackendLogs,
     };
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `ai-agent-logs-${Date.now()}.json`;
     document.body.appendChild(a);
@@ -267,13 +297,20 @@ export function EnhancedExecutionConsole() {
 
   const cleanupStuck = async () => {
     try {
-      await supabase.rpc('cleanup_stuck_executions');
-      toast({ title: 'Cleanup triggered', description: 'Stuck executions marked as failed.' });
+      await supabase.rpc("cleanup_stuck_executions");
+      toast({
+        title: "Cleanup triggered",
+        description: "Stuck executions marked as failed.",
+      });
       fetchExecutionLogs();
       fetchBackendLogs();
     } catch (error) {
-      console.error('Cleanup error:', error);
-      toast({ title: 'Cleanup failed', description: 'Could not cleanup stuck executions', variant: 'destructive' });
+      console.error("Cleanup error:", error);
+      toast({
+        title: "Cleanup failed",
+        description: "Could not cleanup stuck executions",
+        variant: "destructive",
+      });
     }
   };
 
@@ -294,8 +331,18 @@ export function EnhancedExecutionConsole() {
               <AlertTriangle className="h-4 w-4 mr-2" />
               Clean stuck
             </Button>
-            <Button onClick={() => { fetchExecutionLogs(); fetchBackendLogs(); }} variant="outline" size="sm" disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <Button
+              onClick={() => {
+                fetchExecutionLogs();
+                fetchBackendLogs();
+              }}
+              variant="outline"
+              size="sm"
+              disabled={isLoading}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+              />
               Refresh
             </Button>
           </div>
@@ -341,7 +388,9 @@ export function EnhancedExecutionConsole() {
                   <div
                     key={log.id}
                     className={`p-3 border rounded cursor-pointer transition-colors hover:bg-muted/50 ${
-                      selectedExecution?.id === log.id ? 'bg-muted border-primary' : ''
+                      selectedExecution?.id === log.id
+                        ? "bg-muted border-primary"
+                        : ""
                     }`}
                     onClick={() => setSelectedExecution(log)}
                   >
@@ -349,7 +398,9 @@ export function EnhancedExecutionConsole() {
                       <div className="flex items-center gap-3">
                         {getStatusIcon(log.status)}
                         <div>
-                          <p className="font-medium text-sm">{log.agent_name}</p>
+                          <p className="font-medium text-sm">
+                            {log.agent_name}
+                          </p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(log.started_at).toLocaleString()}
                           </p>
@@ -366,10 +417,12 @@ export function EnhancedExecutionConsole() {
                     </div>
                   </div>
                 ))}
-                
+
                 {filteredLogs.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
-                    {isLoading ? 'Loading execution logs...' : 'No execution logs found'}
+                    {isLoading
+                      ? "Loading execution logs..."
+                      : "No execution logs found"}
                   </div>
                 )}
               </div>
@@ -387,7 +440,10 @@ export function EnhancedExecutionConsole() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Select value={logLevelFilter} onValueChange={setLogLevelFilter}>
+                <Select
+                  value={logLevelFilter}
+                  onValueChange={setLogLevelFilter}
+                >
                   <SelectTrigger className="w-36">
                     <SelectValue />
                   </SelectTrigger>
@@ -400,16 +456,24 @@ export function EnhancedExecutionConsole() {
                   </SelectContent>
                 </Select>
                 <Button
-                  variant={logLevelFilter === 'info' ? 'default' : 'outline'}
+                  variant={logLevelFilter === "info" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setLogLevelFilter(logLevelFilter === 'info' ? 'all' : 'info')}
+                  onClick={() =>
+                    setLogLevelFilter(
+                      logLevelFilter === "info" ? "all" : "info",
+                    )
+                  }
                 >
                   Info
                 </Button>
                 <Button
-                  variant={logLevelFilter === 'debug' ? 'default' : 'outline'}
+                  variant={logLevelFilter === "debug" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setLogLevelFilter(logLevelFilter === 'debug' ? 'all' : 'debug')}
+                  onClick={() =>
+                    setLogLevelFilter(
+                      logLevelFilter === "debug" ? "all" : "debug",
+                    )
+                  }
                 >
                   Debug
                 </Button>
@@ -435,8 +499,11 @@ export function EnhancedExecutionConsole() {
                               {log.step_name}
                             </Badge>
                           )}
-                          <Badge 
-                            className={getLogLevelColor(log.log_level) + ' cursor-pointer'}
+                          <Badge
+                            className={
+                              getLogLevelColor(log.log_level) +
+                              " cursor-pointer"
+                            }
                             onClick={() => setLogLevelFilter(log.log_level)}
                             title={`Filter by ${log.log_level}`}
                           >
@@ -458,13 +525,12 @@ export function EnhancedExecutionConsole() {
                     </div>
                   </div>
                 ))}
-                
+
                 {filteredBackendLogs.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
-                    {selectedExecution 
-                      ? 'No backend logs for this execution' 
-                      : 'Select an execution to view backend logs'
-                    }
+                    {selectedExecution
+                      ? "No backend logs for this execution"
+                      : "Select an execution to view backend logs"}
                   </div>
                 )}
               </div>
@@ -476,23 +542,33 @@ export function EnhancedExecutionConsole() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-medium text-sm text-muted-foreground">Agent</h4>
-                    <p className="font-mono text-sm">{selectedExecution.agent_name}</p>
+                    <h4 className="font-medium text-sm text-muted-foreground">
+                      Agent
+                    </h4>
+                    <p className="font-mono text-sm">
+                      {selectedExecution.agent_name}
+                    </p>
                   </div>
                   <div>
-                    <h4 className="font-medium text-sm text-muted-foreground">Status</h4>
+                    <h4 className="font-medium text-sm text-muted-foreground">
+                      Status
+                    </h4>
                     <Badge className={getStatusColor(selectedExecution.status)}>
                       {selectedExecution.status}
                     </Badge>
                   </div>
                   <div>
-                    <h4 className="font-medium text-sm text-muted-foreground">Started</h4>
+                    <h4 className="font-medium text-sm text-muted-foreground">
+                      Started
+                    </h4>
                     <p className="font-mono text-xs">
                       {new Date(selectedExecution.started_at).toLocaleString()}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-medium text-sm text-muted-foreground">Duration</h4>
+                    <h4 className="font-medium text-sm text-muted-foreground">
+                      Duration
+                    </h4>
                     <p className="font-mono text-sm">
                       {formatDuration(selectedExecution.execution_time_ms)}
                     </p>
@@ -501,7 +577,9 @@ export function EnhancedExecutionConsole() {
 
                 {selectedExecution.output_data && (
                   <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Output Data</h4>
+                    <h4 className="font-medium text-sm text-muted-foreground mb-2">
+                      Output Data
+                    </h4>
                     <ScrollArea className="h-48 w-full rounded border bg-muted p-3">
                       <pre className="text-xs font-mono whitespace-pre-wrap">
                         {JSON.stringify(selectedExecution.output_data, null, 2)}
@@ -512,9 +590,13 @@ export function EnhancedExecutionConsole() {
 
                 {selectedExecution.error_message && (
                   <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Error</h4>
+                    <h4 className="font-medium text-sm text-muted-foreground mb-2">
+                      Error
+                    </h4>
                     <div className="p-3 bg-red-50 border border-red-200 rounded">
-                      <p className="text-sm text-red-700">{selectedExecution.error_message}</p>
+                      <p className="text-sm text-red-700">
+                        {selectedExecution.error_message}
+                      </p>
                     </div>
                   </div>
                 )}

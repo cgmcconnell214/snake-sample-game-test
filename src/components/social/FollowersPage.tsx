@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Users, UserPlus, UserMinus, Search } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Users, UserPlus, UserMinus, Search } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface UserProfile {
   user_id: string;
@@ -35,8 +35,8 @@ export default function FollowersPage() {
   const [followers, setFollowers] = useState<FollowRelation[]>([]);
   const [following, setFollowing] = useState<FollowRelation[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<UserProfile[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('followers');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("followers");
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -53,34 +53,34 @@ export default function FollowersPage() {
     if (!user) return () => {};
 
     const incomingChannel = supabase
-      .channel('user-follows-incoming')
+      .channel("user-follows-incoming")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'user_follows',
+          event: "*",
+          schema: "public",
+          table: "user_follows",
           filter: `following_id=eq.${user.id}`,
         },
         () => {
           fetchFollowData();
-        }
+        },
       )
       .subscribe();
 
     const outgoingChannel = supabase
-      .channel('user-follows-outgoing')
+      .channel("user-follows-outgoing")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'user_follows',
+          event: "*",
+          schema: "public",
+          table: "user_follows",
           filter: `follower_id=eq.${user.id}`,
         },
         () => {
           fetchFollowData();
-        }
+        },
       )
       .subscribe();
 
@@ -98,49 +98,59 @@ export default function FollowersPage() {
 
       // Fetch followers with manual joins
       const { data: followersData, error: followersError } = await supabase
-        .from('user_follows')
-        .select('*')
-        .eq('following_id', user.id);
+        .from("user_follows")
+        .select("*")
+        .eq("following_id", user.id);
 
       if (followersError) throw followersError;
 
       // Get follower profiles
-      const followerIds = followersData?.map(f => f.follower_id) || [];
+      const followerIds = followersData?.map((f) => f.follower_id) || [];
       const { data: followerProfiles } = await (supabase as any)
-        .from('public_user_profiles')
-        .select('user_id, display_name, username, avatar_url, bio, follower_count, following_count')
-        .in('user_id', followerIds);
+        .from("public_user_profiles")
+        .select(
+          "user_id, display_name, username, avatar_url, bio, follower_count, following_count",
+        )
+        .in("user_id", followerIds);
 
       // Fetch following with manual joins
       const { data: followingData, error: followingError } = await supabase
-        .from('user_follows')
-        .select('*')
-        .eq('follower_id', user.id);
+        .from("user_follows")
+        .select("*")
+        .eq("follower_id", user.id);
 
       if (followingError) throw followingError;
 
       // Get following profiles
-      const followingIds = followingData?.map(f => f.following_id) || [];
+      const followingIds = followingData?.map((f) => f.following_id) || [];
       const { data: followingProfiles } = await (supabase as any)
-        .from('public_user_profiles')
-        .select('user_id, display_name, username, avatar_url, bio, follower_count, following_count')
-        .in('user_id', followingIds);
+        .from("public_user_profiles")
+        .select(
+          "user_id, display_name, username, avatar_url, bio, follower_count, following_count",
+        )
+        .in("user_id", followingIds);
 
       // Combine data
-      const followersWithProfiles = followersData?.map(f => ({
-        ...f,
-        follower_profile: followerProfiles?.find(p => p.user_id === f.follower_id)
-      })) || [];
+      const followersWithProfiles =
+        followersData?.map((f) => ({
+          ...f,
+          follower_profile: followerProfiles?.find(
+            (p) => p.user_id === f.follower_id,
+          ),
+        })) || [];
 
-      const followingWithProfiles = followingData?.map(f => ({
-        ...f,
-        following_profile: followingProfiles?.find(p => p.user_id === f.following_id)
-      })) || [];
+      const followingWithProfiles =
+        followingData?.map((f) => ({
+          ...f,
+          following_profile: followingProfiles?.find(
+            (p) => p.user_id === f.following_id,
+          ),
+        })) || [];
 
       setFollowers(followersWithProfiles);
       setFollowing(followingWithProfiles);
     } catch (error) {
-      console.error('Error fetching follow data:', error);
+      console.error("Error fetching follow data:", error);
       toast({
         title: "Error",
         description: "Failed to load followers and following data",
@@ -157,40 +167,42 @@ export default function FollowersPage() {
     try {
       // Get users that current user is not following and exclude self
       const { data: allUsers, error } = await (supabase as any)
-        .from('public_user_profiles')
-        .select('user_id, display_name, username, avatar_url, bio, follower_count, following_count')
-        .neq('user_id', user.id)
+        .from("public_user_profiles")
+        .select(
+          "user_id, display_name, username, avatar_url, bio, follower_count, following_count",
+        )
+        .neq("user_id", user.id)
         .limit(20);
 
       if (error) throw error;
 
       // Filter out users that are already being followed
-      const followingIds = new Set(following.map(f => f.following_id));
+      const followingIds = new Set(following.map((f) => f.following_id));
       const suggested = (allUsers || [])
-        .filter(u => !followingIds.has(u.user_id))
+        .filter((u) => !followingIds.has(u.user_id))
         .slice(0, 10);
 
       // Check follow status for suggested users
       const suggestedWithStatus = await Promise.all(
         suggested.map(async (suggestedUser) => {
           const { data: followStatus } = await supabase
-            .from('user_follows')
-            .select('id')
-            .eq('follower_id', user.id)
-            .eq('following_id', suggestedUser.user_id)
+            .from("user_follows")
+            .select("id")
+            .eq("follower_id", user.id)
+            .eq("following_id", suggestedUser.user_id)
             .single();
 
           return {
             ...suggestedUser,
             is_following: !!followStatus,
-            mutual_connections: Math.floor(Math.random() * 10) // Mock mutual connections
+            mutual_connections: Math.floor(Math.random() * 10), // Mock mutual connections
           };
-        })
+        }),
       );
 
       setSuggestedUsers(suggestedWithStatus);
     } catch (error) {
-      console.error('Error fetching suggested users:', error);
+      console.error("Error fetching suggested users:", error);
     }
   };
 
@@ -198,22 +210,20 @@ export default function FollowersPage() {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('user_follows')
-        .insert({
-          follower_id: user.id,
-          following_id: targetUserId
-        });
+      const { error } = await supabase.from("user_follows").insert({
+        follower_id: user.id,
+        following_id: targetUserId,
+      });
 
       if (error) throw error;
 
       // Update suggested users
-      setSuggestedUsers(prev => 
-        prev.map(u => 
-          u.user_id === targetUserId 
+      setSuggestedUsers((prev) =>
+        prev.map((u) =>
+          u.user_id === targetUserId
             ? { ...u, is_following: true, follower_count: u.follower_count + 1 }
-            : u
-        )
+            : u,
+        ),
       );
 
       // Refresh data
@@ -224,7 +234,7 @@ export default function FollowersPage() {
         description: "You are now following this user",
       });
     } catch (error) {
-      console.error('Error following user:', error);
+      console.error("Error following user:", error);
       toast({
         title: "Error",
         description: "Failed to follow user",
@@ -238,31 +248,37 @@ export default function FollowersPage() {
 
     try {
       const { error } = await supabase
-        .from('user_follows')
+        .from("user_follows")
         .delete()
-        .eq('follower_id', user.id)
-        .eq('following_id', targetUserId);
+        .eq("follower_id", user.id)
+        .eq("following_id", targetUserId);
 
       if (error) throw error;
 
       // Update suggested users
-      setSuggestedUsers(prev => 
-        prev.map(u => 
-          u.user_id === targetUserId 
-            ? { ...u, is_following: false, follower_count: Math.max(0, u.follower_count - 1) }
-            : u
-        )
+      setSuggestedUsers((prev) =>
+        prev.map((u) =>
+          u.user_id === targetUserId
+            ? {
+                ...u,
+                is_following: false,
+                follower_count: Math.max(0, u.follower_count - 1),
+              }
+            : u,
+        ),
       );
 
       // Update following list
-      setFollowing(prev => prev.filter(f => f.following_id !== targetUserId));
+      setFollowing((prev) =>
+        prev.filter((f) => f.following_id !== targetUserId),
+      );
 
       toast({
         title: "Unfollowed",
         description: "You are no longer following this user",
       });
     } catch (error) {
-      console.error('Error unfollowing user:', error);
+      console.error("Error unfollowing user:", error);
       toast({
         title: "Error",
         description: "Failed to unfollow user",
@@ -276,21 +292,23 @@ export default function FollowersPage() {
 
     try {
       const { error } = await supabase
-        .from('user_follows')
+        .from("user_follows")
         .delete()
-        .eq('follower_id', followerUserId)
-        .eq('following_id', user.id);
+        .eq("follower_id", followerUserId)
+        .eq("following_id", user.id);
 
       if (error) throw error;
 
-      setFollowers(prev => prev.filter(f => f.follower_id !== followerUserId));
+      setFollowers((prev) =>
+        prev.filter((f) => f.follower_id !== followerUserId),
+      );
 
       toast({
         title: "Follower Removed",
         description: "Follower has been removed",
       });
     } catch (error) {
-      console.error('Error removing follower:', error);
+      console.error("Error removing follower:", error);
       toast({
         title: "Error",
         description: "Failed to remove follower",
@@ -299,25 +317,38 @@ export default function FollowersPage() {
     }
   };
 
-  const filteredFollowers = followers.filter(f =>
-    f.follower_profile?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    f.follower_profile?.username?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredFollowers = followers.filter(
+    (f) =>
+      f.follower_profile?.display_name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      f.follower_profile?.username
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()),
   );
 
-  const filteredFollowing = following.filter(f =>
-    f.following_profile?.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    f.following_profile?.username?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredFollowing = following.filter(
+    (f) =>
+      f.following_profile?.display_name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      f.following_profile?.username
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()),
   );
 
-  const filteredSuggested = suggestedUsers.filter(u =>
-    u.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.username?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredSuggested = suggestedUsers.filter(
+    (u) =>
+      u.display_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.username?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (!user) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground">Please sign in to view followers and following</p>
+        <p className="text-muted-foreground">
+          Please sign in to view followers and following
+        </p>
       </div>
     );
   }
@@ -336,9 +367,7 @@ export default function FollowersPage() {
             <Users className="h-4 w-4 mr-1" />
             {followers.length} followers
           </Badge>
-          <Badge variant="outline">
-            {following.length} following
-          </Badge>
+          <Badge variant="outline">{following.length} following</Badge>
         </div>
       </div>
 
@@ -361,9 +390,7 @@ export default function FollowersPage() {
           <TabsTrigger value="following">
             Following ({following.length})
           </TabsTrigger>
-          <TabsTrigger value="suggested">
-            Suggested
-          </TabsTrigger>
+          <TabsTrigger value="suggested">Suggested</TabsTrigger>
         </TabsList>
 
         <TabsContent value="followers" className="space-y-4">
@@ -373,7 +400,9 @@ export default function FollowersPage() {
             <div className="text-center py-8">
               <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                {searchQuery ? 'No followers found matching your search' : 'No followers yet'}
+                {searchQuery
+                  ? "No followers found matching your search"
+                  : "No followers yet"}
               </p>
             </div>
           ) : (
@@ -383,9 +412,11 @@ export default function FollowersPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3 mb-3">
                       <Avatar>
-                        <AvatarImage src={relation.follower_profile?.avatar_url} />
+                        <AvatarImage
+                          src={relation.follower_profile?.avatar_url}
+                        />
                         <AvatarFallback>
-                          {relation.follower_profile?.display_name?.[0] || 'U'}
+                          {relation.follower_profile?.display_name?.[0] || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
@@ -397,7 +428,7 @@ export default function FollowersPage() {
                         </p>
                       </div>
                     </div>
-                    
+
                     {relation.follower_profile?.bio && (
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                         {relation.follower_profile.bio}
@@ -405,8 +436,12 @@ export default function FollowersPage() {
                     )}
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                      <span>{relation.follower_profile?.follower_count} followers</span>
-                      <span>{relation.follower_profile?.following_count} following</span>
+                      <span>
+                        {relation.follower_profile?.follower_count} followers
+                      </span>
+                      <span>
+                        {relation.follower_profile?.following_count} following
+                      </span>
                     </div>
 
                     <div className="flex gap-2">
@@ -441,7 +476,9 @@ export default function FollowersPage() {
             <div className="text-center py-8">
               <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                {searchQuery ? 'No following found matching your search' : 'Not following anyone yet'}
+                {searchQuery
+                  ? "No following found matching your search"
+                  : "Not following anyone yet"}
               </p>
             </div>
           ) : (
@@ -451,9 +488,11 @@ export default function FollowersPage() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3 mb-3">
                       <Avatar>
-                        <AvatarImage src={relation.following_profile?.avatar_url} />
+                        <AvatarImage
+                          src={relation.following_profile?.avatar_url}
+                        />
                         <AvatarFallback>
-                          {relation.following_profile?.display_name?.[0] || 'U'}
+                          {relation.following_profile?.display_name?.[0] || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
@@ -465,7 +504,7 @@ export default function FollowersPage() {
                         </p>
                       </div>
                     </div>
-                    
+
                     {relation.following_profile?.bio && (
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                         {relation.following_profile.bio}
@@ -473,8 +512,12 @@ export default function FollowersPage() {
                     )}
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                      <span>{relation.following_profile?.follower_count} followers</span>
-                      <span>{relation.following_profile?.following_count} following</span>
+                      <span>
+                        {relation.following_profile?.follower_count} followers
+                      </span>
+                      <span>
+                        {relation.following_profile?.following_count} following
+                      </span>
                     </div>
 
                     <Button
@@ -498,7 +541,9 @@ export default function FollowersPage() {
             <div className="text-center py-8">
               <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                {searchQuery ? 'No suggested users found matching your search' : 'No suggestions available'}
+                {searchQuery
+                  ? "No suggested users found matching your search"
+                  : "No suggestions available"}
               </p>
             </div>
           ) : (
@@ -510,7 +555,7 @@ export default function FollowersPage() {
                       <Avatar>
                         <AvatarImage src={userProfile.avatar_url} />
                         <AvatarFallback>
-                          {userProfile.display_name?.[0] || 'U'}
+                          {userProfile.display_name?.[0] || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
@@ -522,7 +567,7 @@ export default function FollowersPage() {
                         </p>
                       </div>
                     </div>
-                    
+
                     {userProfile.bio && (
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                         {userProfile.bio}
@@ -538,8 +583,8 @@ export default function FollowersPage() {
                       variant={userProfile.is_following ? "outline" : "default"}
                       size="sm"
                       className="w-full"
-                      onClick={() => 
-                        userProfile.is_following 
+                      onClick={() =>
+                        userProfile.is_following
                           ? unfollowUser(userProfile.user_id)
                           : followUser(userProfile.user_id)
                       }

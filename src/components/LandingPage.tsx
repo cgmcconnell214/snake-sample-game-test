@@ -95,7 +95,7 @@ const LandingPage = () => {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate('/auth?mode=signin')}
+                onClick={() => navigate("/auth?mode=signin")}
                 className="border-divine-gold text-divine-gold hover:bg-divine-gold hover:text-divine-gold-foreground"
               >
                 Login
@@ -280,7 +280,7 @@ const LandingPage = () => {
             <Button
               size="lg"
               className="bg-gradient-to-r from-primary to-divine-gold text-primary-foreground hover:scale-105 transition-all duration-300 shadow-divine"
-              onClick={() => navigate('/auth?mode=signup')}
+              onClick={() => navigate("/auth?mode=signup")}
             >
               🔓 Register Now
             </Button>

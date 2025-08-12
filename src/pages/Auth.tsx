@@ -47,8 +47,13 @@ const Auth = (): JSX.Element => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const signInCaptchaRef = useRef<ReCAPTCHA>(null);
   const signUpCaptchaRef = useRef<ReCAPTCHA>(null);
-  const recaptchaSiteKey = (import.meta as any).env?.VITE_RECAPTCHA_SITE_KEY as string | undefined;
-  const initialTab = new URLSearchParams(location.search).get("mode") === "signup" ? "signup" : "signin";
+  const recaptchaSiteKey = (import.meta as any).env?.VITE_RECAPTCHA_SITE_KEY as
+    | string
+    | undefined;
+  const initialTab =
+    new URLSearchParams(location.search).get("mode") === "signup"
+      ? "signup"
+      : "signin";
   useEffect(() => {
     if (user) {
       navigate("/");
@@ -218,7 +223,10 @@ const Auth = (): JSX.Element => {
                   />
                   {formData.password && (
                     <div className="space-y-1">
-                      <Progress value={(passwordScore / 4) * 100} className="h-2" />
+                      <Progress
+                        value={(passwordScore / 4) * 100}
+                        className="h-2"
+                      />
                       <p className={`text-xs ${strengthColors[passwordScore]}`}>
                         Strength: {strengthLabels[passwordScore]}
                       </p>
@@ -229,10 +237,24 @@ const Auth = (): JSX.Element => {
                   <Checkbox
                     id="signin-terms"
                     checked={acceptedSignin}
-                    onCheckedChange={(v) => { setAcceptedSignin(Boolean(v)); setError(null); }}
+                    onCheckedChange={(v) => {
+                      setAcceptedSignin(Boolean(v));
+                      setError(null);
+                    }}
                   />
-                  <label htmlFor="signin-terms" className="text-sm text-muted-foreground">
-                    I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
+                  <label
+                    htmlFor="signin-terms"
+                    className="text-sm text-muted-foreground"
+                  >
+                    I agree to the{" "}
+                    <a href="/terms" className="underline">
+                      Terms
+                    </a>{" "}
+                    and{" "}
+                    <a href="/privacy" className="underline">
+                      Privacy Policy
+                    </a>
+                    .
                   </label>
                 </div>
                 {recaptchaSiteKey && (
@@ -310,7 +332,10 @@ const Auth = (): JSX.Element => {
                   />
                   {formData.password && (
                     <div className="space-y-1">
-                      <Progress value={(passwordScore / 4) * 100} className="h-2" />
+                      <Progress
+                        value={(passwordScore / 4) * 100}
+                        className="h-2"
+                      />
                       <p className={`text-xs ${strengthColors[passwordScore]}`}>
                         Strength: {strengthLabels[passwordScore]}
                       </p>
@@ -334,10 +359,24 @@ const Auth = (): JSX.Element => {
                   <Checkbox
                     id="signup-terms"
                     checked={acceptedSignup}
-                    onCheckedChange={(v) => { setAcceptedSignup(Boolean(v)); setError(null); }}
+                    onCheckedChange={(v) => {
+                      setAcceptedSignup(Boolean(v));
+                      setError(null);
+                    }}
                   />
-                  <label htmlFor="signup-terms" className="text-sm text-muted-foreground">
-                    I agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
+                  <label
+                    htmlFor="signup-terms"
+                    className="text-sm text-muted-foreground"
+                  >
+                    I agree to the{" "}
+                    <a href="/terms" className="underline">
+                      Terms
+                    </a>{" "}
+                    and{" "}
+                    <a href="/privacy" className="underline">
+                      Privacy Policy
+                    </a>
+                    .
                   </label>
                 </div>
                 {recaptchaSiteKey && (

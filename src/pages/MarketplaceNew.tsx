@@ -39,7 +39,9 @@ export default function Marketplace(): JSX.Element {
   const [sortBy, setSortBy] = useState("volume");
   const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<MarketplaceAsset | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<MarketplaceAsset | null>(
+    null,
+  );
   const [modalSide, setModalSide] = useState<"buy" | "sell">("buy");
 
   useEffect(() => {
@@ -96,7 +98,10 @@ export default function Marketplace(): JSX.Element {
     });
   };
 
-  const openTradeModal = async (asset: MarketplaceAsset, side: "buy" | "sell") => {
+  const openTradeModal = async (
+    asset: MarketplaceAsset,
+    side: "buy" | "sell",
+  ) => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -138,210 +143,214 @@ export default function Marketplace(): JSX.Element {
 
   return (
     <>
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">P2P Marketplace</h1>
-          <p className="text-muted-foreground">
-            Trade tokenized assets peer-to-peer
-          </p>
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">P2P Marketplace</h1>
+            <p className="text-muted-foreground">
+              Trade tokenized assets peer-to-peer
+            </p>
+          </div>
+          <Button onClick={handleListAsset}>
+            <Package className="h-4 w-4 mr-2" />
+            List Asset
+          </Button>
         </div>
-        <Button onClick={handleListAsset}>
-          <Package className="h-4 w-4 mr-2" />
-          List Asset
-        </Button>
-      </div>
 
-      {/* Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              List New Asset
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Tokenize and list your assets for peer-to-peer trading
-            </p>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={handleListAsset}
-            >
-              List Asset
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
-              Browse Offers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Explore available assets and trading opportunities
-            </p>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={handleBrowseOffers}
-            >
-              Browse Offers
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              Contract Queue
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              View active trades and pending smart contracts
-            </p>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={handleViewContracts}
-            >
-              View Queue
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Search and Filter */}
-      <div className="flex gap-4 mb-6">
-        <div className="flex-1">
-          <Input
-            placeholder="Search assets..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
-          />
-        </div>
-        <select
-          className="px-3 py-2 border rounded-md bg-background"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          <option value="volume">Sort by Volume</option>
-          <option value="price">Sort by Price</option>
-          <option value="change">Sort by Change</option>
-        </select>
-      </div>
-
-      {/* Asset Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sortedAssets.map((asset) => (
-          <Card key={asset.id} className="hover:shadow-lg transition-shadow">
+        {/* Action Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="hover:shadow-lg transition-shadow">
             <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-lg">{asset.asset_name}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {asset.asset_symbol}
-                  </p>
-                </div>
-                <Badge
-                  variant={
-                    asset.price_change_24h >= 0 ? "default" : "destructive"
-                  }
-                >
-                  {asset.price_change_24h >= 0 ? "+" : ""}
-                  {asset.price_change_24h.toFixed(2)}%
-                </Badge>
-              </div>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                List New Asset
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {asset.description}
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Tokenize and list your assets for peer-to-peer trading
               </p>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Current Price:</span>
-                  <span className="font-bold text-lg">
-                    ${asset.current_price.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">24h Volume:</span>
-                  <span className="font-medium">
-                    ${asset.volume_24h.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Supply:</span>
-                  <span className="font-medium">
-                    {asset.circulating_supply.toLocaleString()} /{" "}
-                    {asset.total_supply.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  className="flex-1"
-                  onClick={() => openTradeModal(asset, "buy")}
-                >
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Buy
-                </Button>
-                <Button
-                  className="flex-1 bg-sell hover:bg-sell/90"
-                  onClick={() => openTradeModal(asset, "sell")}
-                >
-                  <TrendingDown className="h-4 w-4 mr-2" />
-                  Sell
-                </Button>
-                <Button
-                  variant="outline"
-                  aria-label="Add to favorites"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toast({
-                      title: "Favorite Asset",
-                      description: `Added ${asset.asset_name} to favorites`,
-                    });
-                  }}
-                >
-                  <Star className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleListAsset}
+              >
+                List Asset
+              </Button>
             </CardContent>
           </Card>
-        ))}
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5" />
+                Browse Offers
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Explore available assets and trading opportunities
+              </p>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleBrowseOffers}
+              >
+                Browse Offers
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                Contract Queue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                View active trades and pending smart contracts
+              </p>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleViewContracts}
+              >
+                View Queue
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="flex gap-4 mb-6">
+          <div className="flex-1">
+            <Input
+              placeholder="Search assets..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <select
+            className="px-3 py-2 border rounded-md bg-background"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="volume">Sort by Volume</option>
+            <option value="price">Sort by Price</option>
+            <option value="change">Sort by Change</option>
+          </select>
+        </div>
+
+        {/* Asset Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedAssets.map((asset) => (
+            <Card key={asset.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-lg">
+                      {asset.asset_name}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      {asset.asset_symbol}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={
+                      asset.price_change_24h >= 0 ? "default" : "destructive"
+                    }
+                  >
+                    {asset.price_change_24h >= 0 ? "+" : ""}
+                    {asset.price_change_24h.toFixed(2)}%
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {asset.description}
+                </p>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Current Price:
+                    </span>
+                    <span className="font-bold text-lg">
+                      ${asset.current_price.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">24h Volume:</span>
+                    <span className="font-medium">
+                      ${asset.volume_24h.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Supply:</span>
+                    <span className="font-medium">
+                      {asset.circulating_supply.toLocaleString()} /{" "}
+                      {asset.total_supply.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    onClick={() => openTradeModal(asset, "buy")}
+                  >
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Buy
+                  </Button>
+                  <Button
+                    className="flex-1 bg-sell hover:bg-sell/90"
+                    onClick={() => openTradeModal(asset, "sell")}
+                  >
+                    <TrendingDown className="h-4 w-4 mr-2" />
+                    Sell
+                  </Button>
+                  <Button
+                    variant="outline"
+                    aria-label="Add to favorites"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toast({
+                        title: "Favorite Asset",
+                        description: `Added ${asset.asset_name} to favorites`,
+                      });
+                    }}
+                  >
+                    <Star className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {sortedAssets.length === 0 && (
+          <div className="text-center py-12">
+            <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">
+              {searchTerm
+                ? "No assets found matching your search."
+                : "No assets available. Be the first to list one!"}
+            </p>
+          </div>
+        )}
       </div>
 
-      {sortedAssets.length === 0 && (
-        <div className="text-center py-12">
-          <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">
-            {searchTerm
-              ? "No assets found matching your search."
-              : "No assets available. Be the first to list one!"}
-          </p>
-        </div>
+      {selectedAsset && (
+        <OrderModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          asset={selectedAsset}
+          side={modalSide}
+        />
       )}
-    </div>
-
-    {selectedAsset && (
-      <OrderModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        asset={selectedAsset}
-        side={modalSide}
-      />
-    )}
     </>
   );
 }

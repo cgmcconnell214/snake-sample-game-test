@@ -119,7 +119,6 @@ const IPTokenization: React.FC = () => {
     }
   }, [user]);
 
-
   const calculateTokenMetrics = (revenue: number, valuation: number) => {
     // Based on example: 500k/yr revenue = 1M tokens at $0.50/yr yield
     const tokensPerDollar = 2.0; // Default 2 tokens per dollar of valuation
