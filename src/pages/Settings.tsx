@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { setTheme, getStoredTheme, type ThemePreference } from "@/lib/theme";
+import ProfileCompleteness from "@/components/ProfileCompleteness";
 
 const Settings = () => {
   const { user, profile, signOut, checkSubscription } = useAuth();
@@ -175,6 +176,8 @@ const Settings = () => {
           Sign Out
         </Button>
       </div>
+
+      <ProfileCompleteness />
 
       {/* User Profile */}
       <Card>

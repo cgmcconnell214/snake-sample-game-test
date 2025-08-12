@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://example.com/</loc></url>
+  <url><loc>https://example.com/auth</loc></url>
+  <url><loc>https://example.com/app</loc></url>
+  <url><loc>https://example.com/app/trading</loc></url>
+  <url><loc>https://example.com/app/portfolio</loc></url>
+  <url><loc>https://example.com/app/marketplace</loc></url>
+  <url><loc>https://example.com/app/liquidity</loc></url>
+  <url><loc>https://example.com/app/learning</loc></url>
+  <url><loc>https://example.com/app/certification</loc></url>
+  <url><loc>https://example.com/app/social</loc></url>
+  <url><loc>https://example.com/app/profile</loc></url>
+</urlset>

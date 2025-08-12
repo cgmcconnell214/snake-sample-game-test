@@ -43,6 +43,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import ProfileCompleteness from "@/components/ProfileCompleteness";
 
 interface UserProfileData {
   user_id: string;
@@ -213,6 +214,9 @@ export default function EnhancedUserProfile() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Profile completeness banner */}
+      <ProfileCompleteness />
+
       {/* Profile Header */}
       <Card>
         <CardContent className="p-0">
