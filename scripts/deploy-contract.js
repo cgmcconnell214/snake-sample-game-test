@@ -1,15 +1,29 @@
 import fs from 'fs/promises';
+import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { Client, Wallet } from 'xrpl';
 
+// Only allow known contract templates to be deployed
+const TEMPLATE_WHITELIST = [
+  'marketplace',
+  'p2p-trading',
+];
+
 async function main() {
-  const templateFile = process.argv[2];
-  if (!templateFile) {
-    console.error('Usage: node deploy-contract.js <template.json>');
+  const templateName = process.argv[2];
+  if (!templateName || !TEMPLATE_WHITELIST.includes(templateName)) {
+    console.error(`Template must be one of: ${TEMPLATE_WHITELIST.join(', ')}`);
     process.exit(1);
   }
 
-  const template = JSON.parse(await fs.readFile(templateFile, 'utf8'));
+  const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set');
+    process.exit(1);
+  }
+
+  const templatePath = path.resolve('supabase/contract-templates', `${templateName}.json`);
+  const template = JSON.parse(await fs.readFile(templatePath, 'utf8'));
 
   let txHash = '';
   try {
@@ -28,7 +42,8 @@ async function main() {
     txHash = `MOCK${Math.random().toString(16).slice(2)}`;
   }
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+  // Use service role key to ensure this runs server-side with full privileges
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
   const { data, error } = await supabase
     .from('contract_deployments')
     .insert({
