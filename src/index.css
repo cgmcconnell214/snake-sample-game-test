@@ -276,4 +276,15 @@
   .overflow-y-auto::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground));
   }
+
+  /* Accessibility and dropdown layering fixes */
+  [data-radix-popper-content-wrapper] {
+    z-index: 50; /* Ensure dropdowns/menus appear above app header/sidebar */
+  }
+  [data-radix-popper-content-wrapper] > div {
+    background-color: hsl(var(--popover)); /* Prevent transparent menus */
+  }
+  [data-state="open"][data-side] {
+    z-index: 50; /* Drawers/sheets over content */
+  }
 }
