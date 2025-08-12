@@ -10,6 +10,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import PageViewTracker from "@/components/PageViewTracker";
 
 // Lazy-loaded Pages
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -103,6 +104,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <PageViewTracker />
             <Routes>
               {/* Public routes */}
               <Route path="/" element={withSuspense(<Index />)} />
