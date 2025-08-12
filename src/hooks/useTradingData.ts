@@ -107,26 +107,39 @@ export function useTradingData() {
       setLoading(false);
     };
 
-    loadData();
+    let assetsChannel: any;
+    let ordersChannel: any;
 
-    // Set up real-time subscriptions
-    const assetsChannel = supabase
-      .channel('assets-changes')
-      .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'market_data' }, 
-          () => fetchAssets())
-      .subscribe();
+    const setup = async () => {
+      await loadData();
 
-    const ordersChannel = supabase
-      .channel('orders-changes')
-      .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'orders' }, 
-          () => fetchOrders())
-      .subscribe();
+      // Market data updates can be frequent; listen only for UPDATEs
+      assetsChannel = supabase
+        .channel('assets-changes')
+        .on('postgres_changes', 
+            { event: 'UPDATE', schema: 'public', table: 'market_data' }, 
+            () => fetchAssets())
+        .subscribe();
+
+      // Scope orders realtime to current user to reduce DB load
+      const { data: session } = await supabase.auth.getSession();
+      const userId = session.session?.user?.id;
+
+      ordersChannel = supabase
+        .channel('orders-changes')
+        .on('postgres_changes', 
+            userId
+              ? { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${userId}` }
+              : { event: '*', schema: 'public', table: 'orders' },
+            () => fetchOrders())
+        .subscribe();
+    };
+
+    setup();
 
     return () => {
-      supabase.removeChannel(assetsChannel);
-      supabase.removeChannel(ordersChannel);
+      if (assetsChannel) supabase.removeChannel(assetsChannel);
+      if (ordersChannel) supabase.removeChannel(ordersChannel);
     };
   }, []);
 

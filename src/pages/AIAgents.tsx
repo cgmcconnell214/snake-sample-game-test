@@ -39,12 +39,9 @@ import {
 import {
   Bot,
   Plus,
-  Settings,
   TestTube,
   Zap,
   DollarSign,
-  Users,
-  Star,
   MoreVertical,
   Trash2,
   Edit,
@@ -52,6 +49,7 @@ import {
   Code,
   Download,
   BarChart3,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +60,7 @@ import { AgentAuditor } from "@/components/ai-agents/AgentAuditor";
 import { ComprehensiveTestDashboard } from "@/components/ai-agents/ComprehensiveTestDashboard";
 import { EnhancedExecutionConsole } from "@/components/ai-agents/EnhancedExecutionConsole";
 import { AgentExecutionAnalyzer } from "@/components/ai-agents/AgentExecutionAnalyzer";
+import { z } from "zod";
 
 interface AIAgent {
   id: string;
@@ -80,6 +79,17 @@ interface AIAgent {
   is_active: boolean;
 }
 
+const agentSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  agent_type: z.string().min(1, "Agent type is required"),
+  price_per_use: z.number().nonnegative("Price must be 0 or more"),
+  total_tokens: z.number().int().positive("Total tokens must be positive"),
+});
+
+type AgentForm = z.infer<typeof agentSchema>;
+
 export default function AIAgents() {
   const [agents, setAgents] = useState<AIAgent[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -96,104 +106,173 @@ export default function AIAgents() {
     workflow_data: {},
     configuration: {},
   });
+  const [errors, setErrors] = useState<Partial<Record<keyof AgentForm, string>>>({});
+  const [editErrors, setEditErrors] = useState<Partial<Record<keyof AgentForm, string>>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showAuditMode, setShowAuditMode] = useState(false);
   const [showComprehensiveTest, setShowComprehensiveTest] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchAgents();
   }, []);
 
-  const fetchAgents = async () => {
-    const { data, error } = await supabase
-      .from("ai_agents")
-      .select("*")
-      .eq("is_active", true)
-      .order("created_at", { ascending: false });
+  useEffect(() => {
+    const result = agentSchema.safeParse(newAgent);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        name: fieldErrors.name?.[0],
+        description: fieldErrors.description?.[0],
+        category: fieldErrors.category?.[0],
+        agent_type: fieldErrors.agent_type?.[0],
+        price_per_use: fieldErrors.price_per_use?.[0],
+        total_tokens: fieldErrors.total_tokens?.[0],
+      });
+    } else {
+      setErrors({});
+    }
+  }, [newAgent]);
 
-    if (error) {
+  useEffect(() => {
+    if (!editingAgent) {
+      setEditErrors({});
+      return;
+    }
+    const result = agentSchema.safeParse(editingAgent);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setEditErrors({
+        name: fieldErrors.name?.[0],
+        description: fieldErrors.description?.[0],
+        price_per_use: fieldErrors.price_per_use?.[0],
+        total_tokens: fieldErrors.total_tokens?.[0],
+      });
+    } else {
+      setEditErrors({});
+    }
+  }, [editingAgent]);
+
+  const fetchAgents = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("ai_agents")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setAgents(data || []);
+    } catch (error) {
+      console.error("Failed to fetch AI agents:", error);
       toast({
         title: "Error",
         description: "Failed to fetch AI agents",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    setAgents(data || []);
   };
 
   const handleCreateAgent = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create an AI agent",
-        variant: "destructive",
+    const result = agentSchema.safeParse(newAgent);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setErrors({
+        name: fieldErrors.name?.[0],
+        description: fieldErrors.description?.[0],
+        category: fieldErrors.category?.[0],
+        agent_type: fieldErrors.agent_type?.[0],
+        price_per_use: fieldErrors.price_per_use?.[0],
+        total_tokens: fieldErrors.total_tokens?.[0],
       });
       return;
     }
 
-    const { data, error } = await supabase
-      .from("ai_agents")
-      .insert({
-        ...newAgent,
-        creator_id: user.id,
-        configuration: {
-          napier_integration: true,
-          tokenomics_enabled: true,
-          revenue_sharing: true,
-          ...newAgent.configuration,
-        },
-      })
-      .select()
-      .single();
+    setIsLoading(true);
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to create an AI agent",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (error) {
+      const { data, error } = await supabase
+        .from("ai_agents")
+        .insert({
+          ...newAgent,
+          creator_id: user.id,
+          configuration: {
+            napier_integration: true,
+            tokenomics_enabled: true,
+            revenue_sharing: true,
+            ...newAgent.configuration,
+          },
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "AI agent created successfully",
+      });
+
+      setAgents([data, ...agents]);
+      setIsCreateModalOpen(false);
+      setNewAgent({
+        name: "",
+        description: "",
+        category: "workflow",
+        agent_type: "workflow",
+        price_per_use: 0,
+        total_tokens: 1000000,
+        workflow_data: {},
+        configuration: {},
+      });
+      setErrors({});
+    } catch (error) {
+      console.error("Failed to create AI agent:", error);
       toast({
         title: "Error",
         description: "Failed to create AI agent",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    toast({
-      title: "Success",
-      description: "AI agent created successfully",
-    });
-
-    setAgents([data, ...agents]);
-    setIsCreateModalOpen(false);
-    setNewAgent({
-      name: "",
-      description: "",
-      category: "workflow",
-      agent_type: "workflow",
-      price_per_use: 0,
-      total_tokens: 1000000,
-      workflow_data: {},
-      configuration: {},
-    });
   };
-
   const handleCreateTestingAgent = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to create an AI agent",
-        variant: "destructive",
-      });
-      return;
-    }
+    setIsLoading(true);
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to create an AI agent",
+          variant: "destructive",
+        });
+        return;
+      }
 
     const testingAgentData = {
       name: "Site Functionality Tester",
@@ -309,121 +388,144 @@ export default function AIAgents() {
       }
     };
 
-    const { data, error } = await supabase
-      .from("ai_agents")
-      .insert(testingAgentData)
-      .select()
-      .single();
+      const { data, error } = await supabase
+        .from("ai_agents")
+        .insert(testingAgentData)
+        .select()
+        .single();
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Testing Agent Created",
+        description: "Site Functionality Tester has been created and is ready for deployment.",
+      });
+
+      setAgents([data, ...agents]);
+    } catch (error) {
+      console.error("Failed to create testing agent:", error);
       toast({
         title: "Error",
         description: "Failed to create testing agent",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    toast({
-      title: "Testing Agent Created",
-      description: "Site Functionality Tester has been created and is ready for deployment.",
-    });
-
-    setAgents([data, ...agents]);
   };
 
   const handleDeleteAgent = async (agentId: string) => {
-    const { error } = await supabase
-      .from("ai_agents")
-      .update({ is_active: false })
-      .eq("id", agentId);
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from("ai_agents")
+        .update({ is_active: false })
+        .eq("id", agentId);
 
-    if (error) {
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "AI agent deleted successfully",
+      });
+
+      setAgents(agents.filter((agent) => agent.id !== agentId));
+    } catch (error) {
+      console.error("Failed to delete AI agent:", error);
       toast({
         title: "Error",
         description: "Failed to delete AI agent",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    toast({
-      title: "Success",
-      description: "AI agent deleted successfully",
-    });
-
-    setAgents(agents.filter(agent => agent.id !== agentId));
   };
 
   const handlePurchaseAgent = async (
     agentId: string,
     tokensToPurchase: number,
   ) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to purchase an AI agent",
-        variant: "destructive",
+    setIsLoading(true);
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to purchase an AI agent",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const agent = agents.find((a) => a.id === agentId);
+      if (!agent) return;
+
+      await injectContractTemplate('rent');
+
+      const totalAmount = tokensToPurchase * agent.price_per_use;
+
+      const { error: purchaseError } = await supabase.from("ai_agent_purchases").insert({
+        buyer_id: user.id,
+        agent_id: agentId,
+        tokens_purchased: tokensToPurchase,
+        total_amount: totalAmount,
+        payment_status: "completed",
       });
-      return;
-    }
 
-    const agent = agents.find((a) => a.id === agentId);
-    if (!agent) return;
+      if (purchaseError) throw purchaseError;
 
-    await injectContractTemplate('rent');
+      const { error: updateError } = await supabase
+        .from("ai_agents")
+        .update({
+          tokens_sold: agent.tokens_sold + tokensToPurchase,
+        })
+        .eq("id", agentId);
 
-    const totalAmount = tokensToPurchase * agent.price_per_use;
+      if (updateError) throw updateError;
 
-    const { error } = await supabase.from("ai_agent_purchases").insert({
-      buyer_id: user.id,
-      agent_id: agentId,
-      tokens_purchased: tokensToPurchase,
-      total_amount: totalAmount,
-      payment_status: "completed",
-    });
+      toast({
+        title: "Purchase Successful",
+        description: `Purchased ${tokensToPurchase} tokens for $${totalAmount}`,
+      });
 
-    if (error) {
+      fetchAgents();
+    } catch (error) {
+      console.error("Failed to purchase AI agent:", error);
       toast({
         title: "Error",
         description: "Failed to purchase AI agent",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    // Update agent tokens sold
-    await supabase
-      .from("ai_agents")
-      .update({
-        tokens_sold: agent.tokens_sold + tokensToPurchase,
-      })
-      .eq("id", agentId);
-
-    toast({
-      title: "Purchase Successful",
-      description: `Purchased ${tokensToPurchase} tokens for $${totalAmount}`,
-    });
-
-    fetchAgents();
   };
 
   const handleExecuteAgent = async (agent: AIAgent) => {
+    setIsLoading(true);
     try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError) throw userError;
+
       const { data, error } = await supabase.functions.invoke('execute-ai-agent', {
-        body: { 
-          agentId: agent.id, 
+        body: {
+          agentId: agent.id,
           workflowData: agent.workflow_data,
           configuration: agent.configuration,
           inputData: {
             triggered_by: 'manual',
             triggered_at: new Date().toISOString(),
-            user_id: (await supabase.auth.getUser()).data.user?.id
-          }
-        }
+            user_id: user?.id,
+          },
+        },
       });
 
       if (error) throw error;
@@ -445,16 +547,17 @@ export default function AIAgents() {
         total_steps: totalSteps,
         successful_steps: successfulSteps,
         failed_steps: failedSteps,
-        step_details: stepResults
+        step_details: stepResults,
       });
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('Agent execution error:', error);
       toast({
         title: "Execution Failed",
         description: `Failed to execute ${agent.name}: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -471,26 +574,43 @@ export default function AIAgents() {
     // Get the agent to update - could be editingAgent or workflowAgent
     const agentToUpdate = editingAgent || workflowAgent;
     if (!agentToUpdate) return;
-    
-    const { data, error } = await supabase
-      .from('ai_agents')
-      .update(updated)
-      .eq('id', agentToUpdate.id)
-      .select()
-      .single();
 
-    if (error) {
+    if (editingAgent) {
+      const result = agentSchema.safeParse(editingAgent);
+      if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors;
+        setEditErrors({
+          name: fieldErrors.name?.[0],
+          description: fieldErrors.description?.[0],
+          price_per_use: fieldErrors.price_per_use?.[0],
+          total_tokens: fieldErrors.total_tokens?.[0],
+        });
+        return;
+      }
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('ai_agents')
+        .update(updated)
+        .eq('id', agentToUpdate.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setAgents(prev => prev.map(a => (a.id === data.id ? data : a)));
+      setEditingAgent(null);
+      setEditErrors({});
+      toast({ title: 'Agent Updated', description: 'Changes saved successfully' });
+    } catch (error) {
       console.error('Update error:', error);
       toast({ title: 'Error', description: 'Failed to update agent', variant: 'destructive' });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-    
-    console.log('Agent updated successfully:', data);
-    setAgents(prev => prev.map(a => (a.id === data.id ? data : a)));
-    setEditingAgent(null);
-    toast({ title: 'Agent Updated', description: 'Changes saved successfully' });
   };
-
   const isUserAgent = (agent: AIAgent) => {
     // This would check if the current user is the creator
     // For now, we'll just return true to show all options
@@ -499,6 +619,11 @@ export default function AIAgents() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {isLoading && (
+        <div className="flex justify-center">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      )}
       {showComprehensiveTest ? (
         <ComprehensiveTestDashboard onClose={() => setShowComprehensiveTest(false)} />
       ) : showAnalytics ? (
@@ -551,11 +676,11 @@ export default function AIAgents() {
                 <TestTube className="h-4 w-4 mr-2" />
                 {showAuditMode ? 'Exit Audit' : 'Basic Audit'}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCreateTestingAgent}>
+              <DropdownMenuItem onClick={handleCreateTestingAgent} disabled={isLoading}>
                 <Bot className="h-4 w-4 mr-2" />
                 Create Testing Agent
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setIsCreateModalOpen(true)}>
+              <DropdownMenuItem onClick={() => setIsCreateModalOpen(true)} disabled={isLoading}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Agent
               </DropdownMenuItem>
@@ -627,7 +752,7 @@ export default function AIAgents() {
                           <Download className="h-4 w-4 mr-2" />
                           Deploy Agent
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleExecuteAgent(agent)}>
+                        <DropdownMenuItem onClick={() => handleExecuteAgent(agent)} disabled={isLoading}>
                           <Play className="h-4 w-4 mr-2" />
                           Execute Now
                         </DropdownMenuItem>
@@ -653,8 +778,16 @@ export default function AIAgents() {
                               <AlertDialogAction
                                 onClick={() => handleDeleteAgent(agent.id)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                disabled={isLoading}
                               >
-                                Delete
+                                {isLoading ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Deleting...
+                                  </>
+                                ) : (
+                                  "Delete"
+                                )}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -699,10 +832,19 @@ export default function AIAgents() {
                 <Button
                   className="flex-1"
                   onClick={() => handlePurchaseAgent(agent.id, 1000)}
-                  disabled={agent.total_tokens - agent.tokens_sold < 1000}
+                  disabled={agent.total_tokens - agent.tokens_sold < 1000 || isLoading}
                 >
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Buy 1000 tokens
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      Buy 1000 tokens
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
@@ -737,7 +879,11 @@ export default function AIAgents() {
                   setNewAgent({ ...newAgent, name: e.target.value })
                 }
                 placeholder="e.g., Trading Bot Extreme"
+                disabled={isLoading}
               />
+              {errors.name && (
+                <p className="text-sm text-red-500 mt-1">{errors.name}</p>
+              )}
             </div>
 
             <div>
@@ -749,7 +895,11 @@ export default function AIAgents() {
                   setNewAgent({ ...newAgent, description: e.target.value })
                 }
                 placeholder="Describe what your AI agent does..."
+                disabled={isLoading}
               />
+              {errors.description && (
+                <p className="text-sm text-red-500 mt-1">{errors.description}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -760,6 +910,7 @@ export default function AIAgents() {
                   onValueChange={(value) =>
                     setNewAgent({ ...newAgent, category: value })
                   }
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -771,6 +922,9 @@ export default function AIAgents() {
                     <SelectItem value="compliance">Compliance</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.category && (
+                  <p className="text-sm text-red-500 mt-1">{errors.category}</p>
+                )}
               </div>
 
               <div>
@@ -780,6 +934,7 @@ export default function AIAgents() {
                   onValueChange={(value) =>
                     setNewAgent({ ...newAgent, agent_type: value })
                   }
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -791,6 +946,9 @@ export default function AIAgents() {
                     <SelectItem value="api_connector">API Connector</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.agent_type && (
+                  <p className="text-sm text-red-500 mt-1">{errors.agent_type}</p>
+                )}
               </div>
             </div>
 
@@ -808,7 +966,11 @@ export default function AIAgents() {
                       price_per_use: parseFloat(e.target.value) || 0,
                     })
                   }
+                  disabled={isLoading}
                 />
+                {errors.price_per_use && (
+                  <p className="text-sm text-red-500 mt-1">{errors.price_per_use}</p>
+                )}
               </div>
 
               <div>
@@ -823,14 +985,27 @@ export default function AIAgents() {
                       total_tokens: parseInt(e.target.value) || 1000000,
                     })
                   }
+                  disabled={isLoading}
                 />
+                {errors.total_tokens && (
+                  <p className="text-sm text-red-500 mt-1">{errors.total_tokens}</p>
+                )}
               </div>
             </div>
 
             <div className="flex gap-2 pt-4">
-              <Button onClick={handleCreateAgent} className="flex-1">
-                <Zap className="h-4 w-4 mr-2" />
-                Create Agent
+              <Button onClick={handleCreateAgent} className="flex-1" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4 mr-2" />
+                    Create Agent
+                  </>
+                )}
               </Button>
               <Button
                 variant="outline"
@@ -858,7 +1033,11 @@ export default function AIAgents() {
                   id="edit-name"
                   value={editingAgent.name}
                   onChange={(e) => setEditingAgent({ ...editingAgent, name: e.target.value })}
+                  disabled={isLoading}
                 />
+                {editErrors.name && (
+                  <p className="text-sm text-red-500 mt-1">{editErrors.name}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="edit-description">Description</Label>
@@ -866,7 +1045,11 @@ export default function AIAgents() {
                   id="edit-description"
                   value={editingAgent.description}
                   onChange={(e) => setEditingAgent({ ...editingAgent, description: e.target.value })}
+                  disabled={isLoading}
                 />
+                {editErrors.description && (
+                  <p className="text-sm text-red-500 mt-1">{editErrors.description}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="edit-price">Price per Use ($)</Label>
@@ -876,7 +1059,11 @@ export default function AIAgents() {
                   step="0.01"
                   value={editingAgent.price_per_use}
                   onChange={(e) => setEditingAgent({ ...editingAgent, price_per_use: parseFloat(e.target.value) || 0 })}
+                  disabled={isLoading}
                 />
+                {editErrors.price_per_use && (
+                  <p className="text-sm text-red-500 mt-1">{editErrors.price_per_use}</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="edit-tokens">Total Tokens</Label>
@@ -885,11 +1072,22 @@ export default function AIAgents() {
                   type="number"
                   value={editingAgent.total_tokens}
                   onChange={(e) => setEditingAgent({ ...editingAgent, total_tokens: parseInt(e.target.value) || 0 })}
+                  disabled={isLoading}
                 />
+                {editErrors.total_tokens && (
+                  <p className="text-sm text-red-500 mt-1">{editErrors.total_tokens}</p>
+                )}
               </div>
               <div className="flex gap-2 pt-4">
-                <Button onClick={() => handleUpdateAgent(editingAgent)} className="flex-1">
-                  Save Changes
+                <Button onClick={() => handleUpdateAgent(editingAgent)} className="flex-1" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
                 </Button>
                 <Button variant="outline" onClick={() => setEditingAgent(null)}>
                   Cancel

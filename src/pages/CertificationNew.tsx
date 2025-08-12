@@ -3,7 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Award, CheckCircle, Clock, Star, Trophy, Book, Users } from "lucide-react";
+import CertificationList, {
+  CertificationItem,
+} from "@/components/certification/CertificationList";
+import { Award, CheckCircle, Star, Trophy, Book, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -200,6 +203,31 @@ export default function Certification(): JSX.Element {
 
   const overallProgress = certifications.reduce((acc, cert) => acc + cert.progress, 0) / certifications.length;
 
+  const certificationItems: CertificationItem[] = certifications.map((cert) => ({
+    id: cert.id,
+    name: cert.name,
+    description: cert.description,
+    level: cert.level,
+    levelVariant: getLevelColor(cert.level) as CertificationItem["levelVariant"],
+    progress: cert.progress,
+    requirements: cert.requirements,
+    rewards: cert.rewards,
+    estimatedTime: cert.estimated_time,
+    icon: Trophy,
+    isCompleted: cert.is_completed,
+    actionLabel:
+      cert.progress === 0
+        ? "Start Certification"
+        : cert.is_completed
+        ? undefined
+        : "Continue",
+    actionVariant: cert.progress === 0 ? "default" : "outline",
+    onAction:
+      cert.progress === 0 || !cert.is_completed
+        ? () => handleStartCertification(cert.id)
+        : undefined,
+  }));
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -224,10 +252,10 @@ export default function Certification(): JSX.Element {
       {/* Overall Progress */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Book className="h-5 w-5" />
-            Your Learning Journey
-          </CardTitle>
+            <CardTitle>Your Learning Journey</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -258,18 +286,22 @@ export default function Certification(): JSX.Element {
         {/* Certification Paths */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-xl font-semibold">Certification Paths</h2>
+          <CertificationList
+            certifications={certificationItems}
+            gridClassName="grid-cols-1"
+          />
           {certifications.map((cert) => (
             <Card key={cert.id} className="relative overflow-hidden">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <Trophy className="h-5 w-5" />
-                      {cert.name}
+                      <CardTitle>{cert.name}</CardTitle>
                       <Badge variant={getLevelColor(cert.level)}>
                         Level {cert.level}
                       </Badge>
-                    </CardTitle>
+                    </div>
                     <p className="text-sm text-muted-foreground mt-1">
                       {cert.description}
                     </p>
@@ -335,10 +367,10 @@ export default function Certification(): JSX.Element {
           <h2 className="text-xl font-semibold">Your Badges</h2>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <Award className="h-5 w-5" />
-                Earned Badges
-              </CardTitle>
+                <CardTitle>Earned Badges</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {userBadges.length === 0 ? (
