@@ -104,12 +104,25 @@ const TwoFactorManager: React.FC = () => {
         return;
       }
 
-      const { error } = await supabase
+      // Store MFA data in secure table
+      const { error: mfaError } = await supabase
+        .from("user_mfa")
+        .upsert({
+          user_id: user?.id,
+          totp_secret: secret,
+          enabled: true,
+          backup_codes: backupCodes,
+        });
+
+      if (mfaError) throw mfaError;
+
+      // Update profile status
+      const { error: profileError } = await supabase
         .from("profiles")
-        .update({ two_factor_enabled: true, two_factor_secret: secret })
+        .update({ two_factor_enabled: true })
         .eq("user_id", user?.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
       setIsEnabled(true);
       setShowSetup(false);
@@ -134,12 +147,21 @@ const TwoFactorManager: React.FC = () => {
   const disable2FA = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ two_factor_enabled: false, two_factor_secret: null })
+      // Remove MFA data
+      const { error: mfaError } = await supabase
+        .from("user_mfa")
+        .delete()
         .eq("user_id", user?.id);
 
-      if (error) throw error;
+      if (mfaError) throw mfaError;
+
+      // Update profile status
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ two_factor_enabled: false })
+        .eq("user_id", user?.id);
+
+      if (profileError) throw profileError;
 
       setIsEnabled(false);
       setBackupCodes([]);

@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -142,6 +142,27 @@ export type Database = {
           payment_status?: string
           tokens_purchased?: number
           total_amount?: number
+        }
+        Relationships: []
+      }
+      ai_agent_secrets: {
+        Row: {
+          agent_id: string
+          created_at: string
+          secrets: Json
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          secrets?: Json
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          secrets?: Json
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2563,6 +2584,33 @@ export type Database = {
           },
         ]
       }
+      user_mfa: {
+        Row: {
+          backup_codes: string[]
+          created_at: string
+          enabled: boolean
+          totp_secret: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          backup_codes?: string[]
+          created_at?: string
+          enabled?: boolean
+          totp_secret: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          backup_codes?: string[]
+          created_at?: string
+          enabled?: boolean
+          totp_secret?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_posts: {
         Row: {
           comment_count: number | null
@@ -2828,16 +2876,16 @@ export type Database = {
       }
       create_notification: {
         Args: {
-          target_user_id: string
-          notification_type: string
-          notification_title: string
-          notification_message: string
           notification_data?: Json
+          notification_message: string
+          notification_title: string
+          notification_type: string
+          target_user_id: string
         }
         Returns: string
       }
       execute_ai_agent_workflow: {
-        Args: { agent_id: string; workflow_data?: Json; input_data?: Json }
+        Args: { agent_id: string; input_data?: Json; workflow_data?: Json }
         Returns: Json
       }
       get_current_user_role: {
@@ -2847,24 +2895,24 @@ export type Database = {
       get_public_user_profiles: {
         Args: Record<PropertyKey, never>
         Returns: {
-          user_id: string
-          display_name: string
-          username: string
-          bio: string
           avatar_url: string
+          bio: string
+          display_name: string
+          user_id: string
+          username: string
         }[]
       }
       get_user_notifications: {
         Args: { target_user_id: string }
         Returns: {
-          id: string
-          user_id: string
-          type: string
-          title: string
-          message: string
-          data: Json
-          is_read: boolean
           created_at: string
+          data: Json
+          id: string
+          is_read: boolean
+          message: string
+          title: string
+          type: string
+          user_id: string
         }[]
       }
       mark_all_notifications_read: {
