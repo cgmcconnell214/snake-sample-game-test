@@ -59,7 +59,7 @@ const LandingPage = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <img src="/lovable-uploads/93355fa4-02d2-44c8-a9a1-36ffb47138c1.png" alt="God's Realm Logo" className="h-8 w-8" />
+              <img src="/lovable-uploads/5e27a9c9-6f52-4a64-9270-63f61c6b48cd.png" alt="God's Realm Logo" className="h-10 w-10 drop-shadow-lg" />
               <span className="text-xl font-bold text-divine-gold">
                 God's Realm
               </span>
@@ -131,20 +131,28 @@ const LandingPage = () => {
 
         <div className="container mx-auto px-6 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-6xl md:text-8xl font-bold font-playfair mb-6 bg-gradient-to-r from-divine-gold via-primary to-divine-white bg-clip-text text-transparent">
-              Enter God's Realm
+            {/* Logo Display */}
+            <div className="mb-8 flex justify-center">
+              <img 
+                src="/lovable-uploads/5e27a9c9-6f52-4a64-9270-63f61c6b48cd.png" 
+                alt="God's Realm - Divine Sanctuary" 
+                className="h-32 w-auto drop-shadow-2xl animate-glow"
+              />
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold font-playfair mb-6 bg-gradient-to-r from-divine-gold via-primary to-luxury-purple bg-clip-text text-transparent leading-tight">
+              Welcome to the Divine Sanctuary
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto font-inter">
               Tokenize your assets, secure your rights, and operate under Divine
-              Law.
+              Law in the ultimate sovereign digital realm.
             </p>
             <Button
               onClick={() => scrollToSection("register")}
               size="lg"
-              className="bg-gradient-to-r from-divine-gold to-primary text-divine-gold-foreground hover:scale-105 transition-all duration-300 shadow-divine"
+              className="bg-gradient-to-r from-divine-gold to-primary text-divine-gold-foreground hover:scale-105 transition-all duration-300 shadow-divine font-inter font-semibold px-8 py-4 text-lg"
             >
               <Sparkles className="mr-2 h-5 w-5" />
-              Get Started
+              Enter the Realm
             </Button>
           </div>
         </div>
@@ -292,7 +300,7 @@ const LandingPage = () => {
       <footer className="py-12 border-t border-divine-gold/20">
         <div className="container mx-auto px-6 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <img src="/lovable-uploads/93355fa4-02d2-44c8-a9a1-36ffb47138c1.png" alt="God's Realm Logo" className="h-6 w-6" />
+            <img src="/lovable-uploads/5e27a9c9-6f52-4a64-9270-63f61c6b48cd.png" alt="God's Realm Logo" className="h-8 w-8 drop-shadow-lg" />
             <span className="text-lg font-semibold text-divine-gold">
               God's Realm
             </span>
