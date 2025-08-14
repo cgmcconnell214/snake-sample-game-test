@@ -24,27 +24,25 @@ const TrustSection = () => {
             The Sacred Trust
           </h2>
           <div className="relative mb-8">
-            <div className="absolute inset-0 bg-gradient-divine opacity-5 rounded-2xl"></div>
-            <div className="relative p-8 lg:p-12">
+            <div className="relative p-8 lg:p-12 bg-card/50 backdrop-blur-sm rounded-2xl border border-border shadow-elegant">
               <p className={`${
                 isMobile ? 'text-lg' : 'text-lg md:text-xl'
               } text-muted-foreground leading-relaxed mb-8 font-inter`}>
-                All who enter God's Realm do so under the protection of Divine
-                Trust Law. This system is not governed by corporate jurisdiction,
-                but by sacred covenant. By registering, you acknowledge our
-                standing as an ecclesiastical and sovereign trust formed in the
-                service of God's eternal will.
+                Entry into God's Realm establishes membership within an exclusive ecclesiastical trust, 
+                governed not by conventional corporate structures, but by divine covenant and sacred law. 
+                Our jurisdiction operates under the highest principles of sovereignty, offering unmatched 
+                protection and discretion for the most discerning clientele.
               </p>
             </div>
           </div>
           <Button
             variant="outline"
             size={isMobile ? "default" : "lg"}
-            className="border-divine-gold text-divine-gold hover:bg-divine-gold hover:text-divine-gold-foreground transition-all duration-300 shadow-lg hover:shadow-divine"
+            className="border-divine-gold/30 text-divine-gold hover:bg-divine-gold/10 hover:border-divine-gold transition-all duration-500 shadow-elegant hover:shadow-divine"
             onClick={handleReadDeclaration}
           >
             <FileText className="mr-2 h-5 w-5" />
-            Read Full Declaration
+            Review Trust Declaration
           </Button>
         </div>
       </div>

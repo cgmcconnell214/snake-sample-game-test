@@ -32,235 +32,173 @@
 
 @layer base {
   :root {
-    /* Light Theme Colors - Enhanced Luxury */
+    /* UHNWI Luxury Theme - Light Mode */
     --background: 0 0% 100%;
-    --foreground: 220 25% 10%;
+    --foreground: 0 0% 8%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 0 0% 8%;
 
-    --primary: 220 90% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 45 100% 50%;
+    --primary-foreground: 0 0% 8%;
 
-    --secondary: 45 80% 90%;
-    --secondary-foreground: 220 25% 15%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 8%;
 
-    --muted: 220 10% 96%;
-    --muted-foreground: 220 25% 40%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 220 15% 95%;
-    --accent-foreground: 220 25% 15%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 8%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 90%;
-    --ring: 220 90% 60%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 45 100% 50%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Divine Luxury Colors */
-    --divine-gold: 45 85% 55%;
-    --divine-gold-foreground: 220 25% 10%;
-    --divine-gold-light: 45 90% 70%;
-    --divine-gold-dark: 45 80% 45%;
-    --ethereal-white: 0 0% 100%;
-    --deep-blue: 220 90% 60%;
-    --sacred-dark: 220 25% 8%;
-    --sacred-medium: 220 25% 30%;
-    --luxury-purple: 270 80% 60%;
-    --luxury-emerald: 160 80% 45%;
+    /* UHNWI Luxury Colors */
+    --divine-gold: 45 100% 50%;
+    --divine-gold-foreground: 0 0% 8%;
+    --divine-gold-light: 45 100% 70%;
+    --divine-gold-dark: 45 100% 35%;
+    --luxury-black: 0 0% 8%;
+    --luxury-white: 0 0% 100%;
+    --luxury-gray: 0 0% 96%;
+    --luxury-gray-dark: 0 0% 20%;
 
     /* Trading Specific Colors */
-    --success: 120 60% 45%;
+    --success: 120 100% 25%;
     --success-foreground: 0 0% 100%;
-    --buy: 120 60% 45%;
+    --buy: 120 100% 25%;
     --sell: 0 84% 55%;
-    --warning: 45 93% 50%;
-    --warning-foreground: 220 25% 15%;
+    --warning: 45 100% 50%;
+    --warning-foreground: 0 0% 8%;
 
-    /* Chart Colors */
-    --chart-1: 220 90% 60%;
-    --chart-2: 120 60% 45%;
-    --chart-3: 45 80% 55%;
-    --chart-4: 280 80% 50%;
-    --chart-5: 0 84% 55%;
+    /* Chart Colors - Luxury Palette */
+    --chart-1: 45 100% 50%;
+    --chart-2: 0 0% 8%;
+    --chart-3: 0 0% 60%;
+    --chart-4: 45 100% 35%;
+    --chart-5: 0 0% 40%;
 
-    /* Luxury Gradients */
-    --gradient-divine: linear-gradient(
-      135deg,
-      hsl(220 90% 60%) 0%,
-      hsl(45 85% 55%) 50%,
-      hsl(270 80% 60%) 100%
-    );
-    --gradient-sacred: linear-gradient(
-      135deg,
-      hsl(0 0% 100%) 0%,
-      hsl(220 15% 95%) 50%,
-      hsl(45 85% 95%) 100%
-    );
-    --gradient-ethereal: linear-gradient(
-      180deg,
-      hsl(0 0% 100%) 0%,
-      hsl(220 90% 60% / 0.05) 100%
-    );
-    --gradient-hero: linear-gradient(
-      135deg,
-      hsl(0 0% 100%) 0%,
-      hsl(220 90% 60% / 0.1) 25%,
-      hsl(45 85% 55% / 0.1) 50%,
-      hsl(270 80% 60% / 0.05) 100%
-    );
-    --gradient-luxury: linear-gradient(
-      135deg,
-      hsl(45 85% 55%) 0%,
-      hsl(270 80% 60%) 50%,
-      hsl(160 80% 45%) 100%
-    );
+    /* UHNWI Luxury Gradients */
+    --gradient-divine: linear-gradient(135deg, hsl(45 100% 50%) 0%, hsl(45 100% 70%) 100%);
+    --gradient-luxury: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 96%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(45 100% 50% / 0.03) 100%);
 
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 220 25% 30%;
-    --sidebar-primary: 220 90% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 10% 96%;
-    --sidebar-accent-foreground: 220 25% 20%;
-    --sidebar-border: 220 15% 90%;
-    --sidebar-ring: 220 90% 60%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 45 100% 50%;
+    --sidebar-primary-foreground: 0 0% 8%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 8%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 45 100% 50%;
 
-    /* Luxury Shadows and Effects */
-    --shadow-divine: 0 20px 40px -10px hsl(45 85% 55% / 0.25);
-    --shadow-sacred: 0 0 60px hsl(220 90% 60% / 0.2);
-    --shadow-ethereal: 0 25px 70px -15px hsl(220 90% 60% / 0.15);
-    --shadow-luxury: 0 30px 60px -15px hsl(270 80% 60% / 0.2);
-    --glow-divine: 0 0 30px hsl(45 85% 55% / 0.4);
-    --glow-sacred: 0 0 50px hsl(220 90% 60% / 0.3);
+    /* UHNWI Luxury Shadows and Effects */
+    --shadow-divine: 0 4px 20px hsl(45 100% 50% / 0.15);
+    --shadow-luxury: 0 8px 32px hsl(0 0% 0% / 0.08);
+    --shadow-elegant: 0 2px 16px hsl(0 0% 0% / 0.04);
+    --glow-divine: 0 0 20px hsl(45 100% 50% / 0.3);
 
-    /* Enhanced Animations */
+    /* UHNWI Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-divine: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    --transition-luxury: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    --ease-divine: cubic-bezier(0.23, 1, 0.32, 1);
+    --transition-luxury: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-luxury: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .dark {
-    /* Sacred Divine Theme Colors (Dark) - Enhanced Luxury */
-    --background: 220 25% 8%;
-    --foreground: 45 100% 95%;
+    /* UHNWI Luxury Theme - Dark Mode */
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 220 25% 10%;
-    --card-foreground: 45 100% 95%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 220 25% 10%;
-    --popover-foreground: 45 100% 95%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 220 90% 65%;
-    --primary-foreground: 220 25% 8%;
+    --primary: 45 100% 60%;
+    --primary-foreground: 0 0% 8%;
 
-    --secondary: 45 80% 75%;
-    --secondary-foreground: 220 25% 8%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 220 25% 15%;
-    --muted-foreground: 45 50% 80%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 220 25% 15%;
-    --accent-foreground: 45 100% 95%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 95%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 220 25% 8%;
+    --destructive-foreground: 0 0% 8%;
 
-    --border: 220 25% 20%;
-    --input: 220 25% 20%;
-    --ring: 220 90% 65%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 45 100% 60%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Sacred Luxury Colors (Dark) */
-    --divine-gold: 45 90% 75%;
-    --divine-gold-foreground: 220 25% 8%;
-    --divine-gold-light: 45 95% 85%;
-    --divine-gold-dark: 45 85% 65%;
-    --ethereal-white: 45 100% 95%;
-    --deep-blue: 220 90% 65%;
-    --sacred-dark: 220 25% 8%;
-    --sacred-medium: 220 25% 15%;
-    --luxury-purple: 270 80% 70%;
-    --luxury-emerald: 160 80% 55%;
+    /* UHNWI Luxury Colors - Dark */
+    --divine-gold: 45 100% 60%;
+    --divine-gold-foreground: 0 0% 8%;
+    --divine-gold-light: 45 100% 75%;
+    --divine-gold-dark: 45 100% 45%;
+    --luxury-black: 0 0% 8%;
+    --luxury-white: 0 0% 95%;
+    --luxury-gray: 0 0% 15%;
+    --luxury-gray-dark: 0 0% 20%;
 
     /* Trading Specific Colors */
-    --success: 120 60% 50%;
-    --success-foreground: 220 25% 8%;
-    --buy: 120 60% 50%;
+    --success: 120 100% 30%;
+    --success-foreground: 0 0% 8%;
+    --buy: 120 100% 30%;
     --sell: 0 84% 60%;
-    --warning: 45 93% 58%;
-    --warning-foreground: 220 25% 8%;
+    --warning: 45 100% 60%;
+    --warning-foreground: 0 0% 8%;
 
-    /* Chart Colors */
-    --chart-1: 220 90% 65%;
-    --chart-2: 120 60% 50%;
-    --chart-3: 45 80% 75%;
-    --chart-4: 280 80% 60%;
-    --chart-5: 0 84% 60%;
+    /* Chart Colors - Luxury Palette */
+    --chart-1: 45 100% 60%;
+    --chart-2: 0 0% 95%;
+    --chart-3: 0 0% 65%;
+    --chart-4: 45 100% 45%;
+    --chart-5: 0 0% 50%;
 
-    /* Sacred Luxury Gradients */
-    --gradient-divine: linear-gradient(
-      135deg,
-      hsl(220 90% 65%) 0%,
-      hsl(45 90% 75%) 50%,
-      hsl(270 80% 70%) 100%
-    );
-    --gradient-sacred: linear-gradient(
-      135deg,
-      hsl(220 25% 8%) 0%,
-      hsl(220 25% 15%) 50%,
-      hsl(45 90% 75% / 0.1) 100%
-    );
-    --gradient-ethereal: linear-gradient(
-      180deg,
-      hsl(220 25% 8%) 0%,
-      hsl(220 90% 65% / 0.1) 100%
-    );
-    --gradient-hero: linear-gradient(
-      135deg,
-      hsl(220 25% 8%) 0%,
-      hsl(220 90% 65% / 0.15) 25%,
-      hsl(45 90% 75% / 0.1) 50%,
-      hsl(270 80% 70% / 0.05) 100%
-    );
-    --gradient-luxury: linear-gradient(
-      135deg,
-      hsl(45 90% 75%) 0%,
-      hsl(270 80% 70%) 50%,
-      hsl(160 80% 55%) 100%
-    );
+    /* UHNWI Luxury Gradients - Dark */
+    --gradient-divine: linear-gradient(135deg, hsl(45 100% 60%) 0%, hsl(45 100% 75%) 100%);
+    --gradient-luxury: linear-gradient(135deg, hsl(0 0% 8%) 0%, hsl(0 0% 15%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 8%) 0%, hsl(0 0% 10%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 8%) 0%, hsl(45 100% 60% / 0.05) 100%);
 
     /* Sidebar */
-    --sidebar-background: 220 25% 8%;
-    --sidebar-foreground: 45 50% 80%;
-    --sidebar-primary: 220 90% 65%;
-    --sidebar-primary-foreground: 220 25% 8%;
-    --sidebar-accent: 220 25% 15%;
-    --sidebar-accent-foreground: 45 100% 95%;
-    --sidebar-border: 220 25% 20%;
-    --sidebar-ring: 220 90% 65%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 65%;
+    --sidebar-primary: 45 100% 60%;
+    --sidebar-primary-foreground: 0 0% 8%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 45 100% 60%;
 
-    /* Sacred Luxury Shadows and Effects */
-    --shadow-divine: 0 20px 40px -10px hsl(45 90% 75% / 0.3);
-    --shadow-sacred: 0 0 60px hsl(220 90% 65% / 0.25);
-    --shadow-ethereal: 0 25px 70px -15px hsl(220 90% 65% / 0.2);
-    --shadow-luxury: 0 30px 60px -15px hsl(270 80% 70% / 0.25);
-    --glow-divine: 0 0 30px hsl(45 90% 75% / 0.5);
-    --glow-sacred: 0 0 50px hsl(220 90% 65% / 0.4);
+    /* UHNWI Luxury Shadows and Effects - Dark */
+    --shadow-divine: 0 4px 20px hsl(45 100% 60% / 0.2);
+    --shadow-luxury: 0 8px 32px hsl(0 0% 0% / 0.5);
+    --shadow-elegant: 0 2px 16px hsl(0 0% 0% / 0.3);
+    --glow-divine: 0 0 20px hsl(45 100% 60% / 0.4);
 
-    /* Enhanced Animations */
+    /* UHNWI Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-divine: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    --transition-luxury: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-    --ease-divine: cubic-bezier(0.23, 1, 0.32, 1);
+    --transition-luxury: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-luxury: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 

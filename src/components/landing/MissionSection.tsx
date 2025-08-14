@@ -13,16 +13,14 @@ const MissionSection = () => {
             Our Mission
           </h2>
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-divine opacity-10 rounded-2xl"></div>
-            <div className="relative p-8 lg:p-12">
+            <div className="relative p-8 lg:p-12 bg-card/50 backdrop-blur-sm rounded-2xl border border-border shadow-elegant">
               <p className={`${
                 isMobile ? 'text-lg' : 'text-lg md:text-xl'
               } text-muted-foreground leading-relaxed font-inter`}>
-                God's Realm is a sovereign digital sanctuary, empowering
-                individuals to tokenize assets, govern by sacred trust, and trade
-                peer-to-peer under the jurisdiction of Divine Law. We are
-                rearchitecting finance, identity, and learning — not through
-                corporate compliance, but through divine compliance.
+                God's Realm serves as an exclusive digital sanctuary for the world's most sophisticated individuals. 
+                We provide unparalleled asset tokenization, divine governance protocols, and peer-to-peer trading 
+                under the highest standards of security and discretion. This is where legacy meets innovation 
+                in the most refined digital environment.
               </p>
             </div>
           </div>

@@ -46,10 +46,10 @@ const FeaturesSection = () => {
             <h2 className={`${
               isMobile ? 'text-3xl' : 'text-4xl md:text-5xl'
             } font-bold text-divine-gold font-playfair mb-4`}>
-              What You Can Do Inside
+              Elite Platform Features
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-inter">
-              Discover the powerful features that make God's Realm the ultimate sovereign digital sanctuary
+              Sophisticated tools designed for the most discerning digital asset management
             </p>
           </div>
           
@@ -59,11 +59,11 @@ const FeaturesSection = () => {
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="group bg-card/80 backdrop-blur-sm border-divine-gold/20 hover:border-divine-gold/40 transition-all duration-500 hover:shadow-divine hover:scale-105"
+                className="group bg-card/90 backdrop-blur-sm border-border hover:border-divine-gold/50 transition-all duration-700 hover:shadow-elegant hover:scale-105"
               >
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
-                    <div className="p-3 rounded-lg bg-divine-gold/10 group-hover:bg-divine-gold/20 transition-colors duration-300">
+                    <div className="p-3 rounded-lg bg-divine-gold/10 group-hover:bg-divine-gold/20 transition-colors duration-500">
                       <feature.icon className="h-8 w-8 text-divine-gold" />
                     </div>
                   </div>
