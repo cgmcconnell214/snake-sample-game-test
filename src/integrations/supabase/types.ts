@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_links: {
+        Row: {
+          id: string
+          is_primary: boolean | null
+          linked_at: string
+          provider: string
+          provider_email: string | null
+          provider_id: string
+          provider_metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          is_primary?: boolean | null
+          linked_at?: string
+          provider: string
+          provider_email?: string | null
+          provider_id: string
+          provider_metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          is_primary?: boolean | null
+          linked_at?: string
+          provider?: string
+          provider_email?: string | null
+          provider_id?: string
+          provider_metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_agent_execution_logs: {
         Row: {
           agent_id: string | null
@@ -1966,6 +1999,48 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          created_at: string
+          device_fingerprint: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          is_blocked: boolean | null
+          location_data: Json | null
+          risk_score: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_fingerprint?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          is_blocked?: boolean | null
+          location_data?: Json | null
+          risk_score?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_fingerprint?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          is_blocked?: boolean | null
+          location_data?: Json | null
+          risk_score?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       session_attendance: {
         Row: {
           attendee_id: string
@@ -2510,6 +2585,42 @@ export type Database = {
           },
         ]
       }
+      user_devices: {
+        Row: {
+          browser_info: Json | null
+          device_fingerprint: string
+          device_name: string | null
+          first_seen: string
+          id: string
+          is_trusted: boolean | null
+          last_seen: string
+          location_data: Json | null
+          user_id: string
+        }
+        Insert: {
+          browser_info?: Json | null
+          device_fingerprint: string
+          device_name?: string | null
+          first_seen?: string
+          id?: string
+          is_trusted?: boolean | null
+          last_seen?: string
+          location_data?: Json | null
+          user_id: string
+        }
+        Update: {
+          browser_info?: Json | null
+          device_fingerprint?: string
+          device_name?: string | null
+          first_seen?: string
+          id?: string
+          is_trusted?: boolean | null
+          last_seen?: string
+          location_data?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_follows: {
         Row: {
           created_at: string
@@ -2915,6 +3026,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      link_oauth_account: {
+        Args: {
+          p_is_primary?: boolean
+          p_provider: string
+          p_provider_email?: string
+          p_provider_id: string
+          p_provider_metadata?: Json
+        }
+        Returns: string
+      }
       mark_all_notifications_read: {
         Args: { target_user_id: string }
         Returns: undefined
@@ -2922,6 +3043,15 @@ export type Database = {
       mark_notification_read: {
         Args: { notification_id: string }
         Returns: undefined
+      }
+      register_device: {
+        Args: {
+          p_browser_info?: Json
+          p_device_fingerprint: string
+          p_device_name?: string
+          p_location_data?: Json
+        }
+        Returns: string
       }
     }
     Enums: {

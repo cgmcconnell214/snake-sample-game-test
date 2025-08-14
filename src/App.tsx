@@ -48,6 +48,7 @@ const TokenomicsPage = lazy(() => import("./pages/TokenomicsPage"));
 const TokenSupply = lazy(() => import("./pages/TokenSupply"));
 const DevPlayground = lazy(() => import("./pages/DevPlayground"));
 const Auth = lazy(() => import("./pages/Auth"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Index = lazy(() => import("./pages/Index"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const MarketplaceNew = lazy(() => import("./pages/MarketplaceNew"));
@@ -112,6 +113,7 @@ const App = () => (
               {/* Public routes */}
               <Route path="/" element={withSuspense(<Index />)} />
               <Route path="/auth" element={withSuspense(<Auth />)} />
+              <Route path="/auth/callback" element={withSuspense(<AuthCallback />)} />
 
               {/* Protected app routes */}
               <Route

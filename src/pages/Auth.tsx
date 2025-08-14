@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import zxcvbn from "zxcvbn";
 import { Progress } from "@/components/ui/progress";
 import ReCAPTCHA from "react-google-recaptcha";
+import OAuthProviders from "@/components/auth/OAuthProviders";
 
 const Auth = (): JSX.Element => {
   const { user, signIn, signUp } = useAuth();
@@ -143,28 +144,6 @@ const Auth = (): JSX.Element => {
       setLoading(false);
       signUpCaptchaRef.current?.reset();
       setCaptchaToken(null);
-    }
-  };
-
-  const handleDiscordAuth = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "discord",
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        },
-      });
-
-      if (error) {
-        setError(error.message);
-      }
-    } catch (err: any) {
-      setError(err.message || "An error occurred with Discord authentication");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -401,7 +380,7 @@ const Auth = (): JSX.Element => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-divine-gold/20" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
@@ -409,15 +388,13 @@ const Auth = (): JSX.Element => {
                 </span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              className="w-full mt-4"
-              onClick={handleDiscordAuth}
-              disabled={loading}
-            >
-              <Icons.discord className="mr-2 h-4 w-4" />
-              Discord
-            </Button>
+            <div className="mt-4">
+              <OAuthProviders 
+                loading={loading} 
+                setLoading={setLoading} 
+                setError={setError} 
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
