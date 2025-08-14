@@ -148,8 +148,8 @@ export function AppSidebar(): JSX.Element {
     <Sidebar className={open ? "w-64" : "w-16"} collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <Coins className="h-5 w-5 text-primary-foreground" />
+          <div className="w-8 h-8 flex items-center justify-center">
+            <img src="/lovable-uploads/93355fa4-02d2-44c8-a9a1-36ffb47138c1.png" alt="God's Realm Logo" className="h-8 w-8" />
           </div>
           {open && (
             <div>
