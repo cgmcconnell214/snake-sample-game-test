@@ -151,28 +151,16 @@ export function AppSidebar(): JSX.Element {
           {/* Background pattern */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--divine-gold))_0%,transparent_70%)] opacity-5"></div>
           
-          {/* Logo and text container */}
-          <div className="relative z-10 flex items-center gap-3 px-4">
-            <div className="flex-shrink-0">
-              <img 
-                src="/lovable-uploads/93355fa4-02d2-44c8-a9a1-36ffb47138c1.png" 
-                alt="God's Realm Logo" 
-                className="h-10 w-10 drop-shadow-lg" 
-              />
-            </div>
-            {open && (
-              <div className="text-center">
-                <h2 className="text-lg font-bold text-divine-gold drop-shadow-sm">
-                  God's Realm
-                </h2>
-                <p className="text-xs text-divine-gold/80 font-medium">
-                  Divine Sanctuary
-                </p>
-              </div>
-            )}
+          {/* Centered logo */}
+          <div className="relative z-10 flex items-center justify-center w-full px-4">
+            <img 
+              src="/lovable-uploads/5e27a9c9-6f52-4a64-9270-63f61c6b48cd.png" 
+              alt="God's Realm - Divine Sanctuary" 
+              className={`drop-shadow-lg transition-all duration-300 ${open ? "h-16 w-auto" : "h-8 w-8"}`}
+            />
           </div>
           
-          {/* Decorative elements for when expanded */}
+          {/* Decorative elements */}
           {open && (
             <>
               <div className="absolute top-2 left-4 w-2 h-2 bg-divine-gold/30 rounded-full animate-pulse"></div>
