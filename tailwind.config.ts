@@ -98,6 +98,11 @@ export default {
           purple: "hsl(var(--luxury-purple))",
           emerald: "hsl(var(--luxury-emerald))",
         },
+        "gradient-divine": "var(--gradient-divine)",
+        "gradient-sacred": "var(--gradient-sacred)",
+        "gradient-ethereal": "var(--gradient-ethereal)",
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-luxury": "var(--gradient-luxury)",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -173,6 +178,19 @@ export default {
             backgroundPosition: "200% 0",
           },
         },
+      },
+      boxShadow: {
+        divine: "var(--shadow-divine)",
+        sacred: "var(--shadow-sacred)",
+        ethereal: "var(--shadow-ethereal)",
+        luxury: "var(--shadow-luxury)",
+      },
+      backgroundImage: {
+        "gradient-divine": "var(--gradient-divine)",
+        "gradient-sacred": "var(--gradient-sacred)",
+        "gradient-ethereal": "var(--gradient-ethereal)",
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-luxury": "var(--gradient-luxury)",
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
