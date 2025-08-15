@@ -19,6 +19,31 @@ export interface UseFileUploadResult {
   error: string | null;
 }
 
+// File validation constants
+const ALLOWED_MIME_TYPES = {
+  'image/jpeg': 10 * 1024 * 1024, // 10MB
+  'image/png': 10 * 1024 * 1024,  // 10MB
+  'image/gif': 5 * 1024 * 1024,   // 5MB
+  'image/webp': 10 * 1024 * 1024, // 10MB
+  'application/pdf': 25 * 1024 * 1024, // 25MB
+  'text/plain': 5 * 1024 * 1024,  // 5MB
+  'application/msword': 25 * 1024 * 1024, // 25MB
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 25 * 1024 * 1024, // 25MB
+};
+
+const validateFile = (file: File): string | null => {
+  if (!ALLOWED_MIME_TYPES[file.type as keyof typeof ALLOWED_MIME_TYPES]) {
+    return `File type ${file.type} is not allowed`;
+  }
+  
+  const maxSize = ALLOWED_MIME_TYPES[file.type as keyof typeof ALLOWED_MIME_TYPES];
+  if (file.size > maxSize) {
+    return `File ${file.name} exceeds maximum size of ${Math.round(maxSize / 1024 / 1024)}MB`;
+  }
+  
+  return null;
+};
+
 export function useFileUpload(): UseFileUploadResult {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -30,6 +55,15 @@ export function useFileUpload(): UseFileUploadResult {
     folderPath: string = "",
   ): Promise<FileUploadResult[]> => {
     if (!files.length) return [];
+
+    // Validate all files first
+    for (const file of files) {
+      const validationError = validateFile(file);
+      if (validationError) {
+        setError(validationError);
+        throw new Error(validationError);
+      }
+    }
 
     setUploading(true);
     setProgress(0);
@@ -60,7 +94,7 @@ export function useFileUpload(): UseFileUploadResult {
 
       const uploadPromises = files.map(async (file) => {
         const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const filePath = folderPath ? `${folderPath}/${fileName}` : fileName;
 
         const { data, error: uploadError } = await supabase.storage
@@ -77,17 +111,36 @@ export function useFileUpload(): UseFileUploadResult {
           );
         }
 
-        // Get the URL for the uploaded file
-        const { data: urlData } = supabase.storage
-          .from(bucketName)
-          .getPublicUrl(data?.path || filePath);
+        // Check if bucket is public to determine URL method
+        const { data: buckets } = await supabase.storage.listBuckets();
+        const bucket = buckets?.find(b => b.name === bucketName);
+        const isPublic = bucket?.public === true;
+
+        let fileUrl: string;
+        if (isPublic) {
+          // Use public URL for public buckets
+          const { data: urlData } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(data?.path || filePath);
+          fileUrl = urlData.publicUrl;
+        } else {
+          // Use signed URL for private buckets (expires in 1 hour)
+          const { data: urlData, error: urlError } = await supabase.storage
+            .from(bucketName)
+            .createSignedUrl(data?.path || filePath, 3600);
+          
+          if (urlError) {
+            throw new Error(`Failed to generate signed URL: ${urlError.message}`);
+          }
+          fileUrl = urlData?.signedUrl || '';
+        }
 
         completedUploads++;
         setProgress(Math.floor((completedUploads / files.length) * 100));
 
         return {
           name: file.name,
-          url: urlData.publicUrl,
+          url: fileUrl,
           size: file.size,
           type: file.type,
         };

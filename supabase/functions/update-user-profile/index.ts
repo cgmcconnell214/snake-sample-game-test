@@ -105,10 +105,11 @@ serve(async (req) => {
 
     const body = await req.json();
     const profileData = body.profile;
+    const mfaData = body.mfaData;
     const mfaCode: string | undefined = body.mfaCode;
     const password: string | undefined = body.password;
 
-    if (profileData.user_id && profileData.user_id !== user.id) {
+    if (profileData?.user_id && profileData.user_id !== user.id) {
       return new Response(
         JSON.stringify({ error: "Cannot update other users" }),
         {
@@ -118,65 +119,154 @@ serve(async (req) => {
       );
     }
 
-    const { data: profile } = await supabaseClient
-      .from("profiles")
-      .select("two_factor_enabled, two_factor_secret, email")
-      .eq("user_id", user.id)
-      .single();
+    // Handle MFA data if provided
+    if (mfaData) {
+      try {
+        if (mfaData.enabled === false) {
+          // Disable 2FA - remove MFA data
+          const { error: deleteMfaError } = await supabaseClient
+            .from("user_mfa")
+            .delete()
+            .eq("user_id", user.id);
+          
+          if (deleteMfaError) {
+            console.error("Error deleting MFA data:", deleteMfaError);
+            throw new Error("Failed to disable 2FA");
+          }
+        } else if (mfaData.totp_secret && mfaData.backup_codes && mfaData.enabled) {
+          // Enable 2FA - encrypt and store data
+          const encryptedSecret = await encryptSecret(mfaData.totp_secret);
+          const encryptedBackupCodes = await Promise.all(
+            mfaData.backup_codes.map((code: string) => encryptSecret(code))
+          );
 
-    if (profile?.two_factor_enabled) {
-      if (!mfaCode) {
-        return new Response(JSON.stringify({ error: "MFA required" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const valid = await verifyToken(profile.two_factor_secret, mfaCode);
-      if (!valid) {
-        return new Response(JSON.stringify({ error: "Invalid MFA token" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-    } else {
-      if (!password) {
-        return new Response(JSON.stringify({ error: "Password required" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const { error: reauthError } =
-        await supabaseClient.auth.signInWithPassword({
-          email: profile?.email || user.email || "",
-          password,
-        });
-      if (reauthError) {
-        return new Response(JSON.stringify({ error: "Invalid password" }), {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+          const { error: upsertMfaError } = await supabaseClient
+            .from("user_mfa")
+            .upsert({
+              user_id: user.id,
+              totp_secret_encrypted: encryptedSecret,
+              backup_codes_encrypted: encryptedBackupCodes,
+              enabled: true,
+            });
+
+          if (upsertMfaError) {
+            console.error("Error storing MFA data:", upsertMfaError);
+            throw new Error("Failed to store encrypted MFA data");
+          }
+        }
+      } catch (mfaError) {
+        console.error("MFA processing error:", mfaError);
+        return new Response(
+          JSON.stringify({ 
+            error: "Failed to process MFA data",
+            details: mfaError instanceof Error ? mfaError.message : "Unknown error"
+          }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
       }
     }
 
-    const { error: updateError } = await supabaseClient
-      .from("user_profiles")
-      .upsert({ ...profileData, user_id: user.id }, { onConflict: "user_id" });
+    // Update profile data if provided
+    if (profileData && Object.keys(profileData).length > 0) {
+      const { data: profile } = await supabaseClient
+        .from("profiles")
+        .select("two_factor_enabled, two_factor_secret, email")
+        .eq("user_id", user.id)
+        .single();
 
-    if (updateError) {
-      throw updateError;
+      if (profile?.two_factor_enabled) {
+        if (!mfaCode) {
+          return new Response(JSON.stringify({ error: "MFA required" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const valid = await verifyToken(profile.two_factor_secret, mfaCode);
+        if (!valid) {
+          return new Response(JSON.stringify({ error: "Invalid MFA token" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } else if (!mfaData) {
+        // Only require password if we're not setting up MFA
+        if (!password) {
+          return new Response(JSON.stringify({ error: "Password required" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const { error: reauthError } =
+          await supabaseClient.auth.signInWithPassword({
+            email: profile?.email || user.email || "",
+            password,
+          });
+        if (reauthError) {
+          return new Response(JSON.stringify({ error: "Invalid password" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+
+      // Prepare the data to update
+      const updateData: any = {
+        ...profileData,
+        user_id: user.id,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Remove undefined values
+      Object.keys(updateData).forEach((key) => {
+        if (updateData[key] === undefined) {
+          delete updateData[key];
+        }
+      });
+
+      const { data: updatedProfile, error: updateError } = await supabaseClient
+        .from("profiles")
+        .update(updateData)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        return new Response(
+          JSON.stringify({ 
+            error: "Failed to update profile",
+            details: updateError.message
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      // Log the profile update
+      await supabaseClient.from("user_behavior_log").insert({
+        user_id: user.id,
+        action: "profile_update",
+        location_data: { origin: req.headers.get("origin") },
+        risk_indicators: { fields: Object.keys(profileData || {}) },
+      });
+
+      return new Response(JSON.stringify({ profile: updatedProfile }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    await supabaseClient.from("user_behavior_log").insert({
-      user_id: user.id,
-      action: "profile_update",
-      location_data: { origin: req.headers.get("origin") },
-      risk_indicators: { fields: Object.keys(profileData || {}) },
-    });
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // If only MFA data was processed, return success
+    return new Response(
+      JSON.stringify({ success: true, message: "MFA data processed successfully" }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return new Response(JSON.stringify({ error: message }), {

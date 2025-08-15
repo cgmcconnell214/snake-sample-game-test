@@ -114,17 +114,25 @@ const TwoFactorManager: React.FC = () => {
         return;
       }
 
-      // Store MFA data in secure table
-      const { error: mfaError } = await supabase
-        .from("user_mfa")
-        .upsert({
-          user_id: user?.id,
-          totp_secret: secret,
-          enabled: true,
-          backup_codes: backupCodes,
-        });
+      // Store MFA data using secure edge function
+      const { data: mfaData, error: mfaError } = await supabase.functions.invoke(
+        'update-user-profile',
+        {
+          body: {
+            profile: {},
+            mfaData: {
+              totp_secret: secret,
+              backup_codes: backupCodes,
+              enabled: true
+            }
+          }
+        }
+      );
 
-      if (mfaError) throw mfaError;
+      if (mfaError) {
+        console.error("MFA error:", mfaError);
+        throw mfaError;
+      }
 
       // Update profile status
       const { error: profileError } = await supabase
@@ -137,6 +145,7 @@ const TwoFactorManager: React.FC = () => {
       setIsEnabled(true);
       setShowSetup(false);
       setSecret("");
+      setQrCodeDataUrl("");
 
       toast({
         title: "2FA Enabled",
@@ -157,11 +166,18 @@ const TwoFactorManager: React.FC = () => {
   const disable2FA = async () => {
     setLoading(true);
     try {
-      // Remove MFA data
-      const { error: mfaError } = await supabase
-        .from("user_mfa")
-        .delete()
-        .eq("user_id", user?.id);
+      // Disable MFA using secure edge function
+      const { error: mfaError } = await supabase.functions.invoke(
+        'update-user-profile',
+        {
+          body: {
+            profile: {},
+            mfaData: {
+              enabled: false
+            }
+          }
+        }
+      );
 
       if (mfaError) throw mfaError;
 
@@ -175,7 +191,7 @@ const TwoFactorManager: React.FC = () => {
 
       setIsEnabled(false);
       setBackupCodes([]);
-      setQrCodeUrl("");
+      setQrCodeDataUrl("");
 
       toast({
         title: "2FA Disabled",
