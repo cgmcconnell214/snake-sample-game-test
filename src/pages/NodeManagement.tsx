@@ -2,38 +2,30 @@ import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GitBranch, Wifi, Activity, Globe } from "lucide-react";
+import { GitBranch, Wifi, Activity, Globe, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NetworkNode {
-  id: number;
+  id: string;
   name: string;
   url: string;
-  latency: number | null;
-  status: "online" | "offline";
+  description?: string;
+  is_active: boolean;
+  node_type: string;
+  priority: number;
+  timeout_ms: number;
+  latency?: number | null;
+  status?: "online" | "offline";
 }
 
 export default function NodeManagement(): JSX.Element {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [nodes, setNodes] = useState<NetworkNode[]>([
-    {
-      id: 1,
-      name: "Validator 1",
-      url: "https://example-node1.com/health",
-      latency: null,
-      status: "offline",
-    },
-    {
-      id: 2,
-      name: "Validator 2",
-      url: "https://example-node2.com/health",
-      latency: null,
-      status: "offline",
-    },
-  ]);
+  const [nodes, setNodes] = useState<NetworkNode[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const nodesRef = useRef(nodes);
 
@@ -41,11 +33,40 @@ export default function NodeManagement(): JSX.Element {
     nodesRef.current = nodes;
   }, [nodes]);
 
+  const fetchNodes = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-network-nodes', {
+        method: 'GET'
+      });
+
+      if (error) {
+        console.error('Error fetching nodes:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch network nodes",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setNodes(data.nodes || []);
+    } catch (error) {
+      console.error('Error fetching nodes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch network nodes",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const checkNodes = async () => {
     const updated = await Promise.all(
       nodesRef.current.map(async (node) => {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
+        const timeout = setTimeout(() => controller.abort(), node.timeout_ms || 5000);
         const start = performance.now();
         try {
           const response = await fetch(node.url, { signal: controller.signal });
@@ -65,16 +86,52 @@ export default function NodeManagement(): JSX.Element {
   };
 
   useEffect(() => {
-    checkNodes();
-    const interval = setInterval(checkNodes, 30000);
-    return () => clearInterval(interval);
+    fetchNodes();
   }, []);
+
+  useEffect(() => {
+    if (nodes.length > 0) {
+      checkNodes();
+      const interval = setInterval(checkNodes, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [nodes.length]);
 
   const handleAddNode = () => {
     toast({
       title: "Add Node",
-      description: "Adding new network node",
+      description: "Node management via admin interface only",
     });
+  };
+
+  const deleteNode = async (nodeId: string) => {
+    try {
+      const { error } = await supabase.functions.invoke('manage-network-nodes', {
+        body: { method: 'DELETE', nodeId }
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete node",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Node deleted successfully",
+      });
+      
+      fetchNodes();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete node",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewPeers = () => {
@@ -107,30 +164,57 @@ export default function NodeManagement(): JSX.Element {
           <CardTitle>Network Nodes</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {nodes.map((node) => (
-              <div key={node.id} className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{node.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {node.url}
+          {loading ? (
+            <div className="text-center py-4">Loading nodes...</div>
+          ) : (
+            <div className="space-y-4">
+              {nodes.map((node) => (
+                <div key={node.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium">{node.name}</div>
+                      <Badge variant="outline">{node.node_type}</Badge>
+                      {!node.is_active && (
+                        <Badge variant="secondary">Inactive</Badge>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {node.url}
+                    </div>
+                    {node.description && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {node.description}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Badge
+                      variant={
+                        node.status === "online" ? "default" : "destructive"
+                      }
+                    >
+                      {node.status || "unknown"}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      {node.latency !== null && node.latency !== undefined ? `${node.latency} ms` : "N/A"}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => deleteNode(node.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <Badge
-                    variant={
-                      node.status === "online" ? "default" : "destructive"
-                    }
-                  >
-                    {node.status}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {node.latency !== null ? `${node.latency} ms` : "N/A"}
-                  </span>
+              ))}
+              {nodes.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No network nodes configured
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

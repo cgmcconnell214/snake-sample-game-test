@@ -1845,6 +1845,51 @@ export type Database = {
           },
         ]
       }
+      network_nodes: {
+        Row: {
+          allowed_domains: Json
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          node_type: string
+          priority: number
+          timeout_ms: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          allowed_domains?: Json
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          node_type?: string
+          priority?: number
+          timeout_ms?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          allowed_domains?: Json
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          node_type?: string
+          priority?: number
+          timeout_ms?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
