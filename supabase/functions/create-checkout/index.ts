@@ -21,6 +21,13 @@ serve(async (req) => {
   const rateLimitResponse = await rateLimit(req);
   if (rateLimitResponse) return rateLimitResponse;
 
+  // Create a Supabase client using the service role key for writes
+  const supabaseService = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
   // Create a Supabase client using the anon key for user authentication
   const supabaseClient = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
@@ -93,6 +100,27 @@ serve(async (req) => {
       sessionId: session.id,
       url: session.url,
     });
+
+    // Store or update the stripe_customer_id in the subscription record
+    const finalCustomerId = customerId || session.customer as string;
+    logStep("Storing customer ID in database", { customerId: finalCustomerId });
+    
+    await supabaseService.from("subscriptions").upsert(
+      {
+        user_id: user.id,
+        stripe_customer_id: finalCustomerId,
+        stripe_subscription_id: null, // Will be updated by check-subscription after payment
+        status: "pending", // Mark as pending until payment is confirmed
+        tier: "free", // Will be updated after successful payment
+        current_period_start: null,
+        current_period_end: null,
+        cancel_at_period_end: false,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
+
+    logStep("Customer ID stored successfully");
 
     const execTime = Date.now() - startTime;
     logStep(`Execution time: ${execTime}ms`);

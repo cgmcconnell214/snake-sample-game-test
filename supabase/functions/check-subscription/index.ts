@@ -52,58 +52,73 @@ serve(async (req) => {
       throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
-    const customers = await stripe.customers.list({
-      email: user.email,
-      limit: 1,
-    });
-
-    if (customers.data.length === 0) {
-      logStep("No customer found, updating unsubscribed state");
-      await supabaseClient.from("subscriptions").upsert(
-        {
-          user_id: user.id,
-          stripe_customer_id: null,
-          stripe_subscription_id: null,
-          status: "inactive",
-          tier: "free",
-          current_period_start: null,
-          current_period_end: null,
-          cancel_at_period_end: false,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id" },
-      );
-
-      // Also update profile
-      await supabaseClient
-        .from("profiles")
-        .update({
-          subscription_tier: "free",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id);
-
-      const execTime = Date.now() - startTime;
-      logStep(`Execution time: ${execTime}ms`);
-      return new Response(
-        JSON.stringify({
-          subscribed: false,
-          subscription_tier: "free",
-          subscription_end: null,
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        },
-      );
+    // Query subscription by user_id instead of email to ensure isolation
+    const { data: existingSubscription, error: subError } = await supabaseClient
+      .rpc('get_user_subscription_with_stripe_customer', { p_user_id: user.id });
+    
+    if (subError) {
+      logStep("Error querying user subscription", { error: subError.message });
+      throw new Error(`Failed to query subscription: ${subError.message}`);
     }
 
-    const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
+    let stripe_customer_id: string | null = null;
+    
+    if (existingSubscription && existingSubscription.length > 0) {
+      const subscription = existingSubscription[0];
+      stripe_customer_id = subscription.stripe_customer_id;
+      logStep("Found existing subscription record", { 
+        userId: user.id, 
+        stripeCustomerId: stripe_customer_id,
+        status: subscription.status 
+      });
+    } else {
+      logStep("No subscription record found for user", { userId: user.id });
+    }
+
+    const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    
+    // If no subscription record or no stripe_customer_id, try to find by email as fallback
+    if (!stripe_customer_id) {
+      const customers = await stripe.customers.list({
+        email: user.email,
+        limit: 1,
+      });
+      
+      if (customers.data.length === 0) {
+        logStep("No customer found, updating unsubscribed state");
+        // Since we now have NOT NULL constraint, we need a valid stripe_customer_id
+        // We'll skip updating the subscription table here and handle it in checkout
+        
+        // Update profile only
+        await supabaseClient
+          .from("profiles")
+          .update({
+            subscription_tier: "free",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", user.id);
+
+        const execTime = Date.now() - startTime;
+        logStep(`Execution time: ${execTime}ms`);
+        return new Response(
+          JSON.stringify({
+            subscribed: false,
+            subscription_tier: "free",
+            subscription_end: null,
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          },
+        );
+      }
+      
+      stripe_customer_id = customers.data[0].id;
+      logStep("Found Stripe customer by email", { customerId: stripe_customer_id });
+    }
 
     const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
+      customer: stripe_customer_id,
       status: "active",
       limit: 1,
     });
@@ -143,7 +158,7 @@ serve(async (req) => {
     await supabaseClient.from("subscriptions").upsert(
       {
         user_id: user.id,
-        stripe_customer_id: customerId,
+        stripe_customer_id: stripe_customer_id,
         stripe_subscription_id: hasActiveSub ? subscriptions.data[0].id : null,
         status: hasActiveSub ? "active" : "inactive",
         tier: subscriptionTier,

@@ -2430,7 +2430,7 @@ export type Database = {
           current_period_start: string | null
           id: string
           status: string
-          stripe_customer_id: string | null
+          stripe_customer_id: string
           stripe_subscription_id: string | null
           tier: Database["public"]["Enums"]["subscription_tier"]
           updated_at: string | null
@@ -2443,7 +2443,7 @@ export type Database = {
           current_period_start?: string | null
           id?: string
           status: string
-          stripe_customer_id?: string | null
+          stripe_customer_id: string
           stripe_subscription_id?: string | null
           tier: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string | null
@@ -2456,7 +2456,7 @@ export type Database = {
           current_period_start?: string | null
           id?: string
           status?: string
-          stripe_customer_id?: string | null
+          stripe_customer_id?: string
           stripe_subscription_id?: string | null
           tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string | null
@@ -3279,6 +3279,18 @@ export type Database = {
           title: string
           type: string
           user_id: string
+        }[]
+      }
+      get_user_subscription_with_stripe_customer: {
+        Args: { p_user_id: string }
+        Returns: {
+          cancel_at_period_end: boolean
+          current_period_end: string
+          current_period_start: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          tier: string
         }[]
       }
       hash_api_key: {
