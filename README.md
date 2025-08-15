@@ -18,7 +18,7 @@ Changes made via Lovable will be committed automatically to this repo.
 
 If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The only requirement is having Bun installed - [install Bun](https://bun.sh/docs/installation)
 
 Follow these steps:
 
@@ -34,10 +34,10 @@ cp .env.example .env
 # Edit .env with your Supabase credentials
 
 # Step 4: Install the necessary dependencies.
-npm i
+bun install
 
 # Step 5: Start the development server with auto-reloading and an instant preview.
-npm run dev
+bun run dev
 ```
 
 **Edit a file directly in GitHub**
@@ -64,6 +64,19 @@ React
 shadcn-ui
 Tailwind CSS
 
+## Package Manager
+
+This project uses **Bun** as the package manager for faster installation and better performance. The project has been standardized to use only Bun to ensure deterministic builds and avoid conflicts between different lock files.
+
+**Why Bun?**
+- Significantly faster package installation
+- Built-in bundler and test runner  
+- Better memory efficiency
+- Native TypeScript support
+
+**Migration from npm:**
+If you have `package-lock.json`, it should be removed to avoid conflicts. Only `bun.lockb` should be committed to ensure consistent dependency resolution across environments.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/e4cce269-0ddb-46c0-8401-035391dbecce) and click on Share -> Publish.
@@ -73,25 +86,25 @@ Simply open [Lovable](https://lovable.dev/projects/e4cce269-0ddb-46c0-8401-03539
 Run the test suite:
 
 ```bash
-npm test
+bun test
 ```
 
 Run tests in watch mode during development:
 
 ```bash
-npm run test:watch
+bun run test:watch
 ```
 
 Generate a coverage report:
 
 ```bash
-npm run coverage
+bun run coverage
 ```
 
 Run tests with UI (optional):
 
 ```bash
-npm run test:ui
+bun run test:ui
 ```
 
 ### Coverage Thresholds
@@ -111,10 +124,10 @@ For continuous integration, add these commands to your pipeline:
 ```yaml
 # Example GitHub Actions workflow
 - name: Install dependencies
-  run: npm ci
+  run: bun install --frozen-lockfile
 
 - name: Run tests with coverage
-  run: npm run coverage
+  run: bun run coverage
 
 - name: Upload coverage reports
   uses: codecov/codecov-action@v3
@@ -124,13 +137,13 @@ For continuous integration, add these commands to your pipeline:
 For other CI systems:
 ```bash
 # Install dependencies
-npm ci
+bun install --frozen-lockfile
 
 # Run all tests with coverage enforcement
-npm run coverage
+bun run coverage
 
 # Run linting (optional)
-npm run lint
+bun run lint
 ```
 
 ## Deployment status
@@ -145,7 +158,7 @@ deployment script with the template name, ensuring the required Supabase service
 credentials are available in the environment:
 
 ```
-SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run deploy:contract -- marketplace
+SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... bun run deploy:contract -- marketplace
 ```
 
 Only templates explicitly whitelisted in the script and server function will be
@@ -202,7 +215,7 @@ Make sure these are set when deploying functions so the API calls succeed.
 1. **Create accounts** – Sign up for [Supabase](https://supabase.com) and [Stripe](https://stripe.com) if you haven't already.
 2. **Create a Supabase project** – After logging in, create a new project and obtain the Project URL and API keys from `Settings > API`.
 3. **Configure environment variables** – Copy the values into a `.env` file inside the `supabase` directory as shown above.
-4. **Install the Supabase CLI** – Run `npm install -g supabase` and authenticate with `supabase login`.
+4. **Install the Supabase CLI** – Run `bun add -g supabase` and authenticate with `supabase login`.
 5. **Deploy functions** – From the project root, run `supabase functions deploy --project-ref <project-ref>` to upload the Edge functions.
 6. **Set up Stripe** – In the Stripe dashboard create API keys and a webhook secret, then add them to your `.env` file.
 7. **Configure webhooks** – Point the Stripe webhook URL to `/functions/v1/stripe-webhook` on your Supabase project.
