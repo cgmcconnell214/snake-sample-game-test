@@ -5,6 +5,7 @@ import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { EdgeLogger } from "../_shared/logger-utils.ts";
 import { createUrlValidator } from "../_shared/url-validator.ts";
+import { createErrorHandler, ErrorHandler, ErrorType } from "../_shared/error.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
@@ -16,7 +17,7 @@ interface ScrapeRequestBody {
 }
 
 serve(async (req) => {
-  const logger = new EdgeLogger("scrape-website", req);
+  const errorHandler = createErrorHandler("scrape-website", req, corsHeaders);
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -25,87 +26,53 @@ serve(async (req) => {
   const rateLimitResponse = await rateLimit(req);
   if (rateLimitResponse) return rateLimitResponse;
 
-  // Initialize Supabase client for authentication
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  
-  if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
-    logger.error("Missing Supabase configuration");
-    return new Response(
-      JSON.stringify({ error: "Server configuration error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
-  const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-
-  // Require authentication
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) {
-    logger.warn("Missing Authorization header for scrape request");
-    return new Response(JSON.stringify({ error: "Authentication required" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const token = authHeader.replace("Bearer ", "");
-  const { data: authData, error: authError } = await supabase.auth.getUser(token);
-  const user = authData?.user;
-  
-  if (authError || !user) {
-    logger.warn("Invalid authentication for scrape request", { error: authError?.message });
-    return new Response(JSON.stringify({ error: "Invalid authentication" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  logger.setUser(user.id);
-
   try {
+    // Initialize Supabase client for authentication
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
+      throw ErrorHandler.createError(ErrorType.CONFIGURATION_ERROR, "Missing Supabase configuration");
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Require authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw ErrorHandler.authenticationRequired();
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: authData, error: authError } = await supabase.auth.getUser(token);
+    const user = authData?.user;
+    
+    if (authError || !user) {
+      throw ErrorHandler.createError(ErrorType.INVALID_AUTHENTICATION);
+    }
+
     if (req.method !== "POST") {
-      return new Response(JSON.stringify({ error: "Method not allowed" }), {
-        status: 405,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      throw ErrorHandler.createError(ErrorType.INVALID_INPUT, "Method not allowed");
     }
 
     const body = (await req.json()) as ScrapeRequestBody;
     const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
 
     if (!apiKey) {
-      logger.error("FIRECRAWL_API_KEY is not set");
-      return new Response(
-        JSON.stringify({ error: "Server is missing Firecrawl API key" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      throw ErrorHandler.createError(ErrorType.CONFIGURATION_ERROR, "Firecrawl API key not configured");
     }
 
     if (!body?.url || typeof body.url !== "string") {
-      return new Response(
-        JSON.stringify({ error: "Valid 'url' is required" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      throw ErrorHandler.createError(ErrorType.MISSING_REQUIRED_FIELDS, "Valid 'url' is required");
     }
 
     // Enhanced URL validation with security checks
-    const urlValidator = createUrlValidator(logger, {
-      // Custom validation options for scraping
-      allowedDomains: [], // Empty means all domains allowed (but with other restrictions)
-      maxContentLength: 25 * 1024 * 1024, // 25MB limit
-      timeout: 20000, // 20 second timeout
+    const urlValidator = createUrlValidator(new EdgeLogger("scrape-website", req), {
+      allowedDomains: [],
+      maxContentLength: 25 * 1024 * 1024,
+      timeout: 20000,
     });
 
     const clientInfo = {
@@ -131,26 +98,18 @@ serve(async (req) => {
         p_client_info: clientInfo
       });
 
-      logger.security("url_validation_failed", {
-        url: body.url,
-        error: urlValidation.error,
+      throw ErrorHandler.createError(ErrorType.SECURITY_VIOLATION, "URL validation failed", {
         userId: user.id,
-        clientInfo
-      });
-
-      return new Response(
-        JSON.stringify({ 
-          error: "URL validation failed", 
-          details: urlValidation.error 
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        functionName: "scrape-website",
+        clientInfo: {
+          ip: clientInfo.ip,
+          userAgent: clientInfo.userAgent
         },
-      );
+        additionalContext: { urlError: urlValidation.error }
+      });
     }
 
-    // Additional pre-flight check with HEAD request to validate accessibility
+    // Additional pre-flight check
     const preflightCheck = await urlValidator.validateAndFetch(body.url, clientInfo);
     if (!preflightCheck.isValid) {
       await supabaseAdmin.rpc('log_validation_failure', {
@@ -163,38 +122,21 @@ serve(async (req) => {
         p_client_info: clientInfo
       });
 
-      return new Response(
-        JSON.stringify({ 
-          error: "URL accessibility check failed", 
-          details: preflightCheck.error 
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      throw ErrorHandler.createError(ErrorType.EXTERNAL_SERVICE_ERROR, "URL accessibility check failed");
     }
 
     const limit =
       typeof body.limit === "number"
-        ? Math.min(Math.max(body.limit, 1), 100) // Reduced max limit from 200 to 100
-        : 25; // Reduced default from 50 to 25
+        ? Math.min(Math.max(body.limit, 1), 100)
+        : 25;
     const formats =
       Array.isArray(body.formats) && body.formats.length > 0
         ? body.formats
         : ["markdown", "html"];
 
-    // Log the scraping request
-    logger.info(`User requesting scrape`, { 
-      url: body.url, 
-      limit, 
-      formats,
-      userId: user.id 
-    });
-    
-    // Call Firecrawl REST API with timeout and content limits
+    // Call Firecrawl API with timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
       const firecrawlRes = await fetch("https://api.firecrawl.dev/v1/crawl", {
@@ -208,43 +150,18 @@ serve(async (req) => {
           limit,
           scrapeOptions: { 
             formats,
-            onlyMainContent: true, // Focus on main content for security
-            includeHtml: false, // Disable raw HTML to prevent XSS
+            onlyMainContent: true,
+            includeHtml: false,
           },
         }),
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
-
       const firecrawlData = await firecrawlRes.json().catch(() => ({}));
 
-      // Log the result
-      if (firecrawlRes.ok) {
-        logger.info(`Successful scrape`, { 
-          url: body.url, 
-          itemCount: firecrawlData?.data?.length || 0,
-          userId: user.id 
-        });
-      } else {
-        logger.warn(`Failed scrape`, { 
-          url: body.url, 
-          error: firecrawlData,
-          userId: user.id 
-        });
-      }
-
       if (!firecrawlRes.ok) {
-        return new Response(
-          JSON.stringify({
-            error: "Failed to crawl site",
-            details: firecrawlData?.error || firecrawlData,
-          }),
-          {
-            status: 502,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          },
-        );
+        throw ErrorHandler.createError(ErrorType.EXTERNAL_SERVICE_ERROR, "Failed to crawl site");
       }
 
       return new Response(
@@ -252,28 +169,24 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
 
-    } catch (error) {
+    } catch (fetchError) {
       clearTimeout(timeoutId);
       
-      if (error.name === 'AbortError') {
-        logger.warn(`Scrape request timeout`, { url: body.url, userId: user.id });
-        return new Response(
-          JSON.stringify({ error: "Request timeout" }),
-          {
-            status: 408,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          },
-        );
+      if (fetchError.name === 'AbortError') {
+        throw ErrorHandler.createError(ErrorType.EXTERNAL_SERVICE_TIMEOUT, "Scrape request timed out");
       }
-      throw error;
+      throw fetchError;
     }
 
-  } catch (err) {
-    logger.error("Unexpected error in scrape-website", err);
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return new Response(JSON.stringify({ error: "Internal error", message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+  } catch (error) {
+    return errorHandler.handleError(error, {
+      functionName: "scrape-website",
+      clientInfo: {
+        ip: req.headers.get("cf-connecting-ip") || 
+            req.headers.get("x-forwarded-for") || 
+            req.headers.get("x-real-ip") || "unknown",
+        userAgent: req.headers.get("user-agent")
+      }
     });
   }
 });

@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { EdgeLogger } from "../_shared/logger-utils.ts";
+import { createErrorHandler, ErrorHandler, ErrorType } from "../_shared/error.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
@@ -57,7 +58,7 @@ function validateEnum(value: any, fieldName: string, allowedValues: string[]): s
 }
 
 serve(async (req) => {
-  const logger = new EdgeLogger("create-order", req);
+  const errorHandler = createErrorHandler("create-order", req, corsHeaders);
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -74,22 +75,32 @@ serve(async (req) => {
 
   try {
     const startTime = Date.now();
-    logger.info("Function started");
-
+    
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader) {
+      throw ErrorHandler.authenticationRequired({
+        functionName: "create-order",
+        requestId: crypto.randomUUID(),
+        clientInfo: {
+          ip: req.headers.get("cf-connecting-ip") || 
+              req.headers.get("x-forwarded-for") || 
+              req.headers.get("x-real-ip") || "unknown",
+          userAgent: req.headers.get("user-agent")
+        }
+      });
+    }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } =
       await supabaseClient.auth.getUser(token);
-    if (userError)
-      throw new Error(`Authentication error: ${userError.message}`);
+    if (userError) {
+      throw ErrorHandler.createError(ErrorType.INVALID_AUTHENTICATION, userError.message);
+    }
 
     const user = userData.user;
-    if (!user) throw new Error("User not authenticated");
-    
-    logger.setUser(user.id);
-    logger.info("User authenticated", { userId: user.id });
+    if (!user) {
+      throw ErrorHandler.createError(ErrorType.INVALID_AUTHENTICATION);
+    }
 
     // Check subscription tier
     const { data: profile } = await supabaseClient
@@ -99,16 +110,11 @@ serve(async (req) => {
       .single();
 
     if (!profile || profile.subscription_tier === "free") {
-      throw new Error("Standard subscription required for trading");
+      throw ErrorHandler.createError(ErrorType.SUBSCRIPTION_REQUIRED);
     }
 
     const requestData: CreateOrderRequest = await req.json();
-    logger.info("Request data parsed", { 
-      assetId: requestData.asset_id,
-      orderType: requestData.order_type,
-      side: requestData.side
-    });
-
+    
     // Enhanced server-side validation with strict type checking
     const clientInfo = {
       ip: req.headers.get("cf-connecting-ip") || 
@@ -134,14 +140,14 @@ serve(async (req) => {
       if ((validatedData.order_type === "limit" || 
            validatedData.order_type === "stop_loss" || 
            validatedData.order_type === "take_profit") && !validatedData.price) {
-        throw new Error("Price required for limit/stop orders");
+        throw ErrorHandler.createError(ErrorType.MISSING_REQUIRED_FIELDS, "Price required for limit/stop orders");
       }
 
       // Validate expires_at if provided
       if (validatedData.expires_at) {
         const expiryDate = new Date(validatedData.expires_at);
         if (isNaN(expiryDate.getTime()) || expiryDate <= new Date()) {
-          throw new Error("expires_at must be a valid future date");
+          throw ErrorHandler.createError(ErrorType.INVALID_FORMAT, "expires_at must be a valid future date");
         }
       }
 
@@ -161,18 +167,16 @@ serve(async (req) => {
 
       const orderData = orderResult[0];
       if (!orderData.success) {
-        logger.warn("Order creation failed", { 
-          error: orderData.error_message,
-          userId: user.id
-        });
-        throw new Error(orderData.error_message);
+        if (orderData.error_message?.includes('not found')) {
+          throw ErrorHandler.notFound("Asset");
+        } else if (orderData.error_message?.includes('balance')) {
+          throw ErrorHandler.createError(ErrorType.INSUFFICIENT_BALANCE);
+        } else {
+          throw ErrorHandler.createError(ErrorType.BUSINESS_RULE_VIOLATION, orderData.error_message);
+        }
       }
 
       const orderId = orderData.order_id;
-      logger.info("Order created successfully", { 
-        orderId,
-        userId: user.id
-      });
 
       // Get the created order details for response
       const { data: order, error: fetchError } = await supabaseClient
@@ -196,7 +200,7 @@ serve(async (req) => {
 
       // Attempt to match order immediately for market orders
       if (validatedData.order_type === "market") {
-        await attemptOrderMatching(supabaseClient, logger, orderId);
+        await attemptOrderMatching(supabaseClient, orderId);
       }
 
       // Log user behavior securely
@@ -214,7 +218,6 @@ serve(async (req) => {
       });
 
       const execTime = Date.now() - startTime;
-      logger.performance("create-order", execTime);
       
       return new Response(
         JSON.stringify({
@@ -249,32 +252,32 @@ serve(async (req) => {
         p_client_info: clientInfo
       });
 
-      logger.security("input_validation_failed", {
-        error: validationError.message,
+      throw ErrorHandler.createError(ErrorType.INVALID_INPUT, validationError.message, {
         userId: user.id,
-        clientInfo
+        functionName: "create-order",
+        clientInfo: {
+          ip: clientInfo.ip,
+          userAgent: clientInfo.userAgent
+        },
+        additionalContext: { endpoint: 'create-order' }
       });
-
-      throw validationError;
     }
 
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const execTime = Date.now() - startTime;
-    
-    logger.error("ERROR in create-order", error instanceof Error ? error : new Error(errorMessage));
-    logger.performance("create-order", execTime);
-    
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+    return errorHandler.handleError(error, {
+      userId: user?.id,
+      functionName: "create-order",
+      clientInfo: {
+        ip: req.headers.get("cf-connecting-ip") || 
+            req.headers.get("x-forwarded-for") || 
+            req.headers.get("x-real-ip") || "unknown",
+        userAgent: req.headers.get("user-agent")
+      }
     });
   }
 });
 
-async function attemptOrderMatching(supabaseClient: any, logger: EdgeLogger, orderId: string) {
-  logger.info("Attempting order matching", { orderId });
-
+async function attemptOrderMatching(supabaseClient: any, orderId: string) {
   // Get the order details using safe query
   const { data: order, error: orderError } = await supabaseClient
     .from("orders")
@@ -288,7 +291,6 @@ async function attemptOrderMatching(supabaseClient: any, logger: EdgeLogger, ord
     .single();
 
   if (orderError || !order) {
-    logger.warn("Order not found for matching", { orderId, error: orderError });
     return;
   }
 
@@ -302,13 +304,7 @@ async function attemptOrderMatching(supabaseClient: any, logger: EdgeLogger, ord
     .eq("status", "pending")
     .order("created_at", { ascending: true });
 
-  if (matchError) {
-    logger.error("Error fetching matching orders", matchError);
-    return;
-  }
-
-  if (!matchingOrders || matchingOrders.length === 0) {
-    logger.info("No matching orders found");
+  if (matchError || !matchingOrders || matchingOrders.length === 0) {
     return;
   }
 
@@ -333,13 +329,6 @@ async function attemptOrderMatching(supabaseClient: any, logger: EdgeLogger, ord
     const executionPrice = matchOrder.price || order.price || 0;
     const totalValue = executionQuantity * executionPrice;
 
-    logger.info("Executing trade", {
-      buyer: order.side === "buy" ? order.user_id : matchOrder.user_id,
-      seller: order.side === "sell" ? order.user_id : matchOrder.user_id,
-      quantity: executionQuantity,
-      price: executionPrice,
-    });
-
     // Create trade execution record using safe insert
     const { error: tradeError } = await supabaseClient
       .from("trade_executions")
@@ -356,7 +345,6 @@ async function attemptOrderMatching(supabaseClient: any, logger: EdgeLogger, ord
       });
 
     if (tradeError) {
-      logger.error("Failed to create trade execution", tradeError);
       continue;
     }
 
@@ -370,11 +358,8 @@ async function attemptOrderMatching(supabaseClient: any, logger: EdgeLogger, ord
       });
 
     if (updateSuccess) {
-      logger.info("Orders updated after execution");
       // Update local order state for next iteration
       order.remaining_quantity -= executionQuantity;
-    } else {
-      logger.error("Failed to update orders after execution");
     }
   }
 }
