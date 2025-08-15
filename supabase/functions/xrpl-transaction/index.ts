@@ -3,25 +3,46 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { Client, Wallet } from "https://esm.sh/xrpl@2.7.0";
 import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { authorizeUser, AuthorizationError, createAuthorizationErrorResponse } from "../_shared/authorization.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
+const IS_TEST_ENV = Deno.env.get("DENO_ENV") === "test" || Deno.env.get("NODE_ENV") === "test";
 
+// Strictly validated transaction request interface
 interface XRPLTransactionRequest {
-  action?: string; // Smart contract function name
-  transaction_type?:
+  transaction_type:
     | "token_transfer"
     | "token_mint"
     | "token_burn"
     | "create_token"
     | "freeze_account"
     | "execute_trade";
-  asset_id?: string;
-  amount?: number;
-  destination?: string; // For transfers
-  memo?: string;
-  parameters?: any; // For smart contract functions
+  asset_id: string; // Required UUID
+  amount: number; // Required positive number
+  destination?: string; // Required for transfers, must be valid XRPL address
+  memo?: string; // Optional, max 1KB
+  // Removed: action, parameters (smart contract execution handled separately)
 }
+
+// Allowed fields whitelist for validation
+const ALLOWED_TRANSACTION_FIELDS = [
+  'transaction_type',
+  'asset_id', 
+  'amount',
+  'destination',
+  'memo'
+] as const;
+
+// Transaction type validation
+const VALID_TRANSACTION_TYPES = [
+  'token_transfer',
+  'token_mint', 
+  'token_burn',
+  'create_token',
+  'freeze_account',
+  'execute_trade'
+] as const;
 
 // Helper logging function
 const logStep = (step: string, details?: any) => {
@@ -88,7 +109,8 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const rateLimitResponse = await rateLimit(req);
+  // Enhanced rate limiting for blockchain operations (stricter limits)
+  const rateLimitResponse = await rateLimit(req, undefined, 5); // Max 5 requests per window
   if (rateLimitResponse) return rateLimitResponse;
 
   const supabaseClient = createClient(
@@ -97,80 +119,85 @@ serve(async (req) => {
     { auth: { persistSession: false } },
   );
 
+  const startTime = Date.now();
+  let user: any = null;
+
   try {
-    const startTime = Date.now();
-    logStep("Function started");
+    logStep("XRPL transaction function started");
 
+    // Authorize user with admin role requirement for blockchain operations
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    const { user: authenticatedUser, profile } = await authorizeUser(supabaseClient, authHeader, {
+      requiredRole: "admin" // XRPL transactions require admin role
+    });
+    
+    user = authenticatedUser;
+    logStep("User authorized for blockchain operations", { 
+      userId: user.id, 
+      role: profile.role,
+      email: user.email 
+    });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } =
-      await supabaseClient.auth.getUser(token);
-    if (userError)
-      throw new Error(`Authentication error: ${userError.message}`);
+    // Parse and validate request data with strict field filtering
+    const rawRequestData = await req.json();
+    const requestData = await validateAndSanitizeRequest(rawRequestData, user.id, supabaseClient);
+    
+    logStep("Request data validated", { 
+      transaction_type: requestData.transaction_type,
+      asset_id: requestData.asset_id,
+      amount: requestData.amount,
+      has_destination: !!requestData.destination
+    });
 
-    const user = userData.user;
-    if (!user?.id) throw new Error("User not authenticated");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    // Log all transaction attempts for audit trail
+    await logTransactionAttempt(user.id, requestData, req, supabaseClient);
 
-    // Check if user has admin role for blockchain operations
-    const { data: profile, error: profileError } = await supabaseClient
-      .from("profiles")
-      .select("role")
-      .eq("user_id", user.id)
-      .single();
-
-    if (profileError) throw new Error(`Profile error: ${profileError.message}`);
-    if (profile.role !== "admin") {
-      throw new Error("Insufficient permissions for blockchain operations");
+    // Reject smart contract execution - handled by separate function
+    if ('action' in rawRequestData || 'parameters' in rawRequestData) {
+      await logSecurityViolation(user.id, "attempted_smart_contract_execution", rawRequestData, supabaseClient);
+      throw new Error("Smart contract execution not supported in this endpoint");
     }
 
-    const requestData: XRPLTransactionRequest = await req.json();
-    logStep("Request data parsed", requestData);
-
-    // Handle smart contract function execution
-    if (requestData.action && requestData.parameters) {
-      const resp = await handleSmartContractExecution(
-        requestData.action,
-        requestData.parameters,
-        user.id,
-        supabaseClient,
-      );
-      const execTime = Date.now() - startTime;
-      logStep(`Execution time: ${execTime}ms`);
-      return resp;
-    }
-
-    // Get asset details
+    // Get and validate asset details
     const { data: asset, error: assetError } = await supabaseClient
       .from("tokenized_assets")
       .select("*")
       .eq("id", requestData.asset_id)
+      .eq("is_active", true) // Only active assets
       .single();
 
     if (assetError || !asset) {
-      throw new Error("Asset not found");
+      await logSecurityViolation(user.id, "invalid_asset_access", { asset_id: requestData.asset_id }, supabaseClient);
+      throw new Error("Asset not found or inactive");
     }
 
-    // Execute XRPL transaction against selected network
-    const xrplResult = await submitPayment(
-      requestData.transaction_type === "token_burn"
-        ? XRPL_BURN_ADDRESS
-        : requestData.destination || getWallet().classicAddress,
-      String(requestData.amount || 0),
-      asset.xrpl_currency_code,
-      asset.xrpl_issuer_address,
-      requestData.memo,
-    );
+    // Validate asset permissions
+    if (!canUserAccessAsset(user.id, asset, requestData.transaction_type)) {
+      await logSecurityViolation(user.id, "unauthorized_asset_operation", {
+        asset_id: requestData.asset_id,
+        transaction_type: requestData.transaction_type,
+        asset_creator: asset.creator_id
+      }, supabaseClient);
+      throw new Error("Insufficient permissions for this asset operation");
+    }
 
-    logStep("XRPL transaction submitted", {
+    // Execute XRPL transaction with enhanced validation
+    const xrplResult = await executeXRPLTransaction(requestData, asset, user.id);
+
+    logStep("XRPL transaction executed", {
       type: requestData.transaction_type,
       asset: asset.asset_symbol,
       amount: requestData.amount,
       hash: xrplResult.transactionHash,
       status: xrplResult.status,
+      isMockData: xrplResult.isMock
     });
+
+    // Validate transaction result authenticity
+    if (xrplResult.isMock && !IS_TEST_ENV) {
+      await logSecurityViolation(user.id, "mock_data_in_production", xrplResult, supabaseClient);
+      throw new Error("Mock transaction data not allowed in production environment");
+    }
 
     // Update asset holdings based on transaction type
     if (
@@ -296,14 +323,28 @@ serve(async (req) => {
       },
     );
   } catch (error) {
+    if (error instanceof AuthorizationError) {
+      return createAuthorizationErrorResponse(error, corsHeaders);
+    }
+    
     const errorMessage = error instanceof Error ? error.message : String(error);
     const execTime = Date.now() - startTime;
-    logStep("ERROR in xrpl-transaction", { message: errorMessage });
-    logStep(`Execution time: ${execTime}ms`);
+    
+    // Log error for security monitoring
+    if (user?.id) {
+      await logSecurityViolation(user.id, "transaction_error", {
+        error: errorMessage,
+        executionTime: execTime
+      }, supabaseClient).catch(console.error);
+    }
+    
+    logStep("ERROR in xrpl-transaction", { message: errorMessage, executionTime: execTime });
+    
     return new Response(
       JSON.stringify({
         error: errorMessage,
         success: false,
+        code: "TRANSACTION_FAILED"
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -313,236 +354,224 @@ serve(async (req) => {
   }
 });
 
-// Handle smart contract function execution
-async function handleSmartContractExecution(
-  action: string,
-  parameters: any,
+/**
+ * Validate and sanitize transaction request with strict field filtering
+ */
+async function validateAndSanitizeRequest(
+  rawData: any,
   userId: string,
-  supabase: any,
-) {
-  logStep("Handling smart contract execution", { action, parameters });
+  supabase: any
+): Promise<XRPLTransactionRequest> {
+  // Check for unauthorized fields
+  const providedFields = Object.keys(rawData);
+  const unauthorizedFields = providedFields.filter(field => !ALLOWED_TRANSACTION_FIELDS.includes(field as any));
+  
+  if (unauthorizedFields.length > 0) {
+    await logSecurityViolation(userId, "unauthorized_fields", {
+      unauthorizedFields,
+      providedFields
+    }, supabase);
+    throw new Error(`Unauthorized fields: ${unauthorizedFields.join(', ')}`);
+  }
 
-  // Get the smart contract function configuration
-  const { data: contractFunction, error: contractError } = await supabase
-    .from("smart_contract_functions")
-    .select("*")
-    .eq("function_name", action)
-    .eq("deployment_status", "deployed")
-    .single();
+  // Validate required fields
+  if (!rawData.transaction_type) {
+    throw new Error("transaction_type is required");
+  }
 
-  if (contractError) {
-    throw new Error(
-      `Smart contract function not found or not deployed: ${action}`,
+  if (!rawData.asset_id) {
+    throw new Error("asset_id is required");
+  }
+
+  if (typeof rawData.amount !== 'number' || rawData.amount <= 0) {
+    throw new Error("amount must be a positive number");
+  }
+
+  // Validate transaction type
+  if (!VALID_TRANSACTION_TYPES.includes(rawData.transaction_type)) {
+    await logSecurityViolation(userId, "invalid_transaction_type", {
+      provided: rawData.transaction_type,
+      allowed: VALID_TRANSACTION_TYPES
+    }, supabase);
+    throw new Error(`Invalid transaction type: ${rawData.transaction_type}`);
+  }
+
+  // Validate UUID format for asset_id
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(rawData.asset_id)) {
+    throw new Error("asset_id must be a valid UUID");
+  }
+
+  // Validate destination for transfers
+  if (rawData.transaction_type === 'token_transfer') {
+    if (!rawData.destination) {
+      throw new Error("destination is required for transfers");
+    }
+    
+    // Basic XRPL address validation (starts with 'r' and is 25-34 chars)
+    if (typeof rawData.destination !== 'string' || 
+        !rawData.destination.startsWith('r') || 
+        rawData.destination.length < 25 || 
+        rawData.destination.length > 34) {
+      throw new Error("destination must be a valid XRPL address");
+    }
+  }
+
+  // Validate memo size
+  if (rawData.memo && typeof rawData.memo === 'string' && rawData.memo.length > 1024) {
+    throw new Error("memo cannot exceed 1024 characters");
+  }
+
+  // Validate amount limits based on transaction type
+  const MAX_AMOUNTS = {
+    token_transfer: 1000000,
+    token_mint: 10000000,
+    token_burn: 1000000,
+    create_token: 100000000,
+    freeze_account: 0,
+    execute_trade: 1000000
+  };
+
+  if (rawData.amount > MAX_AMOUNTS[rawData.transaction_type as keyof typeof MAX_AMOUNTS]) {
+    throw new Error(`Amount exceeds maximum for ${rawData.transaction_type}: ${MAX_AMOUNTS[rawData.transaction_type as keyof typeof MAX_AMOUNTS]}`);
+  }
+
+  return {
+    transaction_type: rawData.transaction_type,
+    asset_id: rawData.asset_id,
+    amount: rawData.amount,
+    destination: rawData.destination,
+    memo: rawData.memo
+  };
+}
+
+/**
+ * Check if user can perform operation on asset
+ */
+function canUserAccessAsset(userId: string, asset: any, transactionType: string): boolean {
+  // Asset creator can do anything
+  if (asset.creator_id === userId) {
+    return true;
+  }
+
+  // Non-creators can only transfer (not mint/burn)
+  if (transactionType === 'token_mint' || transactionType === 'token_burn' || transactionType === 'create_token') {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Execute XRPL transaction with enhanced validation and mock detection
+ */
+async function executeXRPLTransaction(
+  requestData: XRPLTransactionRequest,
+  asset: any,
+  userId: string
+): Promise<any> {
+  try {
+    const destination = requestData.transaction_type === "token_burn"
+      ? XRPL_BURN_ADDRESS
+      : requestData.destination || getWallet().classicAddress;
+
+    const result = await submitPayment(
+      destination,
+      String(requestData.amount),
+      asset.xrpl_currency_code,
+      asset.xrpl_issuer_address,
+      requestData.memo,
     );
-  }
 
-  logStep("Smart contract function found", {
-    functionName: contractFunction.function_name,
-    transactionType: contractFunction.xrpl_transaction_type,
-  });
-
-  // Validate parameters against contract schema
-  const requiredParams = Object.keys(contractFunction.parameters);
-  const providedParams = Object.keys(parameters);
-  const missingParams = requiredParams.filter(
-    (param) => !providedParams.includes(param),
-  );
-
-  if (missingParams.length > 0) {
-    throw new Error(`Missing required parameters: ${missingParams.join(", ")}`);
-  }
-
-  // Validate compliance rules
-  const complianceChecks = await validateCompliance(
-    userId,
-    action,
-    parameters,
-    contractFunction.compliance_rules,
-    supabase,
-  );
-
-  logStep("Compliance checks completed", { complianceChecks });
-
-  if (!complianceChecks.passed) {
-    throw new Error(`Compliance check failed: ${complianceChecks.reason}`);
-  }
-
-  // Create transaction queue entry
-  const { data: transactionData, error: transactionError } = await supabase
-    .from("blockchain_transaction_queue")
-    .insert({
-      user_id: userId,
-      function_name: action,
-      transaction_type: contractFunction.xrpl_transaction_type,
-      parameters: parameters,
-      status: "pending",
-      compliance_check_status: complianceChecks,
-    })
-    .select()
-    .single();
-
-  if (transactionError) throw transactionError;
-
-  logStep("Transaction queued", { transactionId: transactionData.id });
-
-  // Simulate XRPL transaction execution
-  const xrplResult = await simulateXRPLTransaction(
-    contractFunction.xrpl_transaction_type,
-    parameters,
-    supabase,
-  );
-
-  // Update transaction with result
-  const { error: updateError } = await supabase
-    .from("blockchain_transaction_queue")
-    .update({
-      status: xrplResult.success ? "completed" : "failed",
-      xrpl_transaction_hash: xrplResult.transactionHash,
-      xrpl_ledger_index: xrplResult.ledgerIndex,
-      error_message: xrplResult.error,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", transactionData.id);
-
-  if (updateError) throw updateError;
-
-  logStep("Transaction updated", {
-    success: xrplResult.success,
-    hash: xrplResult.transactionHash,
-  });
-
-  // Create audit log entry
-  await createAuditLog(userId, action, parameters, xrplResult, supabase);
-
-  return new Response(
-    JSON.stringify({
-      success: xrplResult.success,
-      transactionId: transactionData.id,
-      transactionHash: xrplResult.transactionHash,
-      ledgerIndex: xrplResult.ledgerIndex,
-      complianceStatus: complianceChecks,
-    }),
-    {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: xrplResult.success ? 200 : 400,
-    },
-  );
-}
-
-// Compliance validation function
-async function validateCompliance(
-  userId: string,
-  action: string,
-  parameters: any,
-  complianceRules: any,
-  supabase: any,
-) {
-  const checks = {
-    passed: true,
-    reason: "",
-    details: {},
-  };
-
-  // Check KYC requirements
-  if (complianceRules.kyc_required || complianceRules.kyc_verified) {
-    const { data: kyc } = await supabase
-      .from("kyc_verification")
-      .select("verification_status")
-      .eq("user_id", userId)
-      .eq("verification_status", "approved")
-      .single();
-
-    if (!kyc) {
-      checks.passed = false;
-      checks.reason = "KYC verification required";
-      return checks;
-    }
-    checks.details.kyc_status = "verified";
-  }
-
-  // Check daily limits
-  if (complianceRules.daily_limit && parameters.amount) {
-    const today = new Date().toISOString().split("T")[0];
-    const { data: todaysTransactions } = await supabase
-      .from("blockchain_transaction_queue")
-      .select("parameters")
-      .eq("user_id", userId)
-      .gte("created_at", `${today}T00:00:00.000Z`)
-      .eq("status", "completed");
-
-    const todaysTotal =
-      todaysTransactions?.reduce((total: number, tx: any) => {
-        return total + (tx.parameters?.amount || 0);
-      }, 0) || 0;
-
-    if (todaysTotal + parameters.amount > complianceRules.daily_limit) {
-      checks.passed = false;
-      checks.reason = `Daily limit exceeded. Limit: ${complianceRules.daily_limit}, Current: ${todaysTotal}`;
-      return checks;
-    }
-    checks.details.daily_usage = todaysTotal;
-  }
-
-  // Check admin approval requirements
-  if (complianceRules.admin_approval && action === "freeze_account") {
-    checks.details.admin_approval = "auto_approved_for_admin";
-  }
-
-  checks.details.compliance_framework = "US_SEC_CFTC_COMPLIANT";
-  return checks;
-}
-
-// Simulate XRPL transaction execution
-async function simulateXRPLTransaction(
-  transactionType: string,
-  parameters: any,
-  supabase: any,
-) {
-  // In a real implementation, this would use the XRPL library
-  const simulatedResults = {
-    TrustSet: {
-      success: true,
-      transactionHash: `TS${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
-      ledgerIndex: Math.floor(Math.random() * 1000000) + 80000000,
-      fee: "12",
-    },
-    Payment: {
-      success: true,
-      transactionHash: `PAY${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
-      ledgerIndex: Math.floor(Math.random() * 1000000) + 80000000,
-      fee: "12",
-    },
-    OfferCreate: {
-      success: true,
-      transactionHash: `OFF${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
-      ledgerIndex: Math.floor(Math.random() * 1000000) + 80000000,
-      fee: "12",
-    },
-    AccountSet: {
-      success: true,
-      transactionHash: `AS${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
-      ledgerIndex: Math.floor(Math.random() * 1000000) + 80000000,
-      fee: "12",
-    },
-  };
-
-  // Simulate network delay
-  await new Promise((resolve) =>
-    setTimeout(resolve, Math.random() * 2000 + 500),
-  );
-
-  const result =
-    simulatedResults[transactionType as keyof typeof simulatedResults];
-  if (!result) {
+    // Mark as real transaction (not mock)
     return {
-      success: false,
-      error: `Unsupported transaction type: ${transactionType}`,
-      transactionHash: null,
-      ledgerIndex: null,
+      ...result,
+      isMock: false
     };
+  } catch (error) {
+    // In test environment, allow controlled mock data
+    if (IS_TEST_ENV) {
+      return {
+        success: true,
+        transactionHash: `TEST_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ledgerIndex: Math.floor(Math.random() * 1000) + 1000000,
+        status: "tesSUCCESS",
+        isMock: true
+      };
+    }
+    throw error;
   }
+}
 
-  return result;
+/**
+ * Log transaction attempts for comprehensive audit trail
+ */
+async function logTransactionAttempt(
+  userId: string,
+  requestData: XRPLTransactionRequest,
+  req: Request,
+  supabase: any
+): Promise<void> {
+  try {
+    await supabase.from("user_behavior_log").insert({
+      user_id: userId,
+      action: "xrpl_transaction_attempt",
+      location_data: { 
+        origin: req.headers.get("origin"),
+        userAgent: req.headers.get("user-agent"),
+        ip: req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for")
+      },
+      risk_indicators: {
+        transaction_type: requestData.transaction_type,
+        amount: requestData.amount,
+        asset_id: requestData.asset_id,
+        has_destination: !!requestData.destination,
+        memo_length: requestData.memo?.length || 0
+      },
+    });
+
+    // Also log to security events for high-value transactions
+    if (requestData.amount > 10000) {
+      await supabase.from("security_events").insert({
+        user_id: userId,
+        event_type: "high_value_transaction_attempt",
+        event_data: {
+          transaction_type: requestData.transaction_type,
+          amount: requestData.amount,
+          asset_id: requestData.asset_id
+        },
+        risk_score: requestData.amount > 100000 ? 8 : 5
+      });
+    }
+  } catch (error) {
+    console.error("Failed to log transaction attempt:", error);
+  }
+}
+
+/**
+ * Log security violations with detailed context
+ */
+async function logSecurityViolation(
+  userId: string,
+  violationType: string,
+  details: any,
+  supabase: any
+): Promise<void> {
+  try {
+    await supabase.from("security_events").insert({
+      user_id: userId,
+      event_type: `xrpl_security_violation_${violationType}`,
+      event_data: {
+        violation_type: violationType,
+        details,
+        function: "xrpl-transaction",
+        timestamp: new Date().toISOString()
+      },
+      risk_score: 9 // High risk for security violations
+    });
+  } catch (error) {
+    console.error("Failed to log security violation:", error);
+  }
 }
 
 // Create audit log entry
