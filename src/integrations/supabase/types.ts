@@ -3132,6 +3132,22 @@ export type Database = {
         }
         Returns: string
       }
+      create_order_secure: {
+        Args: {
+          p_asset_id: string
+          p_expires_at?: string
+          p_order_type: string
+          p_price?: number
+          p_quantity: number
+          p_side: string
+          p_user_id: string
+        }
+        Returns: {
+          error_message: string
+          order_id: string
+          success: boolean
+        }[]
+      }
       execute_ai_agent_workflow: {
         Args: { agent_id: string; input_data?: Json; workflow_data?: Json }
         Returns: Json
@@ -3177,6 +3193,15 @@ export type Database = {
         }
         Returns: string
       }
+      log_validation_failure: {
+        Args: {
+          p_client_info?: Json
+          p_details: Json
+          p_failure_type: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       mark_all_notifications_read: {
         Args: { target_user_id: string }
         Returns: undefined
@@ -3201,6 +3226,15 @@ export type Database = {
       update_api_key_usage: {
         Args: { p_key_hash: string }
         Returns: undefined
+      }
+      update_order_execution: {
+        Args: {
+          p_execution_price: number
+          p_execution_quantity: number
+          p_match_order_id: string
+          p_order_id: string
+        }
+        Returns: boolean
       }
       verify_api_key: {
         Args: { key_hash: string; key_text: string }
