@@ -11,5 +11,9 @@ describe("generateXrplCurrencyCode", () => {
     const code = generateXrplCurrencyCode("LONGTOKEN");
     expect(code.length).toBe(40);
     expect(code).toMatch(/^[0-9A-F]+$/);
+    // Verify specific encoding matches TextEncoder output
+    const expectedBytes = new TextEncoder().encode("LONGTOKEN");
+    const expectedHex = Array.from(expectedBytes).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+    expect(code).toBe(expectedHex.padEnd(40, "0"));
   });
 });
