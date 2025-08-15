@@ -74,7 +74,7 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const rateLimitResponse = rateLimit(req);
+  const rateLimitResponse = await rateLimit(req);
   if (rateLimitResponse) return rateLimitResponse;
 
   const supabaseClient = createClient(

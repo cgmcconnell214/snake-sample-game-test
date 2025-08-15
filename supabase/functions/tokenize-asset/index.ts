@@ -27,7 +27,7 @@ serve(async (req) => {
   }
 
   // Global/IP rate limit (shared util)
-  const rateLimitResponse = rateLimit(req);
+  const rateLimitResponse = await rateLimit(req);
   if (rateLimitResponse) return rateLimitResponse;
 
   const supabaseClient = createClient(

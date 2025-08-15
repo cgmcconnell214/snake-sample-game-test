@@ -57,7 +57,7 @@ serve(async (req) => {
     );
   }
 
-  const rateLimitResponse = rateLimit(req);
+  const rateLimitResponse = await rateLimit(req);
   if (rateLimitResponse) return rateLimitResponse;
 
   const supabaseClient = createClient(

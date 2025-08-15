@@ -16,7 +16,7 @@ serve(async (req) => {
   }
 
   // Basic rate limiting
-  const limited = rateLimit(req);
+  const limited = await rateLimit(req);
   if (limited) return limited;
 
   const supabase = createClient(

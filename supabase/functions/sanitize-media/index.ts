@@ -26,7 +26,7 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const rateLimitResponse = rateLimit(req);
+  const rateLimitResponse = await rateLimit(req);
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

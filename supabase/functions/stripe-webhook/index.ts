@@ -12,7 +12,7 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const rateLimitResponse = rateLimit(req);
+  const rateLimitResponse = await rateLimit(req);
   if (rateLimitResponse) return rateLimitResponse;
 
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");

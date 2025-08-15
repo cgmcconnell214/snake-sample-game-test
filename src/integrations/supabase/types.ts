@@ -1975,6 +1975,36 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          identifier: string
+          request_count: number
+          updated_at: string | null
+          window_start: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          identifier: string
+          request_count?: number
+          updated_at?: string | null
+          window_start?: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          identifier?: string
+          request_count?: number
+          updated_at?: string | null
+          window_start?: string
+        }
+        Relationships: []
+      }
       regulatory_reports: {
         Row: {
           created_at: string
@@ -3038,6 +3068,10 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_expired_rate_limits: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       cleanup_stuck_executions: {
         Args: Record<PropertyKey, never>
         Returns: undefined

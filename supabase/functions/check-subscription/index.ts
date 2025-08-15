@@ -18,7 +18,7 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const rateLimitResponse = rateLimit(req);
+  const rateLimitResponse = await rateLimit(req);
   if (rateLimitResponse) return rateLimitResponse;
 
   // Use the service role key to perform writes (upsert) in Supabase
