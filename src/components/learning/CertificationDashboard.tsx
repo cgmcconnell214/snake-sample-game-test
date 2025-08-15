@@ -38,6 +38,9 @@ interface UserCertification {
   earned_at: string;
   expires_at?: string;
   verification_code: string;
+  verification_code_hash?: string;
+  code_display_count: number;
+  last_displayed_at?: string;
   certificate_url?: string;
   certifications: Certification;
 }
@@ -90,7 +93,13 @@ export default function CertificationDashboard() {
       .order("earned_at", { ascending: false });
 
     if (data) {
-      setUserCertifications(data as UserCertification[]);
+      // Mask verification codes by default for security
+      const maskedData = data.map(cert => ({
+        ...cert,
+        verification_code: '••••••••••••', // Always mask codes initially
+        code_display_count: cert.code_display_count || 0
+      }));
+      setUserCertifications(maskedData as UserCertification[]);
     }
   };
 
@@ -176,38 +185,127 @@ export default function CertificationDashboard() {
       return;
     }
 
-    const verification_code = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    try {
+      // Use secure code generation edge function
+      const { data, error } = await supabase.functions.invoke(
+        'generate-certification-code',
+        {
+          body: { certification_id: certificationId }
+        }
+      );
 
-    const { data, error } = await supabase
-      .from("user_certifications")
-      .insert({
-        user_id: user.id,
-        certification_id: certificationId,
-        verification_code,
-      })
-      .select(
-        `
-        *,
-        certifications (*)
-      `,
-      )
-      .single();
+      if (error) {
+        console.error("Error generating certification:", error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to earn certification",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (error) {
+      if (!data?.success) {
+        toast({
+          title: "Error",
+          description: data?.message || "Failed to earn certification",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Show success with one-time code display
+      toast({
+        title: "🎉 Congratulations!",
+        description: `You've earned the certification! Your verification code is: ${data.verification_code}. Please save it securely - it will only be shown a limited number of times.`,
+        duration: 10000, // Show for 10 seconds
+      });
+
+      // Update the certifications list (without the plaintext code)
+      const updatedCert = {
+        ...data.certification,
+        verification_code: '••••••••••••' // Mask the code in the UI
+      };
+      setUserCertifications([updatedCert, ...userCertifications]);
+
+    } catch (error) {
+      console.error("Unexpected error:", error);
       toast({
         title: "Error",
-        description: "Failed to earn certification",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
-      return;
     }
+  };
 
-    toast({
-      title: "Congratulations!",
-      description: "You've earned a new certification!",
-    });
+  const revealVerificationCode = async (certificationId: string, certIndex: number) => {
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'reveal-verification-code',
+        {
+          body: { certification_id: certificationId }
+        }
+      );
 
-    setUserCertifications([data as UserCertification, ...userCertifications]);
+      if (error) {
+        console.error("Error revealing code:", error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to reveal verification code",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!data?.success) {
+        toast({
+          title: "Access Denied",
+          description: data?.message || "Cannot reveal verification code",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Temporarily show the code
+      const updatedCerts = [...userCertifications];
+      updatedCerts[certIndex] = {
+        ...updatedCerts[certIndex],
+        verification_code: data.verification_code,
+        code_display_count: data.display_count
+      };
+      setUserCertifications(updatedCerts);
+
+      // Show warning if approaching limit
+      let toastDescription = `Verification code: ${data.verification_code} (Display ${data.display_count}/${data.max_displays})`;
+      if (data.warning) {
+        toastDescription += ` ⚠️ ${data.warning}`;
+      }
+
+      toast({
+        title: "Verification Code Revealed",
+        description: toastDescription,
+        duration: 8000,
+      });
+
+      // Hide the code again after 30 seconds
+      setTimeout(() => {
+        const maskedCerts = [...userCertifications];
+        if (maskedCerts[certIndex]) {
+          maskedCerts[certIndex] = {
+            ...maskedCerts[certIndex],
+            verification_code: '••••••••••••'
+          };
+          setUserCertifications(maskedCerts);
+        }
+      }, 30000);
+
+    } catch (error) {
+      console.error("Unexpected error revealing code:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    }
   };
 
   const generateCertificate = async (certificationId: string) => {
@@ -312,7 +410,7 @@ export default function CertificationDashboard() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {userCertifications.map((cert) => (
+                {userCertifications.map((cert, index) => (
                   <Card key={cert.id} className="relative">
                     <div className="absolute top-4 right-4">
                       <Badge variant="default">
@@ -348,12 +446,31 @@ export default function CertificationDashboard() {
                             {new Date(cert.earned_at).toLocaleDateString()}
                           </span>
                         </div>
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between items-center text-sm">
                           <span>Verification:</span>
-                          <span className="font-mono text-xs">
-                            {cert.verification_code}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-xs">
+                              {cert.verification_code}
+                            </span>
+                            {cert.verification_code === '••••••••••••' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0"
+                                onClick={() => revealVerificationCode(cert.certification_id, index)}
+                                title="Reveal verification code"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
+                        {cert.code_display_count > 0 && (
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Code revealed:</span>
+                            <span>{cert.code_display_count}/5 times</span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-2 mt-4">
                         <Button

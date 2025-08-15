@@ -2774,29 +2774,38 @@ export type Database = {
         Row: {
           certificate_url: string | null
           certification_id: string
+          code_display_count: number | null
           earned_at: string | null
           expires_at: string | null
           id: string
+          last_displayed_at: string | null
           user_id: string
           verification_code: string | null
+          verification_code_hash: string | null
         }
         Insert: {
           certificate_url?: string | null
           certification_id: string
+          code_display_count?: number | null
           earned_at?: string | null
           expires_at?: string | null
           id?: string
+          last_displayed_at?: string | null
           user_id: string
           verification_code?: string | null
+          verification_code_hash?: string | null
         }
         Update: {
           certificate_url?: string | null
           certification_id?: string
+          code_display_count?: number | null
           earned_at?: string | null
           expires_at?: string | null
           id?: string
+          last_displayed_at?: string | null
           user_id?: string
           verification_code?: string | null
+          verification_code_hash?: string | null
         }
         Relationships: [
           {
@@ -3254,6 +3263,10 @@ export type Database = {
         }
         Returns: string
       }
+      generate_secure_verification_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -3295,6 +3308,10 @@ export type Database = {
       }
       hash_api_key: {
         Args: { key_text: string }
+        Returns: string
+      }
+      hash_verification_code: {
+        Args: { code: string }
         Returns: string
       }
       link_oauth_account: {
@@ -3366,6 +3383,16 @@ export type Database = {
       verify_api_key: {
         Args: { key_hash: string; key_text: string }
         Returns: boolean
+      }
+      verify_certification_code: {
+        Args: { p_code: string; p_user_id?: string }
+        Returns: {
+          certification_name: string
+          earned_at: string
+          expires_at: string
+          is_valid: boolean
+          user_name: string
+        }[]
       }
     }
     Enums: {
