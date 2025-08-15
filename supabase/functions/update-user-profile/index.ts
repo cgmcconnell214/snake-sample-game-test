@@ -1,11 +1,112 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { z } from "https://esm.sh/zod@3.22.4";
 import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { encryptSecret } from "../_shared/encryption.ts";
+import { getErrorResponse } from "../_shared/error.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
+
+// HTML sanitization function to prevent XSS
+function sanitizeHtml(input: string): string {
+  if (!input || typeof input !== 'string') return '';
+  
+  // Remove script tags, event handlers, and other dangerous content
+  return input
+    .replace(/<script[^>]*>.*?<\/script>/gis, '') // Remove script tags
+    .replace(/<iframe[^>]*>.*?<\/iframe>/gis, '') // Remove iframe tags
+    .replace(/<object[^>]*>.*?<\/object>/gis, '') // Remove object tags
+    .replace(/<embed[^>]*>/gi, '') // Remove embed tags
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '') // Remove event handlers
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/data:text\/html/gi, '') // Remove data URLs
+    .replace(/vbscript:/gi, '') // Remove vbscript: protocol
+    .replace(/<link[^>]*>/gi, '') // Remove link tags
+    .replace(/<meta[^>]*>/gi, '') // Remove meta tags
+    .replace(/<style[^>]*>.*?<\/style>/gis, '') // Remove style tags
+    .trim();
+}
+
+// Zod schemas for validation
+const ProfileUpdateSchema = z.object({
+  first_name: z.string().min(1).max(50).optional(),
+  last_name: z.string().min(1).max(50).optional(),
+  display_name: z.string().min(1).max(100).optional(),
+  bio: z.string().max(500).optional(),
+  location: z.string().max(100).optional(),
+  website: z.string().url().max(200).optional().or(z.literal('')),
+  avatar_url: z.string().url().max(500).optional().or(z.literal('')),
+  phone: z.string().max(20).optional(),
+  company: z.string().max(100).optional(),
+  job_title: z.string().max(100).optional(),
+  social_links: z.record(z.string().url().max(200)).optional(),
+  preferences: z.record(z.union([z.string(), z.number(), z.boolean()])).optional(),
+}).strict(); // strict() prevents extra keys
+
+const MfaDataSchema = z.object({
+  enabled: z.boolean(),
+  totp_secret: z.string().optional(),
+  backup_codes: z.array(z.string()).optional(),
+}).strict();
+
+const RequestBodySchema = z.object({
+  profile: ProfileUpdateSchema.optional(),
+  mfaData: MfaDataSchema.optional(),
+  mfaCode: z.string().optional(),
+  password: z.string().optional(),
+}).strict();
+
+// Validate and sanitize profile data
+function validateAndSanitizeProfile(profileData: any) {
+  // First validate the structure
+  const validationResult = ProfileUpdateSchema.safeParse(profileData);
+  
+  if (!validationResult.success) {
+    throw new Error(`Invalid profile data: ${validationResult.error.message}`);
+  }
+  
+  const sanitized = { ...validationResult.data };
+  
+  // Sanitize string fields that could contain HTML
+  if (sanitized.first_name) sanitized.first_name = sanitizeHtml(sanitized.first_name);
+  if (sanitized.last_name) sanitized.last_name = sanitizeHtml(sanitized.last_name);
+  if (sanitized.display_name) sanitized.display_name = sanitizeHtml(sanitized.display_name);
+  if (sanitized.bio) sanitized.bio = sanitizeHtml(sanitized.bio);
+  if (sanitized.location) sanitized.location = sanitizeHtml(sanitized.location);
+  if (sanitized.company) sanitized.company = sanitizeHtml(sanitized.company);
+  if (sanitized.job_title) sanitized.job_title = sanitizeHtml(sanitized.job_title);
+  
+  // Validate URLs are not malicious
+  if (sanitized.website && sanitized.website !== '') {
+    const websiteUrl = new URL(sanitized.website);
+    if (!['http:', 'https:'].includes(websiteUrl.protocol)) {
+      throw new Error('Website URL must use HTTP or HTTPS protocol');
+    }
+  }
+  
+  if (sanitized.avatar_url && sanitized.avatar_url !== '') {
+    const avatarUrl = new URL(sanitized.avatar_url);
+    if (!['http:', 'https:'].includes(avatarUrl.protocol)) {
+      throw new Error('Avatar URL must use HTTP or HTTPS protocol');
+    }
+  }
+  
+  // Sanitize social links
+  if (sanitized.social_links) {
+    for (const [platform, url] of Object.entries(sanitized.social_links)) {
+      if (typeof url === 'string') {
+        const socialUrl = new URL(url);
+        if (!['http:', 'https:'].includes(socialUrl.protocol)) {
+          throw new Error(`Social link for ${platform} must use HTTP or HTTPS protocol`);
+        }
+      }
+    }
+  }
+  
+  return sanitized;
+}
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
@@ -103,19 +204,44 @@ serve(async (req) => {
     }
     const user = userData.user;
 
-    const body = await req.json();
-    const profileData = body.profile;
-    const mfaData = body.mfaData;
-    const mfaCode: string | undefined = body.mfaCode;
-    const password: string | undefined = body.password;
+    const requestBody = await req.json();
+    
+    // Validate entire request body structure first
+    const bodyValidation = RequestBodySchema.safeParse(requestBody);
+    if (!bodyValidation.success) {
+      console.error('Request validation failed:', bodyValidation.error);
+      return getErrorResponse(
+        'VALIDATION_ERROR',
+        'update-user-profile',
+        req,
+        corsHeaders,
+        { additionalContext: { validationErrors: bodyValidation.error.errors } }
+      );
+    }
+    
+    const { profile: profileData, mfaData, mfaCode, password } = bodyValidation.data;
+    
+    // Additional security check: reject requests with any unexpected properties
+    const allowedKeys = ['profile', 'mfaData', 'mfaCode', 'password'];
+    const extraKeys = Object.keys(requestBody).filter(key => !allowedKeys.includes(key));
+    if (extraKeys.length > 0) {
+      console.error('Request contains unexpected keys:', extraKeys);
+      return getErrorResponse(
+        'SECURITY_VIOLATION',
+        'update-user-profile',
+        req,
+        corsHeaders,
+        { additionalContext: { unauthorizedFields: extraKeys } }
+      );
+    }
 
     if (profileData?.user_id && profileData.user_id !== user.id) {
-      return new Response(
-        JSON.stringify({ error: "Cannot update other users" }),
-        {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+      return getErrorResponse(
+        'INSUFFICIENT_PERMISSIONS',
+        'update-user-profile',
+        req,
+        corsHeaders,
+        { userId: user.id, additionalContext: { attemptedUserId: profileData.user_id } }
       );
     }
 
@@ -212,9 +338,24 @@ serve(async (req) => {
         }
       }
 
+      // Validate and sanitize profile data
+      let sanitizedProfileData;
+      try {
+        sanitizedProfileData = validateAndSanitizeProfile(profileData);
+      } catch (validationError) {
+        console.error('Profile validation failed:', validationError);
+        return getErrorResponse(
+          validationError,
+          'update-user-profile',
+          req,
+          corsHeaders,
+          { additionalContext: { error: validationError instanceof Error ? validationError.message : 'Validation failed' } }
+        );
+      }
+
       // Prepare the data to update
       const updateData: any = {
-        ...profileData,
+        ...sanitizedProfileData,
         user_id: user.id,
         updated_at: new Date().toISOString(),
       };
