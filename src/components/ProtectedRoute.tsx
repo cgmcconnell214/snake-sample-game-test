@@ -20,8 +20,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
+    } else if (!loading && user && profile && !profile.two_factor_enabled) {
+      // Enforce 2FA for all users
+      navigate("/app/settings?tab=security&require2fa=true");
     }
-  }, [user, loading, navigate]);
+  }, [user, profile, loading, navigate]);
 
   if (loading) {
     return (

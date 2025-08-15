@@ -31,6 +31,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import QRCode from "qrcode";
 
 const TwoFactorManager: React.FC = () => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -51,23 +52,32 @@ const TwoFactorManager: React.FC = () => {
   const generateBackupCodes = () => {
     const codes = [];
     for (let i = 0; i < 8; i++) {
-      codes.push(Math.random().toString(36).substring(2, 10).toUpperCase());
+      const array = new Uint8Array(4);
+      crypto.getRandomValues(array);
+      const code = Array.from(array)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+        .toUpperCase();
+      codes.push(code);
     }
     return codes;
   };
 
   const [secret, setSecret] = useState<string>("");
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
 
   const enable2FA = async () => {
     setLoading(true);
     try {
       const newSecret = generateSecret();
       const codes = generateBackupCodes();
+      const otpAuthUrl = generateOtpAuthURL(newSecret, user?.email || "user", "God's Realm");
 
+      // Generate actual QR code
+      const qrDataUrl = await QRCode.toDataURL(otpAuthUrl);
+      
       setSecret(newSecret);
-      setQrCodeUrl(
-        generateOtpAuthURL(newSecret, user?.email || "user", "God's Realm"),
-      );
+      setQrCodeDataUrl(qrDataUrl);
       setBackupCodes(codes);
       setShowSetup(true);
     } catch (error) {
@@ -293,17 +303,20 @@ const TwoFactorManager: React.FC = () => {
 
           <div className="space-y-4">
             <div className="text-center">
-              <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center mx-auto">
-                <div className="text-center">
-                  <Smartphone className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                  <div className="text-sm text-muted-foreground">QR Code</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Use Google Authenticator
-                    <br />
-                    or similar app
+              {qrCodeDataUrl ? (
+                <img 
+                  src={qrCodeDataUrl} 
+                  alt="2FA QR Code"
+                  className="w-48 h-48 mx-auto border rounded-lg"
+                />
+              ) : (
+                <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center mx-auto">
+                  <div className="text-center">
+                    <Smartphone className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                    <div className="text-sm text-muted-foreground">Loading QR Code...</div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div>

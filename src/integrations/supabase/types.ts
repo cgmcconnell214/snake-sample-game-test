@@ -1865,6 +1865,7 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_tier"]
             | null
           two_factor_enabled: boolean | null
+          two_factor_secret_encrypted: string | null
           updated_at: string | null
           user_id: string
         }
@@ -1889,6 +1890,7 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_tier"]
             | null
           two_factor_enabled?: boolean | null
+          two_factor_secret_encrypted?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -1913,6 +1915,7 @@ export type Database = {
             | Database["public"]["Enums"]["subscription_tier"]
             | null
           two_factor_enabled?: boolean | null
+          two_factor_secret_encrypted?: string | null
           updated_at?: string | null
           user_id?: string
         }
