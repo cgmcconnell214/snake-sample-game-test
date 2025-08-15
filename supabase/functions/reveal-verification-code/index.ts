@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { getErrorResponse } from "../_shared/error.ts";
+import { authorizeUser, AuthorizationError, createAuthorizationErrorResponse } from "../_shared/authorization.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
@@ -30,27 +31,11 @@ serve(async (req) => {
   );
 
   try {
+    // Authorize user with role/tier requirements
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return getErrorResponse(
-        "AUTHENTICATION_REQUIRED",
-        "reveal-verification-code",
-        req,
-        corsHeaders
-      );
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    
-    if (userError || !userData.user) {
-      return getErrorResponse(
-        "INVALID_AUTHENTICATION",
-        "reveal-verification-code",
-        req,
-        corsHeaders
-      );
-    }
+    const { user, profile } = await authorizeUser(supabaseClient, authHeader, {
+      requiredTier: "standard" // Code reveal requires standard subscription
+    });
 
     const { certification_id } = await req.json();
     
@@ -63,7 +48,7 @@ serve(async (req) => {
       );
     }
 
-    const user = userData.user;
+    
 
     // Get the certification with current display count
     const { data: certification, error: certError } = await supabaseClient
@@ -158,6 +143,10 @@ serve(async (req) => {
     );
 
   } catch (error) {
+    if (error instanceof AuthorizationError) {
+      return createAuthorizationErrorResponse(error, corsHeaders);
+    }
+    
     console.error("Unexpected error in reveal-verification-code:", error);
     return getErrorResponse(
       error,

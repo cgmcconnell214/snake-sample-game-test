@@ -4,6 +4,7 @@ import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 import { EdgeLogger } from "../_shared/logger-utils.ts";
 import { createErrorHandler, ErrorHandler, ErrorType } from "../_shared/error.ts";
+import { authorizeUser, AuthorizationError, createAuthorizationErrorResponse } from "../_shared/authorization.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
@@ -76,42 +77,11 @@ serve(async (req) => {
   try {
     const startTime = Date.now();
     
+    // Authorize user with role/tier requirements
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw ErrorHandler.authenticationRequired({
-        functionName: "create-order",
-        requestId: crypto.randomUUID(),
-        clientInfo: {
-          ip: req.headers.get("cf-connecting-ip") || 
-              req.headers.get("x-forwarded-for") || 
-              req.headers.get("x-real-ip") || "unknown",
-          userAgent: req.headers.get("user-agent")
-        }
-      });
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } =
-      await supabaseClient.auth.getUser(token);
-    if (userError) {
-      throw ErrorHandler.createError(ErrorType.INVALID_AUTHENTICATION, userError.message);
-    }
-
-    const user = userData.user;
-    if (!user) {
-      throw ErrorHandler.createError(ErrorType.INVALID_AUTHENTICATION);
-    }
-
-    // Check subscription tier
-    const { data: profile } = await supabaseClient
-      .from("profiles")
-      .select("subscription_tier")
-      .eq("user_id", user.id)
-      .single();
-
-    if (!profile || profile.subscription_tier === "free") {
-      throw ErrorHandler.createError(ErrorType.SUBSCRIPTION_REQUIRED);
-    }
+    const { user, profile } = await authorizeUser(supabaseClient, authHeader, {
+      requiredTier: "standard" // Order creation requires standard subscription
+    });
 
     const requestData: CreateOrderRequest = await req.json();
     
@@ -264,6 +234,10 @@ serve(async (req) => {
     }
 
   } catch (error) {
+    if (error instanceof AuthorizationError) {
+      return createAuthorizationErrorResponse(error, corsHeaders);
+    }
+    
     return errorHandler.handleError(error, {
       userId: user?.id,
       functionName: "create-order",

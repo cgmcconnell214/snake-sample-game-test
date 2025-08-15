@@ -9,6 +9,24 @@ interface ProtectedRouteProps {
   requiredTier?: "free" | "standard" | "enterprise";
 }
 
+/**
+ * ProtectedRoute Component
+ * 
+ * Provides client-side route protection based on user authentication, roles, and subscription tiers.
+ * 
+ * IMPORTANT: This is client-side protection only. All Edge Functions implement server-side 
+ * authorization that cannot be bypassed, returning 403 for unauthorized users.
+ * 
+ * Required Roles by Feature:
+ * - Contract Deployment: admin role
+ * - Trading/Orders: standard+ subscription tier  
+ * - Certification Management: standard+ subscription tier
+ * - Data Sync: admin role
+ * - Website Scraping: standard+ subscription tier
+ * 
+ * See docs/API_ENDPOINTS.md for complete authorization requirements.
+ */
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requiredRole,

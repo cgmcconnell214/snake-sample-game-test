@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { Client, Wallet } from "npm:xrpl";
 import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { authorizeUser, AuthorizationError, createAuthorizationErrorResponse } from "../_shared/authorization.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
@@ -36,29 +37,12 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // Authorize user with admin role requirement
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } =
-      await supabaseClient.auth.getUser(token);
-    if (userError)
-      throw new Error(`Authentication error: ${userError.message}`);
-
-    const user = userData.user;
-    if (!user) throw new Error("User not authenticated");
-    logStep("User authenticated", { userId: user.id });
-
-    // Check admin role
-    const { data: profile } = await supabaseClient
-      .from("profiles")
-      .select("role")
-      .eq("user_id", user.id)
-      .single();
-
-    if (!profile || profile.role !== "admin") {
-      throw new Error("Insufficient permissions to deploy contracts");
-    }
+    const { user, profile } = await authorizeUser(supabaseClient, authHeader, {
+      requiredRole: "admin" // Contract deployment requires admin role
+    });
+    logStep("User authorized", { userId: user.id, role: profile.role });
 
     const requestData: DeployRequest = await req.json();
     logStep("Request data parsed", requestData);
@@ -123,6 +107,10 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
+    if (error instanceof AuthorizationError) {
+      return createAuthorizationErrorResponse(error, corsHeaders);
+    }
+    
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR in deploy-contract", { message: errorMessage });
     return new Response(
