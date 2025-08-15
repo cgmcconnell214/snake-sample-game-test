@@ -253,6 +253,60 @@ export type Database = {
         }
         Relationships: []
       }
+      application_logs: {
+        Row: {
+          component: string | null
+          context: Json | null
+          created_at: string | null
+          error_data: Json | null
+          function_name: string | null
+          id: string
+          ip_address: unknown | null
+          level: string
+          message: string
+          metadata: Json | null
+          request_id: string | null
+          session_id: string | null
+          timestamp: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          component?: string | null
+          context?: Json | null
+          created_at?: string | null
+          error_data?: Json | null
+          function_name?: string | null
+          id?: string
+          ip_address?: unknown | null
+          level: string
+          message: string
+          metadata?: Json | null
+          request_id?: string | null
+          session_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          component?: string | null
+          context?: Json | null
+          created_at?: string | null
+          error_data?: Json | null
+          function_name?: string | null
+          id?: string
+          ip_address?: unknown | null
+          level?: string
+          message?: string
+          metadata?: Json | null
+          request_id?: string | null
+          session_id?: string | null
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       asset_holdings: {
         Row: {
           asset_id: string
