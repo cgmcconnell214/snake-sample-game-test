@@ -3312,6 +3312,10 @@ export type Database = {
         Args: { notification_id: string }
         Returns: undefined
       }
+      redeem_enrollment_link_atomic: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: Json
+      }
       register_device: {
         Args: {
           p_browser_info?: Json

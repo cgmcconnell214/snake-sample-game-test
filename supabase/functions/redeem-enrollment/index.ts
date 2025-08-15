@@ -39,60 +39,38 @@ serve(async (req) => {
     const { code } = await req.json();
     if (!code) throw new Error("Missing code");
 
-    // Load link by code
-    const { data: link, error: linkErr } = await service
-      .from("course_enrollment_links")
-      .select(
-        "id, course_id, creator_id, max_uses, used_count, expires_at, is_active",
-      )
-      .eq("code", code)
-      .maybeSingle();
+    // Use atomic function for thread-safe redemption
+    const { data: result, error: redeemErr } = await service.rpc(
+      'redeem_enrollment_link_atomic',
+      {
+        p_code: code,
+        p_user_id: userData.user.id
+      }
+    );
 
-    if (linkErr) throw new Error(linkErr.message);
-    if (!link) throw new Error("Invalid code");
-    if (!link.is_active) throw new Error("Link is inactive");
-    if (link.expires_at && new Date(link.expires_at) < new Date()) {
-      throw new Error("Link expired");
-    }
-    if (link.used_count >= link.max_uses)
-      throw new Error("Usage limit reached");
+    if (redeemErr) throw new Error(`RPC error: ${redeemErr.message}`);
+    if (!result) throw new Error("No result from redemption function");
 
-    // Check if already enrolled
-    const { data: existing, error: existingErr } = await service
-      .from("course_enrollments")
-      .select("id")
-      .eq("course_id", link.course_id)
-      .eq("student_id", userData.user.id)
-      .maybeSingle();
-    if (existingErr) throw new Error(existingErr.message);
-
-    if (!existing) {
-      const { error: enrollErr } = await service
-        .from("course_enrollments")
-        .insert({
-          student_id: userData.user.id,
-          course_id: link.course_id,
-          payment_amount: 0,
-          payment_status: "paid",
-          payment_provider: "bypass",
-        });
-      if (enrollErr) throw new Error(enrollErr.message);
+    // Check if the atomic function succeeded
+    if (!result.success) {
+      throw new Error(result.error || "Redemption failed");
     }
 
-    // Increment usage
-    const newCount = link.used_count + 1;
-    const reached = newCount >= link.max_uses;
-    const { error: updErr } = await service
-      .from("course_enrollment_links")
-      .update({
-        used_count: newCount,
-        is_active: reached ? false : link.is_active,
-      })
-      .eq("id", link.id);
-    if (updErr) throw new Error(updErr.message);
+    console.log('Redemption successful:', {
+      course_id: result.course_id,
+      already_enrolled: result.already_enrolled,
+      used_count: result.used_count,
+      max_uses: result.max_uses
+    });
 
     return new Response(
-      JSON.stringify({ success: true, course_id: link.course_id }),
+      JSON.stringify({ 
+        success: true, 
+        course_id: result.course_id,
+        already_enrolled: result.already_enrolled,
+        used_count: result.used_count,
+        max_uses: result.max_uses
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
