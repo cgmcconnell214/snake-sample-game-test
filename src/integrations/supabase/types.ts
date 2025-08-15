@@ -1751,6 +1751,100 @@ export type Database = {
           },
         ]
       }
+      meeting_access_tokens: {
+        Row: {
+          access_token: string
+          attendee_id: string
+          class_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          is_used: boolean
+        }
+        Insert: {
+          access_token: string
+          attendee_id: string
+          class_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          is_used?: boolean
+        }
+        Update: {
+          access_token?: string
+          attendee_id?: string
+          class_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_used?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_access_tokens_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_credentials: {
+        Row: {
+          access_token: string | null
+          class_id: string
+          created_at: string
+          expires_at: string | null
+          host_key: string | null
+          id: string
+          is_active: boolean
+          meeting_id: string
+          meeting_url: string
+          participant_key: string | null
+          provider: string
+          refresh_token: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          class_id: string
+          created_at?: string
+          expires_at?: string | null
+          host_key?: string | null
+          id?: string
+          is_active?: boolean
+          meeting_id: string
+          meeting_url: string
+          participant_key?: string | null
+          provider: string
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          class_id?: string
+          created_at?: string
+          expires_at?: string | null
+          host_key?: string | null
+          id?: string
+          is_active?: boolean
+          meeting_id?: string
+          meeting_url?: string
+          participant_key?: string | null
+          provider?: string
+          refresh_token?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_credentials_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "live_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -3152,6 +3246,14 @@ export type Database = {
         Args: { agent_id: string; input_data?: Json; workflow_data?: Json }
         Returns: Json
       }
+      generate_meeting_access_token: {
+        Args: {
+          p_attendee_id: string
+          p_class_id: string
+          p_expires_minutes?: number
+        }
+        Returns: string
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -3235,6 +3337,15 @@ export type Database = {
           p_order_id: string
         }
         Returns: boolean
+      }
+      validate_meeting_access_token: {
+        Args: { p_token: string }
+        Returns: {
+          attendee_id: string
+          class_id: string
+          is_valid: boolean
+          meeting_url: string
+        }[]
       }
       verify_api_key: {
         Args: { key_hash: string; key_text: string }
