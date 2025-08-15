@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -33,6 +33,11 @@ import {
   Activity,
   CheckCircle,
   AlertCircle,
+  Key,
+  RotateCcw,
+  Eye,
+  EyeOff,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,8 +65,119 @@ export function AgentDeployment({ agent, onClose }: AgentDeploymentProps) {
   >("idle");
   const [deploymentUrl, setDeploymentUrl] = useState("");
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [generatingKey, setGeneratingKey] = useState(false);
+  const [keyName, setKeyName] = useState("");
   const { toast } = useToast();
+
+  // Load existing API keys on component mount
+  useEffect(() => {
+    loadApiKeys();
+  }, [agent.id]);
+
+  const loadApiKeys = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('agent_api_keys')
+        .select('*')
+        .eq('agent_id', agent.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setApiKeys(data || []);
+    } catch (error) {
+      console.error('Failed to load API keys:', error);
+    }
+  };
+
+  const generateSecureApiKey = () => {
+    // Generate secure API key using crypto.getRandomValues
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    const randomString = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    
+    // Create a structured API key with prefix and checksum
+    const prefix = 'ak_live';
+    const timestamp = Date.now().toString(36);
+    const keyId = crypto.randomUUID().substring(0, 8);
+    
+    return `${prefix}_${keyId}_${timestamp}_${randomString.substring(0, 24)}`;
+  };
+
+  const generateAPIKey = async () => {
+    if (!keyName.trim()) {
+      toast({
+        title: "Key Name Required",
+        description: "Please enter a name for your API key",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setGeneratingKey(true);
+    try {
+      // Generate secure API key
+      const newApiKey = generateSecureApiKey();
+      
+      // Store the hashed key using RPC function
+      const { data, error } = await supabase
+        .rpc('create_agent_api_key', {
+          p_agent_id: agent.id,
+          p_key_text: newApiKey,
+          p_name: keyName
+        });
+
+      if (error) throw error;
+
+      // Set the cleartext key to show to user once
+      setApiKey(newApiKey);
+      setShowApiKey(true);
+      setKeyName("");
+      
+      // Reload the keys list
+      await loadApiKeys();
+
+      toast({
+        title: "API Key Generated",
+        description: "Your new API key has been created. Save it now - you won't see it again!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate API key",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingKey(false);
+    }
+  };
+
+  const revokeApiKey = async (keyId: string) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('revoke_agent_api_key', {
+          p_key_id: keyId
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "API Key Revoked",
+        description: "The API key has been revoked successfully",
+      });
+
+      // Reload the keys list
+      await loadApiKeys();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to revoke API key",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleDeploy = async () => {
     setIsDeploying(true);
@@ -99,41 +215,6 @@ export function AgentDeployment({ agent, onClose }: AgentDeploymentProps) {
     });
   };
 
-  const generateAPIKey = async () => {
-    setGeneratingKey(true);
-    try {
-      // Generate a secure API key
-      const newApiKey = `ak_${agent.id.substring(0, 8)}_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 15)}`;
-      setApiKey(newApiKey);
-
-      // Store the API key in the database
-      const { error } = await supabase
-        .from("ai_agents")
-        .update({
-          configuration: {
-            ...agent.configuration,
-            api_key: newApiKey,
-            api_key_created_at: new Date().toISOString(),
-          },
-        })
-        .eq("id", agent.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "API Key Generated",
-        description: "Your new API key has been created successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to generate API key",
-        variant: "destructive",
-      });
-    } finally {
-      setGeneratingKey(false);
-    }
-  };
 
   const handleDownloadAgent = () => {
     const agentPackage = {
@@ -878,40 +959,137 @@ cd agent-${agent.id.slice(0, 8)}
 
               <Card>
                 <CardHeader>
-                  <CardTitle>API Authentication</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Key className="h-4 w-4" />
+                    API Key Management
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Use your agent's API key to authenticate requests. You can
-                    find your API key in the agent settings.
-                  </p>
+                <CardContent className="space-y-4">
+                  {/* New API Key Generation */}
                   <div className="space-y-3">
-                    <Button
-                      variant="outline"
-                      onClick={generateAPIKey}
-                      disabled={generatingKey}
-                    >
-                      {generatingKey ? "Generating..." : "Generate API Key"}
-                    </Button>
-                    {(apiKey || agent.configuration?.api_key) && (
-                      <div className="bg-muted p-3 rounded-md">
-                        <p className="text-sm font-mono break-all">
-                          {apiKey || agent.configuration?.api_key}
-                        </p>
+                    <div>
+                      <Label htmlFor="key-name">Generate New API Key</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          id="key-name"
+                          placeholder="Enter a name for this key (e.g., 'Production App')"
+                          value={keyName}
+                          onChange={(e) => setKeyName(e.target.value)}
+                          className="flex-1"
+                        />
                         <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            copyToClipboard(
-                              apiKey || agent.configuration?.api_key,
-                            )
-                          }
-                          className="mt-2"
+                          onClick={generateAPIKey}
+                          disabled={generatingKey || !keyName.trim()}
                         >
-                          Copy API Key
+                          {generatingKey ? "Generating..." : "Generate"}
                         </Button>
                       </div>
+                    </div>
+
+                    {/* Show newly generated key once */}
+                    {apiKey && showApiKey && (
+                      <div className="p-4 border-2 border-orange-200 bg-orange-50 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertCircle className="h-4 w-4 text-orange-600" />
+                          <span className="font-medium text-orange-800">
+                            Save this API key now!
+                          </span>
+                        </div>
+                        <p className="text-sm text-orange-700 mb-3">
+                          This is the only time you'll see the full key. Store it safely.
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={apiKey}
+                            readOnly
+                            className="font-mono text-sm flex-1"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              copyToClipboard(apiKey);
+                              toast({
+                                title: "API Key Copied",
+                                description: "API key copied to clipboard",
+                              });
+                            }}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setApiKey(null);
+                              setShowApiKey(false);
+                            }}
+                          >
+                            <EyeOff className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     )}
+                  </div>
+
+                  {/* Existing API Keys */}
+                  <div className="space-y-3">
+                    <Label>Active API Keys</Label>
+                    {apiKeys.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Key className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p>No API keys generated yet.</p>
+                        <p className="text-sm">Generate your first key above to get started.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {apiKeys.map((key) => (
+                          <div
+                            key={key.id}
+                            className="flex items-center justify-between p-3 border rounded-lg"
+                          >
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-sm">
+                                  {key.key_prefix}••••••••••••••••
+                                </span>
+                                {key.name && (
+                                  <Badge variant="outline">{key.name}</Badge>
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                Created: {new Date(key.created_at).toLocaleDateString()}
+                                {key.last_used_at && (
+                                  <span className="ml-2">
+                                    Last used: {new Date(key.last_used_at).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => revokeApiKey(key.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-muted p-3 rounded-md">
+                    <h4 className="text-sm font-medium mb-2">Security Best Practices:</h4>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• Store API keys in environment variables, never in code</li>
+                      <li>• Use different keys for different environments</li>
+                      <li>• Rotate keys regularly and revoke unused ones</li>
+                      <li>• Monitor API key usage for suspicious activity</li>
+                    </ul>
                   </div>
                 </CardContent>
               </Card>

@@ -47,6 +47,48 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_api_keys: {
+        Row: {
+          agent_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+        }
+        Relationships: []
+      }
       ai_agent_execution_logs: {
         Row: {
           agent_id: string | null
@@ -3076,6 +3118,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_agent_api_key: {
+        Args: { p_agent_id: string; p_key_text: string; p_name?: string }
+        Returns: string
+      }
       create_notification: {
         Args: {
           notification_data?: Json
@@ -3117,6 +3163,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      hash_api_key: {
+        Args: { key_text: string }
+        Returns: string
+      }
       link_oauth_account: {
         Args: {
           p_is_primary?: boolean
@@ -3143,6 +3193,18 @@ export type Database = {
           p_location_data?: Json
         }
         Returns: string
+      }
+      revoke_agent_api_key: {
+        Args: { p_key_id: string }
+        Returns: boolean
+      }
+      update_api_key_usage: {
+        Args: { p_key_hash: string }
+        Returns: undefined
+      }
+      verify_api_key: {
+        Args: { key_hash: string; key_text: string }
+        Returns: boolean
       }
     }
     Enums: {
