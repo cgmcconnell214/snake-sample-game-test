@@ -4,6 +4,7 @@ import { generateXrplCurrencyCode } from "../utils.ts";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { EdgeLogger } from "../logger-service/logger-utils.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
@@ -19,12 +20,8 @@ const tokenizeSchema = z.object({
 });
 type TokenizeRequest = z.infer<typeof tokenizeSchema>;
 
-const logStep = (step: string, details?: unknown) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
-  console.log(`[TOKENIZE-ASSET] ${step}${detailsStr}`);
-};
-
 serve(async (req) => {
+  const logger = new EdgeLogger("tokenize-asset", req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -42,7 +39,7 @@ serve(async (req) => {
   const startTime = Date.now();
 
   try {
-    logStep("Function started");
+    logger.info("Tokenize asset function started");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
@@ -53,18 +50,51 @@ serve(async (req) => {
 
     const user = userData.user;
     if (!user) throw new Error("User not authenticated");
-    logStep("User authenticated", { userId: user.id });
+    logger.setUser(user.id);
+    logger.info("User authenticated", { userId: user.id });
 
-    // Subscription tier check
-    const { data: profile } = await supabaseClient
+    // Check KYC status before allowing tokenization
+    const { data: profile, error: profileError } = await supabaseClient
       .from("profiles")
-      .select("subscription_tier")
+      .select("subscription_tier, kyc_status")
       .eq("user_id", user.id)
       .single();
 
+    if (profileError) {
+      logger.error("Failed to fetch user profile", profileError);
+      throw new Error("Failed to verify user profile");
+    }
+
     if (!profile || profile.subscription_tier === "free") {
+      logger.warn("User attempted tokenization without proper subscription", { 
+        userId: user.id, 
+        tier: profile?.subscription_tier 
+      });
       throw new Error("Standard subscription required for tokenization");
     }
+
+    // Verify KYC status
+    if (profile.kyc_status !== "approved") {
+      logger.security("tokenization_attempted_without_kyc", {
+        userId: user.id,
+        kycStatus: profile.kyc_status,
+        ipAddress: req.headers.get('x-forwarded-for')
+      });
+      
+      return new Response(
+        JSON.stringify({ 
+          error: "KYC verification required", 
+          details: "You must complete KYC verification before creating tokenized assets",
+          kyc_status: profile.kyc_status
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 403,
+        }
+      );
+    }
+
+    logger.info("KYC verification passed", { userId: user.id });
 
     // Validate body with Zod
     const requestJson = await req.json();
@@ -73,16 +103,16 @@ serve(async (req) => {
       const errors = parsed.error.issues
         .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
         .join("; ");
-      logStep("Validation failed", { errors });
+      logger.warn("Validation failed", { errors, userId: user.id });
       const execTime = Date.now() - startTime;
-      logStep(`Execution time: ${execTime}ms`);
+      logger.performance("tokenize-asset-failed", execTime);
       return new Response(JSON.stringify({ error: "Invalid request data", details: errors }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
     const requestData: TokenizeRequest = parsed.data;
-    logStep("Request data parsed", requestData);
+    logger.info("Request data validated", { assetSymbol: requestData.asset_symbol, totalSupply: requestData.total_supply });
 
     // XRPL currency code (3-char or hex for custom)
     const xrpl_currency_code = generateXrplCurrencyCode(requestData.asset_symbol);
@@ -90,7 +120,7 @@ serve(async (req) => {
     // Simulated XRPL interaction (stub)
     const mockXrplIssuerAddress = `r${Math.random().toString(36).substring(2, 27).toUpperCase()}`;
     const mockTransactionHash = `${Math.random().toString(16).substring(2, 66).toUpperCase()}`;
-    logStep("Simulated XRPL transaction", {
+    logger.info("Simulated XRPL transaction", {
       currency_code: xrpl_currency_code,
       issuer: mockXrplIssuerAddress,
       hash: mockTransactionHash,
@@ -121,7 +151,7 @@ serve(async (req) => {
       .single();
 
     if (assetError) throw assetError;
-    logStep("Asset created in database", { assetId: asset.id });
+    logger.info("Asset created in database", { assetId: asset.id });
 
     // Log tokenization event
     await supabaseClient.from("tokenization_events").insert({
@@ -133,7 +163,8 @@ serve(async (req) => {
       xrpl_transaction_hash: mockTransactionHash,
       xrpl_ledger_index: Math.floor(Math.random() * 1_000_000),
       compliance_metadata: {
-        kyc_verified: true, // TODO: check actual KYC status
+        kyc_verified: true, // KYC already verified above
+        kyc_status: profile.kyc_status,
         risk_assessment: "low",
         regulatory_clearance: "pending",
       },
@@ -144,7 +175,7 @@ serve(async (req) => {
         remittance_information: `Token creation: ${requestData.asset_name}`,
       },
     });
-    logStep("Tokenization event logged");
+    logger.info("Tokenization event logged");
 
     // Initial holding for creator
     await supabaseClient.from("asset_holdings").insert({
@@ -153,9 +184,9 @@ serve(async (req) => {
       balance: requestData.total_supply,
       locked_balance: 0,
     });
-    logStep("Initial holdings created");
+    logger.info("Initial holdings created");
 
-    // Behavior log
+    // Business event logging
     await supabaseClient.from("user_behavior_log").insert({
       user_id: user.id,
       action: "asset_tokenization",
@@ -166,8 +197,15 @@ serve(async (req) => {
       },
     });
 
+    logger.business("asset_tokenization_completed", {
+      assetId: asset.id,
+      assetSymbol: requestData.asset_symbol,
+      totalSupply: requestData.total_supply,
+      userId: user.id,
+    });
+
     const execTime = Date.now() - startTime;
-    logStep(`Execution time: ${execTime}ms`);
+    logger.performance("tokenize-asset-success", execTime);
 
     return new Response(
       JSON.stringify({
@@ -189,7 +227,10 @@ serve(async (req) => {
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in tokenize-asset", { message });
+    logger.error("Error in tokenize-asset function", error, { 
+      userId: logger.context.userId,
+      executionTime: Date.now() - startTime 
+    });
     return new Response(
       JSON.stringify({ success: false, error: message }),
       {

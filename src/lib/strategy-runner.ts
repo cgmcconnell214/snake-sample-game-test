@@ -6,6 +6,8 @@
  * that can analyze market data and execute trades based on AI signals.
  */
 
+import { createComponentLogger } from "@/lib/logger";
+
 export interface StrategySignal {
   action: "buy" | "sell" | "hold";
   confidence: number; // 0-1
@@ -62,9 +64,11 @@ export interface StrategyPerformanceMetrics {
 export class StrategyRunner {
   private config: StrategyConfig;
   private isRunning: boolean = false;
+  private logger = createComponentLogger('StrategyRunner');
 
   constructor(config: StrategyConfig) {
     this.config = config;
+    this.logger.setContext({ metadata: { strategy_id: config.strategy_id, strategy_name: config.name } });
   }
 
   /**
@@ -147,16 +151,13 @@ export class StrategyRunner {
           signals.push(signal);
 
           // Log strategy signal for compliance
-          console.log(
-            `[STRATEGY-${this.config.strategy_id}] Signal generated:`,
-            {
-              asset: data.asset_symbol,
-              action: signal.action,
-              confidence: signal.confidence,
-              reasoning: signal.reasoning,
-              timestamp: new Date().toISOString(),
-            },
-          );
+          this.logger.business('strategy_signal_generated', {
+            asset: data.asset_symbol,
+            action: signal.action,
+            confidence: signal.confidence,
+            reasoning: signal.reasoning,
+            timestamp: new Date().toISOString(),
+          });
         }
       }
     }
@@ -169,7 +170,7 @@ export class StrategyRunner {
    */
   start(): void {
     this.isRunning = true;
-    console.log(`Strategy ${this.config.name} started`);
+    this.logger.info(`Strategy ${this.config.name} started`);
   }
 
   /**
@@ -177,7 +178,7 @@ export class StrategyRunner {
    */
   stop(): void {
     this.isRunning = false;
-    console.log(`Strategy ${this.config.name} stopped`);
+    this.logger.info(`Strategy ${this.config.name} stopped`);
   }
 
   /**

@@ -3,11 +3,14 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { EdgeLogger } from "../logger-service/logger-utils.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
 
 serve(async (req) => {
+  const logger = new EdgeLogger("execute-ai-agent", req);
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -36,7 +39,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!supabaseUrl || !supabaseKey) {
-      console.error("Missing Supabase configuration");
+      logger.error("Missing Supabase configuration");
       return new Response(
         JSON.stringify({ error: "Server configuration error" }),
         {
@@ -61,13 +64,15 @@ serve(async (req) => {
       await supabase.auth.getUser(token);
     const user = authData?.user;
     if (authError || !user) {
+      logger.warn("Unauthorized access attempt", authError);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log(`Executing AI agent: ${agentId}`);
+    logger.setUser(user.id);
+    logger.info(`Executing AI agent: ${agentId}`);
 
     // Normalize agentId: accept UUID or agent name
     let resolvedAgentId = agentId as string;
@@ -136,7 +141,7 @@ serve(async (req) => {
     );
 
     if (executionError) {
-      console.error("Execution error:", executionError);
+      logger.error("Execution error", executionError);
       return new Response(
         JSON.stringify({
           error: "Failed to execute agent workflow",
@@ -158,7 +163,7 @@ serve(async (req) => {
         user_id: user.id,
       });
     if (auditError) {
-      console.error("Failed to record workflow execution audit:", auditError);
+      logger.error("Failed to record workflow execution audit", auditError);
     }
 
     // If workflow has steps, actually execute them
@@ -168,10 +173,10 @@ serve(async (req) => {
       workflowData.steps &&
       Array.isArray(workflowData.steps)
     ) {
-      console.log(`Processing ${workflowData.steps.length} workflow steps`);
+      logger.info(`Processing ${workflowData.steps.length} workflow steps`);
 
       for (const step of workflowData.steps) {
-        console.log(`Executing step: ${step.name} (${step.type})`);
+        logger.debug(`Executing step: ${step.name} (${step.type})`);
         let stepResult = {
           step_id: step.id,
           status: "success",
@@ -298,7 +303,7 @@ serve(async (req) => {
         } catch (error) {
           stepResult.status = "error";
           stepResult.error = (error as Error).message;
-          console.error(`Step execution failed: ${step.name}`, error);
+          logger.error(`Step execution failed: ${step.name}`, error);
         }
 
         // Log step result immediately
@@ -369,7 +374,7 @@ serve(async (req) => {
       });
     }
 
-    console.log("Agent execution completed successfully");
+    logger.info("Agent execution completed successfully");
 
     return new Response(
       JSON.stringify({
@@ -389,7 +394,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {
-    console.error("Error in execute-ai-agent function:", error);
+    logger.error("Error in execute-ai-agent function", error);
     return new Response(
       JSON.stringify({
         error: "Internal server error",
