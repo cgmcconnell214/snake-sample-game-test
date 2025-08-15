@@ -3,11 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { generateXrplCurrencyCode } from "../utils.ts";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { rateLimit } from "../_shared/rateLimit.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
+const corsHeaders = getCorsHeaders([allowedOrigin]);
 
 const tokenizeSchema = z.object({
   asset_name: z.string().min(1, "Asset name is required"),
