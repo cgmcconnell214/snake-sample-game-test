@@ -2,18 +2,59 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { EdgeLogger } from "../_shared/logger-utils.ts";
 
 const allowedOrigin = Deno.env.get("ALLOWED_ORIGIN") || "*";
 const corsHeaders = getCorsHeaders([allowedOrigin]);
 
-const logStep = (step: string, details?: any) => {
-  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
-  console.log(`[MARKET-SCHEDULER] ${step}${detailsStr}`);
+// Authorization check helper
+const isAuthorized = (req: Request): boolean => {
+  const authHeader = req.headers.get("Authorization");
+  const apiKey = req.headers.get("X-API-Key");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  
+  // Check for service role key in Authorization header
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.substring(7);
+    return token === serviceRoleKey;
+  }
+  
+  // Check for API key in X-API-Key header
+  if (apiKey) {
+    return apiKey === serviceRoleKey;
+  }
+  
+  return false;
 };
 
 serve(async (req) => {
+  const logger = new EdgeLogger("market-data-scheduler", req);
+  
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Authorization check
+  if (!isAuthorized(req)) {
+    const clientIP = req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || "unknown";
+    
+    logger.security("unauthorized_scheduler_access", {
+      ip: clientIP,
+      userAgent: req.headers.get("user-agent"),
+      path: "/market-data-scheduler",
+      method: req.method
+    });
+
+    return new Response(
+      JSON.stringify({
+        error: "Unauthorized access. This endpoint requires proper authentication.",
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      },
+    );
   }
 
   const rateLimitResponse = rateLimit(req);
@@ -26,7 +67,7 @@ serve(async (req) => {
   );
 
   try {
-    logStep("Market data scheduler triggered");
+    logger.info("Market data scheduler triggered", { authorized: true });
 
     // Check if we should update market data (every 30 seconds for real-time feel)
     const now = new Date();
@@ -61,7 +102,7 @@ serve(async (req) => {
 
     if (updateError) throw updateError;
 
-    logStep("Market data update completed", {
+    logger.info("Market data update completed", {
       updatedAssets: outdatedData.length,
       result: updateResult,
     });
@@ -80,7 +121,7 @@ serve(async (req) => {
     );
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in market scheduler", { message: errorMessage });
+    logger.error("ERROR in market scheduler", error instanceof Error ? error : new Error(errorMessage));
 
     return new Response(
       JSON.stringify({
