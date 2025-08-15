@@ -106,6 +106,19 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 
 ## Required environment variables
 
+### Client-side environment variables
+
+For the React application, create a `.env` file in the project root with:
+
+```
+VITE_SUPABASE_URL=<your-supabase-url>
+VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+```
+
+These variables are prefixed with `VITE_` to be exposed to the client-side code securely. They should contain your Supabase project URL and anonymous (public) key only.
+
+### Server-side environment variables
+
 Several Supabase Edge functions depend on environment variables for Supabase and Stripe access. Create a `.env` file in the `supabase` directory with at least the following keys:
 
 ```
