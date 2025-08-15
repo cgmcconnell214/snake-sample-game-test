@@ -3,6 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'nonce-theme-script';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https: blob:;
+      media-src 'self' blob:;
+      connect-src 'self' 
+        https://bkxbkaggxqcsiylwcopt.supabase.co 
+        https://api.xrpl.org 
+        https://ipapi.co
+        https://xrpl.ws
+        https://s1.ripple.com
+        https://s2.ripple.com
+        https://xrplcluster.com
+        https://xrpl-ws.org
+        wss://bkxbkaggxqcsiylwcopt.supabase.co
+        wss://xrpl.ws;
+      frame-src 'self';
+      object-src 'none';
+      base-uri 'self';
+      form-action 'self' https://bkxbkaggxqcsiylwcopt.supabase.co;
+      frame-ancestors 'none';
+      upgrade-insecure-requests;
+    " />
+    
     <title>God's Realm | Sovereign Digital Sanctuary</title>
     <meta name="theme-color" content="#d4af37" />
     <link rel="icon" href="/lovable-uploads/5e27a9c9-6f52-4a64-9270-63f61c6b48cd.png" type="image/png">
@@ -27,7 +55,7 @@
       name="twitter:image"
       content="https://lovable.dev/opengraph-image-p98pqg.png"
     />
-    <script>
+    <script nonce="theme-script">
       (function () {
         try {
           var choice = localStorage.getItem("theme") || "system";
