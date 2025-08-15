@@ -72,10 +72,61 @@ Run the test suite:
 npm test
 ```
 
+Run tests in watch mode during development:
+
+```bash
+npm run test:watch
+```
+
 Generate a coverage report:
 
 ```bash
 npm run coverage
+```
+
+Run tests with UI (optional):
+
+```bash
+npm run test:ui
+```
+
+### Coverage Thresholds
+
+This project enforces minimum coverage thresholds:
+- **Branches**: 80%
+- **Functions**: 80% 
+- **Lines**: 80%
+- **Statements**: 80%
+
+Tests will fail if coverage drops below these thresholds.
+
+### CI/CD Integration
+
+For continuous integration, add these commands to your pipeline:
+
+```yaml
+# Example GitHub Actions workflow
+- name: Install dependencies
+  run: npm ci
+
+- name: Run tests with coverage
+  run: npm run coverage
+
+- name: Upload coverage reports
+  uses: codecov/codecov-action@v3
+  if: always()
+```
+
+For other CI systems:
+```bash
+# Install dependencies
+npm ci
+
+# Run all tests with coverage enforcement
+npm run coverage
+
+# Run linting (optional)
+npm run lint
 ```
 
 ## Deployment status

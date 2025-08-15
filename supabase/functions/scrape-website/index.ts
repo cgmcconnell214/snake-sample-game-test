@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { rateLimit } from "../_shared/rateLimit.ts";
 import { getCorsHeaders } from "../_shared/cors.ts";
 
@@ -19,6 +20,45 @@ serve(async (req) => {
 
   const rateLimitResponse = rateLimit(req);
   if (rateLimitResponse) return rateLimitResponse;
+
+  // Initialize Supabase client for authentication
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("Missing Supabase configuration");
+    return new Response(
+      JSON.stringify({ error: "Server configuration error" }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+  // Require authentication
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) {
+    console.log("Missing Authorization header for scrape request");
+    return new Response(JSON.stringify({ error: "Authentication required" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const token = authHeader.replace("Bearer ", "");
+  const { data: authData, error: authError } = await supabase.auth.getUser(token);
+  const user = authData?.user;
+  
+  if (authError || !user) {
+    console.log("Invalid authentication for scrape request:", authError?.message);
+    return new Response(JSON.stringify({ error: "Invalid authentication" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   try {
     if (req.method !== "POST") {
@@ -61,6 +101,9 @@ serve(async (req) => {
         ? body.formats
         : ["markdown", "html"];
 
+    // Log the scraping request
+    console.log(`User ${user.id} requesting scrape of: ${body.url}`);
+    
     // Call Firecrawl REST API
     const firecrawlRes = await fetch("https://api.firecrawl.dev/v1/crawl", {
       method: "POST",
@@ -76,6 +119,13 @@ serve(async (req) => {
     });
 
     const firecrawlData = await firecrawlRes.json().catch(() => ({}));
+
+    // Log the result
+    if (firecrawlRes.ok) {
+      console.log(`Successful scrape for user ${user.id}: ${body.url} (${firecrawlData?.data?.length || 0} items)`);
+    } else {
+      console.error(`Failed scrape for user ${user.id}: ${body.url}`, firecrawlData);
+    }
 
     if (!firecrawlRes.ok) {
       console.error("Firecrawl error:", firecrawlData);

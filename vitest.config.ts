@@ -15,6 +15,25 @@ export default defineConfig({
     coverage: {
       reporter: ["text", "html", "json"],
       provider: "v8",
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
+      exclude: [
+        "node_modules/**",
+        "dist/**",
+        "**/*.d.ts",
+        "**/*.config.{js,ts}",
+        "**/*.test.{js,ts,tsx}",
+        "src/integrations/**",
+        "supabase/migrations/**",
+      ],
     },
+    include: ["tests/**/*.{test,spec}.{js,ts,tsx}"],
+    exclude: ["node_modules/**", "dist/**"],
   },
 });
