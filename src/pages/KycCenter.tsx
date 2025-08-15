@@ -118,49 +118,61 @@ const KycCenter = (): JSX.Element => {
         throw new Error("User not authenticated");
       }
 
-      const uploadFile = (path: string, file: File) =>
-        supabase.storage.from("kyc-documents").upload(path, file);
+      // Generate secure filenames using crypto.randomUUID()
+      const generateFilename = (originalName: string) => {
+        const extension = originalName.split('.').pop();
+        return `${crypto.randomUUID()}.${extension}`;
+      };
 
-      // Upload files to Supabase Storage
+      const uploadFile = async (path: string, file: File) => {
+        const { data, error } = await supabase.storage
+          .from("kyc-documents")
+          .upload(path, file);
+        if (error) throw error;
+        return data;
+      };
+
+      // Upload files to Supabase Storage with secure filenames
+      const uploadPaths = [
+        `${user.id}/id-front-${generateFilename(idFront.name)}`,
+        `${user.id}/id-back-${generateFilename(idBack.name)}`,
+        `${user.id}/proof-address-${generateFilename(proofAddress.name)}`,
+      ];
+
       const uploads = await Promise.all([
-        uploadFile(
-          `${user.id}/id-front-${Date.now()}.${idFront.name.split(".").pop()}`,
-          idFront,
-        ),
-        uploadFile(
-          `${user.id}/id-back-${Date.now()}.${idBack.name.split(".").pop()}`,
-          idBack,
-        ),
-        uploadFile(
-          `${user.id}/proof-address-${Date.now()}.${proofAddress.name
-            .split(".")
-            .pop()}`,
-          proofAddress,
-        ),
+        uploadFile(uploadPaths[0], idFront),
+        uploadFile(uploadPaths[1], idBack),
+        uploadFile(uploadPaths[2], proofAddress),
       ]);
 
-      const errors = uploads.filter((upload) => upload.error);
-      if (errors.length > 0) {
-        throw new Error("Failed to upload some documents");
+      // Submit verification through secure edge function
+      const { data: session } = await supabase.auth.getSession();
+      const { data: verificationResult, error: verificationError } = await supabase.functions.invoke(
+        'kyc-verification',
+        {
+          body: {
+            action: 'submit_verification',
+            documentPaths: uploadPaths,
+            riskScore: 0, // Initial risk score
+            verificationNotes: 'Initial KYC submission'
+          },
+          headers: {
+            Authorization: `Bearer ${session?.session?.access_token}`,
+          },
+        }
+      );
+
+      if (verificationError) {
+        throw verificationError;
       }
 
-      // Update profile with submitted documents status
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          kyc_status: "pending",
-          kyc_submitted_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id);
-
-      if (updateError) {
-        throw updateError;
+      if (!verificationResult.success) {
+        throw new Error(verificationResult.error || 'Verification submission failed');
       }
 
       toast({
         title: "Documents Submitted Successfully",
-        description:
-          "Your KYC documents have been uploaded and are under review",
+        description: "Your KYC documents have been uploaded and are under review",
       });
 
       // Clear uploaded files
@@ -170,8 +182,7 @@ const KycCenter = (): JSX.Element => {
       console.error("Upload error:", error);
       toast({
         title: "Upload Failed",
-        description:
-          "There was an error uploading your documents. Please try again.",
+        description: error instanceof Error ? error.message : "There was an error uploading your documents. Please try again.",
         variant: "destructive",
       });
     } finally {

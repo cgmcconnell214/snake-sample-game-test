@@ -29,10 +29,14 @@ git clone <YOUR_GIT_URL>
 # Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Step 3: Set up environment variables.
+cp .env.example .env
+# Edit .env with your Supabase credentials
+
+# Step 4: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 5: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
@@ -159,14 +163,25 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 
 ### Client-side environment variables
 
-For the React application, create a `.env` file in the project root with:
+**IMPORTANT**: Copy `.env.example` to `.env` and configure your Supabase credentials:
+
+```bash
+cp .env.example .env
+```
+
+Required variables in `.env`:
 
 ```
-VITE_SUPABASE_URL=<your-supabase-url>
-VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+# Supabase Configuration (Required)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+
+# Optional: Development overrides
+VITE_API_URL=http://localhost:8080
+VITE_APP_ENV=development
 ```
 
-These variables are prefixed with `VITE_` to be exposed to the client-side code securely. They should contain your Supabase project URL and anonymous (public) key only.
+These variables are prefixed with `VITE_` to be exposed to the client-side code securely. The application will throw an error on startup if these are not configured properly.
 
 ### Server-side environment variables
 
