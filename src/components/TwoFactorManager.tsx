@@ -93,10 +93,11 @@ const TwoFactorManager: React.FC = () => {
   };
 
   const verify2FA = async () => {
-    if (!verificationCode || verificationCode.length !== 6) {
+    const cleanCode = verificationCode.replace(/\s/g, '').trim();
+    if (!cleanCode || cleanCode.length !== 6 || !/^\d+$/.test(cleanCode)) {
       toast({
         title: "Invalid Code",
-        description: "Please enter a 6-digit verification code.",
+        description: "Please enter a 6-digit verification code containing only numbers.",
         variant: "destructive",
       });
       return;
@@ -104,11 +105,14 @@ const TwoFactorManager: React.FC = () => {
 
     setLoading(true);
     try {
-      const isValid = await verifyToken(secret, verificationCode);
+      console.log('Starting 2FA verification with code:', cleanCode);
+      console.log('Secret length:', secret.length);
+      
+      const isValid = await verifyToken(secret, cleanCode);
       if (!isValid) {
         toast({
           title: "Invalid Code",
-          description: "The verification code you entered is incorrect.",
+          description: "The verification code is incorrect. Please check your authenticator app and try again. Make sure your device time is synchronized.",
           variant: "destructive",
         });
         return;
