@@ -5,18 +5,20 @@ import type { Database } from "./types";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Fallback values for development if env vars are missing
+const fallbackUrl = "https://bkxbkaggxqcsiylwcopt.supabase.co";
+const fallbackKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJreGJrYWdneHFjc2l5bHdjb3B0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMxNzIzNzUsImV4cCI6MjA0ODc0ODM3NX0.OtwA1LLqubCsJ_8iprcPv2GdQhGBRnQBDhIqjVqjRxs";
+
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error(
-    "Missing Supabase environment variables. Please check your .env file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set."
-  );
+  console.warn("Missing Supabase environment variables, using fallback values");
 }
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY,
+  SUPABASE_URL || fallbackUrl,
+  SUPABASE_PUBLISHABLE_KEY || fallbackKey,
   {
     auth: {
       storage: undefined,
