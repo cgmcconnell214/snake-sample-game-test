@@ -84,36 +84,92 @@ export default function EnhancedUserProfile() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      
+      // Check if this is the current user's own profile
+      const currentUser = (await supabase.auth.getUser()).data.user;
+      const isOwnProfile = currentUser?.id === user.id;
+      
+      if (isOwnProfile) {
+        // For own profile, get full data directly
+        const { data, error } = await supabase
+          .from("user_profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (data) {
-        setProfile(data);
+        if (data) {
+          setProfile(data);
+        } else {
+          // Gracefully handle first-time users without a user_profiles row
+          setProfile({
+            user_id: user.id,
+            display_name: user.email?.split("@")[0] || "User",
+            username: null,
+            bio: null,
+            avatar_url: null,
+            profile_banner_url: null,
+            website: null,
+            location: null,
+            phone: null,
+            follower_count: 0,
+            following_count: 0,
+            post_count: 0,
+            theme_preferences: {},
+            privacy_settings: {},
+            notification_settings: {},
+            social_links: {},
+          } as any);
+        }
       } else {
-        // Gracefully handle first-time users without a user_profiles row
-        setProfile({
-          user_id: user.id,
-          display_name: user.email?.split("@")[0] || "User",
-          username: null,
-          bio: null,
-          avatar_url: null,
-          profile_banner_url: null,
-          website: null,
-          location: null,
-          phone: null,
-          follower_count: 0,
-          following_count: 0,
-          post_count: 0,
-          theme_preferences: {},
-          privacy_settings: {},
-          notification_settings: {},
-          social_links: {},
-        } as any);
+        // For other users' profiles, use the secure function that respects privacy
+        const { data, error } = await supabase
+          .rpc('get_user_profile_secure', { target_user_id: user.id });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const profileData = data[0];
+          setProfile({
+            user_id: profileData.user_id,
+            display_name: profileData.display_name,
+            username: profileData.username,
+            bio: profileData.bio,
+            avatar_url: profileData.avatar_url,
+            website: profileData.website,
+            location: profileData.location,
+            phone: null, // Never expose phone numbers to other users
+            follower_count: profileData.follower_count,
+            following_count: profileData.following_count,
+            post_count: profileData.post_count,
+            social_links: profileData.social_links,
+            profile_banner_url: null, // Not included in secure function
+            theme_preferences: {},
+            privacy_settings: {},
+            notification_settings: {},
+          } as any);
+        } else {
+          // Profile is private or doesn't exist
+          setProfile({
+            user_id: user.id,
+            display_name: "Private User",
+            username: null,
+            bio: null,
+            avatar_url: null,
+            profile_banner_url: null,
+            website: null,
+            location: null,
+            phone: null,
+            follower_count: null,
+            following_count: null,
+            post_count: null,
+            theme_preferences: {},
+            privacy_settings: {},
+            notification_settings: {},
+            social_links: {},
+          } as any);
+        }
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -390,10 +446,17 @@ export default function EnhancedUserProfile() {
                             />
                           </div>
                         </div>
-                        <div>
-                          <Label htmlFor="phone">Phone</Label>
-                          <Input name="phone" defaultValue={profile.phone} />
-                        </div>
+                        {/* Only show phone field to profile owner */}
+                        {user?.id === profile.user_id && (
+                          <div>
+                            <Label htmlFor="phone">Phone (Private)</Label>
+                            <Input 
+                              name="phone" 
+                              defaultValue={profile.phone}
+                              placeholder="Only visible to you"
+                            />
+                          </div>
+                        )}
                         <Separator />
                         <h3 className="font-medium">Social Links</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

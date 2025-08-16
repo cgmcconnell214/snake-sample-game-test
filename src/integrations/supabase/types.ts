@@ -3339,6 +3339,23 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_user_profile_secure: {
+        Args: { target_user_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          created_at: string
+          display_name: string
+          follower_count: number
+          following_count: number
+          location: string
+          post_count: number
+          social_links: Json
+          user_id: string
+          username: string
+          website: string
+        }[]
+      }
       get_user_subscription_with_stripe_customer: {
         Args: { p_user_id: string }
         Returns: {
