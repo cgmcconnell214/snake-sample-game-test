@@ -128,10 +128,10 @@ export default function FollowersPage() {
 
       // Get follower profiles
       const followerIds = followersData?.map((f) => f.follower_id) || [];
-      const { data: followerProfiles } = await (supabase as any)
-        .from("public_user_profiles")
+      const { data: followerProfiles } = await supabase
+        .from("safe_public_profiles")
         .select(
-          "user_id, display_name, username, avatar_url, bio, follower_count, following_count",
+          "user_id, display_name, username, avatar_url, bio",
         )
         .in("user_id", followerIds);
 
@@ -145,10 +145,10 @@ export default function FollowersPage() {
 
       // Get following profiles
       const followingIds = followingData?.map((f) => f.following_id) || [];
-      const { data: followingProfiles } = await (supabase as any)
-        .from("public_user_profiles")
+      const { data: followingProfiles } = await supabase
+        .from("safe_public_profiles")
         .select(
-          "user_id, display_name, username, avatar_url, bio, follower_count, following_count",
+          "user_id, display_name, username, avatar_url, bio",
         )
         .in("user_id", followingIds);
 
@@ -158,7 +158,11 @@ export default function FollowersPage() {
           ...f,
           follower_profile: followerProfiles?.find(
             (p) => p.user_id === f.follower_id,
-          ),
+          ) ? {
+            ...followerProfiles.find((p) => p.user_id === f.follower_id)!,
+            follower_count: null,
+            following_count: null,
+          } : null,
         })) || [];
 
       const followingWithProfiles =
@@ -166,7 +170,11 @@ export default function FollowersPage() {
           ...f,
           following_profile: followingProfiles?.find(
             (p) => p.user_id === f.following_id,
-          ),
+          ) ? {
+            ...followingProfiles.find((p) => p.user_id === f.following_id)!,
+            follower_count: null,
+            following_count: null,
+          } : null,
         })) || [];
 
       setFollowers(followersWithProfiles);
@@ -188,10 +196,10 @@ export default function FollowersPage() {
 
     try {
       // Get users that current user is not following and exclude self
-      const { data: allUsers, error } = await (supabase as any)
-        .from("public_user_profiles")
+      const { data: allUsers, error } = await supabase
+        .from("safe_public_profiles")
         .select(
-          "user_id, display_name, username, avatar_url, bio, follower_count, following_count",
+          "user_id, display_name, username, avatar_url, bio",
         )
         .neq("user_id", user.id)
         .limit(20);
@@ -218,6 +226,8 @@ export default function FollowersPage() {
             ...suggestedUser,
             is_following: !!followStatus,
             mutual_connections: Math.floor(Math.random() * 10), // Mock mutual connections
+            follower_count: null,
+            following_count: null,
           };
         }),
       );
@@ -243,7 +253,7 @@ export default function FollowersPage() {
       setSuggestedUsers((prev) =>
         prev.map((u) =>
           u.user_id === targetUserId
-            ? { ...u, is_following: true, follower_count: u.follower_count + 1 }
+            ? { ...u, is_following: true, follower_count: (u.follower_count || 0) + 1 }
             : u,
         ),
       );
@@ -284,7 +294,7 @@ export default function FollowersPage() {
             ? {
                 ...u,
                 is_following: false,
-                follower_count: Math.max(0, u.follower_count - 1),
+                follower_count: Math.max(0, (u.follower_count || 0) - 1),
               }
             : u,
         ),
@@ -462,10 +472,10 @@ export default function FollowersPage() {
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
                       <span>
-                        {relation.follower_profile?.follower_count} followers
+                        {relation.follower_profile?.follower_count || 0} followers
                       </span>
                       <span>
-                        {relation.follower_profile?.following_count} following
+                        {relation.follower_profile?.following_count || 0} following
                       </span>
                     </div>
 
@@ -541,10 +551,10 @@ export default function FollowersPage() {
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
                       <span>
-                        {relation.following_profile?.follower_count} followers
+                        {relation.following_profile?.follower_count || 0} followers
                       </span>
                       <span>
-                        {relation.following_profile?.following_count} following
+                        {relation.following_profile?.following_count || 0} following
                       </span>
                     </div>
 
@@ -603,7 +613,7 @@ export default function FollowersPage() {
                     )}
 
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
-                      <span>{userProfile.follower_count} followers</span>
+                      <span>{userProfile.follower_count || 0} followers</span>
                       <span>{userProfile.mutual_connections} mutual</span>
                     </div>
 

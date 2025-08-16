@@ -126,7 +126,7 @@ export function usePublicProfileInfo(targetUserId: string | null) {
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('public_user_profiles')
+          .from('safe_public_profiles')
           .select('display_name, username, avatar_url')
           .eq('user_id', targetUserId)
           .maybeSingle();

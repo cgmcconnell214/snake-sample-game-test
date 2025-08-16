@@ -71,8 +71,8 @@ export default function NotificationCenter() {
         let profiles: any[] = [];
 
         if (actorIds.length > 0) {
-          const { data: profilesData } = await (supabase as any)
-            .from("public_user_profiles")
+          const { data: profilesData } = await supabase
+            .from("safe_public_profiles")
             .select("user_id, display_name, username, avatar_url")
             .in("user_id", actorIds);
           profiles = profilesData || [];
@@ -114,8 +114,8 @@ export default function NotificationCenter() {
 
           // Get actor profile if available
           if (newNotification.data?.actor_id) {
-            const { data: profile } = await (supabase as any)
-              .from("public_user_profiles")
+            const { data: profile } = await supabase
+              .from("safe_public_profiles")
               .select("user_id, display_name, username, avatar_url")
               .eq("user_id", newNotification.data.actor_id)
               .maybeSingle();

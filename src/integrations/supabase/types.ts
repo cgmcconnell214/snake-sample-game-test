@@ -3246,13 +3246,33 @@ export type Database = {
       }
     }
     Views: {
-      public_user_profiles: {
+      safe_public_profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
+          created_at: string | null
           display_name: string | null
           user_id: string | null
           username: string | null
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: never
+          created_at?: string | null
+          display_name?: never
+          user_id?: string | null
+          username?: never
+          website?: never
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: never
+          created_at?: string | null
+          display_name?: never
+          user_id?: string | null
+          username?: never
+          website?: never
         }
         Relationships: []
       }

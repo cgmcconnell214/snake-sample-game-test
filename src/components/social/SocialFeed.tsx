@@ -91,8 +91,8 @@ export default function SocialFeed() {
           const newPost = payload.new as any;
 
           // Get user profile for the new post
-          const { data: userProfile } = await (supabase as any)
-            .from("public_user_profiles")
+          const { data: userProfile } = await supabase
+            .from("safe_public_profiles")
             .select("user_id, display_name, username, avatar_url")
             .eq("user_id", newPost.user_id)
             .maybeSingle();
@@ -168,8 +168,8 @@ export default function SocialFeed() {
       if (postsData && user) {
         // Get user profiles for posts
         const userIds = [...new Set(postsData.map((post) => post.user_id))];
-        const { data: profiles } = await (supabase as any)
-          .from("public_user_profiles")
+        const { data: profiles } = await supabase
+          .from("safe_public_profiles")
           .select("user_id, display_name, username, avatar_url")
           .in("user_id", userIds);
 
@@ -260,8 +260,8 @@ export default function SocialFeed() {
       if (error) throw error;
 
       // Get user profile for the new post
-      const { data: userProfile } = await (supabase as any)
-        .from("public_user_profiles")
+      const { data: userProfile } = await supabase
+        .from("safe_public_profiles")
         .select("user_id, display_name, username, avatar_url")
         .eq("user_id", user.id)
         .maybeSingle();
@@ -345,8 +345,8 @@ export default function SocialFeed() {
         const userIds = [
           ...new Set(commentsData.map((comment) => comment.user_id)),
         ];
-        const { data: profiles } = await (supabase as any)
-          .from("public_user_profiles")
+        const { data: profiles } = await supabase
+          .from("safe_public_profiles")
           .select("user_id, display_name, username, avatar_url")
           .in("user_id", userIds);
 
@@ -392,7 +392,7 @@ export default function SocialFeed() {
 
       // Get user profile for the new comment
       const { data: userProfile } = await supabase
-        .from("user_profiles")
+        .from("safe_public_profiles")
         .select("user_id, display_name, username, avatar_url")
         .eq("user_id", user.id)
         .single();
