@@ -3403,6 +3403,10 @@ export type Database = {
         Args: { p_key_id: string }
         Returns: boolean
       }
+      set_admin_role_by_email: {
+        Args: { target_email: string }
+        Returns: boolean
+      }
       update_api_key_usage: {
         Args: { p_key_hash: string }
         Returns: undefined
