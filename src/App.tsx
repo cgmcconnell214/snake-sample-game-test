@@ -114,6 +114,12 @@ const App = () => (
               <Route path="/" element={withSuspense(<Index />)} />
               <Route path="/auth" element={withSuspense(<Auth />)} />
               <Route path="/auth/callback" element={withSuspense(<AuthCallback />)} />
+              <Route path="/terms" element={withSuspense(<Terms />)} />
+              <Route path="/privacy" element={withSuspense(<Privacy />)} />
+              <Route
+                path="/redeem/:code"
+                element={withSuspense(<RedeemEnrollment />)}
+              />
 
               {/* Protected app routes */}
               <Route
@@ -366,17 +372,6 @@ const App = () => (
                 )}
               />
             </Routes>
-
-            {/* Public site routes */}
-            <Routes>
-              <Route path="/terms" element={withSuspense(<Terms />)} />
-              <Route path="/privacy" element={withSuspense(<Privacy />)} />
-              <Route
-                path="/redeem/:code"
-                element={withSuspense(<RedeemEnrollment />)}
-              />
-              </Routes>
-              <FooterLinks />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
