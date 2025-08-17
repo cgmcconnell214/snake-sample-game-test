@@ -15,7 +15,7 @@ interface UserProfile {
   display_name: string | null;
   username: string | null;
   avatar_url: string | null;
-  bio: string | null;
+  bio?: string | null; // Optional since it's not always available due to privacy
   follower_count: number | null;
   following_count: number | null;
   is_following?: boolean;
@@ -131,7 +131,7 @@ export default function FollowersPage() {
       const { data: followerProfiles } = await supabase
         .from("safe_public_profiles")
         .select(
-          "user_id, display_name, username, avatar_url, bio",
+          "user_id, display_name, username, avatar_url",
         )
         .in("user_id", followerIds);
 
@@ -148,7 +148,7 @@ export default function FollowersPage() {
       const { data: followingProfiles } = await supabase
         .from("safe_public_profiles")
         .select(
-          "user_id, display_name, username, avatar_url, bio",
+          "user_id, display_name, username, avatar_url",
         )
         .in("user_id", followingIds);
 
@@ -162,6 +162,7 @@ export default function FollowersPage() {
             ...followerProfiles.find((p) => p.user_id === f.follower_id)!,
             follower_count: null,
             following_count: null,
+            bio: null, // Ensure consistency with interface
           } : null,
         })) || [];
 
@@ -174,6 +175,7 @@ export default function FollowersPage() {
             ...followingProfiles.find((p) => p.user_id === f.following_id)!,
             follower_count: null,
             following_count: null,
+            bio: null, // Ensure consistency with interface
           } : null,
         })) || [];
 
@@ -199,7 +201,7 @@ export default function FollowersPage() {
       const { data: allUsers, error } = await supabase
         .from("safe_public_profiles")
         .select(
-          "user_id, display_name, username, avatar_url, bio",
+          "user_id, display_name, username, avatar_url",
         )
         .neq("user_id", user.id)
         .limit(20);
@@ -228,6 +230,7 @@ export default function FollowersPage() {
             mutual_connections: Math.floor(Math.random() * 10), // Mock mutual connections
             follower_count: null,
             following_count: null,
+            bio: null, // Ensure bio is set to null for consistency
           };
         }),
       );

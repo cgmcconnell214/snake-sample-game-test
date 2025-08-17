@@ -73,7 +73,7 @@ export function useSecureUserProfile(targetUserId: string | null) {
           if (data && data.length > 0) {
             setProfile(data[0]);
           } else {
-            // Profile is private or doesn't exist
+            // Profile is private or doesn't exist - provide minimal safe data
             setProfile({
               user_id: targetUserId,
               display_name: 'Private User',

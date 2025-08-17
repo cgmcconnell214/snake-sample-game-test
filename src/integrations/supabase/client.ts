@@ -5,20 +5,21 @@ import type { Database } from "./types";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Fallback values for development if env vars are missing
-const fallbackUrl = "https://bkxbkaggxqcsiylwcopt.supabase.co";
-const fallbackKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJreGJrYWdneHFjc2l5bHdjb3B0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTQyMTMsImV4cCI6MjA2ODY3MDIxM30.VvroY7_I1EKz6VBG-9DMaRKL8_2B1fROzp_FTf3IkPo";
+// Production values - secure configuration
+const productionUrl = "https://bkxbkaggxqcsiylwcopt.supabase.co";
+const productionKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJreGJrYWdneHFjc2l5bHdjb3B0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTQyMTMsImV4cCI6MjA2ODY3MDIxM30.VvroY7_I1EKz6VBG-9DMaRKL8_2B1fROzp_FTf3IkPo";
 
+// Use production values as primary (these are safe public keys)
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  console.warn("Missing Supabase environment variables, using fallback values");
+  console.info("Using production Supabase configuration");
 }
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(
-  SUPABASE_URL || fallbackUrl,
-  SUPABASE_PUBLISHABLE_KEY || fallbackKey,
+  SUPABASE_URL || productionUrl,
+  SUPABASE_PUBLISHABLE_KEY || productionKey,
   {
     auth: {
       storage: undefined,
