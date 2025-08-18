@@ -3269,6 +3269,14 @@ export type Database = {
       }
     }
     Functions: {
+      audit_sensitive_data_access: {
+        Args: {
+          p_accessed_user_id?: string
+          p_operation?: string
+          p_table_name: string
+        }
+        Returns: undefined
+      }
       cleanup_expired_rate_limits: {
         Args: Record<PropertyKey, never>
         Returns: undefined
