@@ -138,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      console.log("Subscription check result:", data);
+      // Subscription check completed
     } catch (error) {
       console.error("Error in checkSubscription:", error);
     }

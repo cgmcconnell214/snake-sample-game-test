@@ -105,8 +105,7 @@ const TwoFactorManager: React.FC = () => {
 
     setLoading(true);
     try {
-      console.log('Starting 2FA verification with code:', cleanCode);
-      console.log('Secret length:', secret.length);
+      // Starting 2FA verification
       
       const isValid = await verifyToken(secret, cleanCode);
       if (!isValid) {

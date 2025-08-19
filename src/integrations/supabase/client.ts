@@ -2,27 +2,19 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Production values - secure configuration
+// Production values - these are safe public keys
 const productionUrl = "https://bkxbkaggxqcsiylwcopt.supabase.co";
 const productionKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJreGJrYWdneHFjc2l5bHdjb3B0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwOTQyMTMsImV4cCI6MjA2ODY3MDIxM30.VvroY7_I1EKz6VBG-9DMaRKL8_2B1fROzp_FTf3IkPo";
 
-// Use production values as primary (these are safe public keys)
-if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  console.info("Using production Supabase configuration");
-}
-
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
+// Secure configuration - no environment variable fallbacks
 export const supabase = createClient<Database>(
-  SUPABASE_URL || productionUrl,
-  SUPABASE_PUBLISHABLE_KEY || productionKey,
+  productionUrl,
+  productionKey,
   {
     auth: {
-      storage: undefined,
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
       detectSessionInUrl: true,
     },
   },

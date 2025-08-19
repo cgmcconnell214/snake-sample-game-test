@@ -3395,6 +3395,10 @@ export type Database = {
         Args: { code: string }
         Returns: string
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       link_oauth_account: {
         Args: {
           p_is_primary?: boolean

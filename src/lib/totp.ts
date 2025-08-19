@@ -80,29 +80,23 @@ export async function verifyToken(
     // Clean the token input - remove spaces and ensure it's exactly 6 digits
     const cleanToken = token.replace(/\s/g, '').trim();
     if (cleanToken.length !== digits || !/^\d+$/.test(cleanToken)) {
-      console.error(`Invalid token format: ${cleanToken}`);
       return false;
     }
 
     const counter = Math.floor(Date.now() / 1000 / step);
-    console.log(`Verifying token: ${cleanToken}, current counter: ${counter}`);
     
     // Check a wider window for time drift (±2 steps = ±60 seconds)
     for (let errorWin = -window; errorWin <= window; errorWin++) {
       const testCounter = counter + errorWin;
       const validToken = await generateToken(secret, testCounter, digits);
-      console.log(`Testing counter ${testCounter}: expected ${validToken}, got ${cleanToken}`);
       
       if (cleanToken === validToken) {
-        console.log(`Token verified successfully with window offset: ${errorWin}`);
         return true;
       }
     }
     
-    console.log('Token verification failed - no matching codes found');
     return false;
   } catch (error) {
-    console.error('Error during token verification:', error);
     return false;
   }
 }

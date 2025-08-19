@@ -12,7 +12,7 @@ export function useMarketUpdates() {
         if (error) {
           console.error("Market update error:", error);
         } else {
-          console.log("Market data updated:", data);
+          // Market data updated successfully
         }
       } catch (error) {
         console.error("Failed to update market data:", error);
