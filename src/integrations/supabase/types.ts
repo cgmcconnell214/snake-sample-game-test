@@ -3281,6 +3281,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      cleanup_expired_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       cleanup_stuck_executions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
