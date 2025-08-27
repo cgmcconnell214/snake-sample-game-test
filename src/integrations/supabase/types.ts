@@ -3110,6 +3110,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_skills: {
         Row: {
           current_level: number | null
@@ -3269,6 +3293,10 @@ export type Database = {
       }
     }
     Functions: {
+      assign_admin_role: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
       audit_sensitive_data_access: {
         Args: {
           p_accessed_user_id?: string
@@ -3276,6 +3304,10 @@ export type Database = {
           p_table_name: string
         }
         Returns: undefined
+      }
+      can_access_kyc_data: {
+        Args: { kyc_user_id: string }
+        Returns: boolean
       }
       cleanup_expired_rate_limits: {
         Args: Record<PropertyKey, never>
@@ -3318,6 +3350,10 @@ export type Database = {
           order_id: string
           success: boolean
         }[]
+      }
+      current_user_has_role: {
+        Args: { required_role: string }
+        Returns: boolean
       }
       execute_ai_agent_workflow: {
         Args: { agent_id: string; input_data?: Json; workflow_data?: Json }
@@ -3466,6 +3502,10 @@ export type Database = {
           p_match_order_id: string
           p_order_id: string
         }
+        Returns: boolean
+      }
+      user_has_role: {
+        Args: { required_role: string; target_user_id: string }
         Returns: boolean
       }
       validate_meeting_access_token: {
