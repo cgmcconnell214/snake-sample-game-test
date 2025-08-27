@@ -126,12 +126,15 @@ export function usePublicProfileInfo(targetUserId: string | null) {
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('safe_public_profiles')
+          .from('user_profiles')
           .select('display_name, username, avatar_url')
           .eq('user_id', targetUserId)
+          .eq('is_public', true)
           .maybeSingle();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching public profile info:', error);
+        }
         
         setProfileInfo(data || {
           display_name: 'Private User',

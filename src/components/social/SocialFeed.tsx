@@ -92,8 +92,9 @@ export default function SocialFeed() {
 
           // Get user profile for the new post
           const { data: userProfile } = await supabase
-            .from("safe_public_profiles")
+            .from("user_profiles")
             .select("user_id, display_name, username, avatar_url")
+            .eq("is_public", true)
             .eq("user_id", newPost.user_id)
             .maybeSingle();
 
@@ -169,8 +170,9 @@ export default function SocialFeed() {
         // Get user profiles for posts
         const userIds = [...new Set(postsData.map((post) => post.user_id))];
         const { data: profiles } = await supabase
-          .from("safe_public_profiles")
+          .from("user_profiles")
           .select("user_id, display_name, username, avatar_url")
+          .eq("is_public", true)
           .in("user_id", userIds);
 
         // Check which posts the user has liked
@@ -261,8 +263,9 @@ export default function SocialFeed() {
 
       // Get user profile for the new post
       const { data: userProfile } = await supabase
-        .from("safe_public_profiles")
+        .from("user_profiles")
         .select("user_id, display_name, username, avatar_url")
+        .eq("is_public", true)
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -346,8 +349,9 @@ export default function SocialFeed() {
           ...new Set(commentsData.map((comment) => comment.user_id)),
         ];
         const { data: profiles } = await supabase
-          .from("safe_public_profiles")
+          .from("user_profiles")
           .select("user_id, display_name, username, avatar_url")
+          .eq("is_public", true)
           .in("user_id", userIds);
 
         const commentsWithProfiles = commentsData.map((comment) => ({
@@ -392,8 +396,9 @@ export default function SocialFeed() {
 
       // Get user profile for the new comment
       const { data: userProfile } = await supabase
-        .from("safe_public_profiles")
+        .from("user_profiles")
         .select("user_id, display_name, username, avatar_url")
+        .eq("is_public", true)
         .eq("user_id", user.id)
         .single();
 

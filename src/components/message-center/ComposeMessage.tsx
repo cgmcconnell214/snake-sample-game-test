@@ -50,8 +50,9 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
     }
     const t = setTimeout(async () => {
       const { data } = await supabase
-        .from("safe_public_profiles")
+        .from("user_profiles")
         .select("user_id, username, display_name")
+        .eq("is_public", true)
         .or(
           `username.eq.${newMessage.recipient.trim()},display_name.ilike.%${newMessage.recipient.trim()}%`,
         )
@@ -106,8 +107,9 @@ const ComposeMessage: React.FC<ComposeMessageProps> = ({ onMessageSent }) => {
     try {
       // Look up recipient by username first, then by display_name as fallback
       const { data: recipientData, error: recipientError } = await supabase
-        .from("safe_public_profiles")
+        .from("user_profiles")
         .select("user_id, username, display_name")
+        .eq("is_public", true)
         .or(
           `username.eq.${newMessage.recipient.trim()},display_name.ilike.%${newMessage.recipient.trim()}%`,
         )
