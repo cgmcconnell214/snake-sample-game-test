@@ -3249,21 +3249,24 @@ export type Database = {
       safe_public_profiles: {
         Row: {
           avatar_url: string | null
-          display_name: string | null
+          created_at: string | null
+          first_name: string | null
+          last_name: string | null
           user_id: string | null
-          username: string | null
         }
         Insert: {
           avatar_url?: string | null
-          display_name?: never
+          created_at?: string | null
+          first_name?: string | null
+          last_name?: string | null
           user_id?: string | null
-          username?: never
         }
         Update: {
           avatar_url?: string | null
-          display_name?: never
+          created_at?: string | null
+          first_name?: string | null
+          last_name?: string | null
           user_id?: string | null
-          username?: never
         }
         Relationships: []
       }
