@@ -225,8 +225,9 @@ export default function CourseBuilder() {
     ).filter(Boolean);
     if (ids.length) {
       const { data: profiles } = await supabase
-        .from("safe_public_profiles")
+        .from("user_profiles")
         .select("user_id, display_name, username, avatar_url")
+        .eq("is_public", true)
         .in("user_id", ids);
       const map: Record<string, any> = {};
       (profiles || []).forEach((p: any) => {
