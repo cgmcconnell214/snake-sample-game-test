@@ -3406,6 +3406,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_admin_bypass_rls: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       link_oauth_account: {
         Args: {
           p_is_primary?: boolean
