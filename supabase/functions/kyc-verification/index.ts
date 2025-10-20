@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
+import { authorizeUser, createAuthorizationErrorResponse, AuthorizationError } from "../_shared/authorization.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -125,15 +126,14 @@ serve(async (req) => {
 
     // Admin actions (approve/reject)
     if (action === 'approve' || action === 'reject') {
-      // Check if user is admin
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profile?.role !== 'admin') {
-        throw new Error('Insufficient permissions');
+      // Validate admin authorization using standardized helper
+      try {
+        await authorizeUser(supabase, authHeader, { requiredRole: 'admin' });
+      } catch (error) {
+        if (error instanceof AuthorizationError) {
+          return createAuthorizationErrorResponse(error, corsHeaders);
+        }
+        throw error;
       }
 
       const { user_id: targetUserId, reason } = await req.json();
