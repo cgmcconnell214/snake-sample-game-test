@@ -32,10 +32,10 @@ export async function authorizeUser(
 
   const user = userData.user;
 
-  // Get user profile with role and subscription tier
+  // Get user profile with subscription tier (NOT role - use user_roles table)
   const { data: profile, error: profileError } = await supabaseClient
     .from("profiles")
-    .select("role, subscription_tier, two_factor_enabled")
+    .select("subscription_tier, two_factor_enabled")
     .eq("user_id", user.id)
     .single();
 
@@ -43,16 +43,22 @@ export async function authorizeUser(
     throw new AuthorizationError("PROFILE_NOT_FOUND", "User profile not found");
   }
 
-  // Check role requirements
-  if (options.requiredRole && profile?.role) {
-    const roleHierarchy = { basic: 0, premium: 1, admin: 2 };
-    const userRoleLevel = roleHierarchy[profile.role as keyof typeof roleHierarchy] ?? 0;
-    const requiredRoleLevel = roleHierarchy[options.requiredRole];
+  // Check role requirements using secure RPC function (user_roles table)
+  if (options.requiredRole) {
+    const { data: hasRole, error: roleError } = await supabaseClient
+      .rpc('current_user_has_role', { required_role: options.requiredRole });
 
-    if (userRoleLevel < requiredRoleLevel) {
+    if (roleError) {
+      throw new AuthorizationError(
+        "ROLE_CHECK_FAILED", 
+        "Failed to verify user role"
+      );
+    }
+
+    if (!hasRole) {
       throw new AuthorizationError(
         "INSUFFICIENT_ROLE", 
-        `Requires ${options.requiredRole} role, user has ${profile.role || 'none'}`
+        `Requires ${options.requiredRole} role`
       );
     }
   }
